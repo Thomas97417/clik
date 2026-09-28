@@ -592,7 +592,7 @@ export default function Editor({
               )}
               <span>
                 Glisser une pièce : déplacer · Glisser dans le vide : orbiter ·
-                Molette : zoomer
+                Molette : zoom · Pièce saisie : tourner ±90°
               </span>
             </div>
           </section>

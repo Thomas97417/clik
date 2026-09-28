@@ -364,3 +364,147 @@ test("le repère d’orientation conserve la sélection et l’historique", asyn
     .click();
   await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
 });
+
+async function wheelTurn(page: Page, deltaY: number) {
+  const canvas = page.locator("canvas").first();
+  const frames = Number(await canvas.getAttribute("data-frames"));
+  await page.mouse.wheel(0, deltaY);
+  await expect
+    .poll(async () => Number(await canvas.getAttribute("data-frames")))
+    .toBeGreaterThan(frames + 1);
+}
+
+test("molette pendant la prise : +90°, −90° et un seul historique", async ({
+  page,
+}) => {
+  const { canvas, x, y } = await setup(page);
+  const before = await position(page);
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  // No pointer displacement is necessary to start a quarter turn.
+  await wheelTurn(page, -100);
+  await expect(canvas).toHaveAttribute("data-snap-kind", "grid");
+  await page.mouse.up();
+  await expect(page.getByLabel("rotation Y", { exact: true })).toHaveValue(
+    "90",
+  );
+  expect(await position(page)).toEqual(before);
+  await page
+    .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
+    .click();
+  await page.locator(".tree-name").first().click();
+  await expect(page.getByLabel("rotation Y", { exact: true })).toHaveValue("0");
+  await page.getByRole("button", { name: "Rétablir", exact: true }).click();
+  await page.locator(".tree-name").first().click();
+  await expect(page.getByLabel("rotation Y", { exact: true })).toHaveValue(
+    "90",
+  );
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await wheelTurn(page, 100);
+  await wheelTurn(page, 100);
+  await page.mouse.up();
+  await expect(page.getByLabel("rotation Y", { exact: true })).toHaveValue(
+    "-90",
+  );
+  await page
+    .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
+    .click();
+  await page.locator(".tree-name").first().click();
+  await expect(page.getByLabel("rotation Y", { exact: true })).toHaveValue(
+    "90",
+  );
+});
+
+test("molette et déplacement : rotation conservée, annulation et verrouillage", async ({
+  page,
+}) => {
+  const { canvas, x, y } = await setup(page);
+  await page.getByRole("button", { name: "Aimantation", exact: true }).click();
+  const before = await position(page);
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + 80, y + 40, { steps: 8 });
+  await wheelTurn(page, 100);
+  await page.mouse.move(x + 140, y + 60, { steps: 8 });
+  await page.mouse.up();
+  await expect(page.getByLabel("rotation Y", { exact: true })).toHaveValue(
+    "-90",
+  );
+  expect(await position(page)).not.toEqual(before);
+  await page
+    .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
+    .click();
+  await page.locator(".tree-name").first().click();
+  expect(await position(page)).toEqual(before);
+  await expect(page.getByLabel("rotation Y", { exact: true })).toHaveValue("0");
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await wheelTurn(page, -100);
+  await page.keyboard.press("Escape");
+  await page.mouse.up();
+  await expect(page.getByLabel("rotation Y", { exact: true })).toHaveValue("0");
+  await expect(canvas).toHaveAttribute("data-snap-kind", "none");
+  await page.getByTitle("Verrouiller", { exact: true }).click();
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await wheelTurn(page, -100);
+  await page.mouse.up();
+  await expect(page.getByLabel("rotation Y", { exact: true })).toHaveValue("0");
+});
+
+test("molette : sélection rigide et zoom préservé hors prise", async ({
+  page,
+}) => {
+  const { canvas, x, y } = await setup(page);
+  await page.locator('.piece-card[aria-label="Brique 2 × 2"]').click();
+  await page.getByLabel("position Y", { exact: true }).fill("1.2");
+  await page.getByLabel("position Y", { exact: true }).press("Tab");
+  await page
+    .locator(".tree-name")
+    .first()
+    .click({ modifiers: ["Shift"] });
+  await page.getByRole("button", { name: "Grouper", exact: true }).click();
+  await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
+  await page.mouse.move(x, y);
+  const imageBefore = await canvas.evaluate((c: HTMLCanvasElement) =>
+    c.toDataURL(),
+  );
+  await page.mouse.down();
+  await wheelTurn(page, -100);
+  await wheelTurn(page, 100);
+  await page.mouse.up();
+  // Opposite turns cancel each other; the camera must not have zoomed.
+  await expect
+    .poll(() =>
+      canvas.evaluate(
+        (c: HTMLCanvasElement, before) => c.toDataURL() === before,
+        imageBefore,
+      ),
+    )
+    .toBe(true);
+  await page.mouse.down();
+  await wheelTurn(page, -100);
+  await page.mouse.up();
+  await expect(page.locator(".tree-row.selected .tree-name")).toHaveText(
+    "Nouveau groupe",
+  );
+  await expect(page.getByLabel("rotation Y", { exact: true })).toHaveValue(
+    "90",
+  );
+  await page.locator(".tree-name").nth(1).click();
+  await expect(page.getByLabel("rotation Y", { exact: true })).toHaveValue("0");
+  await page.mouse.move(x, y);
+  const zoomBefore = await canvas.evaluate((c: HTMLCanvasElement) =>
+    c.toDataURL(),
+  );
+  await wheelTurn(page, 100);
+  await expect
+    .poll(() =>
+      canvas.evaluate(
+        (c: HTMLCanvasElement, before) => c.toDataURL() === before,
+        zoomBefore,
+      ),
+    )
+    .toBe(false);
+});

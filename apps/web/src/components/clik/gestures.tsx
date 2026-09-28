@@ -36,6 +36,9 @@ type Drag = {
   reference: string;
   point: Vector3;
   bottom: number;
+  pivot: Vector3;
+  offset: Vector3;
+  turns: number;
   moving: Set<string>;
   started: boolean;
 };
@@ -254,10 +257,37 @@ export function Gestures({
         reference: part.id,
         point: hit.point.clone(),
         bottom,
+        pivot: new Vector3().setFromMatrixPosition(
+          worldMatrix(state.scene, part.id),
+        ),
+        offset: new Vector3(),
+        turns: 0,
         moving,
         started: false,
       };
       canvas.style.cursor = "grab";
+    };
+    const startDrag = () => {
+      if (!drag || drag.started) return;
+      drag.started = true;
+      useEditor.getState().begin(drag.reference);
+      canvas.style.cursor = "grabbing";
+      canvas.dataset.dragging = "true";
+    };
+    const previewDrag = () => {
+      if (!drag) return;
+      const { pivot, offset, turns } = drag;
+      // Rotate the rigid selection around the grabbed brick's vertical axis,
+      // then apply the free translation. Wheel input never repositions the camera.
+      const delta = new Matrix4().makeTranslation(...offset.toArray());
+      if (turns)
+        delta
+          .multiply(new Matrix4().makeTranslation(...pivot.toArray()))
+          .multiply(new Matrix4().makeRotationY((turns * Math.PI) / 2))
+          .multiply(
+            new Matrix4().makeTranslation(-pivot.x, -pivot.y, -pivot.z),
+          );
+      useEditor.getState().preview(delta);
     };
     const move = (e: PointerEvent) => {
       if (!drag) {
@@ -279,10 +309,7 @@ export function Gestures({
       stop(e);
       if (!drag.started) {
         if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) <= 4) return;
-        drag.started = true;
-        useEditor.getState().begin(drag.reference);
-        canvas.style.cursor = "grabbing";
-        canvas.dataset.dragging = "true";
+        startDrag();
       }
       lastMove = { clientX: e.clientX, clientY: e.clientY };
       if (!moveFrame) moveFrame = requestAnimationFrame(updateDrag);
@@ -305,15 +332,24 @@ export function Gestures({
         new Vector3(),
       );
       if (!point) return;
-      useEditor
-        .getState()
-        .preview(
-          new Matrix4().makeTranslation(
-            point.x - drag.point.x,
-            surface.y - drag.bottom,
-            point.z - drag.point.z,
-          ),
-        );
+      drag.offset.set(
+        point.x - drag.point.x,
+        surface.y - drag.bottom,
+        point.z - drag.point.z,
+      );
+      previewDrag();
+    };
+    const wheel = (e: WheelEvent) => {
+      if (!drag || e.deltaY === 0) return;
+      stop(e);
+      startDrag();
+      if (moveFrame) {
+        cancelAnimationFrame(moveFrame);
+        updateDrag();
+      }
+      // One wheel event is one quarter turn; upward scroll is +90°, downward -90°.
+      drag.turns = (drag.turns - Math.sign(e.deltaY)) % 4;
+      previewDrag();
     };
     const up = (e: PointerEvent) => {
       if (cameraGesture) finishCamera();
@@ -442,6 +478,7 @@ export function Gestures({
     canvas.addEventListener("dragover", over);
     canvas.addEventListener("drop", drop);
     canvas.addEventListener("dragleave", dragleave);
+    window.addEventListener("wheel", wheel, { capture: true, passive: false });
     window.addEventListener("pointerup", finishCamera, true);
     window.addEventListener("keydown", keydown, true);
     window.addEventListener("keyup", keyup);
@@ -459,6 +496,7 @@ export function Gestures({
       canvas.removeEventListener("dragover", over);
       canvas.removeEventListener("drop", drop);
       canvas.removeEventListener("dragleave", dragleave);
+      window.removeEventListener("wheel", wheel, true);
       window.removeEventListener("pointerup", finishCamera, true);
       window.removeEventListener("keydown", keydown, true);
       window.removeEventListener("keyup", keyup);

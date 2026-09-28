@@ -19,6 +19,10 @@ Le backend est testé avec `convex-test` : protection des projets privés, rejet
 
 Les tests React vérifient l’envoi des modifications à la reconnexion, la conservation locale en cas de conflit serveur et la conversion du brouillon invité en nouveau projet sans effacement du brouillon original. Les tests navigateur n’écrivent pas dans les comptes ou publications réels.
 
+## Rotation à la molette pendant la prise
+
+Neuf contrôles supplémentaires (trois scénarios sur Chromium, Firefox et WebKit) sont validés : +90°/−90° sans déplacement préalable du pointeur, rotations successives en une opération annuler/rétablir, déplacement combiné à la rotation, Échap, verrouillage, rotation rigide d’un groupe, absence de zoom pendant la prise et zoom conservé après relâchement. TypeScript, les 21 tests unitaires et le build ont également été relancés avec succès.
+
 ## Mesure de charge
 
 Machine : Apple M2 Pro, 16 Gio de mémoire, macOS. Fenêtre de 1 440 × 1 000 pixels. Serveur Vite en développement, rendu instancié, ombres et antialiasing actifs. Scène de 500 briques 2 × 4 réparties sur une grille et plusieurs niveaux, cinq couleurs. Sélection et cadrage d’une pièce en vue de dessus, puis déplacement réel avec aperçu d’aimantation actif pendant une fenêtre de mesure de trois secondes. Les événements du pointeur sont regroupés par image ; les transformations et couleurs des instances immobiles sont réutilisées, et l’arborescence reste stable pendant le geste.
