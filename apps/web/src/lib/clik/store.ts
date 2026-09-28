@@ -10,6 +10,7 @@ import {
   reparent,
   roots,
   snapPart,
+  placeInFreeSpace,
   previewSelection,
   movableRoots,
   type SelectionPreview,
@@ -111,10 +112,13 @@ export const useEditor = create<State>((set, get) => ({
           : [...s.selection, id]
         : [id],
     })),
-  add: (type, position = [0, 0, 0]) => {
-    const s = get(),
-      part = snapPart(s.scene, makePart(type, s.color, position), s.snap);
-    s.commit({ ...s.scene, nodes: [...s.scene.nodes, part] });
+  add: (type, position) => {
+    const s = get();
+    const part = position
+      ? snapPart(s.scene, makePart(type, s.color, position), s.snap)
+      : makePart(type, s.color);
+    const next = { ...s.scene, nodes: [...s.scene.nodes, part] };
+    s.commit(position ? next : placeInFreeSpace(next, [part.id], s.scene));
     set({ selection: [part.id], pending: null });
   },
   patch: (id, patch) => {

@@ -227,15 +227,16 @@ function partBounds(scene: SceneDocument, part: Part) {
 }
 
 /** Keep an assembly rigid and at the same height, with a free space beside it. */
-function placeCopies(
+export function placeInFreeSpace(
   scene: SceneDocument,
   ids: string[],
   existing: SceneDocument,
 ) {
-  const copied = new Set(descendants(scene, ids));
+  scene = validateScene(scene);
+  const moving = new Set(descendants(scene, ids));
   const bounds = new Box3();
   for (const n of scene.nodes) {
-    if (n.kind === "part" && copied.has(n.id))
+    if (n.kind === "part" && moving.has(n.id))
       bounds.union(partBounds(scene, n));
   }
   if (bounds.isEmpty()) return scene;
@@ -288,7 +289,7 @@ function placeCopies(
     }
   }
   throw Error(
-    "Aucun emplacement libre dans les limites de la scène pour cette copie.",
+    "Aucun emplacement libre dans les limites de la scène pour cet ajout.",
   );
 }
 
@@ -307,12 +308,9 @@ export function duplicate(
       parentId: (n.parentId && map.get(n.parentId)) || n.parentId,
     }));
   const copyIds = roots(scene, ids).map((id) => map.get(id)!);
-  const combined = validateScene({
-    ...into,
-    nodes: [...into.nodes, ...copies],
-  });
+  const combined = { ...into, nodes: [...into.nodes, ...copies] };
   return {
-    scene: placeCopies(combined, copyIds, into),
+    scene: placeInFreeSpace(combined, copyIds, into),
     ids: copyIds,
   };
 }

@@ -219,3 +219,53 @@ test("duplication d’un groupe à côté de l’original, annuler et rétablir"
   await expect(page.locator(".viewport-bottom")).toContainText("4 / 500");
   await expect(page.locator(".overlap")).toHaveCount(0);
 });
+
+test("ajouts par clic dans un espace libre, avec et sans aimantation", async ({
+  page,
+}) => {
+  await page.goto("/editor");
+  for (const [i, name] of [
+    "Brique 2 × 4",
+    "Brique 2 × 4",
+    "Plaque 2 × 2",
+    "Pente 2 × 2",
+  ].entries()) {
+    if (i === 2)
+      await page
+        .getByRole("button", { name: "Aimantation", exact: true })
+        .click();
+    await page.locator(`.piece-card[aria-label="${name}"]`).click();
+    await expect(page.locator(".viewport-bottom")).toContainText(
+      `${i + 1} / 500`,
+    );
+    await expect(page.locator(".overlap")).toHaveCount(0);
+    await expect(page.locator(".tree-row.selected .tree-name")).toHaveText(
+      name,
+    );
+    await expect(page.getByLabel("position Y", { exact: true })).toHaveValue(
+      "0",
+    );
+  }
+  const position = async () =>
+    Promise.all(
+      ["X", "Y", "Z"].map((axis) =>
+        page.getByLabel(`position ${axis}`, { exact: true }).inputValue(),
+      ),
+    );
+  const addedPosition = await position();
+  expect(addedPosition).not.toEqual(["0", "0", "0"]);
+  await page
+    .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
+    .click();
+  await expect(page.locator(".viewport-bottom")).toContainText("3 / 500");
+  await page.getByRole("button", { name: "Rétablir", exact: true }).click();
+  await expect(page.locator(".viewport-bottom")).toContainText("4 / 500");
+  await page.locator(".tree-name").last().click();
+  expect(await position()).toEqual(addedPosition);
+  await expect(page.getByRole("status")).toContainText("Enregistré");
+  await page.reload();
+  await expect(page.locator(".viewport-bottom")).toContainText("4 / 500");
+  await expect(page.locator(".overlap")).toHaveCount(0);
+  await page.locator(".tree-name").last().click();
+  expect(await position()).toEqual(addedPosition);
+});

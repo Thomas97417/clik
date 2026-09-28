@@ -252,6 +252,67 @@ describe("Historique de l’atelier", () => {
     editor.redo();
     expect(useEditor.getState().scene).toEqual(after);
   });
+  it.each([true, false])(
+    "ajoute toutes les formes sans chevauchement (aimantation %s), en une opération",
+    (snap) => {
+      const editor = useEditor.getState();
+      useEditor.setState({ snap, color: "#ef4444" });
+      for (const type of Object.keys(CATALOG) as (keyof typeof CATALOG)[]) {
+        const before = useEditor.getState().scene;
+        const historyLength = useEditor.getState().past.length;
+        editor.add(type);
+        const { scene, selection, past } = useEditor.getState();
+        expectFreeCopies(before, scene, selection);
+        const added = scene.nodes.find((n) => n.id === selection[0]) as Part;
+        expect(added.type).toBe(type);
+        expect(added.color).toBe("#ef4444");
+        expect(added.position[1]).toBe(0);
+        if (!before.nodes.length) expect(added.position).toEqual([0, 0, 0]);
+        expect(scene.nodes.slice(0, -1)).toEqual(before.nodes);
+        expect(past).toHaveLength(historyLength + 1);
+        editor.undo();
+        expect(useEditor.getState().scene).toEqual(before);
+        editor.redo();
+        expect(useEditor.getState().scene).toEqual(scene);
+      }
+    },
+  );
+  it("évite les enfants d’un groupe tourné, masqué et verrouillé lors de l’ajout", () => {
+    const obstacle = makePart("brick-2x4", "#4079e8");
+    let scene = group(
+      { ...emptyScene(), nodes: [obstacle] },
+      [obstacle.id],
+      "assembly",
+    );
+    scene = applyDelta(
+      scene,
+      ["assembly"],
+      new Matrix4().makeRotationY(Math.PI / 4),
+    );
+    const assembly = scene.nodes.find((n) => n.id === "assembly")!;
+    assembly.hidden = true;
+    assembly.locked = true;
+    useEditor.getState().load(scene, "Test");
+    useEditor.getState().add("plate-2x4");
+    const after = useEditor.getState();
+    expectFreeCopies(scene, after.scene, after.selection);
+  });
+  it("ne crée ni pièce ni historique lorsque la limite d’ajout est atteinte", () => {
+    const part = makePart("brick-1x1", "#4079e8");
+    const scene = {
+      ...emptyScene(),
+      nodes: Array.from({ length: 500 }, (_, i) => ({
+        ...part,
+        id: String(i),
+      })),
+    };
+    const editor = useEditor.getState();
+    editor.load(scene, "Test");
+    expect(() => editor.add("brick-2x2")).toThrow("500");
+    expect(useEditor.getState().scene).toEqual(scene);
+    expect(useEditor.getState().past).toHaveLength(0);
+    expect(useEditor.getState().selection).toEqual([]);
+  });
   it("respecte le verrouillage hérité", () => {
     const s = useEditor.getState();
     s.add("brick-1x1");

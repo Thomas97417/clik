@@ -35,6 +35,12 @@ Les 54 scénarios navigateur ciblés (six nouveaux contrôles visuels, 45 contr�
 
 Avec les nouvelles géométries, la mesure de déplacement avec aperçu sur 500 pièces donne 60,0 images/s sous Chromium, 119,3 sous Firefox et 59,6 sous WebKit, dans les mêmes conditions que ci-dessous. Les géométries restent mutualisées et instanciées. Captures : `/tmp/clik-undersides-<moteur>.png` et `/tmp/clik-fitted-stack-<moteur>.png`.
 
+## Ajout par clic sans chevauchement
+
+L’ajout depuis une carte de bibliothèque réutilise la recherche d’emplacement libre des duplications. Quatre tests automatisés supplémentaires couvrent les dix formes avec et sans aimantation, le maintien au sol, la couleur et la sélection, l’historique, les obstacles groupés/tournés/masqués/verrouillés et le refus de dépasser 500 pièces sans modification du document. Les 53 tests automatisés, TypeScript et le build passent.
+
+Les 87 contrôles des suites éditeur, gestes et géométrie passent en une exécution sous Chromium, Firefox et WebKit. Le nouveau scénario vérifie les ajouts successifs, l’absence de chevauchement, l’annulation/rétablissement et les positions après rechargement. Les scènes de test d’empilement fixent désormais explicitement la position des pièces ajoutées, puisque le clic ne les superpose plus automatiquement à l’origine.
+
 ## Mesure de charge
 
 Machine : Apple M2 Pro, 16 Gio de mémoire, macOS. Fenêtre de 1 440 × 1 000 pixels. Serveur Vite en développement, rendu instancié, ombres et antialiasing actifs. Scène de 500 briques 2 × 4 réparties sur une grille et plusieurs niveaux, cinq couleurs. Sélection et cadrage d’une pièce en vue de dessus, puis déplacement réel avec aperçu d’aimantation actif pendant une fenêtre de mesure de trois secondes. Les événements du pointeur sont regroupés par image ; les transformations et couleurs des instances immobiles sont réutilisées, et l’arborescence reste stable pendant le geste.

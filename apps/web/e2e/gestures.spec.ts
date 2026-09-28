@@ -138,6 +138,8 @@ test("empilement : plots éclairés, dépôt et désactivation de l’aimantatio
 }, info) => {
   const { canvas, x, y } = await setup(page);
   await page.locator('.piece-card[aria-label="Brique 2 × 2"]').click();
+  await page.getByLabel("position X", { exact: true }).fill("0");
+  await page.getByLabel("position X", { exact: true }).press("Tab");
   await page.getByLabel("position Y", { exact: true }).fill("0");
   await page.getByLabel("position Y", { exact: true }).press("Tab");
   await page.getByLabel("position Z", { exact: true }).fill("-3");
@@ -171,6 +173,8 @@ test("glisser un enfant conserve la sélection du groupe ; bibliothèque avec ap
 }) => {
   const { canvas, x, y } = await setup(page);
   await page.locator('.piece-card[aria-label="Brique 2 × 2"]').click();
+  await page.getByLabel("position X", { exact: true }).fill("0");
+  await page.getByLabel("position X", { exact: true }).press("Tab");
   await page.getByLabel("position Y", { exact: true }).fill("1.2");
   await page.getByLabel("position Y", { exact: true }).press("Tab");
   await page
@@ -269,6 +273,8 @@ test("accroche sur une surface tournée autour de plusieurs axes", async ({
 }) => {
   const { canvas, x, y } = await setup(page);
   await page.locator('.piece-card[aria-label="Brique 2 × 2"]').click();
+  await page.getByLabel("position X", { exact: true }).fill("0");
+  await page.getByLabel("position X", { exact: true }).press("Tab");
   for (const [label, value] of [
     ["position Z", "-3"],
     ["rotation X", "20"],
@@ -297,6 +303,8 @@ test("déplacement rigide d’une sélection multiple sans groupe", async ({
 }) => {
   const { canvas, x, y } = await setup(page);
   await page.locator('.piece-card[aria-label="Brique 2 × 2"]').click();
+  await page.getByLabel("position X", { exact: true }).fill("0");
+  await page.getByLabel("position X", { exact: true }).press("Tab");
   await page.getByLabel("position Y", { exact: true }).fill("1.2");
   await page.getByLabel("position Y", { exact: true }).press("Tab");
   await page
@@ -458,6 +466,8 @@ test("molette : sélection rigide et zoom préservé hors prise", async ({
 }) => {
   const { canvas, x, y } = await setup(page);
   await page.locator('.piece-card[aria-label="Brique 2 × 2"]').click();
+  await page.getByLabel("position X", { exact: true }).fill("0");
+  await page.getByLabel("position X", { exact: true }).press("Tab");
   await page.getByLabel("position Y", { exact: true }).fill("1.2");
   await page.getByLabel("position Y", { exact: true }).press("Tab");
   await page

@@ -18,6 +18,7 @@ test("dessous creux des briques, plaques et pentes", async ({ page }, info) => {
     await page.getByRole("button", { name, exact: true }).click();
     await property(page, "position X", String((i - 1) * 4));
     await property(page, "position Y", "2");
+    await property(page, "position Z", "0");
     await property(page, "rotation X", "155");
   }
   await page
