@@ -27,6 +27,14 @@ Neuf contrôles supplémentaires (trois scénarios sur Chromium, Firefox et WebK
 
 La duplication et le collage cherchent un emplacement libre à la même hauteur. Cinq tests unitaires supplémentaires couvrent les copies successives, les obstacles masqués/verrouillés, les groupes imbriqués tournés, la sélection multiple, le collage et les limites de coordonnées, ainsi que l’historique. Les 26 tests automatisés, TypeScript et le build passent. Six contrôles navigateur ciblés passent dans Chromium, Firefox et WebKit : duplication d’une pièce et d’un groupe, absence de chevauchement, annuler/rétablir et conservation du brouillon. La capture Chromium confirme visuellement l’espace entre l’original et sa copie.
 
+## Dessous creux et contact des pièces
+
+Les dix géométries possèdent des logements ouverts sous les plots, avec parois intérieures et plafond. Vingt-trois tests géométriques supplémentaires vérifient par lancer de rayons les ouvertures, les parois, la profondeur disponible, les dimensions et le contact après aimantation sur une brique, une plaque et une pente tournées. Les 49 tests automatisés, TypeScript et le build passent.
+
+Les 54 scénarios navigateur ciblés (six nouveaux contrôles visuels, 45 contrôles de gestes, trois mesures de charge) sont validés sous Chromium, Firefox et WebKit. Les nouveaux tests ont été corrigés pour distinguer la carte de bibliothèque du bouton d’arborescence et attendre la taille définitive du canvas ; les six passent ensemble. Un cas de relâchement hors canvas sous WebKit a échoué au premier passage et réussi à la relance ciblée, sans modification du code de manipulation. Les captures des dessous et de l’empilement ont été inspectées : logements visibles et absence d’espace entre les corps emboîtés.
+
+Avec les nouvelles géométries, la mesure de déplacement avec aperçu sur 500 pièces donne 60,0 images/s sous Chromium, 119,3 sous Firefox et 59,6 sous WebKit, dans les mêmes conditions que ci-dessous. Les géométries restent mutualisées et instanciées. Captures : `/tmp/clik-undersides-<moteur>.png` et `/tmp/clik-fitted-stack-<moteur>.png`.
+
 ## Mesure de charge
 
 Machine : Apple M2 Pro, 16 Gio de mémoire, macOS. Fenêtre de 1 440 × 1 000 pixels. Serveur Vite en développement, rendu instancié, ombres et antialiasing actifs. Scène de 500 briques 2 × 4 réparties sur une grille et plusieurs niveaux, cinq couleurs. Sélection et cadrage d’une pièce en vue de dessus, puis déplacement réel avec aperçu d’aimantation actif pendant une fenêtre de mesure de trois secondes. Les événements du pointeur sont regroupés par image ; les transformations et couleurs des instances immobiles sont réutilisées, et l’arborescence reste stable pendant le geste.
