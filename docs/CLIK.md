@@ -40,6 +40,8 @@ Cliquer dans le vide désélectionne, puis glisser permet d’orbiter. Clic droi
 
 Dupliquer place la copie sur le côté libre le plus proche, avec un espace entre les pièces. Les groupes et sélections multiples sont déplacés comme un ensemble, à la même hauteur, en conservant leur orientation et leurs positions relatives. Les autres pièces, même masquées ou verrouillées, sont prises en compte. Coller recherche également un emplacement libre si la position d’origine est occupée.
 
+La flèche à gauche d’un groupe replie ou déplie ses enfants ; les groupes imbriqués conservent leur propre état. Les commandes « Tout replier » et « Tout déplier » agissent sur toute l’arborescence. Le compteur indique le nombre total de pièces du groupe, et un point bleu signale une sélection à l’intérieur d’une branche repliée. La sélection et la visibilité 3D sont conservées. Une nouvelle sélection dans la scène ouvre ses groupes parents ; déposer une pièce dans un groupe replié ouvre celui-ci. Les flèches sont utilisables avec Entrée ou Espace. Le repli est un état local de l’interface, sans sauvegarde ni opération annuler/rétablir.
+
 Le menu de parent dans les propriétés et le glisser-déposer sur un groupe réorganisent la hiérarchie en conservant les positions mondiales. Déposer sur le fond de l’arborescence ramène à la racine. Masquage et verrouillage sont hérités des groupes.
 
 Raccourcis : Supprimer / Retour arrière, Échap, F pour cadrer, Cmd/Ctrl-Z et Maj-Cmd/Ctrl-Z, Cmd/Ctrl-Y, Cmd/Ctrl-C/V/D, Cmd/Ctrl-G et Maj-Cmd/Ctrl-G. Les formulaires gardent leurs raccourcis de saisie.
@@ -67,3 +69,7 @@ bun run --cwd apps/web test:e2e
 Les tests navigateur utilisent des contextes isolés et des brouillons locaux jetables. Le test de charge injecte 500 pièces dans IndexedDB ; il n’écrit pas dans les comptes ou la galerie réels. Les tests backend utilisent `convex-test` et une identité Better Auth simulée. Les tests de sauvegarde React simulent les réponses du backend ; les tests navigateur utilisent le vrai IndexedDB.
 
 Les résultats, la machine et les limites de la validation sont documentés dans `VALIDATION.md`.
+
+## Idées
+
+Les défis du jours : chaque jour, un défi avec un certains nombres de pièces prédéterminés, et les gens doivent faire les meilleurs créations possibles. Les gens peuvent upvote les meilleurs créations du jour.

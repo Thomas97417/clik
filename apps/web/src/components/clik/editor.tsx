@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useId,
+} from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAction, useMutation } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
@@ -9,6 +16,7 @@ import {
   COLORS,
   COLOR_NAMES,
   inherited,
+  ancestors,
   worldMatrix,
   type SceneNode,
   type PartType,
@@ -18,6 +26,8 @@ import {
   ArrowLeft,
   Box,
   ChevronRight,
+  ChevronsDownUp,
+  ChevronsUpDown,
   Copy,
   Eye,
   EyeOff,
@@ -102,6 +112,59 @@ export default function Editor({
     [busy, setBusy] = useState(false),
     [pubTitle, setPubTitle] = useState(""),
     [description, setDescription] = useState("");
+  // Presentation state only: folding never changes the scene or its history.
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const treeId = useId();
+  const hierarchy = useMemo(() => {
+    const children = new Map<string | null, SceneNode[]>();
+    const groups = s.scene.nodes.filter((n) => n.kind === "group");
+    for (const node of s.scene.nodes) {
+      const siblings = children.get(node.parentId) ?? [];
+      siblings.push(node);
+      children.set(node.parentId, siblings);
+    }
+    const counts = new Map<string, number>();
+    const countParts = (node: SceneNode): number => {
+      const count =
+        node.kind === "part"
+          ? 1
+          : (children.get(node.id) ?? []).reduce(
+              (sum, child) => sum + countParts(child),
+              0,
+            );
+      counts.set(node.id, count);
+      return count;
+    };
+    (children.get(null) ?? []).forEach(countParts);
+    return { children, groups, counts };
+  }, [s.scene]);
+  const selectedParents = new Set(
+    s.selection.flatMap((id) => ancestors(s.scene, id)),
+  );
+  const selectedParentsKey = JSON.stringify([...selectedParents]);
+  useEffect(() => {
+    setCollapsedGroups(new Set());
+  }, [projectId, draftId]);
+  useEffect(() => {
+    // Reveal selections made in the canvas or moved into another parent, but
+    // allow users to fold a branch while keeping its children selected.
+    const parents = JSON.parse(selectedParentsKey) as string[];
+    setCollapsedGroups((previous) => {
+      if (!parents.some((id) => previous.has(id))) return previous;
+      const next = new Set(previous);
+      parents.forEach((id) => next.delete(id));
+      return next;
+    });
+  }, [s.selection, selectedParentsKey]);
+  const toggleGroup = (id: string) =>
+    setCollapsedGroups((previous) => {
+      const next = new Set(previous);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   const capture = useRef<() => Promise<ArrayBuffer>>(undefined);
   const [captureReady, setCaptureReady] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -208,14 +271,20 @@ export default function Editor({
     }
   };
   const tree = (parent: string | null, depth = 0): React.ReactNode =>
-    s.scene.nodes
-      .filter((n) => n.parentId === parent)
-      .map((n) => (
-        <div key={n.id}>
+    (hierarchy.children.get(parent) ?? []).map((n) => {
+      const isGroup = n.kind === "group";
+      const collapsed = isGroup && collapsedGroups.has(n.id);
+      const containsSelection = collapsed && selectedParents.has(n.id);
+      const childrenId = `${treeId}-${encodeURIComponent(n.id)}`;
+      const partCount = hierarchy.counts.get(n.id) ?? 0;
+      const countLabel = `${partCount} pièce${partCount === 1 ? "" : "s"}`;
+      return (
+        <li key={n.id}>
           <div
-            className={`tree-row ${s.selection.includes(n.id) ? "selected" : ""}`}
-            style={{ paddingLeft: 12 + depth * 14 }}
-            draggable={!n.locked}
+            data-node-id={n.id}
+            className={`tree-row ${s.selection.includes(n.id) ? "selected" : ""} ${containsSelection ? "contains-selection" : ""}`}
+            style={{ paddingLeft: 8 + depth * 14 }}
+            draggable={!inherited(s.scene, n.id, "locked")}
             onDragStart={(e) => {
               e.dataTransfer.setData("clik/node", n.id);
             }}
@@ -227,31 +296,62 @@ export default function Editor({
               e.stopPropagation();
               const id = e.dataTransfer.getData("clik/node");
               if (id)
-                safe(() =>
+                safe(() => {
                   s.reparent(
                     id,
-                    n.kind === "group" ? n.id : n.parentId,
-                    n.kind === "part" ? n.id : undefined,
-                  ),
-                );
+                    isGroup ? n.id : n.parentId,
+                    isGroup ? undefined : n.id,
+                  );
+                  // A folded group remains a drop target; reveal the result.
+                  if (isGroup)
+                    setCollapsedGroups((previous) => {
+                      const next = new Set(previous);
+                      next.delete(n.id);
+                      return next;
+                    });
+                });
             }}
           >
+            {isGroup ? (
+              <button
+                className="tree-toggle"
+                aria-label={`${collapsed ? "Déplier" : "Replier"} ${n.name}`}
+                title={`${collapsed ? "Déplier" : "Replier"} ${n.name}`}
+                aria-expanded={!collapsed}
+                aria-controls={childrenId}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => toggleGroup(n.id)}
+              >
+                <ChevronRight size={14} aria-hidden="true" />
+              </button>
+            ) : (
+              <span className="tree-toggle-spacer" aria-hidden="true" />
+            )}
             <button
               className="tree-name"
+              title={n.name}
+              aria-pressed={s.selection.includes(n.id)}
               onClick={(e) => s.select(n.id, e.shiftKey)}
             >
-              {n.kind === "group" ? (
-                <Layers size={15} />
+              {isGroup ? (
+                <Layers size={15} aria-hidden="true" />
               ) : (
-                <span
-                  className="part-dot"
-                  style={{
-                    background: n.kind === "part" ? n.color : undefined,
-                  }}
-                />
+                <span className="part-dot" style={{ background: n.color }} />
               )}
               <span>{n.name}</span>
             </button>
+            {isGroup && (
+              <span
+                className="tree-count"
+                title={`${countLabel} dans ce groupe${containsSelection ? " · contient la sélection" : ""}`}
+                aria-label={`${countLabel}${containsSelection ? ", contient la sélection" : ""}`}
+              >
+                {containsSelection && (
+                  <span className="tree-selection-dot" aria-hidden="true" />
+                )}
+                {partCount}
+              </span>
+            )}
             <button
               title={n.hidden ? "Afficher" : "Masquer"}
               onClick={() => safe(() => s.patch(n.id, { hidden: !n.hidden }))}
@@ -269,9 +369,14 @@ export default function Editor({
               )}
             </button>
           </div>
-          {n.kind === "group" && tree(n.id, depth + 1)}
-        </div>
-      ));
+          {isGroup && (
+            <ul id={childrenId} className="tree-branch" hidden={collapsed}>
+              {!collapsed && tree(n.id, depth + 1)}
+            </ul>
+          )}
+        </li>
+      );
+    });
   if (projectId && !project.isLoading && !project.isAuthenticated)
     return (
       <div className="empty-state">
@@ -630,6 +735,29 @@ export default function Editor({
               >
                 <Trash2 size={17} />
               </button>
+              <span className="tree-actions-spacer" />
+              <button
+                title="Tout replier"
+                aria-label="Tout replier"
+                disabled={
+                  !hierarchy.groups.some((n) => !collapsedGroups.has(n.id))
+                }
+                onClick={() =>
+                  setCollapsedGroups(new Set(hierarchy.groups.map((n) => n.id)))
+                }
+              >
+                <ChevronsDownUp size={17} />
+              </button>
+              <button
+                title="Tout déplier"
+                aria-label="Tout déplier"
+                disabled={
+                  !hierarchy.groups.some((n) => collapsedGroups.has(n.id))
+                }
+                onClick={() => setCollapsedGroups(new Set())}
+              >
+                <ChevronsUpDown size={17} />
+              </button>
             </div>
             <div
               className="tree"
@@ -640,7 +768,9 @@ export default function Editor({
               }}
             >
               {s.scene.nodes.length ? (
-                tree(null)
+                <ul className="tree-branch" aria-label="Pièces et groupes">
+                  {tree(null)}
+                </ul>
               ) : (
                 <div className="tree-empty">
                   <Layers size={28} />

@@ -41,6 +41,12 @@ L’ajout depuis une carte de bibliothèque réutilise la recherche d’emplacem
 
 Les 87 contrôles des suites éditeur, gestes et géométrie passent en une exécution sous Chromium, Firefox et WebKit. Le nouveau scénario vérifie les ajouts successifs, l’absence de chevauchement, l’annulation/rétablissement et les positions après rechargement. Les scènes de test d’empilement fixent désormais explicitement la position des pièces ajoutées, puisque le clic ne les superpose plus automatiquement à l’origine.
 
+## Arborescence repliable
+
+Les groupes peuvent être repliés individuellement ou en bloc, avec compteur de pièces et indication d’une sélection masquée par le repli. Quatre scénarios navigateur supplémentaires (12 contrôles) vérifient les groupes imbriqués, la conservation de la sélection, Entrée/Espace, les commandes globales, l’absence d’historique de repli, l’ouverture des parents depuis une sélection 3D, le dépôt dans un groupe fermé, les groupes verrouillés/vides et l’indépendance du masquage. Les captures à 1 100 px ont été inspectées ; la barre d’actions reste contenue dans le panneau.
+
+Les 93 contrôles distincts éditeur/gestes/arborescence sont validés sous Chromium, Firefox et WebKit. La première exécution a donné 80 réussites ; les nouveaux tests ont ensuite été corrigés pour compter aussi les groupes dans le diagnostic de scène et cibler le sélecteur de parent par son rôle accessible. Les 12 nouveaux contrôles et les trois contrôles de sélection multiple passent ensemble. Le contrôle de sélection multiple WebKit, en échec au premier passage, passe à la relance sans modification du code des gestes. Les 53 tests automatisés, TypeScript et le build passent. Captures : `/tmp/clik-collapsed-tree-<moteur>.png`.
+
 ## Mesure de charge
 
 Machine : Apple M2 Pro, 16 Gio de mémoire, macOS. Fenêtre de 1 440 × 1 000 pixels. Serveur Vite en développement, rendu instancié, ombres et antialiasing actifs. Scène de 500 briques 2 × 4 réparties sur une grille et plusieurs niveaux, cinq couleurs. Sélection et cadrage d’une pièce en vue de dessus, puis déplacement réel avec aperçu d’aimantation actif pendant une fenêtre de mesure de trois secondes. Les événements du pointeur sont regroupés par image ; les transformations et couleurs des instances immobiles sont réutilisées, et l’arborescence reste stable pendant le geste.

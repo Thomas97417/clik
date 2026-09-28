@@ -1405,3 +1405,71 @@ dialog.modal-backdrop:not([open]) {
 dialog.modal-backdrop::backdrop {
   background: transparent;
 }
+
+/* Collapsible construction hierarchy. */
+.tree-branch {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tree-actions-spacer {
+  flex: 1;
+}
+.tree-row {
+  gap: 5px;
+}
+.tree-row > button.tree-toggle,
+.tree-toggle-spacer {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 28px;
+}
+.tree-row > button.tree-toggle {
+  display: grid;
+  place-items: center;
+  color: #68788e;
+  opacity: 1;
+  border-radius: 5px;
+}
+.tree-toggle[aria-expanded="true"] svg {
+  transform: rotate(90deg);
+}
+.tree-toggle:hover {
+  background: #dfe9fb;
+}
+.tree-row button:focus-visible,
+.tree-actions button:focus-visible {
+  outline: 2px solid #356ae6;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.tree-name > svg {
+  flex-shrink: 0;
+}
+.tree-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 1px 5px;
+  border-radius: 5px;
+  color: #68788e;
+  background: #f0f3f8;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.tree-row.contains-selection:not(.selected) {
+  background: #f4f7fe;
+  box-shadow: inset 2px 0 #356ae6;
+}
+.tree-selection-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #356ae6;
+}
+
+.tree-actions button {
+  min-width: 30px;
+  padding-inline: 6px;
+}
