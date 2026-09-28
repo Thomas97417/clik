@@ -47,6 +47,12 @@ Les groupes peuvent être repliés individuellement ou en bloc, avec compteur de
 
 Les 93 contrôles distincts éditeur/gestes/arborescence sont validés sous Chromium, Firefox et WebKit. La première exécution a donné 80 réussites ; les nouveaux tests ont ensuite été corrigés pour compter aussi les groupes dans le diagnostic de scène et cibler le sélecteur de parent par son rôle accessible. Les 12 nouveaux contrôles et les trois contrôles de sélection multiple passent ensemble. Le contrôle de sélection multiple WebKit, en échec au premier passage, passe à la relance sans modification du code des gestes. Les 53 tests automatisés, TypeScript et le build passent. Captures : `/tmp/clik-collapsed-tree-<moteur>.png`.
 
+## Bibliothèque stable au défilement
+
+La bibliothèque sépare les catégories fixes, la liste défilante avec `scrollbar-gutter: stable` et la palette fixe. Les deux nouveaux scénarios (six contrôles) comparent les dimensions des cartes, du titre, de la palette et du canvas avant/après filtrage d’une liste longue vers une liste courte, puis lors d’un affichage forcé de scrollbar. Ils vérifient aussi le défilement réel à la molette, l’absence de débordement horizontal à 1 100 × 760 px, le retour en haut après filtrage, les compteurs, l’accès aux couleurs et l’ajout d’une pièce dans la couleur choisie.
+
+Les 21 contrôles ciblés bibliothèque/ajout/dépôt/empilement passent ensemble sous Chromium, Firefox et WebKit. Les captures ont été inspectées : catégories et palette accessibles, cartes stables. Les 53 tests automatisés, TypeScript et le build passent. Captures : `/tmp/clik-library-stable-<moteur>.png` et `/tmp/clik-library-palette-<moteur>.png`.
+
 ## Mesure de charge
 
 Machine : Apple M2 Pro, 16 Gio de mémoire, macOS. Fenêtre de 1 440 × 1 000 pixels. Serveur Vite en développement, rendu instancié, ombres et antialiasing actifs. Scène de 500 briques 2 × 4 réparties sur une grille et plusieurs niveaux, cinq couleurs. Sélection et cadrage d’une pièce en vue de dessus, puis déplacement réel avec aperçu d’aimantation actif pendant une fenêtre de mesure de trois secondes. Les événements du pointeur sont regroupés par image ; les transformations et couleurs des instances immobiles sont réutilisées, et l’arborescence reste stable pendant le geste.

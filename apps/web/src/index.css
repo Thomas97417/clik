@@ -520,6 +520,25 @@ button:focus-visible {
 }
 .library {
   border-right: 1px solid #e4e9f1;
+  min-width: 0;
+  overflow: hidden;
+}
+.library-header,
+.library-footer {
+  flex-shrink: 0;
+}
+.library-header {
+  border-bottom: 1px solid #edf0f5;
+}
+.library-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #c4cede transparent;
+  overscroll-behavior: contain;
 }
 .panel-heading {
   display: flex;
@@ -535,94 +554,140 @@ button:focus-visible {
   font-size: 11px;
   color: #8894a7;
 }
+.library .panel-heading {
+  padding: 17px 14px 12px;
+  gap: 8px;
+}
+.library .panel-heading > span {
+  white-space: nowrap;
+}
 .piece-tabs {
-  display: flex;
-  gap: 3px;
-  padding: 0 14px 18px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  padding: 0 12px 12px;
 }
 .piece-tabs button {
-  padding: 6px 7px;
-  font-size: 11px;
-  color: #7c8899;
-  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 32px;
+  padding: 5px 8px;
+  gap: 4px;
+  color: #68788e;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  text-align: left;
+}
+.piece-tabs button:hover {
+  background: #f5f7fb;
 }
 .piece-tabs button.active {
   background: #edf2ff;
+  border-color: #dce6fc;
   color: #356ae6;
   font-weight: 650;
 }
+.category-count {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+}
 .piece-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
   gap: 8px;
-  padding: 0 15px;
+  padding: 12px;
 }
 .piece-card {
-  min-height: 92px;
+  min-width: 0;
+  min-height: 100px;
+  padding: 8px 3px;
   border: 1px solid #e7ebf1;
-  border-radius: 8px;
+  border-radius: 9px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 5px;
   background: #fbfcfe;
+  cursor: grab;
 }
 .piece-card:hover,
 .piece-card.active {
   border-color: #8dacf1;
   background: #f0f5ff;
 }
-.piece-card > span:last-child {
-  font-size: 11px;
-  color: #65738a;
+.piece-card:active {
+  cursor: grabbing;
 }
-.piece-symbol {
-  position: relative;
+.piece-card:disabled {
+  cursor: default;
+}
+.piece-card > span:last-child {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #65738a;
+  white-space: nowrap;
+}
+.piece-preview {
   display: flex;
-  gap: 5px;
   align-items: center;
   justify-content: center;
-  min-height: 42px;
+  width: 100%;
+  height: 56px;
+  flex-shrink: 0;
+  pointer-events: none;
 }
-.piece-symbol > span {
-  font-size: 12px;
-  font-weight: 750;
+.library button:focus-visible,
+.library-scroll:focus-visible {
+  outline: 2px solid #356ae6;
+  outline-offset: -2px;
+}
+.library-footer {
+  border-top: 1px solid #e7ecf3;
+  background: #fff;
 }
 .palette-section {
-  margin-top: 13px;
+  margin: 0;
 }
-.palette-section .panel-heading {
+.library .palette-section .panel-heading {
+  padding-top: 12px;
   padding-bottom: 12px;
 }
 .palette {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
-  padding: 0 19px 18px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  justify-items: center;
+  gap: 10px 4px;
+  padding: 0 14px 12px;
 }
 .palette button {
-  width: 25px;
-  height: 25px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   box-shadow: inset 0 0 0 1px #0000000f;
   border: 3px solid transparent;
 }
 .palette button.chosen {
   outline: 2px solid #356ae6;
-  outline-offset: 3px;
+  outline-offset: 2px;
 }
 .library-tip {
-  margin-top: auto;
-  padding: 25px 18px;
+  padding: 8px 14px 12px;
   display: flex;
-  gap: 9px;
+  gap: 8px;
   align-items: center;
-  color: #8491a4;
+  color: #68788e;
+  background: #f8faff;
+}
+.library-tip > svg {
+  flex-shrink: 0;
 }
 .library-tip p {
   font-size: 11px;
-  line-height: 1.7;
+  line-height: 1.6;
 }
 .viewport {
   position: relative;
@@ -1338,7 +1403,6 @@ button:focus-visible {
 }
 /* Keep the working controls readable at normal and enlarged text sizes. */
 .piece-card > span:last-child,
-.piece-tabs button,
 .tree-name,
 .properties > label,
 .transform-fields,
@@ -1348,15 +1412,6 @@ button:focus-visible {
 .scene-toolbar button span,
 .view-select select {
   font-size: 14px !important;
-}
-.piece-tabs {
-  flex-wrap: wrap;
-}
-.piece-tabs button {
-  padding: 5px 6px;
-}
-.piece-card {
-  min-height: 100px;
 }
 .property-hint,
 .library-tip p,
@@ -1383,10 +1438,6 @@ button:focus-visible {
   width: 100%;
   object-fit: contain;
   pointer-events: none;
-}
-.piece-card {
-  gap: 2px;
-  padding-bottom: 8px;
 }
 .piece-card > span:last-child {
   font-size: 13px !important;
@@ -1472,4 +1523,14 @@ dialog.modal-backdrop::backdrop {
 .tree-actions button {
   min-width: 30px;
   padding-inline: 6px;
+}
+
+.library .piece-tabs button {
+  font-size: 12px;
+}
+.library .piece-card > span:last-child {
+  font-size: 13px !important;
+}
+.library .library-tip p {
+  font-size: 11px;
 }

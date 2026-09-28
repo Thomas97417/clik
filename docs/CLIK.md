@@ -28,6 +28,8 @@ Une copie locale créée après un conflit est accessible par `/editor?draft=…
 
 ## Manipuler
 
+La bibliothèque garde ses catégories et sa palette visibles ; seule la liste des modèles défile. Les catégories sont disposées sur deux colonnes avec leur nombre de modèles. Changer de catégorie ramène la liste en haut. L’espace de la scrollbar est réservé pour conserver la largeur des cartes, et les aperçus occupent une zone de taille fixe pendant leur chargement.
+
 Glisser une pièce depuis la bibliothèque affiche son placement ; cliquer sur sa carte l’ajoute au sol, à l’origine si elle est libre ou sur le côté libre le plus proche. Ce placement évite les pièces existantes, même masquées, verrouillées ou groupées, que l’aimantation soit active ou non. En mode Déplacer, saisir directement une pièce : elle est sélectionnée dès l’appui et commence à suivre le pointeur après 4 pixels. Le point saisi reste sous le pointeur, la rotation est conservée et le bas de la sélection suit le sol ou les surfaces survolées. Un simple clic ne crée aucune opération dans l’historique.
 
 Avec l’aimantation, une silhouette translucide montre exactement la transformation appliquée au dépôt. Les plots compatibles de la cible s’éclairent, y compris sur une pièce tournée ; sans accroche, la silhouette suit la grille. Ces indications fonctionnent pour la bibliothèque, les sélections, les groupes et la rotation. Les chevauchements restent autorisés. L’avertissement de chevauchement compare des boîtes englobantes alignées sur les axes et peut signaler des rapprochements entre pièces tournées.

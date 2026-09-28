@@ -55,6 +55,16 @@ import { useEditor } from "@/lib/clik/store";
 import { useProject } from "@/lib/clik/use-project";
 import ClientScene from "./client-scene";
 import PartPreview from "./part-preview";
+const catalog = Object.entries(CATALOG) as [
+  PartType,
+  (typeof CATALOG)[PartType],
+][];
+const pieceCategories = [
+  { name: "Toutes", prefix: "" },
+  { name: "Briques", prefix: "brick" },
+  { name: "Plaques", prefix: "plate" },
+  { name: "Pentes", prefix: "slope" },
+];
 const safe = (fn: () => unknown) => {
   try {
     const value = fn();
@@ -112,6 +122,12 @@ export default function Editor({
     [busy, setBusy] = useState(false),
     [pubTitle, setPubTitle] = useState(""),
     [description, setDescription] = useState("");
+  const visibleParts = useMemo(() => {
+    const prefix =
+      pieceCategories.find((c) => c.name === category)?.prefix ?? "";
+    return catalog.filter(([id]) => id.startsWith(prefix));
+  }, [category]);
+  const libraryScroll = useRef<HTMLDivElement>(null);
   // Presentation state only: folding never changes the scene or its history.
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
     () => new Set(),
@@ -495,41 +511,49 @@ export default function Editor({
           </div>
         )}
         <div className="editor-body">
-          <aside className="library">
-            <div className="panel-heading">
-              <h2>Les pièces</h2>
-              <span>10 modèles</span>
+          <aside className="library" aria-label="Bibliothèque de pièces">
+            <div className="library-header">
+              <div className="panel-heading">
+                <h2>Les pièces</h2>
+                <span>
+                  {visibleParts.length} modèle
+                  {visibleParts.length === 1 ? "" : "s"}
+                </span>
+              </div>
+              <div
+                className="piece-tabs"
+                role="group"
+                aria-label="Catégories de pièces"
+              >
+                {pieceCategories.map(({ name, prefix }) => (
+                  <button
+                    key={name}
+                    className={name === category ? "active" : ""}
+                    aria-label={name}
+                    aria-pressed={name === category}
+                    onClick={() => {
+                      setCategory(name);
+                      if (libraryScroll.current)
+                        libraryScroll.current.scrollTop = 0;
+                    }}
+                  >
+                    <span>{name}</span>
+                    <span className="category-count" aria-hidden="true">
+                      {catalog.filter(([id]) => id.startsWith(prefix)).length}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="piece-tabs">
-              {["Toutes", "Briques", "Plaques", "Pentes"].map((c) => (
-                <button
-                  key={c}
-                  className={c === category ? "active" : ""}
-                  onClick={() => setCategory(c)}
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
-            <div className="piece-grid">
-              {(
-                Object.entries(CATALOG) as [
-                  PartType,
-                  (typeof CATALOG)[PartType],
-                ][]
-              )
-                .filter(
-                  ([id]) =>
-                    category === "Toutes" ||
-                    id.startsWith(
-                      category === "Briques"
-                        ? "brick"
-                        : category === "Plaques"
-                          ? "plate"
-                          : "slope",
-                    ),
-                )
-                .map(([id, p]) => (
+            <div
+              className="library-scroll"
+              ref={libraryScroll}
+              role="region"
+              aria-label="Modèles de pièces"
+              tabIndex={0}
+            >
+              <div className="piece-grid">
+                {visibleParts.map(([id, p]) => (
                   <button
                     className={`piece-card ${s.pending === id ? "active" : ""}`}
                     key={id}
@@ -544,69 +568,73 @@ export default function Editor({
                     onDragEnd={() => useEditor.setState({ pending: null })}
                     onClick={() => safe(() => s.add(id))}
                   >
-                    <PartPreview type={id} color={s.color} />
-                    <span>
-                      {p.name.split(" ")[0]} {p.d} × {p.w}
+                    <span className="piece-preview">
+                      <PartPreview type={id} color={s.color} />
                     </span>
+                    <span>{p.name}</span>
                   </button>
                 ))}
-            </div>
-            <div className="palette-section">
-              <div className="panel-heading">
-                <h2>Couleurs</h2>
-                <span>{COLOR_NAMES[COLORS.indexOf(s.color)]}</span>
-              </div>
-              <div className="palette">
-                {COLORS.map((color, i) => (
-                  <button
-                    key={color}
-                    title={COLOR_NAMES[i]}
-                    aria-label={COLOR_NAMES[i]}
-                    aria-pressed={s.color === color}
-                    style={{ background: color }}
-                    className={s.color === color ? "chosen" : ""}
-                    onClick={() => {
-                      useEditor.setState({ color });
-                      const ids = new Set(
-                        s.selection.flatMap((id) => [
-                          id,
-                          ...s.scene.nodes
-                            .filter((n) => {
-                              let p = n.parentId;
-                              while (p) {
-                                if (p === id) return true;
-                                p =
-                                  s.scene.nodes.find((x) => x.id === p)
-                                    ?.parentId ?? null;
-                              }
-                              return false;
-                            })
-                            .map((n) => n.id),
-                        ]),
-                      );
-                      safe(() =>
-                        s.commit({
-                          ...s.scene,
-                          nodes: s.scene.nodes.map((n) =>
-                            n.kind === "part" &&
-                            ids.has(n.id) &&
-                            !inherited(s.scene, n.id, "locked")
-                              ? { ...n, color }
-                              : n,
-                          ),
-                        }),
-                      );
-                    }}
-                  />
-                ))}
               </div>
             </div>
-            <div className="library-tip">
-              <Grip size={18} />
-              <p>
-                Glissez une pièce dans la scène.
-                <br />À vous d’imaginer la suite.
-              </p>
+            <div className="library-footer">
+              <div className="palette-section">
+                <div className="panel-heading">
+                  <h2>Couleurs</h2>
+                  <span>{COLOR_NAMES[COLORS.indexOf(s.color)]}</span>
+                </div>
+                <div className="palette">
+                  {COLORS.map((color, i) => (
+                    <button
+                      key={color}
+                      title={COLOR_NAMES[i]}
+                      aria-label={COLOR_NAMES[i]}
+                      aria-pressed={s.color === color}
+                      style={{ background: color }}
+                      className={s.color === color ? "chosen" : ""}
+                      onClick={() => {
+                        useEditor.setState({ color });
+                        const ids = new Set(
+                          s.selection.flatMap((id) => [
+                            id,
+                            ...s.scene.nodes
+                              .filter((n) => {
+                                let p = n.parentId;
+                                while (p) {
+                                  if (p === id) return true;
+                                  p =
+                                    s.scene.nodes.find((x) => x.id === p)
+                                      ?.parentId ?? null;
+                                }
+                                return false;
+                              })
+                              .map((n) => n.id),
+                          ]),
+                        );
+                        safe(() =>
+                          s.commit({
+                            ...s.scene,
+                            nodes: s.scene.nodes.map((n) =>
+                              n.kind === "part" &&
+                              ids.has(n.id) &&
+                              !inherited(s.scene, n.id, "locked")
+                                ? { ...n, color }
+                                : n,
+                            ),
+                          }),
+                        );
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="library-tip">
+                <Grip size={16} aria-hidden="true" />
+                <p>
+                  Clic : ajouter une pièce.
+                  <br />
+                  Glisser : choisir sa place.
+                </p>
+              </div>
             </div>
           </aside>
           <section className="viewport">
