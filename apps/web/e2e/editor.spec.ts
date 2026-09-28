@@ -14,6 +14,8 @@ test("construction, couleurs, historique et récupération du brouillon", async 
   await page.getByRole("button", { name: "Rouge", exact: true }).click();
   await page.getByRole("button", { name: "Dupliquer", exact: true }).click();
   await expect(page.locator(".viewport-bottom")).toContainText("2 / 500");
+  await expect(page.getByLabel("position X", { exact: true })).toHaveValue("2");
+  await expect(page.locator(".overlap")).toHaveCount(0);
   await page
     .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
     .click();
@@ -189,4 +191,31 @@ test("accueil Clik et démonstration interactive", async ({ page }, info) => {
     /\d+/,
   );
   await page.screenshot({ path: `/tmp/clik-home-${info.project.name}.png` });
+});
+
+test("duplication d’un groupe à côté de l’original, annuler et rétablir", async ({
+  page,
+}) => {
+  await page.goto("/editor");
+  await page.getByRole("button", { name: "Brique 1 × 1", exact: true }).click();
+  await page.getByRole("button", { name: "Brique 2 × 2", exact: true }).click();
+  await page.getByLabel("position X", { exact: true }).fill("3");
+  await page.getByLabel("position X", { exact: true }).press("Tab");
+  await page
+    .locator(".tree-name")
+    .first()
+    .click({ modifiers: ["Shift"] });
+  await page.getByRole("button", { name: "Grouper", exact: true }).click();
+  await page.getByRole("button", { name: "Dupliquer", exact: true }).click();
+  await expect(page.locator(".viewport-bottom")).toContainText("4 / 500");
+  await expect(page.getByLabel("position Z", { exact: true })).toHaveValue("3");
+  await expect(page.locator(".overlap")).toHaveCount(0);
+  await expect(page.locator(".tree-name")).toHaveCount(6);
+  await page
+    .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
+    .click();
+  await expect(page.locator(".viewport-bottom")).toContainText("2 / 500");
+  await page.getByRole("button", { name: "Rétablir", exact: true }).click();
+  await expect(page.locator(".viewport-bottom")).toContainText("4 / 500");
+  await expect(page.locator(".overlap")).toHaveCount(0);
 });

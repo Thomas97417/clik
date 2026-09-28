@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Matrix4, Quaternion, Vector3, Euler } from "three";
+import { Box3, Matrix4, Quaternion, Vector3, Euler } from "three";
 export const CATALOG = {
   "brick-1x1": { name: "Brique 1 × 1", w: 1, d: 1, h: 1.2 },
   "brick-1x2": { name: "Brique 1 × 2", w: 2, d: 1, h: 1.2 },
@@ -218,6 +218,80 @@ export function ungroup(scene: SceneDocument, ids: string[]) {
   }
   return next;
 }
+function partBounds(scene: SceneDocument, part: Part) {
+  const { w, h, d } = CATALOG[part.type];
+  return new Box3(
+    new Vector3(-w / 2, 0, -d / 2),
+    new Vector3(w / 2, h + 0.2, d / 2),
+  ).applyMatrix4(worldMatrix(scene, part.id));
+}
+
+/** Keep an assembly rigid and at the same height, with a free space beside it. */
+function placeCopies(
+  scene: SceneDocument,
+  ids: string[],
+  existing: SceneDocument,
+) {
+  const copied = new Set(descendants(scene, ids));
+  const bounds = new Box3();
+  for (const n of scene.nodes) {
+    if (n.kind === "part" && copied.has(n.id))
+      bounds.union(partBounds(scene, n));
+  }
+  if (bounds.isEmpty()) return scene;
+  // Hidden and locked pieces also occupy space. Include studs and rotated parents.
+  const obstacles = existing.nodes
+    .filter((n): n is Part => n.kind === "part")
+    .map((n) => partBounds(existing, n));
+  if (!obstacles.some((box) => bounds.intersectsBox(box))) return scene;
+
+  const candidates: Vector3[] = [];
+  for (const axis of ["x", "z"] as const) {
+    for (const sign of [1, -1]) {
+      let distance = 0;
+      // Every jump passes at least one obstacle permanently along this axis.
+      for (let attempt = 0; attempt <= obstacles.length; attempt++) {
+        const offset = new Vector3();
+        offset[axis] = sign * distance;
+        const candidate = bounds.clone().translate(offset);
+        const collisions = obstacles.filter((box) =>
+          candidate.intersectsBox(box),
+        );
+        if (!collisions.length) {
+          candidates.push(offset);
+          break;
+        }
+        distance = Math.max(
+          ...collisions.map((box) =>
+            Math.ceil(
+              sign > 0
+                ? box.max[axis] - bounds.min[axis] + 1
+                : bounds.max[axis] - box.min[axis] + 1,
+            ),
+          ),
+        );
+      }
+    }
+  }
+  // Prefer the closest free side, with +X first for equal distances.
+  candidates.sort((a, b) => a.lengthSq() - b.lengthSq());
+  for (const offset of candidates) {
+    const placed = applyDelta(
+      scene,
+      ids,
+      new Matrix4().makeTranslation(...offset.toArray()),
+    );
+    try {
+      return validateScene(placed);
+    } catch {
+      /* Try the other sides if this placement exceeds document limits. */
+    }
+  }
+  throw Error(
+    "Aucun emplacement libre dans les limites de la scène pour cette copie.",
+  );
+}
+
 export function duplicate(
   scene: SceneDocument,
   ids: string[],
@@ -232,9 +306,14 @@ export function duplicate(
       id: map.get(n.id)!,
       parentId: (n.parentId && map.get(n.parentId)) || n.parentId,
     }));
+  const copyIds = roots(scene, ids).map((id) => map.get(id)!);
+  const combined = validateScene({
+    ...into,
+    nodes: [...into.nodes, ...copies],
+  });
   return {
-    scene: validateScene({ ...into, nodes: [...into.nodes, ...copies] }),
-    ids: roots(scene, ids).map((id) => map.get(id)!),
+    scene: placeCopies(combined, copyIds, into),
+    ids: copyIds,
   };
 }
 export function applyDelta(

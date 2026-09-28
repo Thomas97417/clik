@@ -23,6 +23,10 @@ Les tests React vérifient l’envoi des modifications à la reconnexion, la con
 
 Neuf contrôles supplémentaires (trois scénarios sur Chromium, Firefox et WebKit) sont validés : +90°/−90° sans déplacement préalable du pointeur, rotations successives en une opération annuler/rétablir, déplacement combiné à la rotation, Échap, verrouillage, rotation rigide d’un groupe, absence de zoom pendant la prise et zoom conservé après relâchement. TypeScript, les 21 tests unitaires et le build ont également été relancés avec succès.
 
+## Duplication sans chevauchement
+
+La duplication et le collage cherchent un emplacement libre à la même hauteur. Cinq tests unitaires supplémentaires couvrent les copies successives, les obstacles masqués/verrouillés, les groupes imbriqués tournés, la sélection multiple, le collage et les limites de coordonnées, ainsi que l’historique. Les 26 tests automatisés, TypeScript et le build passent. Six contrôles navigateur ciblés passent dans Chromium, Firefox et WebKit : duplication d’une pièce et d’un groupe, absence de chevauchement, annuler/rétablir et conservation du brouillon. La capture Chromium confirme visuellement l’espace entre l’original et sa copie.
+
 ## Mesure de charge
 
 Machine : Apple M2 Pro, 16 Gio de mémoire, macOS. Fenêtre de 1 440 × 1 000 pixels. Serveur Vite en développement, rendu instancié, ombres et antialiasing actifs. Scène de 500 briques 2 × 4 réparties sur une grille et plusieurs niveaux, cinq couleurs. Sélection et cadrage d’une pièce en vue de dessus, puis déplacement réel avec aperçu d’aimantation actif pendant une fenêtre de mesure de trois secondes. Les événements du pointeur sont regroupés par image ; les transformations et couleurs des instances immobiles sont réutilisées, et l’arborescence reste stable pendant le geste.

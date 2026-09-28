@@ -1,7 +1,10 @@
 import { describe, expect, it, beforeEach } from "vitest";
-import { Matrix4, Vector3 } from "three";
+import { Box3, Matrix4, Vector3 } from "three";
 import {
   type SceneDocument,
+  type Part,
+  CATALOG,
+  descendants,
   applyDelta,
   duplicate,
   emptyScene,
@@ -16,6 +19,29 @@ import {
 import { useEditor } from "../src/lib/clik/store";
 const close = (a: Matrix4, b: Matrix4) =>
   a.elements.forEach((n, i) => expect(n).toBeCloseTo(b.elements[i], 8));
+const boundsOf = (scene: SceneDocument, part: Part) => {
+  const { w, h, d } = CATALOG[part.type];
+  return new Box3(
+    new Vector3(-w / 2, 0, -d / 2),
+    new Vector3(w / 2, h + 0.2, d / 2),
+  ).applyMatrix4(worldMatrix(scene, part.id));
+};
+const expectFreeCopies = (
+  before: SceneDocument,
+  after: SceneDocument,
+  ids: string[],
+) => {
+  const copied = new Set(descendants(after, ids));
+  for (const part of after.nodes) {
+    if (part.kind !== "part" || !copied.has(part.id)) continue;
+    for (const original of before.nodes) {
+      if (original.kind === "part")
+        expect(
+          boundsOf(after, part).intersectsBox(boundsOf(before, original)),
+        ).toBe(false);
+    }
+  }
+};
 describe("SceneDocument et transformations", () => {
   it("conserve les positions lors du groupement, réorganisation et dissociation imbriqués", () => {
     const p = makePart("brick-2x4", "#4079e8", [3, 2, -4]);
@@ -42,7 +68,88 @@ describe("SceneDocument et transformations", () => {
       (n) => n.id !== p.id && n.kind === "part",
     )!;
     expect(child.parentId).toBe(copy.ids[0]);
-    close(worldMatrix(copy.scene, child.id), worldMatrix(scene, p.id));
+    close(
+      worldMatrix(copy.scene, child.id),
+      new Matrix4().makeTranslation(3, 0, 0).multiply(worldMatrix(scene, p.id)),
+    );
+  });
+  it("place les copies successives hors des pièces existantes, même masquées et verrouillées", () => {
+    const part = makePart("brick-2x4", "#4079e8");
+    const obstacle = makePart("brick-2x4", "#ef4444", [3, 0, 0]);
+    obstacle.hidden = true;
+    obstacle.locked = true;
+    let scene = { ...emptyScene(), nodes: [part, obstacle] } as SceneDocument;
+    for (let i = 0; i < 8; i++) {
+      const previous = structuredClone(scene);
+      const result = duplicate(scene, [part.id]);
+      expectFreeCopies(scene, result.scene, result.ids);
+      expect(scene).toEqual(previous);
+      scene = result.scene;
+    }
+  });
+  it("déplace rigidement un groupe imbriqué tourné et une sélection multiple", () => {
+    const a = makePart("brick-2x4", "#4079e8", [1, 2, 3]);
+    const b = makePart("brick-1x1", "#ef4444", [6, 4, -2]);
+    let scene = group({ ...emptyScene(), nodes: [a, b] }, [a.id], "inner");
+    scene = group(scene, ["inner", b.id], "outer");
+    scene = applyDelta(
+      scene,
+      ["outer"],
+      new Matrix4()
+        .makeRotationX(0.4)
+        .multiply(new Matrix4().makeRotationY(0.7)),
+    );
+    for (const selected of [["inner"], ["inner", b.id]]) {
+      const result = duplicate(scene, selected);
+      expectFreeCopies(scene, result.scene, result.ids);
+      const originals = scene.nodes.filter(
+        (n): n is Part =>
+          n.kind === "part" && descendants(scene, selected).includes(n.id),
+      );
+      const copies = result.scene.nodes.filter(
+        (n): n is Part =>
+          n.kind === "part" && !scene.nodes.some((old) => old.id === n.id),
+      );
+      const offset = new Vector3()
+        .setFromMatrixPosition(worldMatrix(result.scene, copies[0].id))
+        .sub(
+          new Vector3().setFromMatrixPosition(
+            worldMatrix(scene, originals[0].id),
+          ),
+        );
+      expect(offset.y).toBeCloseTo(0, 8);
+      expect(offset.length()).toBeGreaterThan(0);
+      copies.forEach((copy, i) =>
+        close(
+          worldMatrix(result.scene, copy.id),
+          new Matrix4()
+            .makeTranslation(...offset.toArray())
+            .multiply(worldMatrix(scene, originals[i].id)),
+        ),
+      );
+      expect(copies[0].position).toEqual(a.position);
+      expect(
+        result.scene.nodes.find((n) => n.id === result.ids[0])!.parentId,
+      ).toBe("outer");
+    }
+  });
+  it("conserve le placement du presse-papiers si libre et le décale si occupé", () => {
+    const part = makePart("brick-1x1", "#4079e8", [4, 2, -3]);
+    const clipboard = { ...emptyScene(), nodes: [part] };
+    const empty = duplicate(clipboard, [part.id], emptyScene());
+    close(
+      worldMatrix(empty.scene, empty.ids[0]),
+      worldMatrix(clipboard, part.id),
+    );
+    const occupied = duplicate(clipboard, [part.id], empty.scene);
+    expectFreeCopies(empty.scene, occupied.scene, occupied.ids);
+  });
+  it("choisit un autre côté aux limites des coordonnées autorisées", () => {
+    const part = makePart("brick-2x2", "#4079e8", [9999, 0, 0]);
+    const scene = { ...emptyScene(), nodes: [part] };
+    const result = duplicate(scene, [part.id]);
+    expectFreeCopies(scene, result.scene, result.ids);
+    expect(result.scene.nodes[1].position).toEqual([9996, 0, 0]);
   });
   it("emboîte après rotation autour de plusieurs axes", () => {
     const target = makePart("brick-1x1", "#ef4444", [2, 3, 4]);
@@ -116,7 +223,7 @@ describe("Historique de l’atelier", () => {
     expect(useEditor.getState().scene.nodes[0].id).toBe(id);
     expect(useEditor.getState().scene.nodes[0].position[0]).toBe(4);
   });
-  it("Échap restaure le début du geste et copier/coller préserve les positions mondiales", () => {
+  it("Échap restaure le début du geste et copier/coller recrée le groupe", () => {
     const s = useEditor.getState();
     s.add("brick-2x2");
     s.begin();
@@ -129,6 +236,21 @@ describe("Historique de l’atelier", () => {
     expect(
       useEditor.getState().scene.nodes.filter((n) => n.kind === "part"),
     ).toHaveLength(2);
+  });
+  it("annule et rétablit en une opération la duplication d’un groupe sans chevauchement", () => {
+    const editor = useEditor.getState();
+    editor.add("brick-2x4");
+    editor.group();
+    const before = useEditor.getState().scene;
+    const historyLength = useEditor.getState().past.length;
+    editor.duplicate();
+    const after = useEditor.getState().scene;
+    expectFreeCopies(before, after, useEditor.getState().selection);
+    expect(useEditor.getState().past).toHaveLength(historyLength + 1);
+    editor.undo();
+    expect(useEditor.getState().scene).toEqual(before);
+    editor.redo();
+    expect(useEditor.getState().scene).toEqual(after);
   });
   it("respecte le verrouillage hérité", () => {
     const s = useEditor.getState();
