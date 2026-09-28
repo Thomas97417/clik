@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { writeFile } from "node:fs/promises";
-test("500 pièces : sélection et navigation à 30 images par seconde", async ({
+test("500 pièces : déplacement avec aperçu à 30 images par seconde", async ({
   page,
 }, info) => {
   await page.goto("/editor");
@@ -51,6 +51,17 @@ test("500 pièces : sélection et navigation à 30 images par seconde", async ({
     "500",
   );
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
+  await page.locator(".tree-name").nth(250).click();
+  await page.getByLabel("Vue de la caméra").selectOption("top");
+  await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
+  await expect(page.locator(".tree-row.selected")).toHaveCount(1);
+  const canvas = page.locator("canvas").first(),
+    box = (await canvas.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2 + 10, box.y + box.height / 2);
+  await expect(canvas).toHaveAttribute("data-dragging", "true");
+  await expect(canvas).toHaveAttribute("data-snap-kind", /grid|attachment/);
   const measurement = page.evaluate(async () => {
     const canvas = document.querySelector("canvas")!;
     const start = performance.now(),
@@ -61,19 +72,15 @@ test("500 pièces : sélection et navigation à 30 images par seconde", async ({
       durationMs: performance.now() - start,
     };
   });
-  await page.locator(".tree-name").nth(250).click();
-  await expect(page.locator(".tree-row.selected")).toHaveCount(1);
-  const canvas = page.locator("canvas").first(),
-    box = (await canvas.boundingBox())!;
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  await page.mouse.down();
+
   await page.mouse.move(
     box.x + box.width / 2 + 160,
     box.y + box.height / 2 + 60,
     { steps: 90 },
   );
-  await page.mouse.up();
   const result = await measurement;
+  await expect(canvas).toHaveAttribute("data-dragging", "true");
+  await page.mouse.up();
   const fps = result.frames / (result.durationMs / 1000);
   const gpu = await page.evaluate(() => {
     const gl = document.querySelector("canvas")!.getContext("webgl2")!;

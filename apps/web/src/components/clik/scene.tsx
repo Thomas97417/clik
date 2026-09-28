@@ -1,5 +1,13 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Canvas, useThree, type ThreeEvent } from "@react-three/fiber";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentRef,
+} from "react";
+import { Canvas, useThree } from "@react-three/fiber";
 import {
   OrbitControls,
   TransformControls,
@@ -14,26 +22,24 @@ import {
   InstancedMesh,
   Matrix4,
   MeshStandardMaterial,
-  Plane,
-  Raycaster,
-  Vector2,
   Vector3,
 } from "three";
 import { geometry } from "@/lib/clik/geometry";
 import {
   CATALOG,
   inherited,
-  makePart,
   matrix,
-  snapPart,
+  movableRoots,
+  type SelectionPreview,
   worldMatrix,
   type Part,
   type PartType,
   type SceneDocument,
-  type Vec3,
 } from "@clik/scene";
 import { useEditor } from "@/lib/clik/store";
 import { toast } from "sonner";
+import { CAMERA_GIZMO_MARGIN, Gestures } from "./gestures";
+import { SnapPreview } from "./snap-preview";
 const material = new MeshStandardMaterial({ roughness: 0.32, metalness: 0.02 });
 function Batch({
   type,
@@ -45,6 +51,12 @@ function Batch({
   editable: boolean;
 }) {
   const ref = useRef<InstancedMesh>(null);
+  const previous = useRef<{
+    mesh: InstancedMesh;
+    parts: Part[];
+    selection: string[];
+    editable: boolean;
+  } | null>(null);
   const selection = useEditor((s) => s.selection);
   const parts = useMemo(
     () =>
@@ -52,29 +64,55 @@ function Batch({
         (n): n is Part =>
           n.kind === "part" &&
           n.type === type &&
-          !inherited(scene, n.id, "hidden"),
+          !n.hidden &&
+          (!n.parentId || !inherited(scene, n.parentId, "hidden")),
       ),
     [scene, type],
   );
   useLayoutEffect(() => {
     const mesh = ref.current;
     if (!mesh) return;
+    const before = previous.current;
+    let moved = false,
+      recolored = false;
     parts.forEach((part, i) => {
-      mesh.setMatrixAt(i, worldMatrix(scene, part.id));
-      const selected = selection.some(
-        (id) => id === part.id || isChild(scene, part.id, id),
-      );
-      mesh.setColorAt(
-        i,
-        new Color(part.color).lerp(
-          new Color("#a8c8ff"),
-          editable && selected ? 0.4 : 0,
-        ),
-      );
+      const unchanged = before?.mesh === mesh && before.parts[i] === part;
+      // applyDelta shares untouched nodes. Root instances only need uploading
+      // when they change; children also depend on their parent's transform.
+      if (!unchanged || part.parentId) {
+        mesh.setMatrixAt(
+          i,
+          part.parentId ? worldMatrix(scene, part.id) : matrix(part),
+        );
+        moved = true;
+      }
+      if (
+        !unchanged ||
+        before?.selection !== selection ||
+        before.editable !== editable
+      ) {
+        const selected = selection.some(
+          (id) =>
+            id === part.id ||
+            (part.parentId &&
+              (part.parentId === id || isChild(scene, part.parentId, id))),
+        );
+        mesh.setColorAt(
+          i,
+          new Color(part.color).lerp(
+            new Color("#ffffff"),
+            editable && selected ? 0.18 : 0,
+          ),
+        );
+        recolored = true;
+      }
     });
-    mesh.instanceMatrix.needsUpdate = true;
-    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-    mesh.computeBoundingSphere();
+    if (moved) {
+      mesh.instanceMatrix.needsUpdate = true;
+      mesh.computeBoundingSphere();
+    }
+    if (recolored && mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+    previous.current = { mesh, parts, selection, editable };
   }, [parts, scene, selection, editable]);
   if (!parts.length) return null;
   return (
@@ -83,12 +121,7 @@ function Batch({
       args={[geometry(type), material, parts.length]}
       castShadow
       receiveShadow
-      onClick={(e: ThreeEvent<MouseEvent>) => {
-        if (!editable || useEditor.getState().pending) return;
-        e.stopPropagation();
-        const n = parts[e.instanceId ?? 0];
-        useEditor.getState().select(n.id, e.shiftKey);
-      }}
+      userData={{ parts }}
     />
   );
 }
@@ -99,14 +132,15 @@ function isChild(scene: SceneDocument, id: string, parent: string): boolean {
     (n.parentId === parent || isChild(scene, n.parentId, parent))
   );
 }
-function Manipulator() {
+function Manipulator({
+  rotation,
+}: {
+  rotation: React.RefObject<ComponentRef<typeof TransformControls> | null>;
+}) {
   const s = useEditor(),
     pivot = useRef<Group>(null),
     start = useRef(new Matrix4());
-  const ids = s.selection.filter(
-    (id) =>
-      !inherited(s.scene, id, "locked") && !inherited(s.scene, id, "hidden"),
-  );
+  const ids = movableRoots(s.scene, s.selection);
   const center = useMemo(() => {
     const sum = new Vector3();
     ids.forEach((id) =>
@@ -121,13 +155,14 @@ function Manipulator() {
       pivot.current.updateMatrixWorld();
     }
   }, [center, s.gesture]);
-  if (!ids.length) return null;
+  if (!ids.length || s.tool !== "rotate") return null;
   return (
     <>
       <group ref={pivot} position={center.toArray()} />
       <TransformControls
+        ref={rotation}
         object={pivot as React.RefObject<Group>}
-        mode={s.tool}
+        mode="rotate"
         space="world"
         size={0.8}
         onMouseDown={() => {
@@ -167,10 +202,24 @@ function Stage({
   onCapture?: (capture: () => Promise<ArrayBuffer>) => void;
 }) {
   const { camera, gl, scene: threeScene } = useThree(),
-    controls = useRef<any>(null),
+    controls = useRef<ComponentRef<typeof OrbitControls>>(null),
     s = useEditor(),
-    ghost = useRef<Group>(null);
-  const [preview, setPreview] = useState<Part | null>(null);
+    rotation = useRef<ComponentRef<typeof TransformControls>>(null);
+  const [library, setLibrary] = useState<{
+    preview: SelectionPreview | null;
+    free: Part | null;
+  }>({ preview: null, free: null });
+  const onLibraryPreview = useCallback(
+    (preview: SelectionPreview | null, free: Part | null) =>
+      setLibrary({ preview, free }),
+    [],
+  );
+  const preview = s.snap ? (s.pending ? library.preview : s.snapPreview) : null;
+  useEffect(() => {
+    gl.domElement.dataset.snapKind = preview?.kind ?? "none";
+    gl.domElement.dataset.snapPoints = String(preview?.points.length ?? 0);
+    gl.domElement.dataset.tool = s.tool;
+  }, [gl, preview, s.tool]);
   useEffect(() => {
     const previous = threeScene.onAfterRender;
     threeScene.onAfterRender = () => {
@@ -248,64 +297,6 @@ function Stage({
       );
     });
   }, [onCapture, gl, threeScene, camera]);
-  useEffect(() => {
-    if (!editable) return;
-    const canvas = gl.domElement;
-    const locate = (event: DragEvent) => {
-      const rect = canvas.getBoundingClientRect(),
-        ray = new Raycaster();
-      ray.setFromCamera(
-        new Vector2(
-          ((event.clientX - rect.left) / rect.width) * 2 - 1,
-          (-(event.clientY - rect.top) / rect.height) * 2 + 1,
-        ),
-        camera,
-      );
-      const hits = ray
-        .intersectObjects(threeScene.children, true)
-        .filter((h) => h.object instanceof InstancedMesh);
-      const pos =
-        hits[0]?.point.clone() ??
-        ray.ray.intersectPlane(
-          new Plane(new Vector3(0, 1, 0), 0),
-          new Vector3(),
-        );
-      if (!pos) return;
-      const state = useEditor.getState();
-      if (!state.pending) return;
-      const part = snapPart(
-        state.scene,
-        makePart(state.pending, state.color, pos.toArray() as Vec3),
-        state.snap,
-      );
-      setPreview(part);
-      return part;
-    };
-    const over = (e: DragEvent) => {
-      if (!useEditor.getState().pending) return;
-      e.preventDefault();
-      locate(e);
-    };
-    const drop = (e: DragEvent) => {
-      e.preventDefault();
-      const part = locate(e);
-      if (part)
-        try {
-          const state = useEditor.getState();
-          state.commit({ ...state.scene, nodes: [...state.scene.nodes, part] });
-          useEditor.setState({ selection: [part.id], pending: null });
-        } catch (error) {
-          toast.error(String(error));
-        }
-      setPreview(null);
-    };
-    canvas.addEventListener("dragover", over);
-    canvas.addEventListener("drop", drop);
-    return () => {
-      canvas.removeEventListener("dragover", over);
-      canvas.removeEventListener("drop", drop);
-    };
-  }, [gl, camera, threeScene, editable]);
   return (
     <>
       <color attach="background" args={["#edf1f7"]} />
@@ -344,18 +335,26 @@ function Stage({
       {(Object.keys(CATALOG) as PartType[]).map((type) => (
         <Batch key={type} type={type} scene={scene} editable={editable} />
       ))}
-      {editable && s.pending && preview && (
-        <group ref={ghost} matrixAutoUpdate={false} matrix={matrix(preview)}>
-          <mesh geometry={geometry(preview.type)}>
+      {editable && s.pending && library.free && (
+        <group matrixAutoUpdate={false} matrix={matrix(library.free)}>
+          <mesh geometry={geometry(library.free.type)}>
             <meshStandardMaterial
-              color={preview.color}
+              color={library.free.color}
               transparent
-              opacity={0.5}
+              opacity={0.7}
             />
           </mesh>
         </group>
       )}
-      {editable && <Manipulator />}
+      {editable && preview && <SnapPreview preview={preview} />}
+      {editable && s.tool === "rotate" && <Manipulator rotation={rotation} />}
+      {editable && (
+        <Gestures
+          controls={controls}
+          rotation={rotation}
+          onLibraryPreview={onLibraryPreview}
+        />
+      )}
       <OrbitControls
         ref={controls}
         makeDefault
@@ -364,7 +363,7 @@ function Stage({
         maxDistance={50000}
         maxPolarAngle={Math.PI * 0.95}
       />
-      <GizmoHelper alignment="bottom-right" margin={[65, 65]}>
+      <GizmoHelper alignment="bottom-right" margin={CAMERA_GIZMO_MARGIN}>
         <GizmoViewport
           axisColors={["#ed6a65", "#60b58a", "#5c8fe3"]}
           labelColor="white"
@@ -382,6 +381,7 @@ export default function Scene({
   editable?: boolean;
   onCapture?: (capture: () => Promise<ArrayBuffer>) => void;
 }) {
+  const liveScene = useEditor((s) => (editable ? s.scene : scene));
   const [supported] = useState(() => {
     try {
       return !!document.createElement("canvas").getContext("webgl2");
@@ -405,12 +405,8 @@ export default function Scene({
       dpr={[1, 1.5]}
       camera={{ position: [11, 10, 11], fov: 40, near: 0.1, far: 1000 }}
       gl={{ preserveDrawingBuffer: true, antialias: true }}
-      onPointerMissed={() => {
-        if (editable && !useEditor.getState().gesture)
-          useEditor.setState({ selection: [] });
-      }}
     >
-      <Stage scene={scene} editable={editable} onCapture={onCapture} />
+      <Stage scene={liveScene} editable={editable} onCapture={onCapture} />
     </Canvas>
   );
 }

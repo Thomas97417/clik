@@ -147,13 +147,18 @@ export function ancestors(scene: SceneDocument, id: string): string[] {
   return n?.parentId ? [n.parentId, ...ancestors(scene, n.parentId)] : [];
 }
 export function descendants(scene: SceneDocument, ids: string[]) {
-  return scene.nodes
-    .filter(
-      (n) =>
-        ids.includes(n.id) ||
-        ancestors(scene, n.id).some((id) => ids.includes(id)),
-    )
-    .map((n) => n.id);
+  const selected = new Set(ids);
+  const nodes = new Map(scene.nodes.map((n) => [n.id, n]));
+  const included = new Map<string, boolean>();
+  const contains = (n: SceneNode): boolean => {
+    if (selected.has(n.id)) return true;
+    if (included.has(n.id)) return included.get(n.id)!;
+    const parent = n.parentId ? nodes.get(n.parentId) : undefined;
+    const result = !!parent && contains(parent);
+    included.set(n.id, result);
+    return result;
+  };
+  return scene.nodes.filter(contains).map((n) => n.id);
 }
 export function reparent(
   scene: SceneDocument,
@@ -237,15 +242,16 @@ export function applyDelta(
   ids: string[],
   delta: Matrix4,
 ) {
-  const next = structuredClone(scene);
+  const next = { ...scene, nodes: [...scene.nodes] };
   for (const id of roots(scene, ids)) {
-    const n = next.nodes.find((n) => n.id === id)!;
+    const index = scene.nodes.findIndex((n) => n.id === id);
+    const n = scene.nodes[index];
     const local = (
       n.parentId ? worldMatrix(scene, n.parentId).invert() : new Matrix4()
     )
       .multiply(delta)
       .multiply(worldMatrix(scene, id));
-    Object.assign(n, transform(local));
+    next.nodes[index] = { ...n, ...transform(local) };
   }
   return next;
 }
@@ -280,16 +286,24 @@ function anchors(n: Part, top: boolean) {
     }
   return points;
 }
-export function snapPart(
+export type SnapResult = {
+  part: Part;
+  kind: "attachment" | "grid" | "none";
+  targetId?: string;
+  points: Vec3[];
+  rotation: Vec3;
+};
+export function snapCandidate(
   scene: SceneDocument,
   part: Part,
   enabled: boolean,
-): Part {
-  if (!enabled) return part;
+): SnapResult {
+  if (!enabled) return { part, kind: "none", points: [], rotation: [0, 0, 0] };
   const m = matrix(part),
     bottom = anchors(part, false).map((p) => p.applyMatrix4(m));
   let best = 0.7,
     result = part;
+  let targetId: string | undefined;
   for (const target of scene.nodes) {
     if (
       target.kind !== "part" ||
@@ -308,6 +322,7 @@ export function snapPart(
         const dist = a.distanceTo(bottom[i]);
         if (dist < best) {
           best = dist;
+          targetId = target.id;
           let align = tq.clone(),
             angle = Infinity;
           for (let turn = 0; turn < 4; turn++) {
@@ -335,43 +350,107 @@ export function snapPart(
         }
       }
   }
-  return result === part
-    ? {
+  if (!targetId)
+    return {
+      part: {
         ...part,
         position: [
           Math.round(part.position[0]),
           Math.round(part.position[1] / 0.4) * 0.4,
           Math.round(part.position[2]),
         ],
-      }
-    : result;
+      },
+      kind: "grid",
+      points: [],
+      rotation: [0, 0, 0],
+    };
+  const target = scene.nodes.find((n) => n.id === targetId) as Part;
+  const tm = worldMatrix(scene, targetId);
+  const bottoms = anchors(result, false).map((p) =>
+    p.applyMatrix4(matrix(result)),
+  );
+  const points = anchors(target, true)
+    .map((p) => p.applyMatrix4(tm))
+    .filter((p) => bottoms.some((b) => b.distanceTo(p) < 0.001))
+    .map((p) => p.toArray() as Vec3);
+  return {
+    part: result,
+    kind: "attachment",
+    targetId,
+    points,
+    rotation: transform(tm).rotation,
+  };
+}
+export function snapPart(
+  scene: SceneDocument,
+  part: Part,
+  enabled: boolean,
+): Part {
+  return snapCandidate(scene, part, enabled).part;
+}
+
+export type SelectionPreview = Omit<SnapResult, "part"> & {
+  scene: SceneDocument;
+  ids: string[];
+};
+
+/** Locked descendants cannot be carried indirectly by a selected group. */
+export function movableRoots(scene: SceneDocument, ids: string[]) {
+  return roots(scene, ids).filter(
+    (id) =>
+      !inherited(scene, id, "hidden") &&
+      !descendants(scene, [id]).some((child) =>
+        inherited(scene, child, "locked"),
+      ),
+  );
 }
 
 /** Snap a selection as a rigid assembly, never against its own children. */
-export function snapSelection(
+export function previewSelection(
   scene: SceneDocument,
   ids: string[],
   enabled: boolean,
-) {
-  if (!enabled) return scene;
+  referenceId?: string,
+): SelectionPreview {
+  const empty: SelectionPreview = {
+    scene,
+    ids,
+    kind: "none",
+    points: [],
+    rotation: [0, 0, 0],
+  };
+  if (!enabled) return empty;
   const moving = new Set(descendants(scene, ids));
-  const anchor = scene.nodes.find(
+  const eligible = scene.nodes.filter(
     (n): n is Part =>
       n.kind === "part" &&
       moving.has(n.id) &&
       !inherited(scene, n.id, "hidden"),
   );
-  if (!anchor) return scene;
+  const anchor = eligible.find((n) => n.id === referenceId) ?? eligible[0];
+  if (!anchor) return empty;
   const original = worldMatrix(scene, anchor.id),
     world = { ...anchor, ...transform(original), parentId: null };
   const candidates = {
     ...scene,
     nodes: scene.nodes.filter((n) => !moving.has(n.id)),
   };
-  const snapped = snapPart(candidates, world, true);
-  return applyDelta(
-    scene,
+  const { part, ...metadata } = snapCandidate(candidates, world, true);
+  return {
+    ...metadata,
     ids,
-    matrix(snapped).multiply(original.clone().invert()),
-  );
+    scene: applyDelta(
+      scene,
+      ids,
+      matrix(part).multiply(original.clone().invert()),
+    ),
+  };
+}
+
+export function snapSelection(
+  scene: SceneDocument,
+  ids: string[],
+  enabled: boolean,
+) {
+  return previewSelection(scene, ids, enabled).scene;
 }

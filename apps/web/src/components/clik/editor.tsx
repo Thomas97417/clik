@@ -38,6 +38,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useEditor } from "@/lib/clik/store";
@@ -85,7 +86,15 @@ export default function Editor({
   projectId?: string;
   draftId?: string;
 }) {
-  const s = useEditor(),
+  // The canvas subscribes to live transforms. Keep the tree and inspector stable
+  // during a gesture so a 500-part document does not rebuild its UI each frame.
+  const s = useEditor(
+      useShallow((state) => ({
+        ...state,
+        scene: state.gesture?.scene ?? state.scene,
+        snapPreview: null,
+      })),
+    ),
     project = useProject(projectId, draftId),
     navigate = useNavigate();
   const [category, setCategory] = useState("Toutes"),
@@ -120,6 +129,7 @@ export default function Editor({
         state.cancel();
         return;
       }
+      if (state.gesture || state.pending) return;
       if (e.key === "Delete" || e.key === "Backspace") {
         e.preventDefault();
         safe(state.remove);
@@ -580,7 +590,10 @@ export default function Editor({
                   Chevauchement possible · autorisé
                 </span>
               )}
-              <span>Glisser pour orbiter · Molette pour zoomer</span>
+              <span>
+                Glisser une pièce : déplacer · Glisser dans le vide : orbiter ·
+                Molette : zoomer
+              </span>
             </div>
           </section>
           <aside className="inspector">
@@ -742,8 +755,9 @@ export default function Editor({
             <span className="brand-mini">clik</span> L’atelier des possibles
           </span>
           <span>
-            Maj + clic : sélection multiple <ChevronRight size={12} /> F :
-            cadrer <ChevronRight size={12} /> Échap : annuler
+            Glisser : déplacer · Espace + glisser / clic droit : caméra · Maj +
+            clic : sélection multiple <ChevronRight size={12} /> F : cadrer{" "}
+            <ChevronRight size={12} /> Échap : annuler
           </span>
         </footer>
       </main>

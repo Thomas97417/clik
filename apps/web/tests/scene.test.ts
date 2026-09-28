@@ -183,3 +183,99 @@ it("aimante un groupe comme un ensemble sans déformer ses enfants", async () =>
     .sub(new Vector3().setFromMatrixPosition(worldMatrix(scene, a.id)));
   expect(after.distanceTo(before)).toBeLessThan(1e-8);
 });
+
+it("décrit les plots visés dans le repère mondial d’une cible tournée", async () => {
+  const { snapCandidate } = await import("@clik/scene");
+  const target = makePart("brick-2x2", "#ef4444", [2, 3, 4]);
+  target.rotation = [0.4, 0.2, 0.1];
+  const scene = { ...emptyScene(), nodes: [target] };
+  const top = new Vector3(0, 1.2, 0).applyMatrix4(
+    worldMatrix(scene, target.id),
+  );
+  const p = makePart(
+    "brick-2x2",
+    "#4079e8",
+    top.clone().addScalar(0.1).toArray(),
+  );
+  p.rotation = [...target.rotation];
+  const preview = snapCandidate(scene, p, true);
+  expect(preview.kind).toBe("attachment");
+  expect(preview.targetId).toBe(target.id);
+  expect(preview.points).toHaveLength(4);
+  const inverse = worldMatrix(scene, target.id).invert();
+  for (const point of preview.points)
+    expect(new Vector3(...point).applyMatrix4(inverse).y).toBeCloseTo(1.2, 8);
+  expect(snapCandidate(scene, p, false).kind).toBe("none");
+  expect(snapCandidate(emptyScene(), p, true).points).toEqual([]);
+});
+
+it("utilise la pièce saisie comme référence et ignore les autres pièces déplacées", async () => {
+  const { previewSelection } = await import("@clik/scene");
+  const a = makePart("brick-1x1", "#4079e8", [7.1, 1.3, 0]);
+  const b = makePart("brick-1x1", "#4079e8", [0.1, 1.3, 0]);
+  const target = makePart("brick-1x1", "#ef4444");
+  const scene = group(
+    { ...emptyScene(), nodes: [a, b, target] },
+    [a.id, b.id],
+    "g",
+  );
+  const preview = previewSelection(scene, ["g"], true, b.id);
+  expect(preview.targetId).toBe(target.id);
+  expect(
+    new Vector3().setFromMatrixPosition(worldMatrix(preview.scene, b.id)).y,
+  ).toBeCloseTo(1.2);
+  expect(
+    new Vector3().setFromMatrixPosition(worldMatrix(preview.scene, a.id)).x,
+  ).toBeCloseTo(7);
+  expect(previewSelection(scene, ["g", target.id], true, b.id).kind).toBe(
+    "grid",
+  );
+});
+
+it("dépose exactement l’aperçu, sans sérialiser les étapes ni ajouter d’historique pour un clic", () => {
+  const s = useEditor.getState();
+  s.load(emptyScene(), "Test");
+  useEditor.setState({ snap: true });
+  s.add("brick-1x1");
+  const past = useEditor.getState().past.length;
+  s.begin();
+  s.end();
+  expect(useEditor.getState().past).toHaveLength(past);
+  s.begin();
+  s.preview(new Matrix4().makeTranslation(2.3, 0, 0.2));
+  const candidate = useEditor.getState().snapPreview!.scene;
+  expect(useEditor.getState().serial).toBe(1);
+  expect(useEditor.getState().scene.nodes[0].position[0]).toBeCloseTo(2.3);
+  s.end();
+  expect(useEditor.getState().scene).toBe(candidate);
+  expect(useEditor.getState().past).toHaveLength(past + 1);
+  expect(useEditor.getState().snapPreview).toBeNull();
+  s.begin();
+  s.preview(new Matrix4().makeTranslation(3, 0, 0));
+  s.cancel();
+  expect(useEditor.getState().scene).toBe(candidate);
+  expect(useEditor.getState().past).toHaveLength(past + 1);
+});
+
+it("préserve les branches verrouillées et déplace les autres racines sélectionnées", () => {
+  const s = useEditor.getState();
+  const locked = { ...makePart("brick-1x1", "#4079e8"), locked: true };
+  const free = makePart("brick-1x1", "#ef4444", [3, 0, 0]);
+  const scene = group(
+    { ...emptyScene(), nodes: [locked, free] },
+    [locked.id],
+    "locked-group",
+  );
+  s.load(scene, "Test");
+  useEditor.setState({ selection: ["locked-group", free.id], snap: false });
+  s.begin(free.id);
+  s.preview(new Matrix4().makeTranslation(2, 0, 0));
+  s.end();
+  close(
+    worldMatrix(useEditor.getState().scene, locked.id),
+    worldMatrix(scene, locked.id),
+  );
+  expect(
+    useEditor.getState().scene.nodes.find((n) => n.id === free.id)!.position[0],
+  ).toBe(5);
+});

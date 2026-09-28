@@ -10,7 +10,9 @@ import {
   reparent,
   roots,
   snapPart,
-  snapSelection,
+  previewSelection,
+  movableRoots,
+  type SelectionPreview,
   ungroup,
   validateScene,
   worldMatrix,
@@ -35,6 +37,9 @@ type State = Snapshot & {
   view: "perspective" | "top" | "front" | "right";
   serial: number;
   gesture: Snapshot | null;
+  snapPreview: SelectionPreview | null;
+  gestureIds: string[];
+  referenceId?: string;
   clipboard: SceneDocument | null;
   load: (scene: SceneDocument, title: string) => void;
   commit: (scene: SceneDocument, title?: string) => void;
@@ -48,7 +53,7 @@ type State = Snapshot & {
   reparent: (id: string, parentId: string | null, before?: string) => void;
   undo: () => void;
   redo: () => void;
-  begin: () => void;
+  begin: (referenceId?: string) => void;
   preview: (delta: Matrix4) => void;
   end: () => void;
   cancel: () => void;
@@ -70,6 +75,8 @@ export const useEditor = create<State>((set, get) => ({
   view: "perspective",
   serial: 0,
   gesture: null,
+  snapPreview: null,
+  gestureIds: [],
   clipboard: null,
   load: (scene, title) =>
     set({
@@ -80,6 +87,8 @@ export const useEditor = create<State>((set, get) => ({
       future: [],
       serial: 0,
       gesture: null,
+      snapPreview: null,
+      gestureIds: [],
     }),
   commit: (scene, title = get().title) => {
     validateScene(scene);
@@ -194,32 +203,42 @@ export const useEditor = create<State>((set, get) => ({
         serial: s.serial + 1,
       });
   },
-  begin: () => set((s) => ({ gesture: snapshot(s) })),
+  begin: (referenceId) =>
+    set((s) => ({
+      gesture: snapshot(s),
+      snapPreview: null,
+      gestureIds: movableRoots(s.scene, s.selection),
+      referenceId,
+    })),
   preview: (delta) => {
     const s = get();
-    if (s.gesture)
-      set({
-        scene: applyDelta(
-          s.gesture.scene,
-          s.selection.filter((id) => !inherited(s.scene, id, "locked")),
-          delta,
-        ),
-      });
+    if (!s.gesture) return;
+    const scene = applyDelta(s.gesture.scene, s.gestureIds, delta);
+    set({
+      scene,
+      snapPreview: s.snap
+        ? previewSelection(scene, s.gestureIds, true, s.referenceId)
+        : null,
+    });
   },
   end: () => {
     const s = get();
     if (!s.gesture) return;
-    const ids = roots(s.scene, s.selection).filter(
-      (id) => !inherited(s.scene, id, "locked"),
-    );
-    const scene = snapSelection(s.scene, ids, s.snap);
+    const scene = s.snap && s.snapPreview ? s.snapPreview.scene : s.scene;
+    validateScene(scene);
     const before = s.gesture;
-    set({ ...before, gesture: null });
+    set({ ...before, gesture: null, snapPreview: null, gestureIds: [] });
     get().commit(scene);
   },
   cancel: () => {
     const s = get();
-    set({ ...s.gesture, gesture: null, pending: null });
+    set({
+      ...s.gesture,
+      gesture: null,
+      snapPreview: null,
+      gestureIds: [],
+      pending: null,
+    });
   },
   copy: () => {
     const s = get();
