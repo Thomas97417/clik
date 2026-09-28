@@ -1,0 +1,1 @@
+{"name":"@clik/scene","version":"1.0.0","type":"module","exports":{".":"./src/index.ts"},"dependencies":{"three":"^0.180.0","zod":"catalog:"},"devDependencies":{"@types/three":"^0.180.0"}}

@@ -10,11 +10,11 @@ export const r2 = new R2(components.r2);
 // for all callback contexts. Without this, ctx will be typed as GenericDocument
 // instead of your specific table types.
 export const { generateUploadUrl, syncMetadata, listMetadata, getMetadata } = r2.clientApi<DataModel>({
-  checkUpload: async (ctx, bucket) => {
+  checkUpload: async (_ctx, _bucket) => {
     // const user = await userFromAuth(ctx);
     // ...validate that the user can upload to this bucket
   },
-  onUpload: async (ctx, bucket, key) => {
+  onUpload: async (_ctx, _bucket, _key) => {
     // ...do something with the key
     // This technically runs in the `syncMetadata` mutation, as the upload
     // is performed from the client side. Will run if using the `useUploadFile`

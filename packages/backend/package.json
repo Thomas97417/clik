@@ -6,9 +6,12 @@
   "author": "",
   "scripts": {
     "dev": "convex dev",
-    "dev:setup": "convex dev --configure --until-success"
+    "dev:setup": "convex dev --configure --until-success",
+    "test": "vitest run",
+    "check-types": "tsc --project convex/tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@clik/scene": "workspace:*",
     "@convex-dev/better-auth": "catalog:",
     "@convex-dev/r2": "^0.9.1",
     "@convex-dev/resend": "^0.2.3",
@@ -27,6 +30,8 @@
     "@my-better-t-app/config": "workspace:*",
     "@types/node": "^24.3.0",
     "@types/react": "19.2.7",
-    "typescript": "catalog:"
+    "convex-test": "0.0.41",
+    "typescript": "catalog:",
+    "vitest": "^5.0.2"
   }
 }

@@ -48,3 +48,6 @@ coverage
 .cache
 tmp
 temp
+# Browser test artifacts
+playwright-report/
+test-results/

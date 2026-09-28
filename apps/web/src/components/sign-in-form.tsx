@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import z from "zod";
 
@@ -12,10 +12,6 @@ import { Label } from "./ui/label";
 import PasswordInput from "./ui/password-input";
 
 export default function SignInForm() {
-  const navigate = useNavigate({
-    from: "/",
-  });
-
   const form = useForm({
     defaultValues: {
       email: "",
@@ -29,14 +25,19 @@ export default function SignInForm() {
         },
         {
           onSuccess: () => {
-            navigate({
-              to: "/dashboard",
-            });
-            toast.success("Sign in successful");
+            const back = sessionStorage.getItem("clik-return-to") || "/editor";
+            window.location.assign(
+              /^\/(editor|creations|projects)(\/|$)/.test(back)
+                ? back
+                : "/editor",
+            );
+            toast.success("Connexion réussie");
           },
           onError: (error) => {
             if (error.error.status === 403) {
-              toast.error("Please verify your email before signing in.");
+              toast.error(
+                "Vérifiez votre adresse email avant de vous connecter.",
+              );
             } else {
               toast.error(error.error.message || error.error.statusText);
             }
@@ -46,15 +47,19 @@ export default function SignInForm() {
     },
     validators: {
       onSubmit: z.object({
-        email: z.email("Invalid email address"),
-        password: z.string().min(8, "Password must be at least 8 characters"),
+        email: z.email("Adresse email invalide"),
+        password: z
+          .string()
+          .min(8, "Le mot de passe doit contenir au moins 8 caractères"),
       }),
     },
   });
 
   return (
     <div className="mx-auto w-full mt-10 max-w-md p-6">
-      <h1 className="mb-6 text-center text-3xl font-bold">Welcome Back</h1>
+      <h1 className="mb-6 text-center text-3xl font-bold">
+        Heureux de vous retrouver
+      </h1>
 
       <form
         onSubmit={(e) => {
@@ -93,12 +98,12 @@ export default function SignInForm() {
             {(field) => (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor={field.name}>Password</Label>
+                  <Label htmlFor={field.name}>Mot de passe</Label>
                   <Link
                     to="/forgot-password"
                     className="text-xs text-muted-foreground hover:underline cursor-pointer"
                   >
-                    Forgot password?
+                    Mot de passe oublié ?
                   </Link>
                 </div>
                 <PasswordInput
@@ -126,7 +131,7 @@ export default function SignInForm() {
               className="w-full"
               disabled={!state.canSubmit || state.isSubmitting}
             >
-              {state.isSubmitting ? "Submitting..." : "Sign In"}
+              {state.isSubmitting ? "Envoi…" : "Se connecter"}
             </Button>
           )}
         </form.Subscribe>
@@ -138,7 +143,7 @@ export default function SignInForm() {
         </div>
         <div className="relative flex justify-center text-xs uppercase">
           <span className="bg-background px-2 text-muted-foreground">
-            Or continue with
+            Ou continuer avec
           </span>
         </div>
       </div>
@@ -149,12 +154,12 @@ export default function SignInForm() {
       </div>
 
       <div className="mt-4 text-center text-sm text-muted-foreground">
-        <span>Need an account?{" "}</span>
+        <span>Need an account? </span>
         <Link
           to="/sign-up"
           className="hover:underline hover:text-foreground cursor-pointer font-bold"
         >
-          Sign Up
+          Créer un compte
         </Link>
         <span className="mx-2">·</span>
         <Link

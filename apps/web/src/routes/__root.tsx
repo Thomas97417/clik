@@ -9,7 +9,7 @@ import {
   createRootRouteWithContext,
   useRouteContext,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+
 import { createServerFn } from "@tanstack/react-start";
 
 import { Toaster } from "@/components/ui/sonner";
@@ -48,7 +48,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "Toma Stack",
+        title: "Clik — Atelier de construction 3D",
       },
     ],
     links: [
@@ -82,7 +82,7 @@ function RootDocument() {
       authClient={authClient}
       initialToken={context.token}
     >
-      <html lang="en" suppressHydrationWarning>
+      <html lang="fr" suppressHydrationWarning>
         <head>
           <HeadContent />
         </head>
@@ -93,7 +93,8 @@ function RootDocument() {
           >
             <ThemeProvider
               attribute="class"
-              defaultTheme="system"
+              defaultTheme="light"
+              forcedTheme="light"
               disableTransitionOnChange
               storageKey="vite-ui-theme"
             >
@@ -104,7 +105,7 @@ function RootDocument() {
                 </div>
               </div>
               <Toaster richColors />
-              <TanStackRouterDevtools position="bottom-left" />
+
               <Scripts />
             </ThemeProvider>
           </PostHogProvider>

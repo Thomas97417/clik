@@ -23,7 +23,8 @@
     "dev:native": "turbo -F native dev",
     "dev:web": "turbo -F web dev",
     "dev:server": "turbo -F @my-better-t-app/backend dev",
-    "dev:setup": "turbo -F @my-better-t-app/backend dev:setup"
+    "dev:setup": "turbo -F @my-better-t-app/backend dev:setup",
+    "test": "bun run --cwd apps/web test && bun run --cwd packages/backend test"
   },
   "dependencies": {
     "@my-better-t-app/env": "workspace:*",

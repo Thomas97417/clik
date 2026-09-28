@@ -1,0 +1,261 @@
+import { useEffect, useRef, useState } from "react";
+import {
+  useConvex,
+  useConvexAuth,
+  useConvexConnectionState,
+  useMutation,
+  useQuery,
+} from "convex/react";
+import { api } from "@my-better-t-app/backend/convex/_generated/api";
+import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
+import { emptyScene } from "@clik/scene";
+import { useEditor } from "./store";
+import { readDraft, writeDraft, type Draft } from "./local";
+import { toast } from "sonner";
+export function useProject(projectId?: string, draftId?: string) {
+  const connection = useConvexConnectionState();
+  const { isAuthenticated, isLoading } = useConvexAuth(),
+    convex = useConvex();
+  const remote = useQuery(
+    api.projects.get,
+    projectId && isAuthenticated ? { id: projectId as Id<"projects"> } : "skip",
+  );
+  const me = useQuery(api.auth.getCurrentUser, isAuthenticated ? {} : "skip");
+  const save = useMutation(api.projects.save),
+    create = useMutation(api.projects.create);
+  const [ready, setReady] = useState(false),
+    [status, setStatus] = useState("Chargement"),
+    [conflict, setConflict] = useState(false),
+    [retry, setRetry] = useState(0);
+  const key = projectId
+      ? `project:${me?._id ?? "pending"}:${projectId}`
+      : draftId
+        ? `guest:${draftId}`
+        : "guest",
+    serial = useEditor((s) => s.serial),
+    gesture = useEditor((s) => s.gesture);
+  const revision = useRef(0),
+    stamp = useRef(""),
+    queue = useRef(Promise.resolve()),
+    busy = useRef(false),
+    loaded = useRef(""),
+    channel = useRef<BroadcastChannel | null>(null),
+    savedSerial = useRef(0);
+  const backup = async (dirty: boolean) => {
+    const s = useEditor.getState(),
+      draft: Draft = {
+        scene: s.gesture?.scene ?? s.scene,
+        title: s.gesture?.title ?? s.title,
+        revision: revision.current,
+        stamp: crypto.randomUUID(),
+        dirty,
+      };
+    await writeDraft(key, draft, stamp.current);
+    stamp.current = draft.stamp;
+    channel.current?.postMessage(draft.stamp);
+  };
+  useEffect(() => {
+    if ((projectId && (!remote || !me)) || loaded.current === key) return;
+    loaded.current = key;
+    let alive = true;
+    setReady(false);
+    readDraft(key)
+      .then((local) => {
+        if (!alive) return;
+        revision.current = local?.dirty
+          ? local.revision
+          : (remote?.revision ?? 0);
+        stamp.current = local?.stamp ?? "";
+        const recover = local && (!projectId || local.dirty);
+        useEditor
+          .getState()
+          .load(
+            recover
+              ? local.scene
+              : remote
+                ? JSON.parse(remote.scene)
+                : emptyScene(),
+            recover ? local.title : (remote?.title ?? "Ma première création"),
+          );
+        savedSerial.current = local?.dirty && projectId ? -1 : 0;
+        setConflict(
+          !!(local?.dirty && remote && local.revision !== remote.revision),
+        );
+        setReady(true);
+        setStatus(navigator.onLine ? "Enregistré" : "Hors ligne");
+      })
+      .catch((e) => {
+        setStatus("Sauvegarde locale indisponible");
+        toast.error(String(e));
+      });
+    return () => {
+      alive = false;
+      loaded.current = "";
+    };
+  }, [key, !!remote, !!me]);
+  useEffect(() => {
+    const on = () => {
+        setRetry((n) => n + 1);
+        setStatus(
+          useEditor.getState().serial === savedSerial.current
+            ? "Enregistré"
+            : "Enregistrement",
+        );
+      },
+      off = () => setStatus("Hors ligne");
+    window.addEventListener("online", on);
+    window.addEventListener("offline", off);
+    const c = new BroadcastChannel(`clik:${key}`);
+    channel.current = c;
+    c.onmessage = (e) => {
+      if (e.data !== stamp.current) setConflict(true);
+    };
+    return () => {
+      c.close();
+      window.removeEventListener("online", on);
+      window.removeEventListener("offline", off);
+    };
+  }, [key]);
+  useEffect(() => {
+    if (!projectId || !ready) return;
+    if (connection.isWebSocketConnected) {
+      setRetry((n) => n + 1);
+      setStatus(
+        useEditor.getState().serial === savedSerial.current
+          ? "Enregistré"
+          : "Enregistrement",
+      );
+    } else setStatus("Hors ligne");
+  }, [connection.isWebSocketConnected, projectId, ready]);
+  const copyLocal = async () => {
+    const id = crypto.randomUUID(),
+      current = useEditor.getState();
+    await writeDraft(`guest:${id}`, {
+      scene: current.scene,
+      title: `${current.title.slice(0, 90)} · copie`,
+      revision: 0,
+      stamp: crypto.randomUUID(),
+      dirty: false,
+    });
+    return id;
+  };
+  const flush = async () => {
+    if (!ready || conflict || gesture)
+      throw Error("Résolvez le conflit ou terminez la manipulation.");
+    await queue.current;
+    if (useEditor.getState().gesture)
+      throw Error("Terminez la manipulation avant de publier.");
+    if (!projectId) return revision.current;
+    if (!navigator.onLine)
+      throw Error("Hors ligne : votre brouillon reste sur cet appareil.");
+    if (busy.current)
+      throw Error("Enregistrement en cours, réessayez dans un instant.");
+    busy.current = true;
+    const s = useEditor.getState(),
+      sentSerial = s.serial;
+    setStatus("Enregistrement");
+    try {
+      const rev = await save({
+        id: projectId as Id<"projects">,
+        scene: JSON.stringify(s.scene),
+        title: s.title,
+        revision: revision.current,
+      });
+      revision.current = rev;
+      savedSerial.current = sentSerial;
+      queue.current = queue.current.then(() =>
+        backup(useEditor.getState().serial !== sentSerial),
+      );
+      await queue.current;
+      setStatus("Enregistré");
+      return rev;
+    } catch (e) {
+      if (
+        String(e).includes("CONFLICT") ||
+        String(e).includes("LOCAL_CONFLICT")
+      )
+        setConflict(true);
+      setStatus(navigator.onLine ? "Enregistrement impossible" : "Hors ligne");
+      throw e;
+    } finally {
+      busy.current = false;
+      setRetry((n) => n + 1);
+    }
+  };
+  useEffect(() => {
+    if (!ready || conflict || gesture || serial === savedSerial.current) return;
+    setStatus(navigator.onLine ? "Enregistrement" : "Hors ligne");
+    queue.current = queue.current
+      .catch(() => {})
+      .then(() => backup(!!projectId))
+      .then(() => {
+        if (!projectId) {
+          savedSerial.current = serial;
+          setStatus(navigator.onLine ? "Enregistré" : "Hors ligne");
+        }
+      })
+      .catch((e) => {
+        if (String(e).includes("LOCAL_CONFLICT")) setConflict(true);
+        else setStatus("Sauvegarde locale indisponible");
+      });
+    const timer = window.setTimeout(() => {
+      if (projectId && navigator.onLine && !busy.current)
+        void flush().catch((e) => toast.error(String(e)));
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [serial, ready, conflict, gesture, retry]);
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (
+        (projectId && useEditor.getState().serial !== savedSerial.current) ||
+        busy.current
+      ) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [projectId]);
+  const reload = async () => {
+    await queue.current.catch(() => {});
+    const local = await readDraft(key);
+    stamp.current = local?.stamp ?? "";
+    const p = projectId
+      ? await convex.query(api.projects.get, {
+          id: projectId as Id<"projects">,
+        })
+      : null;
+    useEditor
+      .getState()
+      .load(
+        p ? JSON.parse(p.scene) : (local?.scene ?? emptyScene()),
+        p?.title ?? local?.title ?? "Ma création",
+      );
+    revision.current = p?.revision ?? 0;
+    savedSerial.current = 0;
+    setConflict(false);
+    await backup(false);
+    setStatus("Enregistré");
+  };
+  const copy = async () => {
+    await queue.current.catch(() => {});
+    const s = useEditor.getState();
+    return create({
+      title: `${s.title.slice(0, 90)}${projectId ? " · copie" : ""}`,
+      scene: JSON.stringify(s.scene),
+    });
+  };
+  return {
+    ready,
+    status,
+    conflict,
+    reload,
+    copy,
+    copyLocal,
+    flush,
+    isAuthenticated,
+    isLoading,
+    revision: revision.current,
+    origin: remote?.origin,
+  };
+}

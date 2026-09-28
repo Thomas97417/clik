@@ -150,7 +150,7 @@ export const sendVerificationEmail = internalAction({
     url: v.string(),
     token: v.string(),
   },
-  handler: async (ctx, { from, to, url, token }) => {
+  handler: async (ctx, { from, to, url }) => {
     const html = await render(<VerificationEmail url={url} />);
 
     await resend.sendEmail(ctx, {

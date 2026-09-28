@@ -11,8 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UploadRouteImport } from './routes/upload'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ProjectsRouteImport } from './routes/projects'
+import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EditorIndexRouteImport } from './routes/editor.index'
+import { Route as EditorProjectIdRouteImport } from './routes/editor.$projectId'
+import { Route as CreationsPublicationIdRouteImport } from './routes/creations.$publicationId'
 import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
 import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
@@ -30,6 +35,16 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectsRoute = ProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GalleryRoute = GalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -38,6 +53,21 @@ const DashboardRoute = DashboardRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EditorIndexRoute = EditorIndexRouteImport.update({
+  id: '/editor/',
+  path: '/editor/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EditorProjectIdRoute = EditorProjectIdRouteImport.update({
+  id: '/editor/$projectId',
+  path: '/editor/$projectId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreationsPublicationIdRoute = CreationsPublicationIdRouteImport.update({
+  id: '/creations/$publicationId',
+  path: '/creations/$publicationId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const authVerifyEmailRoute = authVerifyEmailRouteImport.update({
@@ -74,6 +104,8 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/gallery': typeof GalleryRoute
+  '/projects': typeof ProjectsRoute
   '/settings': typeof SettingsRoute
   '/upload': typeof UploadRoute
   '/forgot-password': typeof authForgotPasswordRoute
@@ -81,11 +113,16 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
   '/verify-email': typeof authVerifyEmailRoute
+  '/creations/$publicationId': typeof CreationsPublicationIdRoute
+  '/editor/$projectId': typeof EditorProjectIdRoute
+  '/editor/': typeof EditorIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/gallery': typeof GalleryRoute
+  '/projects': typeof ProjectsRoute
   '/settings': typeof SettingsRoute
   '/upload': typeof UploadRoute
   '/forgot-password': typeof authForgotPasswordRoute
@@ -93,12 +130,17 @@ export interface FileRoutesByTo {
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
   '/verify-email': typeof authVerifyEmailRoute
+  '/creations/$publicationId': typeof CreationsPublicationIdRoute
+  '/editor/$projectId': typeof EditorProjectIdRoute
+  '/editor': typeof EditorIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/gallery': typeof GalleryRoute
+  '/projects': typeof ProjectsRoute
   '/settings': typeof SettingsRoute
   '/upload': typeof UploadRoute
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
@@ -106,6 +148,9 @@ export interface FileRoutesById {
   '/(auth)/sign-in': typeof authSignInRoute
   '/(auth)/sign-up': typeof authSignUpRoute
   '/(auth)/verify-email': typeof authVerifyEmailRoute
+  '/creations/$publicationId': typeof CreationsPublicationIdRoute
+  '/editor/$projectId': typeof EditorProjectIdRoute
+  '/editor/': typeof EditorIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
@@ -113,6 +158,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
+    | '/gallery'
+    | '/projects'
     | '/settings'
     | '/upload'
     | '/forgot-password'
@@ -120,11 +167,16 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/verify-email'
+    | '/creations/$publicationId'
+    | '/editor/$projectId'
+    | '/editor/'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/dashboard'
+    | '/gallery'
+    | '/projects'
     | '/settings'
     | '/upload'
     | '/forgot-password'
@@ -132,11 +184,16 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/verify-email'
+    | '/creations/$publicationId'
+    | '/editor/$projectId'
+    | '/editor'
     | '/api/auth/$'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
+    | '/gallery'
+    | '/projects'
     | '/settings'
     | '/upload'
     | '/(auth)/forgot-password'
@@ -144,12 +201,17 @@ export interface FileRouteTypes {
     | '/(auth)/sign-in'
     | '/(auth)/sign-up'
     | '/(auth)/verify-email'
+    | '/creations/$publicationId'
+    | '/editor/$projectId'
+    | '/editor/'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
+  GalleryRoute: typeof GalleryRoute
+  ProjectsRoute: typeof ProjectsRoute
   SettingsRoute: typeof SettingsRoute
   UploadRoute: typeof UploadRoute
   authForgotPasswordRoute: typeof authForgotPasswordRoute
@@ -157,6 +219,9 @@ export interface RootRouteChildren {
   authSignInRoute: typeof authSignInRoute
   authSignUpRoute: typeof authSignUpRoute
   authVerifyEmailRoute: typeof authVerifyEmailRoute
+  CreationsPublicationIdRoute: typeof CreationsPublicationIdRoute
+  EditorProjectIdRoute: typeof EditorProjectIdRoute
+  EditorIndexRoute: typeof EditorIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -176,6 +241,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/projects': {
+      id: '/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gallery': {
+      id: '/gallery'
+      path: '/gallery'
+      fullPath: '/gallery'
+      preLoaderRoute: typeof GalleryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -188,6 +267,27 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/editor/': {
+      id: '/editor/'
+      path: '/editor'
+      fullPath: '/editor/'
+      preLoaderRoute: typeof EditorIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/editor/$projectId': {
+      id: '/editor/$projectId'
+      path: '/editor/$projectId'
+      fullPath: '/editor/$projectId'
+      preLoaderRoute: typeof EditorProjectIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/creations/$publicationId': {
+      id: '/creations/$publicationId'
+      path: '/creations/$publicationId'
+      fullPath: '/creations/$publicationId'
+      preLoaderRoute: typeof CreationsPublicationIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(auth)/verify-email': {
@@ -238,6 +338,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
+  GalleryRoute: GalleryRoute,
+  ProjectsRoute: ProjectsRoute,
   SettingsRoute: SettingsRoute,
   UploadRoute: UploadRoute,
   authForgotPasswordRoute: authForgotPasswordRoute,
@@ -245,6 +347,9 @@ const rootRouteChildren: RootRouteChildren = {
   authSignInRoute: authSignInRoute,
   authSignUpRoute: authSignUpRoute,
   authVerifyEmailRoute: authVerifyEmailRoute,
+  CreationsPublicationIdRoute: CreationsPublicationIdRoute,
+  EditorProjectIdRoute: EditorProjectIdRoute,
+  EditorIndexRoute: EditorIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
