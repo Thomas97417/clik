@@ -206,6 +206,8 @@ function Stage({
     s = useEditor(),
     rotation = useRef<ComponentRef<typeof TransformControls>>(null);
   const [gridStep, setGridStep] = useState(1);
+  // Rotate the original light around Y, keeping its elevation and intensity.
+  const lightAngle = ((editable ? s.lightAngle : 0) * Math.PI) / 180;
   const [library, setLibrary] = useState<{
     preview: SelectionPreview | null;
     free: Part | null;
@@ -322,7 +324,11 @@ function Stage({
       <color attach="background" args={["#edf1f7"]} />
       <ambientLight intensity={1.6} />
       <directionalLight
-        position={[10, 16, 8]}
+        position={[
+          10 * Math.cos(lightAngle) - 8 * Math.sin(lightAngle),
+          16,
+          10 * Math.sin(lightAngle) + 8 * Math.cos(lightAngle),
+        ]}
         intensity={2.3}
         castShadow
         shadow-mapSize={[2048, 2048]}
@@ -332,7 +338,7 @@ function Stage({
         shadow-camera-bottom={-25}
         shadow-bias={-0.0005}
       />
-      <GroundGrid step={gridStep} />
+      {(!editable || s.showGrid) && <GroundGrid step={gridStep} />}
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -0.035, 0]}

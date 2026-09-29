@@ -32,6 +32,7 @@ import {
   Eye,
   EyeOff,
   FolderPlus,
+  Grid2X2,
   Grip,
   Layers,
   LockKeyhole,
@@ -40,6 +41,7 @@ import {
   Redo2,
   Rotate3D,
   Scan,
+  Sun,
   Trash2,
   Undo2,
   Ungroup,
@@ -682,6 +684,16 @@ export default function Editor({
                 <span>Aimantation</span>
               </button>
               <button
+                title={s.showGrid ? "Masquer la grille" : "Afficher la grille"}
+                aria-label="Grille"
+                aria-pressed={s.showGrid}
+                className={s.showGrid ? "active" : ""}
+                onClick={() => useEditor.setState({ showGrid: !s.showGrid })}
+              >
+                <Grid2X2 size={18} />
+                <span>Grille</span>
+              </button>
+              <button
                 title="Cadrer la sélection (F)"
                 onClick={() => useEditor.setState({ frame: s.frame + 1 })}
               >
@@ -701,6 +713,26 @@ export default function Editor({
                 <option value="front">Face</option>
                 <option value="right">Droite</option>
               </select>
+              <label className="scene-light-control">
+                <Sun size={16} aria-hidden="true" />
+                <span>Éclairage</span>
+                <input
+                  type="range"
+                  aria-label="Angle de l’éclairage"
+                  aria-valuetext={`${s.lightAngle} degrés`}
+                  title="Tourner la lumière autour de la construction"
+                  min={0}
+                  max={360}
+                  step={5}
+                  value={s.lightAngle}
+                  onChange={(e) =>
+                    useEditor.setState({ lightAngle: Number(e.target.value) })
+                  }
+                />
+                <span className="scene-light-angle" aria-hidden="true">
+                  {s.lightAngle}°
+                </span>
+              </label>
             </div>
             {project.ready ? (
               <ClientScene scene={s.scene} editable onCapture={onCapture} />

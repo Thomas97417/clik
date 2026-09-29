@@ -744,7 +744,42 @@ button:focus-visible {
   position: absolute;
   top: 79px;
   left: 18px;
+  right: 18px;
   z-index: 3;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  pointer-events: none;
+}
+.view-select > * {
+  pointer-events: auto;
+}
+.scene-light-control {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 9px;
+  border: 1px solid #dde5ef;
+  border-radius: 6px;
+  background: #fffffff0;
+  color: #64758d;
+  font-size: 12px;
+}
+.scene-light-control input {
+  width: 90px;
+  accent-color: #356ae6;
+  cursor: pointer;
+}
+.scene-light-control input:focus-visible {
+  outline: 2px solid #356ae6;
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+.scene-light-angle {
+  width: 32px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 .view-select select {
   font-size: 12px;

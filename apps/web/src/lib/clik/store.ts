@@ -32,6 +32,8 @@ type State = Snapshot & {
   past: Snapshot[];
   future: Snapshot[];
   snap: boolean;
+  showGrid: boolean;
+  lightAngle: number;
   tool: "translate" | "rotate";
   color: (typeof COLORS)[number];
   pending: PartType | null;
@@ -70,6 +72,8 @@ export const useEditor = create<State>((set, get) => ({
   past: [],
   future: [],
   snap: true,
+  showGrid: true,
+  lightAngle: 0,
   tool: "translate",
   color: COLORS[9],
   pending: null,
