@@ -24,7 +24,6 @@ import {
   type Vec3,
 } from "@clik/scene";
 import {
-  ArrowLeft,
   AlertCircle,
   Box,
   CloudCheck,
@@ -49,7 +48,6 @@ import {
   PanelLeftOpen,
   PanelRightClose,
   PanelRightOpen,
-  Pencil,
   Redo2,
   Rotate3D,
   Scan,
@@ -471,19 +469,15 @@ export default function Editor({
       </div>
       <main className="editor">
         <header className="editor-top" aria-label="Projet et sauvegarde">
-          <Link
-            to="/projects"
-            title="Mes créations"
-            aria-label="Mes créations"
-            className="editor-back"
-          >
-            <ArrowLeft size={18} aria-hidden="true" />
-          </Link>
           <div className="editor-project">
-            <label className="project-title-field" title="Renommer le projet">
+            <label className="project-title-field">
+              <span className="sr-only">Nom de la création</span>
               <Input
                 className="project-title"
                 aria-label="Nom du projet"
+                title={s.title}
+                placeholder="Nom de la création"
+                autoComplete="off"
                 key={`${projectId}-${project.ready}-${s.title}`}
                 defaultValue={s.title}
                 disabled={!project.ready}
@@ -503,7 +497,6 @@ export default function Editor({
                   }
                 }}
               />
-              <Pencil size={13} aria-hidden="true" />
             </label>
             <div className="project-metadata">
               <span

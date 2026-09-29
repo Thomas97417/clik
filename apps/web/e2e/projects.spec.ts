@@ -148,7 +148,7 @@ test("une nouvelle création préserve les précédentes et obtient son propre a
   await page.getByLabel("Nom du projet").press("Enter");
   await expect(page.getByRole("status")).toContainText("Enregistré");
   await page
-    .locator(".editor-top")
+    .getByRole("navigation", { name: "Navigation principale" })
     .getByRole("link", { name: "Mes créations", exact: true })
     .click();
   await expect(page.locator(".project-card")).toHaveCount(4);

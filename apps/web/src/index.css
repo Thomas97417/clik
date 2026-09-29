@@ -1088,29 +1088,11 @@ button:focus-visible {
   display: flex;
   align-items: center;
   gap: 18px;
-  padding: 12px 22px;
+  padding: 10px 22px;
   border-bottom: 1px solid #e5e9f0;
   flex-shrink: 0;
   background: #fff;
 }
-.editor-back {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-  border: 1px solid #e5e9f0;
-  border-radius: 10px;
-  color: #68788e;
-  transition:
-    background 150ms,
-    color 150ms;
-}
-.editor-back:hover {
-  background: #f0f4ff;
-  color: #356ae6;
-}
-.editor-back:focus-visible,
 .project-attribution:focus-visible,
 .editor-primary-action:focus-visible {
   outline: 2px solid #356ae6;
@@ -1119,50 +1101,43 @@ button:focus-visible {
 .editor-project {
   flex: 1;
   min-width: 0;
-  padding-left: 18px;
-  border-left: 1px solid #e5e9f0;
 }
 .project-title-field {
-  display: flex;
-  align-items: center;
-  position: relative;
-  max-width: 520px;
-  border-radius: 6px;
-}
-.project-title-field > svg {
-  position: absolute;
-  right: 8px;
-  color: #8b99ad;
-  pointer-events: none;
+  display: block;
+  width: min(100%, 440px);
 }
 .project-title {
-  font-size: 16px !important;
-  height: 30px;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  box-shadow: none !important;
   width: 100%;
   min-width: 0;
+  height: 38px;
+  padding: 7px 12px;
+  border: 1px solid #dfe5ef;
+  border-radius: 9px;
+  background: #f8fafc;
+  box-shadow: none !important;
+  font-size: 15px !important;
   font-weight: 650;
-  padding: 2px 30px 2px 6px;
+  color: #26344c;
   text-overflow: ellipsis;
-  background: transparent;
+  cursor: text;
 }
-.project-title:hover {
-  background: #f5f7fb;
+.project-title:hover:not(:disabled) {
+  border-color: #b8c8e0;
+  background: #fff;
 }
 .project-title:focus-visible {
   border-color: #356ae6;
   background: #fff;
-  outline: 2px solid #e1eaff;
+  outline: 2px solid #dce7ff;
+  outline-offset: 1px;
 }
 .project-metadata {
   display: flex;
   align-items: center;
   gap: 10px;
   min-width: 0;
-  margin-top: 3px;
-  padding-left: 7px;
+  margin-top: 5px;
+  padding-left: 12px;
   font-size: 11px;
   line-height: 18px;
 }
@@ -1192,6 +1167,8 @@ button:focus-visible {
   align-items: center;
   gap: 22px;
   flex-shrink: 0;
+  padding-left: 22px;
+  border-left: 1px solid #e5e9f0;
 }
 .save-status {
   display: flex;
@@ -2495,11 +2472,9 @@ button:focus-visible {
     gap: 12px;
     padding-inline: 16px;
   }
-  .editor-project {
-    padding-left: 12px;
-  }
   .editor-project-actions {
     gap: 14px;
+    padding-left: 16px;
   }
   .project-metadata {
     flex-wrap: wrap;
