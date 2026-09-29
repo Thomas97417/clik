@@ -560,16 +560,32 @@ export default function Editor({
                   <button
                     className={`piece-card ${s.pending === id ? "active" : ""}`}
                     key={id}
-                    draggable
+                    draggable={false}
                     disabled={!project.ready || count >= 500}
                     aria-label={p.name}
                     title={`${p.name} — glisser dans la scène ou cliquer pour ajouter`}
-                    onDragStart={(e) => {
-                      useEditor.setState({ pending: id });
-                      e.dataTransfer.setData("clik/part", id);
+                    onDragStart={(e) => e.preventDefault()}
+                    onPointerDown={(e) => {
+                      if (e.button !== 0 || !e.isPrimary) return;
+                      e.currentTarget.setPointerCapture(e.pointerId);
+                      useEditor.setState({
+                        pending: null,
+                        libraryPointer: {
+                          id: e.pointerId,
+                          type: id,
+                          x: e.clientX,
+                          y: e.clientY,
+                        },
+                        libraryClickSuppressed: false,
+                      });
                     }}
-                    onDragEnd={() => useEditor.setState({ pending: null })}
-                    onClick={() => safe(() => s.add(id))}
+                    onClick={(e) => {
+                      if (
+                        e.detail === 0 ||
+                        !useEditor.getState().libraryClickSuppressed
+                      )
+                        safe(() => s.add(id));
+                    }}
                   >
                     <span className="piece-preview">
                       <PartPreview type={id} color={s.color} />
@@ -705,7 +721,7 @@ export default function Editor({
             ) : (
               <div className="empty-state">Chargement du brouillon…</div>
             )}
-            {project.ready && !count && (
+            {project.ready && !count && !s.pending && (
               <div className="canvas-empty">
                 <span>
                   Une idée commence

@@ -97,6 +97,9 @@ export function Gestures({
       setRotation("enabled", true);
     };
     let library: { free: Part; preview: SelectionPreview | null } | null = null;
+    let libraryTurns = 0;
+    let libraryLocation: { clientX: number; clientY: number } | null = null;
+    let libraryInside = false;
     const ray = new Raycaster();
     const setRay = (e: { clientX: number; clientY: number }) => {
       const rect = canvas.getBoundingClientRect();
@@ -169,7 +172,11 @@ export function Gestures({
         controls.current?.update();
         finishCamera();
       }
-      if (useEditor.getState().gesture || useEditor.getState().pending)
+      if (
+        useEditor.getState().gesture ||
+        useEditor.getState().pending ||
+        useEditor.getState().libraryPointer
+      )
         useEditor.getState().cancel();
       setRotation("dragging", false);
       setRotation("axis", null);
@@ -341,6 +348,14 @@ export function Gestures({
       previewDrag();
     };
     const wheel = (e: WheelEvent) => {
+      if (useEditor.getState().pending && useEditor.getState().libraryPointer) {
+        stop(e);
+        if (e.deltaY && libraryLocation) {
+          libraryTurns = (libraryTurns - Math.sign(e.deltaY)) % 4;
+          if (libraryInside) locate(libraryLocation);
+        }
+        return;
+      }
       if (!drag || e.deltaY === 0) return;
       stop(e);
       startDrag();
@@ -400,7 +415,7 @@ export function Gestures({
     const leave = () => {
       inside = false;
     };
-    const locate = (e: DragEvent) => {
+    const locate = (e: { clientX: number; clientY: number }) => {
       const state = useEditor.getState();
       if (!state.pending) return;
       setRay(e);
@@ -410,7 +425,14 @@ export function Gestures({
         library?.free.type === state.pending
           ? { ...library.free, position: point.toArray() }
           : makePart(state.pending, state.color, point.toArray());
-      const free = snapCandidate(state.scene, proposed, false).part;
+      const free = snapCandidate(
+        state.scene,
+        {
+          ...proposed,
+          rotation: [0, (libraryTurns * Math.PI) / 2, 0],
+        },
+        false,
+      ).part;
       const { part, ...metadata } = snapCandidate(
         state.scene,
         free,
@@ -426,19 +448,9 @@ export function Gestures({
       library = { free, preview };
       onLibraryPreview(preview, free);
     };
-    const over = (e: DragEvent) => {
-      if (useEditor.getState().pending) {
-        e.preventDefault();
-        locate(e);
-      }
-    };
-    const drop = (e: DragEvent) => {
-      e.preventDefault();
+    const drop = () => {
       const state = useEditor.getState();
       if (!state.pending) return;
-      // Some integrations send a drop without dragover. Otherwise use the last
-      // displayed candidate, never recompute a different placement on release.
-      if (!library) locate(e);
       if (library) {
         try {
           const { free, preview } = library;
@@ -447,7 +459,7 @@ export function Gestures({
               ? preview.scene
               : { ...state.scene, nodes: [...state.scene.nodes, free] },
           );
-          useEditor.setState({ selection: [free.id], pending: null });
+          useEditor.setState({ selection: [free.id] });
         } catch (error) {
           toast.error(String(error));
         }
@@ -455,12 +467,54 @@ export function Gestures({
       library = null;
       onLibraryPreview(null, null);
     };
-    const dragleave = () => {
+    const clearLibrary = () => {
       library = null;
+      libraryTurns = 0;
+      libraryLocation = null;
+      libraryInside = false;
       onLibraryPreview(null, null);
     };
+    const overCanvas = (e: { clientX: number; clientY: number }) =>
+      document.elementFromPoint(e.clientX, e.clientY) === canvas;
+    const libraryMove = (e: PointerEvent) => {
+      const state = useEditor.getState();
+      const pointer = state.libraryPointer;
+      if (!pointer || e.pointerId !== pointer.id) return;
+      // A click can finish before the lazy-loaded canvas installs its listeners.
+      // Never revive that press on a later hover (Firefox reuses pointer ID 0).
+      if (!(e.buttons & 1)) {
+        useEditor.setState({ pending: null, libraryPointer: null });
+        return;
+      }
+      if (!state.pending) {
+        if (Math.hypot(e.clientX - pointer.x, e.clientY - pointer.y) <= 4)
+          return;
+        useEditor.setState({
+          pending: pointer.type,
+          libraryClickSuppressed: true,
+        });
+      }
+      e.preventDefault();
+      libraryLocation = { clientX: e.clientX, clientY: e.clientY };
+      libraryInside = overCanvas(e);
+      if (libraryInside) locate(e);
+      else onLibraryPreview(null, null);
+    };
+    const libraryUp = (e: PointerEvent) => {
+      const state = useEditor.getState();
+      if (e.pointerId !== state.libraryPointer?.id) return;
+      if (state.pending) {
+        e.preventDefault();
+        // Deposit exactly the last preview, and only on the unobscured canvas.
+        if (libraryInside && overCanvas(e)) drop();
+      }
+      useEditor.setState({ pending: null, libraryPointer: null });
+    };
+    const libraryCancel = (e: PointerEvent) => {
+      if (e.pointerId === useEditor.getState().libraryPointer?.id) cancel();
+    };
     const unsubscribe = useEditor.subscribe((s, before) => {
-      if (!s.pending && before.pending) dragleave();
+      if (s.libraryPointer !== before.libraryPointer) clearLibrary();
       if (!s.snap && before.snap) {
         library = library && { ...library, preview: null };
         onLibraryPreview(null, library?.free ?? null);
@@ -477,9 +531,13 @@ export function Gestures({
     }
     canvas.addEventListener("pointerenter", enter);
     canvas.addEventListener("pointerleave", leave);
-    canvas.addEventListener("dragover", over);
-    canvas.addEventListener("drop", drop);
-    canvas.addEventListener("dragleave", dragleave);
+    window.addEventListener("pointermove", libraryMove, {
+      capture: true,
+      passive: false,
+    });
+    window.addEventListener("pointerup", libraryUp, true);
+    window.addEventListener("pointercancel", libraryCancel, true);
+    window.addEventListener("lostpointercapture", libraryCancel, true);
     window.addEventListener("wheel", wheel, { capture: true, passive: false });
     window.addEventListener("pointerup", finishCamera, true);
     window.addEventListener("keydown", keydown, true);
@@ -495,9 +553,10 @@ export function Gestures({
       canvas.removeEventListener("lostpointercapture", cancelLost);
       canvas.removeEventListener("pointerenter", enter);
       canvas.removeEventListener("pointerleave", leave);
-      canvas.removeEventListener("dragover", over);
-      canvas.removeEventListener("drop", drop);
-      canvas.removeEventListener("dragleave", dragleave);
+      window.removeEventListener("pointermove", libraryMove, true);
+      window.removeEventListener("pointerup", libraryUp, true);
+      window.removeEventListener("pointercancel", libraryCancel, true);
+      window.removeEventListener("lostpointercapture", libraryCancel, true);
       window.removeEventListener("wheel", wheel, true);
       window.removeEventListener("pointerup", finishCamera, true);
       window.removeEventListener("keydown", keydown, true);

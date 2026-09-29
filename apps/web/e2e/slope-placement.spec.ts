@@ -1,3 +1,4 @@
+import { dragLibrary } from "./drag-library";
 import { test, expect } from "@playwright/test";
 
 for (const snap of [true, false]) {
@@ -19,25 +20,13 @@ for (const snap of [true, false]) {
     const box = (await canvas.boundingBox())!;
     const x = box.x + box.width / 2,
       y = box.y + box.height / 2;
-    const transfer = await page.evaluateHandle(() => new DataTransfer());
-    await page
-      .getByRole("button", { name: "Brique 1 × 1", exact: true })
-      .dispatchEvent("dragstart", { dataTransfer: transfer });
-    await canvas.dispatchEvent("dragover", {
-      dataTransfer: transfer,
-      clientX: x,
-      clientY: y,
-    });
+    await dragLibrary(page, "Brique 1 × 1", x, y);
     await expect(canvas).toHaveAttribute(
       "data-snap-kind",
       snap ? "grid" : "none",
     );
     await expect(canvas).toHaveAttribute("data-snap-points", "0");
-    await canvas.dispatchEvent("drop", {
-      dataTransfer: transfer,
-      clientX: x,
-      clientY: y,
-    });
+    await page.mouse.up();
     const height = page.getByLabel("position Y", { exact: true });
     expect(Number(await height.inputValue())).toBeGreaterThanOrEqual(1.19);
     await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();

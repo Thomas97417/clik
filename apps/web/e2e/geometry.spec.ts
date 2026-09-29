@@ -1,3 +1,4 @@
+import { dragLibrary } from "./drag-library";
 import { test, expect, type Page } from "@playwright/test";
 
 async function property(page: Page, name: string, value: string) {
@@ -62,21 +63,9 @@ test("emboîtement brique, plaque et brique aux hauteurs de contact", async ({
     ["Plaque 2 × 2", "Rouge", "1.2"],
     ["Brique 2 × 2", "Jaune", "1.6"],
   ]) {
-    const transfer = await page.evaluateHandle(() => new DataTransfer());
-    await page
-      .locator(`.piece-card[aria-label="${name}"]`)
-      .dispatchEvent("dragstart", { dataTransfer: transfer });
-    await canvas.dispatchEvent("dragover", {
-      dataTransfer: transfer,
-      clientX,
-      clientY,
-    });
+    await dragLibrary(page, name, clientX, clientY);
     await expect(canvas).toHaveAttribute("data-snap-kind", "attachment");
-    await canvas.dispatchEvent("drop", {
-      dataTransfer: transfer,
-      clientX,
-      clientY,
-    });
+    await page.mouse.up();
     await expect(page.getByLabel("position Y", { exact: true })).toHaveValue(y);
     await page.getByRole("button", { name: color, exact: true }).click();
     await expect(page.locator(".overlap")).toHaveCount(0);

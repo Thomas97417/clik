@@ -1,3 +1,4 @@
+import { dragLibrary } from "./drag-library";
 import { test, expect } from "@playwright/test";
 test("construction, couleurs, historique et récupération du brouillon", async ({
   page,
@@ -121,29 +122,16 @@ test("déposer une pièce et annuler un placement avec Échap", async ({
   await page.goto("/editor");
   const canvas = page.locator("canvas").first();
   await expect(canvas).toHaveAttribute("data-rendered", "0");
-  const bounds = (await canvas.boundingBox())!,
-    transfer = await page.evaluateHandle(() => new DataTransfer());
-  const card = page.getByRole("button", { name: "Brique 2 × 4", exact: true });
-  await card.dispatchEvent("dragstart", { dataTransfer: transfer });
-  await canvas.dispatchEvent("dragover", {
-    dataTransfer: transfer,
-    clientX: bounds.x + bounds.width / 2,
-    clientY: bounds.y + bounds.height / 2,
-  });
+  const bounds = (await canvas.boundingBox())!;
+  const x = bounds.x + bounds.width / 2,
+    y = bounds.y + bounds.height / 2;
+  await dragLibrary(page, "Brique 2 × 4", x, y);
   await page.keyboard.press("Escape");
   await expect(page.locator(".piece-card.active")).toHaveCount(0);
-  await canvas.dispatchEvent("drop", {
-    dataTransfer: transfer,
-    clientX: bounds.x + bounds.width / 2,
-    clientY: bounds.y + bounds.height / 2,
-  });
+  await page.mouse.up();
   await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
-  await card.dispatchEvent("dragstart", { dataTransfer: transfer });
-  await canvas.dispatchEvent("drop", {
-    dataTransfer: transfer,
-    clientX: bounds.x + bounds.width / 2,
-    clientY: bounds.y + bounds.height / 2,
-  });
+  await dragLibrary(page, "Brique 2 × 4", x, y);
+  await page.mouse.up();
   await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
 });
 test("groupement, propriétés numériques et dissociation", async ({ page }) => {

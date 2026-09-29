@@ -1,3 +1,4 @@
+import { dragLibrary } from "./drag-library";
 import { test, expect, type Page } from "@playwright/test";
 
 async function setup(page: Page) {
@@ -206,21 +207,9 @@ test("glisser un enfant conserve la sélection du groupe ; bibliothèque avec ap
   const moved = await position(page);
   expect(moved).not.toEqual(["0", "0", "0"]);
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
-  const transfer = await page.evaluateHandle(() => new DataTransfer());
-  await page
-    .locator('.piece-card[aria-label="Brique 2 × 2"]')
-    .dispatchEvent("dragstart", { dataTransfer: transfer });
-  await canvas.dispatchEvent("dragover", {
-    dataTransfer: transfer,
-    clientX: x,
-    clientY: y,
-  });
+  await dragLibrary(page, "Brique 2 × 2", x, y);
   await expect(canvas).toHaveAttribute("data-snap-kind", "attachment");
-  await canvas.dispatchEvent("drop", {
-    dataTransfer: transfer,
-    clientX: x + 100,
-    clientY: y + 100,
-  });
+  await page.mouse.up();
   await expect(page.locator(".viewport-bottom")).toContainText("3 / 500");
   await expect(page.getByLabel("position Y", { exact: true })).toHaveValue(
     "2.4",

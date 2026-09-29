@@ -601,6 +601,8 @@ button:focus-visible {
   padding: 12px;
 }
 .piece-card {
+  touch-action: none;
+  user-select: none;
   min-width: 0;
   min-height: 100px;
   padding: 8px 3px;

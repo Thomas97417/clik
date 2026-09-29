@@ -1,3 +1,4 @@
+import { dragLibrary } from "./drag-library";
 import { test, expect } from "@playwright/test";
 
 test("une pièce pont éclaire les huit plots de ses deux supports", async ({
@@ -23,25 +24,13 @@ test("une pièce pont éclaire les huit plots de ses deux supports", async ({
   const box = (await canvas.boundingBox())!;
   const x = box.x + box.width / 2,
     y = box.y + box.height / 2;
-  const transfer = await page.evaluateHandle(() => new DataTransfer());
-  await page
-    .getByRole("button", { name: "Plaque 2 × 4", exact: true })
-    .dispatchEvent("dragstart", { dataTransfer: transfer });
-  await canvas.dispatchEvent("dragover", {
-    dataTransfer: transfer,
-    clientX: x + 15,
-    clientY: y + 15,
-  });
+  await dragLibrary(page, "Plaque 2 × 4", x + 15, y + 15);
   await expect(canvas).toHaveAttribute("data-snap-kind", "attachment");
   await expect(canvas).toHaveAttribute("data-snap-points", "8");
   await page.screenshot({
     path: `/tmp/clik-multiple-supports-${info.project.name}.png`,
   });
-  await canvas.dispatchEvent("drop", {
-    dataTransfer: transfer,
-    clientX: x + 15,
-    clientY: y + 15,
-  });
+  await page.mouse.up();
   await expect(page.getByLabel("position Y", { exact: true })).toHaveValue(
     "1.2",
   );

@@ -37,6 +37,8 @@ type State = Snapshot & {
   tool: "translate" | "rotate";
   color: (typeof COLORS)[number];
   pending: PartType | null;
+  libraryPointer: { id: number; type: PartType; x: number; y: number } | null;
+  libraryClickSuppressed: boolean;
   frame: number;
   view: "perspective" | "top" | "front" | "right";
   serial: number;
@@ -77,6 +79,8 @@ export const useEditor = create<State>((set, get) => ({
   tool: "translate",
   color: COLORS[9],
   pending: null,
+  libraryPointer: null,
+  libraryClickSuppressed: false,
   frame: 0,
   view: "perspective",
   serial: 0,
@@ -92,6 +96,8 @@ export const useEditor = create<State>((set, get) => ({
       past: [],
       future: [],
       serial: 0,
+      pending: null,
+      libraryPointer: null,
       gesture: null,
       snapPreview: null,
       gestureIds: [],
@@ -124,7 +130,7 @@ export const useEditor = create<State>((set, get) => ({
       : snapToGrid(makePart(type, s.color));
     const next = { ...s.scene, nodes: [...s.scene.nodes, part] };
     s.commit(position ? next : placeInFreeSpace(next, [part.id], s.scene));
-    set({ selection: [part.id], pending: null });
+    set({ selection: [part.id], pending: null, libraryPointer: null });
   },
   patch: (id, patch) => {
     const s = get();
@@ -248,6 +254,7 @@ export const useEditor = create<State>((set, get) => ({
       snapPreview: null,
       gestureIds: [],
       pending: null,
+      libraryPointer: null,
     });
   },
   copy: () => {
