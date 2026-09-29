@@ -700,40 +700,6 @@ export default function Editor({
                 <Scan size={18} />
               </button>
             </div>
-            <div className="view-select">
-              <select
-                aria-label="Vue de la caméra"
-                value={s.view}
-                onChange={(e) =>
-                  useEditor.setState({ view: e.target.value as typeof s.view })
-                }
-              >
-                <option value="perspective">Perspective</option>
-                <option value="top">Dessus</option>
-                <option value="front">Face</option>
-                <option value="right">Droite</option>
-              </select>
-              <label className="scene-light-control">
-                <Sun size={16} aria-hidden="true" />
-                <span>Éclairage</span>
-                <input
-                  type="range"
-                  aria-label="Angle de l’éclairage"
-                  aria-valuetext={`${s.lightAngle} degrés`}
-                  title="Tourner la lumière autour de la construction"
-                  min={0}
-                  max={360}
-                  step={5}
-                  value={s.lightAngle}
-                  onChange={(e) =>
-                    useEditor.setState({ lightAngle: Number(e.target.value) })
-                  }
-                />
-                <span className="scene-light-angle" aria-hidden="true">
-                  {s.lightAngle}°
-                </span>
-              </label>
-            </div>
             {project.ready ? (
               <ClientScene scene={s.scene} editable onCapture={onCapture} />
             ) : (
@@ -756,10 +722,42 @@ export default function Editor({
                   Chevauchement possible · autorisé
                 </span>
               )}
-              <span>
-                Glisser une pièce : déplacer · Glisser dans le vide : orbiter ·
-                Molette : zoom · Pièce saisie : tourner ±90°
-              </span>
+              <div className="view-select">
+                <select
+                  aria-label="Vue de la caméra"
+                  value={s.view}
+                  onChange={(e) =>
+                    useEditor.setState({
+                      view: e.target.value as typeof s.view,
+                    })
+                  }
+                >
+                  <option value="perspective">Perspective</option>
+                  <option value="top">Dessus</option>
+                  <option value="front">Face</option>
+                  <option value="right">Droite</option>
+                </select>
+                <label className="scene-light-control">
+                  <Sun size={16} aria-hidden="true" />
+                  <span>Éclairage</span>
+                  <input
+                    type="range"
+                    aria-label="Angle de l’éclairage"
+                    aria-valuetext={`${s.lightAngle} degrés`}
+                    title="Tourner la lumière autour de la construction"
+                    min={0}
+                    max={360}
+                    step={5}
+                    value={s.lightAngle}
+                    onChange={(e) =>
+                      useEditor.setState({ lightAngle: Number(e.target.value) })
+                    }
+                  />
+                  <span className="scene-light-angle" aria-hidden="true">
+                    {s.lightAngle}°
+                  </span>
+                </label>
+              </div>
             </div>
           </section>
           <aside className="inspector">

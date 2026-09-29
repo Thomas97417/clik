@@ -25,7 +25,8 @@ import { useEditor } from "@/lib/clik/store";
 import { geometry } from "@/lib/clik/geometry";
 import { toast } from "sonner";
 
-export const CAMERA_GIZMO_MARGIN: [number, number] = [65, 65];
+// Keep the orientation widget above the bottom display controls.
+export const CAMERA_GIZMO_MARGIN: [number, number] = [65, 135];
 
 type Controls = RefObject<ComponentRef<typeof OrbitControls> | null>;
 type Rotation = RefObject<ComponentRef<typeof TransformControls> | null>;

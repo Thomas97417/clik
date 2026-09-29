@@ -741,11 +741,7 @@ button:focus-visible {
   margin-right: 2px;
 }
 .view-select {
-  position: absolute;
-  top: 79px;
-  left: 18px;
-  right: 18px;
-  z-index: 3;
+  margin-left: auto;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -794,9 +790,11 @@ button:focus-visible {
   left: 18px;
   bottom: 15px;
   right: 18px;
+  z-index: 3;
   display: flex;
   align-items: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
   pointer-events: none;
   font-size: 11px;
   color: #8591a3;
@@ -807,9 +805,6 @@ button:focus-visible {
   border-radius: 6px;
   background: #ffffff91;
   color: #6e7f96;
-}
-.viewport-bottom > span:last-child {
-  margin-left: auto;
 }
 .viewport-bottom .overlap {
   font-size: 10px;
@@ -1304,9 +1299,6 @@ button:focus-visible {
     display: none;
   }
   .draft-tag {
-    display: none;
-  }
-  .viewport-bottom > span:last-child {
     display: none;
   }
   .home-intro {

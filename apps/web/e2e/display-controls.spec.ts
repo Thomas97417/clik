@@ -102,6 +102,16 @@ test("le curseur éclaire l’autre côté sans déplacer la pièce, y compris a
     viewport.x + viewport.width,
   );
   expect(controls.y).toBeGreaterThan(toolbar.y + toolbar.height);
+  expect(controls.y).toBeGreaterThan(viewport.y + viewport.height - 100);
+  expect(controls.y + controls.height).toBeLessThanOrEqual(
+    viewport.y + viewport.height,
+  );
+  await expect(
+    page.locator(".viewport-bottom").getByLabel("Vue de la caméra"),
+  ).toBeVisible();
+  await expect(page.locator(".viewport-bottom")).not.toContainText(
+    "Glisser une pièce",
+  );
   await page.screenshot({
     path: `/tmp/clik-display-controls-${info.project.name}.png`,
   });
