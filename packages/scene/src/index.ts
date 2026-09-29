@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Box3, Matrix4, Quaternion, Vector3, Euler } from "three";
+import { placementBody, slopeClearance } from "./slope-clearance";
 export const CATALOG = {
   "brick-1x1": { name: "Brique 1 × 1", w: 1, d: 1, h: 1.2, shape: "block" },
   "brick-1x2": { name: "Brique 1 × 2", w: 2, d: 1, h: 1.2, shape: "block" },
@@ -404,6 +405,41 @@ function anchors(n: Part, top: boolean) {
     }
   return points;
 }
+function clearanceAboveSlopes(
+  scene: SceneDocument,
+  parts: Part[],
+  grid = false,
+) {
+  const ids = new Set(parts.map((p) => p.id));
+  const slopes = scene.nodes.filter(
+    (n): n is Part =>
+      n.kind === "part" &&
+      CATALOG[n.type].shape === "slope" &&
+      !ids.has(n.id) &&
+      !inherited(scene, n.id, "hidden"),
+  );
+  if (!slopes.length) return 0;
+  return slopeClearance(
+    parts.map((p) => placementBody(CATALOG[p.type], matrix(p))),
+    slopes.map((p) => placementBody(CATALOG[p.type], worldMatrix(scene, p.id))),
+    grid,
+  );
+}
+
+function clearPartFromSlopes(
+  scene: SceneDocument,
+  part: Part,
+  grid = false,
+): Part {
+  const lift = clearanceAboveSlopes(scene, [part], grid);
+  return lift
+    ? {
+        ...part,
+        position: [part.position[0], part.position[1] + lift, part.position[2]],
+      }
+    : part;
+}
+
 export type SnapPoint = {
   position: Vec3;
   rotation: Vec3;
@@ -466,7 +502,13 @@ export function snapCandidate(
   part: Part,
   enabled: boolean,
 ): SnapResult {
-  if (!enabled) return { part, kind: "none", points: [], rotation: [0, 0, 0] };
+  if (!enabled)
+    return {
+      part: clearPartFromSlopes(scene, part),
+      kind: "none",
+      points: [],
+      rotation: [0, 0, 0],
+    };
   const m = matrix(part),
     bottom = anchors(part, false).map((p) => p.applyMatrix4(m));
   let best = 0.7,
@@ -520,12 +562,15 @@ export function snapCandidate(
   }
   if (!targetId)
     return {
-      part: snapToGrid(part),
+      part: clearPartFromSlopes(scene, snapToGrid(part), true),
       kind: "grid",
       points: [],
       rotation: [0, 0, 0],
     };
   const tm = worldMatrix(scene, targetId);
+  const safe = clearPartFromSlopes(scene, result, true);
+  if (safe !== result)
+    return { part: safe, kind: "grid", points: [], rotation: [0, 0, 0] };
   return {
     part: result,
     kind: "attachment",
@@ -559,7 +604,7 @@ export function movableRoots(scene: SceneDocument, ids: string[]) {
 }
 
 /** Snap a selection as a rigid assembly, never against its own children. */
-export function previewSelection(
+function rawSelectionPreview(
   scene: SceneDocument,
   ids: string[],
   enabled: boolean,
@@ -609,6 +654,52 @@ export function previewSelection(
         : metadata.points,
     ids,
     scene: snapped,
+  };
+}
+
+export function previewSelection(
+  scene: SceneDocument,
+  ids: string[],
+  enabled: boolean,
+  referenceId?: string,
+): SelectionPreview {
+  const preview = rawSelectionPreview(scene, ids, enabled, referenceId);
+  const moving = new Set(descendants(scene, ids));
+  if (
+    !scene.nodes.some(
+      (n) =>
+        n.kind === "part" &&
+        CATALOG[n.type].shape === "slope" &&
+        !moving.has(n.id) &&
+        !inherited(scene, n.id, "hidden"),
+    )
+  )
+    return preview;
+  const parts = preview.scene.nodes
+    .filter(
+      (n): n is Part =>
+        n.kind === "part" &&
+        moving.has(n.id) &&
+        !inherited(scene, n.id, "hidden"),
+    )
+    .map((p) => ({
+      ...p,
+      ...transform(worldMatrix(preview.scene, p.id)),
+      parentId: null,
+    }));
+  const lift = clearanceAboveSlopes(preview.scene, parts, enabled);
+  if (!lift) return preview;
+  return {
+    ...preview,
+    scene: applyDelta(
+      preview.scene,
+      ids,
+      new Matrix4().makeTranslation(0, lift, 0),
+    ),
+    kind: enabled ? "grid" : "none",
+    targetId: undefined,
+    points: [],
+    rotation: [0, 0, 0],
   };
 }
 

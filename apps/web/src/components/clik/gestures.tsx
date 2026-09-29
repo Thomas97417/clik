@@ -406,10 +406,11 @@ export function Gestures({
       setRay(e);
       const point = hits()[0]?.point ?? ground();
       if (!point) return;
-      const free =
+      const proposed =
         library?.free.type === state.pending
           ? { ...library.free, position: point.toArray() }
           : makePart(state.pending, state.color, point.toArray());
+      const free = snapCandidate(state.scene, proposed, false).part;
       const { part, ...metadata } = snapCandidate(
         state.scene,
         free,

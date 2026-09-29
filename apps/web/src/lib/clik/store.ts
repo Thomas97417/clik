@@ -222,7 +222,8 @@ export const useEditor = create<State>((set, get) => ({
   preview: (delta) => {
     const s = get();
     if (!s.gesture) return;
-    const scene = applyDelta(s.gesture.scene, s.gestureIds, delta);
+    const free = applyDelta(s.gesture.scene, s.gestureIds, delta);
+    const scene = previewSelection(free, s.gestureIds, false).scene;
     set({
       scene,
       snapPreview: s.snap
