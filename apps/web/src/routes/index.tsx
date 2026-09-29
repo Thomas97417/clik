@@ -1,7 +1,32 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Box, Move3D, Sparkles } from "lucide-react";
-import { makePart, emptyScene } from "@clik/scene";
-import ClientScene from "@/components/clik/client-scene";
+import { useMemo, useRef, useState, type CSSProperties } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  ArrowDown,
+  ArrowRight,
+  ArrowUpRight,
+  Blocks,
+  Bot,
+  Check,
+  ChevronRight,
+  FolderOpen,
+  House,
+  Layers3,
+  Monitor,
+  MousePointer2,
+  Palette,
+  Plus,
+  Sparkles,
+} from "lucide-react";
+import { CATALOG, COLORS } from "@clik/scene";
+import CreationPreview from "@/components/clik/creation-preview";
+import { writeDraft } from "@/lib/clik/local";
+import {
+  STARTER_COLORS,
+  STARTER_MODELS,
+  starterScene,
+  type StarterColor,
+} from "@/lib/clik/starter-models";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -9,100 +34,336 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Un atelier de construction 3D. Assemblez des briques, partagez vos créations et réinventez celles de la communauté.",
+          "Votre atelier de construction 3D, directement dans le navigateur. Assemblez des briques, personnalisez un modèle et partagez vos créations.",
       },
     ],
   }),
   component: Home,
 });
-const demo = emptyScene();
-const add = (
-  type: Parameters<typeof makePart>[0],
-  color: Parameters<typeof makePart>[1],
-  p: Parameters<typeof makePart>[2],
-) => {
-  const part = makePart(type, color, p);
-  part.id = `demo-${demo.nodes.length}`;
-  demo.nodes.push(part);
-};
-for (let z = 0; z < 3; z++) add("plate-2x4", "#41a66b", [0, 0, z * 2 - 2]);
-for (let y = 0; y < 3; y++) {
-  add("brick-1x4", "#f8cc36", [0, 0.4 + y * 1.2, -2.5]);
-  add("brick-1x2", "#f8cc36", [-1, 0.4 + y * 1.2, 2.5]);
-  add("brick-1x2", "#f8cc36", [1, 0.4 + y * 1.2, 2.5]);
-  for (const x of [-1.5, 1.5]) {
-    add("brick-1x2", y === 1 ? "#29b8b2" : "#f8cc36", [
-      x,
-      0.4 + y * 1.2,
-      -0.75,
-    ]);
-    add("brick-1x2", "#f8cc36", [x, 0.4 + y * 1.2, 1]);
-  }
-}
-for (const z of [-2, 0, 2]) add("plate-2x4", "#ef4444", [0, 4, z]);
-add("brick-2x2", "#ef4444", [0, 4.4, 0]);
-add("brick-1x2", "#f5f5f3", [0.5, 5.6, 0]);
+const modelIcons = [House, Bot, Layers3];
+
 function Home() {
+  const navigate = useNavigate();
+  const [selected, setSelected] = useState(0);
+  const [color, setColor] = useState<StarterColor>(STARTER_MODELS[0].color);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(false);
+  const opening = useRef(false);
+  const steps = useRef<HTMLElement>(null);
+  const model = STARTER_MODELS[selected];
+  const scene = useMemo(() => starterScene(model.id, color), [model.id, color]);
+  const create = async (fromModel: boolean) => {
+    if (opening.current) return;
+    opening.current = true;
+    setBusy(true);
+    setError(false);
+    try {
+      const id = crypto.randomUUID();
+      if (fromModel) {
+        await writeDraft(`guest:${id}`, {
+          scene,
+          title: `${model.name} · ma version`,
+          stamp: crypto.randomUUID(),
+          revision: 0,
+          dirty: false,
+        });
+      }
+      await navigate({ to: "/editor", search: { draft: id } });
+    } catch {
+      setError(true);
+    } finally {
+      opening.current = false;
+      setBusy(false);
+    }
+  };
   return (
     <main className="home">
-      <section className="home-intro">
+      <section className="home-hero" aria-labelledby="home-title">
         <div className="home-copy">
           <span className="eyebrow">
-            <span /> Un espace pour votre imagination
+            <span /> L’atelier de vos idées
           </span>
-          <h1>
-            Petites briques.
+          <h1 id="home-title">
+            Un petit clik.
             <br />
-            Grandes <em>idées.</em>
+            Une <em>grande</em>
+            <br /> <em>idée.</em>
           </h1>
           <p>
-            Assemblez, essayez, recommencez.
-            <br />
-            Votre prochain monde commence par un clik.
+            Une maison, un drôle de robot, un monde à vous. Donnez forme à ce
+            que vous avez en tête, brique après brique.
           </p>
-          <div className="home-buttons">
-            <Link to="/editor" className="primary-link">
-              Ouvrir l’atelier <ArrowRight size={18} />
-            </Link>
-            <Link to="/gallery" className="secondary-link">
-              Explorer la galerie
+          <div className="home-buttons home-desktop-actions">
+            <button
+              className="primary-link"
+              disabled={busy}
+              onClick={() => void create(false)}
+            >
+              <Plus size={18} aria-hidden="true" /> Créer une construction
+            </button>
+            <Link to="/gallery" className="home-text-link">
+              Explorer la galerie <ArrowUpRight size={17} aria-hidden="true" />
             </Link>
           </div>
-          <span className="home-note">
-            Gratuit · Sans compte pour commencer · Sur ordinateur
-          </span>
+          <div className="home-mobile-actions">
+            <Link to="/gallery" className="primary-link">
+              Explorer la galerie <ArrowRight size={18} aria-hidden="true" />
+            </Link>
+          </div>
+          <p className="home-reassurance">
+            <Check size={15} aria-hidden="true" /> Gratuit. Sans installation.
+            Sans compte pour essayer.
+          </p>
+          <p className="home-device-note">
+            <Monitor size={15} aria-hidden="true" /> Pour construire, ouvrez
+            l’atelier sur ordinateur.
+          </p>
+          <Link to="/projects" className="home-resume">
+            <FolderOpen size={17} aria-hidden="true" /> Retrouver mes créations{" "}
+            <ChevronRight size={16} aria-hidden="true" />
+          </Link>
         </div>
-        <div className="home-scene">
-          <ClientScene scene={demo} />
-          <span className="demo-label">
-            <Box size={15} /> Une maison, mille possibilités
-          </span>
-          <span className="demo-help">Psst… vous pouvez la faire tourner.</span>
+        <div className="home-playground">
+          <div className="home-playground-heading">
+            <span>
+              <span className="home-live-dot" /> Le terrain de jeu
+            </span>
+            <span>À vous d’essayer</span>
+          </div>
+          <div className="home-model-stage">
+            <div className="home-model-halo" aria-hidden="true" />
+            <CreationPreview
+              scene={scene}
+              cacheKey={`starter-v1:${model.id}:${color}`}
+              title={model.name}
+            />
+            <span className="home-model-caption">
+              <Blocks size={14} aria-hidden="true" /> {scene.nodes.length}{" "}
+              pièces. Votre touche.
+            </span>
+            <div
+              className="home-palette"
+              role="group"
+              aria-label="Couleur du modèle"
+            >
+              {STARTER_COLORS.map((swatch) => (
+                <button
+                  key={swatch.value}
+                  style={{ "--swatch": swatch.value } as CSSProperties}
+                  aria-label={swatch.name}
+                  aria-pressed={color === swatch.value}
+                  title={swatch.name}
+                  onClick={() => setColor(swatch.value)}
+                >
+                  {color === swatch.value && (
+                    <Check size={17} aria-hidden="true" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div
+            className="home-model-options"
+            role="group"
+            aria-label="Choisir un modèle"
+          >
+            {STARTER_MODELS.map((item, index) => {
+              const Icon = modelIcons[index];
+              return (
+                <button
+                  key={item.id}
+                  aria-pressed={selected === index}
+                  onClick={() => {
+                    setSelected(index);
+                    setColor(item.color);
+                  }}
+                >
+                  <Icon size={17} aria-hidden="true" /> {item.label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="home-model-details">
+            <div aria-live="polite">
+              <h2>{model.name}</h2>
+              <p>{model.description}</p>
+            </div>
+            <button
+              className="home-model-start home-desktop-actions"
+              disabled={busy}
+              onClick={() => void create(true)}
+            >
+              {busy ? "Ouverture…" : "Créer ma version"}
+              <ArrowRight size={16} aria-hidden="true" />
+            </button>
+          </div>
+          {error && (
+            <p className="home-start-error" role="alert">
+              Impossible d’ouvrir la création. Vérifiez que le stockage de votre
+              navigateur est disponible, puis réessayez.
+            </p>
+          )}
         </div>
       </section>
-      <section className="home-strip">
-        <article>
-          <Box />
+
+      <div className="home-discover-bar">
+        <span>
+          <Blocks size={17} aria-hidden="true" /> {Object.keys(CATALOG).length}{" "}
+          formes à assembler
+        </span>
+        <span>
+          <Palette size={17} aria-hidden="true" /> {COLORS.length} couleurs à
+          mélanger
+        </span>
+        <button
+          onClick={() => {
+            steps.current?.scrollIntoView({
+              behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+                .matches
+                ? "instant"
+                : "smooth",
+              block: "start",
+            });
+            steps.current?.focus({ preventScroll: true });
+          }}
+        >
+          Comment ça marche <ArrowDown size={16} aria-hidden="true" />
+        </button>
+      </div>
+
+      <section
+        ref={steps}
+        tabIndex={-1}
+        className="home-how"
+        aria-labelledby="home-how-title"
+      >
+        <div className="home-section-heading">
           <div>
-            <h2>Juste une brique pour commencer.</h2>
-            <p>10 pièces, 12 couleurs, aucune règle imposée.</p>
+            <span className="eyebrow">De l’idée à la dernière brique</span>
+            <h2 id="home-how-title">
+              Prenez le temps
+              <br />
+              de <em>jouer.</em>
+            </h2>
           </div>
-        </article>
-        <article>
-          <Move3D />
-          <div>
-            <h2>Faites de la place à vos idées.</h2>
-            <p>Déplacez, tournez et assemblez librement.</p>
-          </div>
-        </article>
-        <article>
-          <Sparkles />
-          <div>
-            <h2>L’inspiration se construit ensemble.</h2>
-            <p>Partagez une création. Inventez sa prochaine version.</p>
-          </div>
-        </article>
+          <p>
+            Pas besoin de savoir dessiner ou modéliser.
+            <br />
+            Une pièce, une couleur, et c’est parti.
+          </p>
+        </div>
+        <div className="home-steps">
+          <article>
+            <div className="home-step-top">
+              <span>01</span>
+              <MousePointer2 size={25} aria-hidden="true" />
+            </div>
+            <h3>Posez la première pièce.</h3>
+            <p>
+              Glissez une forme dans l’atelier. Les pièces s’aimantent pour vous
+              aider à les assembler.
+            </p>
+            <span className="home-step-label">
+              <Blocks size={14} aria-hidden="true" /> Briques, plaques, pentes…
+            </span>
+          </article>
+          <article>
+            <div className="home-step-top">
+              <span>02</span>
+              <Palette size={25} aria-hidden="true" />
+            </div>
+            <h3>Faites-la à votre façon.</h3>
+            <p>
+              Changez les couleurs, tournez, dupliquez. Essayez une autre
+              direction : vous pouvez toujours annuler.
+            </p>
+            <div className="home-step-colors" aria-hidden="true">
+              {STARTER_COLORS.map((swatch) => (
+                <span key={swatch.value} style={{ background: swatch.value }} />
+              ))}
+            </div>
+          </article>
+          <article>
+            <div className="home-step-top">
+              <span>03</span>
+              <Sparkles size={25} aria-hidden="true" />
+            </div>
+            <h3>Gardez-la. Ou partagez-la.</h3>
+            <p>
+              Retrouvez votre création sur cet appareil. Avec un compte,
+              conservez-la en ligne et publiez-la quand vous le souhaitez.
+            </p>
+            <span className="home-step-label">
+              <Check size={14} aria-hidden="true" /> Vous choisissez ce qui est
+              public.
+            </span>
+          </article>
+        </div>
       </section>
+
+      <section className="home-next" aria-label="Poursuivre l’aventure">
+        <Link to="/gallery" className="home-gallery-link">
+          <div>
+            <span className="eyebrow">L’imagination se partage</span>
+            <h2>
+              Une idée en fait
+              <br />
+              naître une autre.
+            </h2>
+            <p>
+              Explorez la galerie, ouvrez une création
+              <br />
+              et inventez sa prochaine version.
+            </p>
+            <span className="home-next-action">
+              Découvrir la galerie <ArrowUpRight size={19} aria-hidden="true" />
+            </span>
+          </div>
+          <div className="home-gallery-art" aria-hidden="true">
+            <span className="home-art-brick brick-one">
+              <i />
+              <i />
+              <i />
+              <i />
+            </span>
+            <span className="home-art-brick brick-two">
+              <i />
+              <i />
+              <i />
+              <i />
+            </span>
+            <span className="home-art-brick brick-three">
+              <i />
+              <i />
+            </span>
+            <span className="home-art-spark">✳</span>
+          </div>
+        </Link>
+        <Link to="/projects" className="home-projects-link">
+          <span className="home-projects-icon">
+            <FolderOpen size={28} aria-hidden="true" />
+          </span>
+          <h2>
+            Vos idées ont
+            <br />
+            leur place ici.
+          </h2>
+          <p>
+            Petites expériences et grandes constructions : retrouvez tout dans
+            votre collection.
+          </p>
+          <span className="home-next-action">
+            Mes créations <ArrowUpRight size={19} aria-hidden="true" />
+          </span>
+        </Link>
+      </section>
+      <footer className="home-footer">
+        <Link to="/" aria-label="Clik, accueil">
+          clik<span>.</span>
+        </Link>
+        <p>Un espace pour construire. Juste pour le plaisir.</p>
+        <span>À vous de jouer.</span>
+      </footer>
     </main>
   );
 }
