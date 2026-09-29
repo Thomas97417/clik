@@ -147,7 +147,7 @@ export function useProject(projectId?: string, draftId?: string) {
       throw Error("Terminez la manipulation avant de publier.");
     if (!projectId) return revision.current;
     if (!navigator.onLine)
-      throw Error("Hors ligne : votre brouillon reste sur cet appareil.");
+      throw Error("Hors ligne : votre création reste sur cet appareil.");
     if (busy.current)
       throw Error("Enregistrement en cours, réessayez dans un instant.");
     busy.current = true;

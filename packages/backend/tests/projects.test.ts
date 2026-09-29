@@ -30,6 +30,35 @@ const scene = JSON.stringify(
   validateScene({ ...emptyScene(), nodes: [makePart("brick-2x2", "#4079e8")] }),
 );
 describe("Projets privés et versions publiques", () => {
+  it("renvoie la scène actuelle et sa révision pour les aperçus du propriétaire", async () => {
+    const { alice, bob, t } = setup();
+    const id = await alice.mutation(api.projects.create, {
+      title: "Ma création",
+      scene,
+    });
+    const paginationOpts = { numItems: 12, cursor: null };
+    const first = await alice.query(api.projects.list, { paginationOpts });
+    expect(first.page[0]).toMatchObject({ _id: id, scene, revision: 0 });
+    const changed = JSON.stringify(emptyScene());
+    await alice.mutation(api.projects.save, {
+      id,
+      title: "Ma création terminée",
+      scene: changed,
+      revision: 0,
+    });
+    const second = await alice.query(api.projects.list, { paginationOpts });
+    expect(second.page[0]).toMatchObject({
+      _id: id,
+      scene: changed,
+      revision: 1,
+    });
+    expect(
+      (await bob.query(api.projects.list, { paginationOpts })).page,
+    ).toEqual([]);
+    await expect(
+      t.query(api.projects.list, { paginationOpts }),
+    ).rejects.toThrow("Connexion");
+  });
   it("sauvegarde le catalogue étendu dans un projet existant", async () => {
     const { alice } = setup();
     const id = await alice.mutation(api.projects.create, {

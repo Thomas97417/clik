@@ -56,6 +56,8 @@ export const list = query({
           return {
             _id: p._id,
             title: p.title,
+            scene: p.scene,
+            revision: p.revision,
             updatedAt: p.updatedAt,
             origin: p.origin,
             publicationId: publication?.active ? publication._id : null,
@@ -154,7 +156,7 @@ export const publish = mutation({
       u = await user(ctx);
     if (p.revision !== a.revision)
       throw new ConvexError(
-        "Le brouillon a changé. Enregistrez puis réessayez.",
+        "La création a changé. Enregistrez puis réessayez.",
       );
     const thumb = await ctx.db
       .query("thumbnails")

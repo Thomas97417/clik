@@ -21,8 +21,8 @@ class SceneBoundary extends Component<
       <div className="empty-state">
         <h2>La scène 3D n’a pas pu démarrer</h2>
         <p>
-          Vérifiez WebGL et rechargez la page. Votre brouillon enregistré est
-          conservé.
+          Vérifiez WebGL et rechargez la page. Votre création enregistrée est
+          conservée.
         </p>
       </div>
     ) : (

@@ -508,7 +508,7 @@ export default function Editor({
                 title={
                   projectId
                     ? "Ce projet reste privé jusqu’à sa publication."
-                    : "Ce brouillon est conservé dans ce navigateur."
+                    : "Cette création est conservée dans ce navigateur."
                 }
               >
                 {projectId ? (
@@ -516,7 +516,7 @@ export default function Editor({
                 ) : (
                   <HardDrive size={11} aria-hidden="true" />
                 )}
-                {projectId ? "Projet privé" : "Brouillon local"}
+                {projectId ? "Projet privé" : "Création locale"}
               </span>
               {project.origin && (
                 <Link
@@ -596,7 +596,7 @@ export default function Editor({
         </header>
         {project.conflict && (
           <div className="conflict" role="alert">
-            Ce brouillon a changé dans un autre onglet.{" "}
+            Cette création a changé dans un autre onglet.{" "}
             <Button variant="outline" onClick={() => safe(project.reload)}>
               Recharger
             </Button>
@@ -859,7 +859,7 @@ export default function Editor({
             {project.ready ? (
               <ClientScene scene={s.scene} editable onCapture={onCapture} />
             ) : (
-              <div className="empty-state">Chargement du brouillon…</div>
+              <div className="empty-state">Chargement de la création…</div>
             )}
             {project.ready && !count && !s.pending && (
               <div className="canvas-empty">
