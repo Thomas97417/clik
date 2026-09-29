@@ -4,6 +4,54 @@ const row = (page: Page, name: string) =>
   page
     .locator(".tree-row")
     .filter({ has: page.getByRole("button", { name, exact: true }) });
+
+test("replier les propriétés libère la liste et conserve les modifications", async ({
+  page,
+}, info) => {
+  await page.goto("/editor");
+  await page.locator('.piece-card[aria-label="Brique 1 × 1"]').click();
+  await page.locator('.piece-card[aria-label="Brique 2 × 2"]').click();
+  await page.getByLabel("Nom", { exact: true }).fill("Pièce renommée");
+  const before = (await page.locator(".tree").boundingBox())!.height;
+  await page
+    .getByRole("button", { name: "Replier les propriétés", exact: true })
+    .click();
+  const toggle = page.getByRole("button", {
+    name: "Déplier les propriétés",
+    exact: true,
+  });
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(page.getByLabel("Nom", { exact: true })).not.toBeVisible();
+  await expect(row(page, "Pièce renommée")).toHaveCount(1);
+  await expect
+    .poll(async () => (await page.locator(".tree").boundingBox())!.height)
+    .toBeGreaterThan(before + 100);
+  await row(page, "Brique 1 × 1").locator(".tree-name").click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await toggle.press("Enter");
+  await expect(page.getByLabel("Nom", { exact: true })).toHaveValue(
+    "Brique 1 × 1",
+  );
+  await page
+    .getByRole("button", { name: "Replier les propriétés", exact: true })
+    .press("Space");
+  await page.setViewportSize({ width: 900, height: 760 });
+  await expect(toggle).toBeInViewport();
+  await page.screenshot({
+    path: `/tmp/clik-properties-folded-${info.project.name}.png`,
+  });
+  await toggle.click();
+  await row(page, "Pièce renommée").locator(".tree-name").click();
+  await expect(page.getByLabel("Nom", { exact: true })).toHaveValue(
+    "Pièce renommée",
+  );
+  // Folding has no undo entry: undo goes straight to the name edit.
+  await page
+    .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
+    .click();
+  await expect(row(page, "Brique 2 × 2")).toHaveCount(1);
+  await expect(row(page, "Pièce renommée")).toHaveCount(0);
+});
 async function rename(page: Page, name: string) {
   await page.getByLabel("Nom", { exact: true }).fill(name);
   await page.getByLabel("Nom", { exact: true }).press("Tab");

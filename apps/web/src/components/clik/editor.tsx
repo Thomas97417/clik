@@ -137,6 +137,8 @@ export default function Editor({
     () => new Set(),
   );
   const treeId = useId();
+  const propertiesId = useId();
+  const [propertiesCollapsed, setPropertiesCollapsed] = useState(false);
   const hierarchy = useMemo(() => {
     const children = new Map<string | null, SceneNode[]>();
     const groups = s.scene.nodes.filter((n) => n.kind === "group");
@@ -869,94 +871,122 @@ export default function Editor({
             </div>
             <div className="properties">
               <div className="panel-heading">
-                <h2>Propriétés</h2>
+                <h2>
+                  <button
+                    className="properties-toggle"
+                    aria-label={
+                      propertiesCollapsed
+                        ? "Déplier les propriétés"
+                        : "Replier les propriétés"
+                    }
+                    title={
+                      propertiesCollapsed
+                        ? "Déplier les propriétés"
+                        : "Replier les propriétés"
+                    }
+                    aria-expanded={!propertiesCollapsed}
+                    aria-controls={propertiesId}
+                    onClick={() =>
+                      setPropertiesCollapsed((collapsed) => !collapsed)
+                    }
+                  >
+                    <ChevronRight size={16} aria-hidden="true" />
+                    Propriétés
+                  </button>
+                </h2>
                 <span>
                   {s.selection.length > 1
                     ? `${s.selection.length} éléments`
                     : ""}
                 </span>
               </div>
-              {selected ? (
-                <>
-                  <label>
-                    Nom
-                    <Input
-                      key={selected.id + selected.name}
-                      defaultValue={selected.name}
-                      maxLength={100}
-                      onBlur={(e) =>
-                        safe(() =>
-                          s.patch(selected.id, {
-                            name: e.target.value || selected.name,
-                          }),
-                        )
-                      }
-                    />
-                  </label>
-                  <label>
-                    Groupe parent
-                    <select
-                      value={selected.parentId ?? ""}
-                      onChange={(e) =>
-                        safe(() =>
-                          s.reparent(selected.id, e.target.value || null),
-                        )
-                      }
-                    >
-                      <option value="">Racine</option>
-                      {s.scene.nodes
-                        .filter(
-                          (n) => n.kind === "group" && n.id !== selected.id,
-                        )
-                        .map((n) => (
-                          <option key={n.id} value={n.id}>
-                            {n.name}
-                          </option>
-                        ))}
-                    </select>
-                  </label>
-                  {(["position", "rotation"] as const).map((field) => (
-                    <div className="transform-fields" key={field}>
-                      <label>
-                        {field === "position"
-                          ? "Position"
-                          : "Rotation · degrés"}
-                      </label>
-                      <div>
-                        {["X", "Y", "Z"].map((axis, i) => (
-                          <label key={axis}>
-                            <span className={`axis-${axis}`}>{axis}</span>
-                            <Numeric
-                              label={`${field} ${axis}`}
-                              value={
-                                selected[field][i] *
-                                (field === "rotation" ? 180 / Math.PI : 1)
-                              }
-                              onChange={(value) => {
-                                const values = [...selected[field]] as Vec3;
-                                values[i] =
-                                  value /
-                                  (field === "rotation" ? 180 / Math.PI : 1);
-                                s.patch(selected.id, { [field]: values });
-                              }}
-                            />
-                          </label>
-                        ))}
+              <div
+                id={propertiesId}
+                className="properties-content"
+                hidden={propertiesCollapsed}
+              >
+                {selected ? (
+                  <>
+                    <label>
+                      Nom
+                      <Input
+                        key={selected.id + selected.name}
+                        defaultValue={selected.name}
+                        maxLength={100}
+                        onBlur={(e) =>
+                          safe(() =>
+                            s.patch(selected.id, {
+                              name: e.target.value || selected.name,
+                            }),
+                          )
+                        }
+                      />
+                    </label>
+                    <label>
+                      Groupe parent
+                      <select
+                        value={selected.parentId ?? ""}
+                        onChange={(e) =>
+                          safe(() =>
+                            s.reparent(selected.id, e.target.value || null),
+                          )
+                        }
+                      >
+                        <option value="">Racine</option>
+                        {s.scene.nodes
+                          .filter(
+                            (n) => n.kind === "group" && n.id !== selected.id,
+                          )
+                          .map((n) => (
+                            <option key={n.id} value={n.id}>
+                              {n.name}
+                            </option>
+                          ))}
+                      </select>
+                    </label>
+                    {(["position", "rotation"] as const).map((field) => (
+                      <div className="transform-fields" key={field}>
+                        <label>
+                          {field === "position"
+                            ? "Position"
+                            : "Rotation · degrés"}
+                        </label>
+                        <div>
+                          {["X", "Y", "Z"].map((axis, i) => (
+                            <label key={axis}>
+                              <span className={`axis-${axis}`}>{axis}</span>
+                              <Numeric
+                                label={`${field} ${axis}`}
+                                value={
+                                  selected[field][i] *
+                                  (field === "rotation" ? 180 / Math.PI : 1)
+                                }
+                                onChange={(value) => {
+                                  const values = [...selected[field]] as Vec3;
+                                  values[i] =
+                                    value /
+                                    (field === "rotation" ? 180 / Math.PI : 1);
+                                  s.patch(selected.id, { [field]: values });
+                                }}
+                              />
+                            </label>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                    <p className="property-hint">
+                      {s.selection.length > 1
+                        ? "Les poignées déplacent la sélection entière. Les valeurs ci-dessus concernent le premier élément."
+                        : "Dimensions fixes · positions relatives au groupe"}
+                    </p>
+                  </>
+                ) : (
                   <p className="property-hint">
-                    {s.selection.length > 1
-                      ? "Les poignées déplacent la sélection entière. Les valeurs ci-dessus concernent le premier élément."
-                      : "Dimensions fixes · positions relatives au groupe"}
+                    Sélectionnez une pièce pour la modifier. Maintenez Maj pour
+                    en sélectionner plusieurs.
                   </p>
-                </>
-              ) : (
-                <p className="property-hint">
-                  Sélectionnez une pièce pour la modifier. Maintenez Maj pour en
-                  sélectionner plusieurs.
-                </p>
-              )}
+                )}
+              </div>
             </div>
             {project.origin && (
               <p className="attribution">

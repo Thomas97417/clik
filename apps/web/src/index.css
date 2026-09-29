@@ -920,12 +920,32 @@ button:focus-visible {
 }
 .properties {
   border-top: 1px solid #e9edf3;
-  padding: 0 17px 20px;
+  padding: 0 17px;
+  flex-shrink: 0;
+}
+.properties-content {
+  padding-bottom: 20px;
+}
+.properties-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 4px;
+}
+.properties-toggle:hover {
+  color: #356ae6;
+}
+.properties-toggle:focus-visible {
+  outline: 2px solid #356ae6;
+  outline-offset: 4px;
+}
+.properties-toggle[aria-expanded="true"] svg {
+  transform: rotate(90deg);
 }
 .properties .panel-heading {
   padding: 19px 0;
 }
-.properties > label {
+.properties-content > label {
   font-size: 11px;
   color: #7c899d;
   display: block;
@@ -1456,7 +1476,7 @@ button:focus-visible {
 /* Keep the working controls readable at normal and enlarged text sizes. */
 .piece-card > span:last-child,
 .tree-name,
-.properties > label,
+.properties-content > label,
 .transform-fields,
 .properties select,
 .properties input,
