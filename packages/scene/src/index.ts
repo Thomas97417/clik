@@ -1,18 +1,38 @@
 import { z } from "zod";
 import { Box3, Matrix4, Quaternion, Vector3, Euler } from "three";
 export const CATALOG = {
-  "brick-1x1": { name: "Brique 1 × 1", w: 1, d: 1, h: 1.2 },
-  "brick-1x2": { name: "Brique 1 × 2", w: 2, d: 1, h: 1.2 },
-  "brick-1x4": { name: "Brique 1 × 4", w: 4, d: 1, h: 1.2 },
-  "brick-2x2": { name: "Brique 2 × 2", w: 2, d: 2, h: 1.2 },
-  "brick-2x3": { name: "Brique 2 × 3", w: 3, d: 2, h: 1.2 },
-  "brick-2x4": { name: "Brique 2 × 4", w: 4, d: 2, h: 1.2 },
-  "plate-1x2": { name: "Plaque 1 × 2", w: 2, d: 1, h: 0.4 },
-  "plate-2x2": { name: "Plaque 2 × 2", w: 2, d: 2, h: 0.4 },
-  "plate-2x4": { name: "Plaque 2 × 4", w: 4, d: 2, h: 0.4 },
-  "slope-2x2": { name: "Pente 2 × 2", w: 2, d: 2, h: 1.2 },
+  "brick-1x1": { name: "Brique 1 × 1", w: 1, d: 1, h: 1.2, shape: "block" },
+  "brick-1x2": { name: "Brique 1 × 2", w: 2, d: 1, h: 1.2, shape: "block" },
+  "brick-1x3": { name: "Brique 1 × 3", w: 3, d: 1, h: 1.2, shape: "block" },
+  "brick-1x4": { name: "Brique 1 × 4", w: 4, d: 1, h: 1.2, shape: "block" },
+  "brick-1x6": { name: "Brique 1 × 6", w: 6, d: 1, h: 1.2, shape: "block" },
+  "brick-2x2": { name: "Brique 2 × 2", w: 2, d: 2, h: 1.2, shape: "block" },
+  "brick-2x3": { name: "Brique 2 × 3", w: 3, d: 2, h: 1.2, shape: "block" },
+  "brick-2x4": { name: "Brique 2 × 4", w: 4, d: 2, h: 1.2, shape: "block" },
+  "plate-1x1": { name: "Plaque 1 × 1", w: 1, d: 1, h: 0.4, shape: "block" },
+  "plate-1x2": { name: "Plaque 1 × 2", w: 2, d: 1, h: 0.4, shape: "block" },
+  "plate-1x3": { name: "Plaque 1 × 3", w: 3, d: 1, h: 0.4, shape: "block" },
+  "plate-1x4": { name: "Plaque 1 × 4", w: 4, d: 1, h: 0.4, shape: "block" },
+  "plate-2x2": { name: "Plaque 2 × 2", w: 2, d: 2, h: 0.4, shape: "block" },
+  "plate-2x3": { name: "Plaque 2 × 3", w: 3, d: 2, h: 0.4, shape: "block" },
+  "plate-2x4": { name: "Plaque 2 × 4", w: 4, d: 2, h: 0.4, shape: "block" },
+  "plate-4x4": { name: "Plaque 4 × 4", w: 4, d: 4, h: 0.4, shape: "block" },
+  "slope-2x1": { name: "Pente 2 × 1", w: 1, d: 2, h: 1.2, shape: "slope" },
+  "slope-2x2": { name: "Pente 2 × 2", w: 2, d: 2, h: 1.2, shape: "slope" },
+  "slope-2x3": { name: "Pente 2 × 3", w: 3, d: 2, h: 1.2, shape: "slope" },
+  "slope-3x2": { name: "Pente 3 × 2", w: 2, d: 3, h: 1.2, shape: "slope" },
+  "tile-1x1": { name: "Tuile lisse 1 × 1", w: 1, d: 1, h: 0.4, shape: "tile" },
+  "tile-1x2": { name: "Tuile lisse 1 × 2", w: 2, d: 1, h: 0.4, shape: "tile" },
+  "tile-2x2": { name: "Tuile lisse 2 × 2", w: 2, d: 2, h: 0.4, shape: "tile" },
 } as const;
 export type PartType = keyof typeof CATALOG;
+// Rendering and attachment must agree on the flat, studded part of each roof.
+export function hasTopStud(type: PartType, row: number) {
+  const part = CATALOG[type];
+  return (
+    part.shape !== "tile" && (part.shape !== "slope" || row === part.d - 1)
+  );
+}
 export const COLORS = [
   "#f5f5f3",
   "#b9c2ca",
@@ -350,13 +370,34 @@ export function makePart(
     locked: false,
   };
 }
+/** Align a bottom corner with cell boundaries, rather than rounding the center.
+ * At quarter turns, all footprint edges then lie on integer grid lines, even
+ * when an odd number of studs requires a half-cell center coordinate.
+ */
+export function snapToGrid(part: Part): Part {
+  const { w, d } = CATALOG[part.type];
+  const corner = new Vector3(-w / 2, 0, -d / 2).applyEuler(
+    new Euler(...part.rotation),
+  );
+  // Remove trigonometric noise at quarter turns without changing free rotations.
+  const clean = (value: number) => Math.round(value * 1e10) / 1e10;
+  return {
+    ...part,
+    position: [
+      clean(Math.round(part.position[0] + corner.x) - corner.x),
+      clean(Math.round(part.position[1] / 0.4) * 0.4),
+      clean(Math.round(part.position[2] + corner.z) - corner.z),
+    ],
+  };
+}
+
 // Attachment frames are transformed with their bricks, including arbitrary rotations.
 function anchors(n: Part, top: boolean) {
   const d = CATALOG[n.type],
     points: Vector3[] = [];
   for (let x = 0; x < d.w; x++)
     for (let z = 0; z < d.d; z++) {
-      if (top && n.type === "slope-2x2" && z === 0) continue;
+      if (top && !hasTopStud(n.type, z)) continue;
       points.push(
         new Vector3(x - (d.w - 1) / 2, top ? d.h : 0, z - (d.d - 1) / 2),
       );
@@ -429,14 +470,7 @@ export function snapCandidate(
   }
   if (!targetId)
     return {
-      part: {
-        ...part,
-        position: [
-          Math.round(part.position[0]),
-          Math.round(part.position[1] / 0.4) * 0.4,
-          Math.round(part.position[2]),
-        ],
-      },
+      part: snapToGrid(part),
       kind: "grid",
       points: [],
       rotation: [0, 0, 0],

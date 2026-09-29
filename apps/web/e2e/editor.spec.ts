@@ -14,7 +14,9 @@ test("construction, couleurs, historique et récupération du brouillon", async 
   await page.getByRole("button", { name: "Rouge", exact: true }).click();
   await page.getByRole("button", { name: "Dupliquer", exact: true }).click();
   await expect(page.locator(".viewport-bottom")).toContainText("2 / 500");
-  await expect(page.getByLabel("position X", { exact: true })).toHaveValue("2");
+  await expect(page.getByLabel("position X", { exact: true })).toHaveValue(
+    "2.5",
+  );
   await expect(page.locator(".overlap")).toHaveCount(0);
   await page
     .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
@@ -160,7 +162,9 @@ test("groupement, propriétés numériques et dissociation", async ({ page }) =>
   await page.getByRole("button", { name: "Dissocier", exact: true }).click();
   await expect(page.locator(".tree-name")).toHaveCount(2);
   await page.locator(".tree-name").first().click();
-  await expect(page.getByLabel("position X", { exact: true })).toHaveValue("5");
+  await expect(page.getByLabel("position X", { exact: true })).toHaveValue(
+    "5.5",
+  );
 });
 
 test("WebGL indisponible : message explicite", async ({ page }) => {

@@ -7,7 +7,7 @@ import {
   useState,
   type ComponentRef,
 } from "react";
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   OrbitControls,
   TransformControls,
@@ -18,6 +18,11 @@ import {
 import {
   Box3,
   Color,
+  CustomBlending,
+  SrcAlphaFactor,
+  OneMinusSrcAlphaFactor,
+  OneFactor,
+  DoubleSide,
   type Group,
   InstancedMesh,
   Matrix4,
@@ -205,6 +210,7 @@ function Stage({
     controls = useRef<ComponentRef<typeof OrbitControls>>(null),
     s = useEditor(),
     rotation = useRef<ComponentRef<typeof TransformControls>>(null);
+  const [gridStep, setGridStep] = useState(1);
   const [library, setLibrary] = useState<{
     preview: SelectionPreview | null;
     free: Part | null;
@@ -232,6 +238,25 @@ function Stage({
       threeScene.onAfterRender = previous;
     };
   }, [threeScene, gl, scene.nodes.length]);
+  useFrame(() => {
+    if (!controls.current) return;
+    // OrbitControls permits zooming well beyond the initial far plane. Keep
+    // both clipping planes proportional to the viewing distance, also on zoom-in.
+    const distance = camera.position.distanceTo(controls.current.target);
+    // Keep resolvable lines at very wide zooms. Hysteresis prevents rapid
+    // switching at a scale boundary; every coarser grid remains world-aligned.
+    let step = gridStep;
+    while (distance > step * 200) step *= 5;
+    while (step > 1 && distance < step * 30) step /= 5;
+    if (step !== gridStep) setGridStep(step);
+    const near = Math.max(0.01, distance / 1000);
+    const far = Math.max(1000, distance * 4);
+    if (camera.near !== near || camera.far !== far) {
+      camera.near = near;
+      camera.far = far;
+      camera.updateProjectionMatrix();
+    }
+  });
   const frame = s.frame,
     view = s.view;
   useEffect(() => {
@@ -272,7 +297,7 @@ function Stage({
     camera.position.copy(
       center.clone().add(direction.normalize().multiplyScalar(size)),
     );
-    camera.near = Math.max(0.1, size / 1000);
+    camera.near = 0.1;
     camera.far = Math.max(1000, size * 4);
     camera.updateProjectionMatrix();
     camera.lookAt(center);
@@ -312,25 +337,52 @@ function Stage({
         shadow-camera-bottom={-25}
         shadow-bias={-0.0005}
       />
+      {/* Transparent floor layers must never occlude each other through depth:
+          their nearly coplanar surfaces otherwise flicker as the camera moves. */}
       <Grid
+        renderOrder={-2}
         position={[0, -0.025, 0]}
-        args={[100, 100]}
-        cellSize={1}
-        cellThickness={0.65}
-        cellColor="#cbd4e1"
-        sectionSize={5}
-        sectionThickness={1}
+        args={[2, 2]}
+        onUpdate={(grid) => {
+          // Drei attaches its shader material after the mesh is created.
+          // Apply this to the attached material, not the temporary mesh default.
+          const materials = Array.isArray(grid.material)
+            ? grid.material
+            : [grid.material];
+          materials.forEach((material) => {
+            // Render in the opaque queue BEFORE pieces, but retain alpha
+            // blending for antialiased lines. A giant ground plane must not
+            // compete with tiny piece surfaces through interpolated depth.
+            material.transparent = false;
+            material.blending = CustomBlending;
+            material.blendSrc = SrcAlphaFactor;
+            material.blendDst = OneMinusSrcAlphaFactor;
+            material.blendSrcAlpha = OneFactor;
+            material.blendDstAlpha = OneMinusSrcAlphaFactor;
+            material.depthTest = false;
+            material.depthWrite = false;
+          });
+        }}
+        cellSize={gridStep}
+        cellThickness={1}
+        cellColor="#bcc8d8"
+        sectionSize={gridStep * 5}
+        sectionThickness={1.4}
         sectionColor="#b4c1d4"
-        fadeDistance={65}
+        fadeDistance={100000}
+        fadeStrength={0}
+        followCamera
+        side={DoubleSide}
         infiniteGrid
       />
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -0.035, 0]}
+        renderOrder={-1}
         receiveShadow
       >
         <planeGeometry args={[200, 200]} />
-        <shadowMaterial opacity={0.13} />
+        <shadowMaterial opacity={0.13} depthWrite={false} />
       </mesh>
       {(Object.keys(CATALOG) as PartType[]).map((type) => (
         <Batch key={type} type={type} scene={scene} editable={editable} />

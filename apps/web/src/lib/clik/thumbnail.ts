@@ -1,5 +1,6 @@
 import {
   AmbientLight,
+  Vector3,
   DirectionalLight,
   Mesh,
   MeshStandardMaterial,
@@ -24,6 +25,22 @@ export function partThumbnail(type: PartType, color: string) {
     geometry(type),
     new MeshStandardMaterial({ color, roughness: 0.3 }),
   );
+  // Fit the projected bounding box, with a consistent margin for larger models.
+  camera.updateMatrixWorld();
+  const bounds = mesh.geometry.boundingBox!;
+  let extentX = 0,
+    extentY = 0;
+  for (const x of [bounds.min.x, bounds.max.x])
+    for (const y of [bounds.min.y, bounds.max.y])
+      for (const z of [bounds.min.z, bounds.max.z]) {
+        const point = new Vector3(x, y, z).applyMatrix4(
+          camera.matrixWorldInverse,
+        );
+        extentX = Math.max(extentX, Math.abs(point.x));
+        extentY = Math.max(extentY, Math.abs(point.y));
+      }
+  camera.zoom = Math.min(1, 3 / (extentX * 1.12), 1.875 / (extentY * 1.12));
+  camera.updateProjectionMatrix();
   scene.add(mesh, new AmbientLight("#ffffff", 2));
   const light = new DirectionalLight("#ffffff", 3);
   light.position.set(-3, 7, 5);

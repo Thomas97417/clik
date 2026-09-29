@@ -9,7 +9,7 @@ import {
   Vector2,
 } from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { CATALOG, type PartType } from "@clik/scene";
+import { CATALOG, hasTopStud, type PartType } from "@clik/scene";
 
 const geometries = new Map<PartType, BufferGeometry>();
 const STUD_RADIUS = 0.3;
@@ -35,15 +35,17 @@ function outline(w: number, d: number, inset = 0) {
 }
 
 // Split the roof at the slope's crease, so no triangle cuts across both planes.
-function halfRoof(points: Vector2[], front: boolean) {
+function halfRoof(points: Vector2[], front: boolean, crease: number) {
   const result: Vector2[] = [];
   for (let i = 0; i < points.length; i++) {
     const a = points[i],
       b = points[(i + 1) % points.length];
-    const inside = front ? a.y <= 0 : a.y >= 0;
+    const inside = front ? a.y <= crease : a.y >= crease;
     if (inside) result.push(a);
-    if (inside !== (front ? b.y <= 0 : b.y >= 0))
-      result.push(new Vector2(a.x + ((b.x - a.x) * -a.y) / (b.y - a.y), 0));
+    if (inside !== (front ? b.y <= crease : b.y >= crease))
+      result.push(
+        new Vector2(a.x + ((b.x - a.x) * (crease - a.y)) / (b.y - a.y), crease),
+      );
   }
   return result;
 }
@@ -51,10 +53,10 @@ function halfRoof(points: Vector2[], front: boolean) {
 export function geometry(type: PartType) {
   if (geometries.has(type)) return geometries.get(type)!;
   const { w, d, h } = CATALOG[type];
-  const slope = type === "slope-2x2";
+  const slope = CATALOG[type].shape === "slope";
+  const crease = d / 2 - 1;
   const roofHeight = (z: number) =>
-    slope && z < 0 ? 0.25 + ((h - 0.25) * (z + d / 2)) / (d / 2) : h;
-  const socketDepth = slope ? 0.3 : h - 0.12;
+    slope && z < crease ? 0.25 + ((h - 0.25) * (z + d / 2)) / (d - 1) : h;
   const parts: BufferGeometry[] = [];
   const base = outline(w, d);
   const contour = (shape: Shape) => {
@@ -62,8 +64,14 @@ export function geometry(type: PartType) {
     if (!slope) return points;
     return points.flatMap((a, i) => {
       const b = points[(i + 1) % points.length];
-      return a.y * b.y < 0
-        ? [a, new Vector2(a.x + ((b.x - a.x) * -a.y) / (b.y - a.y), 0)]
+      return (a.y - crease) * (b.y - crease) < 0
+        ? [
+            a,
+            new Vector2(
+              a.x + ((b.x - a.x) * (crease - a.y)) / (b.y - a.y),
+              crease,
+            ),
+          ]
         : [a];
     });
   };
@@ -74,6 +82,10 @@ export function geometry(type: PartType) {
     for (let z = 0; z < d; z++) {
       const cx = x - (w - 1) / 2,
         cz = z - (d - 1) / 2;
+      // Keep the ceiling below even the lowest edge of a socket under a ramp.
+      const socketDepth = slope
+        ? Math.min(0.3, roofHeight(cz - SOCKET_RADIUS) - 0.08)
+        : h - 0.12;
       const hole = new Path();
       hole.absarc(cx, cz, SOCKET_RADIUS, 0, Math.PI * 2, true);
       base.holes.push(hole);
@@ -101,7 +113,7 @@ export function geometry(type: PartType) {
       ceiling.rotateX(Math.PI / 2);
       ceiling.translate(cx, socketDepth, cz);
       parts.push(ceiling.toNonIndexed());
-      if (slope && z === 0) continue;
+      if (!hasTopStud(type, z)) continue;
       const stud = new CylinderGeometry(
         0.29,
         STUD_RADIUS,
@@ -150,12 +162,14 @@ export function geometry(type: PartType) {
   sides.computeVertexNormals();
   parts.push(sides);
   for (const points of slope
-    ? [halfRoof(top, true), halfRoof(top, false)]
+    ? [halfRoof(top, true, crease), halfRoof(top, false, crease)]
     : [top]) {
-    const roof = new ShapeGeometry(new Shape(points));
+    const roof = new ShapeGeometry(
+      new Shape(points.map((p) => new Vector2(p.x, -p.y))),
+    );
     roof.rotateX(-Math.PI / 2);
     const position = roof.getAttribute("position");
-    // The outline is symmetric about Z; both roof halves meet at z=0.
+    // Preserve Z when mapping the 2D roof into the scene, including off-center creases.
     for (let i = 0; i < position.count; i++)
       position.setY(i, roofHeight(position.getZ(i)));
     roof.computeVertexNormals();

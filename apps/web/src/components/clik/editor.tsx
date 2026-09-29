@@ -64,6 +64,7 @@ const pieceCategories = [
   { name: "Briques", prefix: "brick" },
   { name: "Plaques", prefix: "plate" },
   { name: "Pentes", prefix: "slope" },
+  { name: "Tuiles", prefix: "tile" },
 ];
 const safe = (fn: () => unknown) => {
   try {

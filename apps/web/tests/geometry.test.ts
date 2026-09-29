@@ -8,6 +8,7 @@ import {
 } from "three";
 import {
   CATALOG,
+  hasTopStud,
   emptyScene,
   makePart,
   matrix,
@@ -72,7 +73,10 @@ describe("Géométrie des emboîtements", () => {
       const { h, w, d } = CATALOG[type];
       const g = geometry(type);
       expect(g.boundingBox!.min.y).toBeCloseTo(0, 6);
-      expect(g.boundingBox!.max.y).toBeCloseTo(h + 0.18, 6);
+      expect(g.boundingBox!.max.y).toBeCloseTo(
+        h + (hasTopStud(type, d - 1) ? 0.18 : 0),
+        6,
+      );
       // Between studs, over the flat rear half even for the slope.
       const top = hit(
         type,
@@ -80,10 +84,12 @@ describe("Géométrie des emboîtements", () => {
         new Vector3(0, -1, 0),
       );
       expect(top.point.y).toBeCloseTo(h, 6);
-      expect(g.getAttribute("position").count).toBeLessThan(12000);
+      expect(g.getAttribute("position").count).toBeLessThan(
+        1000 * w * d + 1000,
+      );
     },
   );
-  it.each(["brick-1x1", "plate-1x2", "slope-2x2"] as PartType[])(
+  it.each(types.filter((type) => CATALOG[type].shape !== "tile"))(
     "%s : contact sans vide après aimantation, même après rotation",
     (type) => {
       const { h, w, d } = CATALOG[type];
@@ -125,6 +131,68 @@ describe("Géométrie des emboîtements", () => {
       expect(studTop.x).toBeCloseTo(0, 6);
       expect(studTop.z).toBeCloseTo(0, 6);
       expect(studTop.y).toBeCloseTo(0.18, 6);
+    },
+  );
+});
+
+describe("Nouveaux modèles du catalogue", () => {
+  it.each(types)("%s : se fixe par ses logements inférieurs", (type) => {
+    const { w, d } = CATALOG[type];
+    const target = makePart("brick-1x1", "#4079e8");
+    const upper = makePart(type, "#ef4444", [(w - 1) / 2, 1.3, (d - 1) / 2]);
+    const result = snapCandidate(
+      { ...emptyScene(), nodes: [target] },
+      upper,
+      true,
+    );
+    expect(result.kind).toBe("attachment");
+    expect(result.part.position[1]).toBeCloseTo(1.2);
+    expect(result.points).toEqual([[0, 1.2, 0]]);
+  });
+  it.each(types.filter((type) => CATALOG[type].shape === "slope"))(
+    "%s : rampe continue et accroches uniquement sur la rangée haute",
+    (type) => {
+      const { w, d, h } = CATALOG[type];
+      for (const z of [-d / 2 + 0.2, -0.25, d / 2 - 1, d / 2 - 0.15]) {
+        const roof = hit(
+          type,
+          new Vector3(w / 2 - 0.1, h + 1, z),
+          new Vector3(0, -1, 0),
+        );
+        const expected =
+          z < d / 2 - 1 ? 0.25 + ((h - 0.25) * (z + d / 2)) / (d - 1) : h;
+        expect(roof.point.y).toBeCloseTo(expected, 5);
+      }
+      const target = makePart(type, "#4079e8");
+      const upper = makePart("brick-1x1", "#ef4444", [
+        -(w - 1) / 2,
+        h,
+        -(d - 1) / 2,
+      ]);
+      expect(
+        snapCandidate({ ...emptyScene(), nodes: [target] }, upper, true).kind,
+      ).toBe("grid");
+    },
+  );
+  it.each(types.filter((type) => CATALOG[type].shape === "tile"))(
+    "%s : surface lisse sans plots ni accroches fictives",
+    (type) => {
+      const { w, d, h } = CATALOG[type];
+      const target = makePart(type, "#4079e8");
+      for (let x = 0; x < w; x++)
+        for (let z = 0; z < d; z++) {
+          const cx = x - (w - 1) / 2,
+            cz = z - (d - 1) / 2;
+          expect(
+            hit(type, new Vector3(cx, h + 1, cz), new Vector3(0, -1, 0)).point
+              .y,
+          ).toBeCloseTo(h, 6);
+          const upper = makePart("brick-1x1", "#ef4444", [cx, h, cz]);
+          expect(
+            snapCandidate({ ...emptyScene(), nodes: [target] }, upper, true)
+              .kind,
+          ).toBe("grid");
+        }
     },
   );
 });

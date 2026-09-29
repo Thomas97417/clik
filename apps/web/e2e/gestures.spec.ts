@@ -69,6 +69,12 @@ test("annulation par Échap, pointercancel et perte de focus ; dépôt hors canv
   await page.mouse.move(x, y);
   await page.mouse.down();
   await page.mouse.move(box.x + box.width + 30, y, { steps: 15 });
+  // Release after a rendered preview: WebKit can dispatch all synthetic moves
+  // before the next animation frame, whereas the gesture deposits that preview.
+  const rendered = Number(await canvas.getAttribute("data-frames"));
+  await expect
+    .poll(async () => Number(await canvas.getAttribute("data-frames")))
+    .toBeGreaterThan(rendered + 2);
   await page.mouse.up();
   expect(await position(page)).not.toEqual(before);
   await expect(canvas).not.toHaveAttribute("data-dragging", "true");
@@ -190,6 +196,12 @@ test("glisser un enfant conserve la sélection du groupe ; bibliothèque avec ap
   await expect(page.locator(".tree-row.selected .tree-name")).toHaveText(
     "Nouveau groupe",
   );
+  // Release after a rendered preview: WebKit can dispatch all synthetic moves
+  // before the next animation frame, whereas the gesture deposits that preview.
+  const rendered = Number(await canvas.getAttribute("data-frames"));
+  await expect
+    .poll(async () => Number(await canvas.getAttribute("data-frames")))
+    .toBeGreaterThan(rendered + 2);
   await page.mouse.up();
   const moved = await position(page);
   expect(moved).not.toEqual(["0", "0", "0"]);

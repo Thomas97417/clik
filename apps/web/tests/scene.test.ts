@@ -12,6 +12,9 @@ import {
   makePart,
   reparent,
   snapPart,
+  snapToGrid,
+  snapCandidate,
+  previewSelection,
   ungroup,
   validateScene,
   worldMatrix,
@@ -25,6 +28,11 @@ const boundsOf = (scene: SceneDocument, part: Part) => {
     new Vector3(-w / 2, 0, -d / 2),
     new Vector3(w / 2, h + 0.2, d / 2),
   ).applyMatrix4(worldMatrix(scene, part.id));
+};
+const expectAligned = (scene: SceneDocument, part: Part) => {
+  const box = boundsOf(scene, part);
+  for (const edge of [box.min.x, box.max.x, box.min.z, box.max.z])
+    expect(edge).toBeCloseTo(Math.round(edge), 8);
 };
 const expectFreeCopies = (
   before: SceneDocument,
@@ -216,12 +224,12 @@ describe("Historique de l’atelier", () => {
     s.preview(new Matrix4().makeTranslation(4, 0, 0));
     s.end();
     expect(useEditor.getState().past).toHaveLength(2);
-    expect(useEditor.getState().scene.nodes[0].position[0]).toBe(4);
+    expect(useEditor.getState().scene.nodes[0].position[0]).toBe(4.5);
     s.undo();
-    expect(useEditor.getState().scene.nodes[0].position[0]).toBe(0);
+    expect(useEditor.getState().scene.nodes[0].position[0]).toBe(0.5);
     s.redo();
     expect(useEditor.getState().scene.nodes[0].id).toBe(id);
-    expect(useEditor.getState().scene.nodes[0].position[0]).toBe(4);
+    expect(useEditor.getState().scene.nodes[0].position[0]).toBe(4.5);
   });
   it("Échap restaure le début du geste et copier/coller recrée le groupe", () => {
     const s = useEditor.getState();
@@ -267,7 +275,7 @@ describe("Historique de l’atelier", () => {
         expect(added.type).toBe(type);
         expect(added.color).toBe("#ef4444");
         expect(added.position[1]).toBe(0);
-        if (!before.nodes.length) expect(added.position).toEqual([0, 0, 0]);
+        expectAligned(scene, added);
         expect(scene.nodes.slice(0, -1)).toEqual(before.nodes);
         expect(past).toHaveLength(historyLength + 1);
         editor.undo();
@@ -324,7 +332,7 @@ describe("Historique de l’atelier", () => {
     s.remove();
     expect(useEditor.getState().scene.nodes).toHaveLength(2);
     s.patch(id, { position: [10, 0, 0] });
-    expect(useEditor.getState().scene.nodes[0].position[0]).toBe(0);
+    expect(useEditor.getState().scene.nodes[0].position[0]).toBe(0.5);
   });
 });
 
@@ -428,7 +436,7 @@ it("dépose exactement l’aperçu, sans sérialiser les étapes ni ajouter d’
   s.preview(new Matrix4().makeTranslation(2.3, 0, 0.2));
   const candidate = useEditor.getState().snapPreview!.scene;
   expect(useEditor.getState().serial).toBe(1);
-  expect(useEditor.getState().scene.nodes[0].position[0]).toBeCloseTo(2.3);
+  expect(useEditor.getState().scene.nodes[0].position[0]).toBeCloseTo(2.8);
   s.end();
   expect(useEditor.getState().scene).toBe(candidate);
   expect(useEditor.getState().past).toHaveLength(past + 1);
@@ -461,4 +469,68 @@ it("préserve les branches verrouillées et déplace les autres racines sélecti
   expect(
     useEditor.getState().scene.nodes.find((n) => n.id === free.id)!.position[0],
   ).toBe(5);
+});
+
+describe("Alignement des empreintes sur les cases du sol", () => {
+  it.each(Object.keys(CATALOG) as (keyof typeof CATALOG)[])(
+    "%s : bords alignés à chaque quart de tour, aux coordonnées positives et négatives",
+    (type) => {
+      for (const turn of [0, 1, 2, 3])
+        for (const offset of [-3.7, 0, 2.3]) {
+          const part = makePart(type, "#4079e8", [offset, 0, offset + 0.2]);
+          part.rotation = [0, (turn * Math.PI) / 2, 0];
+          const preview = snapCandidate(emptyScene(), part, true);
+          expect(preview.kind).toBe("grid");
+          expect(preview.part.rotation).toEqual(part.rotation);
+          expectAligned(
+            { ...emptyScene(), nodes: [preview.part] },
+            preview.part,
+          );
+          expect(snapToGrid(preview.part)).toEqual(preview.part);
+          expect(snapCandidate(emptyScene(), part, false).part).toBe(part);
+        }
+    },
+  );
+  it("conserve la grille lors d’un emboîtement entre largeurs paires et impaires", () => {
+    const target = snapToGrid(makePart("brick-2x2", "#4079e8"));
+    const moving = makePart("brick-1x1", "#ef4444", [0.6, 1.3, 0.6]);
+    const candidate = snapCandidate(
+      { ...emptyScene(), nodes: [target] },
+      moving,
+      true,
+    );
+    expect(candidate.kind).toBe("attachment");
+    expect(candidate.part.position).toEqual([0.5, 1.2, 0.5]);
+    expectAligned({ ...emptyScene(), nodes: [candidate.part] }, candidate.part);
+  });
+  it("aligne un groupe déplacé et ses copies sans déplacer ses enfants les uns par rapport aux autres", () => {
+    const a = snapToGrid(makePart("brick-1x2", "#4079e8"));
+    const b = snapToGrid(makePart("plate-2x3", "#ef4444", [4, 0, 0]));
+    const initial = group(
+      { ...emptyScene(), nodes: [a, b] },
+      [a.id, b.id],
+      "assembly",
+    );
+    const free = applyDelta(
+      initial,
+      ["assembly"],
+      new Matrix4().makeTranslation(3.2, 0, -4.7),
+    );
+    const preview = previewSelection(free, ["assembly"], true, a.id);
+    for (const part of preview.scene.nodes)
+      if (part.kind === "part") expectAligned(preview.scene, part);
+    const before = new Vector3()
+      .setFromMatrixPosition(worldMatrix(initial, b.id))
+      .sub(new Vector3().setFromMatrixPosition(worldMatrix(initial, a.id)));
+    const after = new Vector3()
+      .setFromMatrixPosition(worldMatrix(preview.scene, b.id))
+      .sub(
+        new Vector3().setFromMatrixPosition(worldMatrix(preview.scene, a.id)),
+      );
+    expect(after.distanceTo(before)).toBeLessThan(1e-8);
+    const copy = duplicate(preview.scene, ["assembly"]);
+    for (const part of copy.scene.nodes)
+      if (part.kind === "part") expectAligned(copy.scene, part);
+    expectFreeCopies(preview.scene, copy.scene, copy.ids);
+  });
 });

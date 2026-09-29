@@ -2,7 +2,13 @@ import { describe, expect, it, vi } from "vitest";
 import { convexTest } from "convex-test";
 import schema from "../convex/schema";
 import { api, internal } from "../convex/_generated/api";
-import { emptyScene, makePart, validateScene } from "@clik/scene";
+import {
+  CATALOG,
+  type PartType,
+  emptyScene,
+  makePart,
+  validateScene,
+} from "@clik/scene";
 vi.mock("../convex/auth", () => ({
   authComponent: {
     safeGetAuthUser: async (ctx: any) => {
@@ -24,6 +30,28 @@ const scene = JSON.stringify(
   validateScene({ ...emptyScene(), nodes: [makePart("brick-2x2", "#4079e8")] }),
 );
 describe("Projets privés et versions publiques", () => {
+  it("sauvegarde le catalogue étendu dans un projet existant", async () => {
+    const { alice } = setup();
+    const id = await alice.mutation(api.projects.create, {
+      title: "Catalogue",
+      scene,
+    });
+    const expanded = JSON.stringify({
+      ...emptyScene(),
+      nodes: (Object.keys(CATALOG) as PartType[]).map((type, i) =>
+        makePart(type, "#4079e8", [i * 8, 0, 0]),
+      ),
+    });
+    await alice.mutation(api.projects.save, {
+      id,
+      title: "Catalogue",
+      scene: expanded,
+      revision: 0,
+    });
+    const saved = await alice.query(api.projects.get, { id });
+    expect(JSON.parse(saved.scene)).toEqual(JSON.parse(expanded));
+    expect(validateScene(JSON.parse(saved.scene)).nodes).toHaveLength(23);
+  });
   it("refuse lectures et écritures aux visiteurs et aux autres propriétaires", async () => {
     const { t, alice, bob } = setup();
     const id = await alice.mutation(api.projects.create, {

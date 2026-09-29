@@ -11,6 +11,7 @@ import {
   roots,
   snapPart,
   placeInFreeSpace,
+  snapToGrid,
   previewSelection,
   movableRoots,
   type SelectionPreview,
@@ -116,7 +117,7 @@ export const useEditor = create<State>((set, get) => ({
     const s = get();
     const part = position
       ? snapPart(s.scene, makePart(type, s.color, position), s.snap)
-      : makePart(type, s.color);
+      : snapToGrid(makePart(type, s.color));
     const next = { ...s.scene, nodes: [...s.scene.nodes, part] };
     s.commit(position ? next : placeInFreeSpace(next, [part.id], s.scene));
     set({ selection: [part.id], pending: null });

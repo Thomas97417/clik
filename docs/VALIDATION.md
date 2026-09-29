@@ -53,6 +53,28 @@ La bibliothèque sépare les catégories fixes, la liste défilante avec `scroll
 
 Les 21 contrôles ciblés bibliothèque/ajout/dépôt/empilement passent ensemble sous Chromium, Firefox et WebKit. Les captures ont été inspectées : catégories et palette accessibles, cartes stables. Les 53 tests automatisés, TypeScript et le build passent. Captures : `/tmp/clik-library-stable-<moteur>.png` et `/tmp/clik-library-palette-<moteur>.png`.
 
+## Catalogue étendu à 23 modèles
+
+Treize modèles supplémentaires : briques 1 × 3 et 1 × 6 ; plaques 1 × 1, 1 × 3, 1 × 4, 2 × 3 et 4 × 4 ; pentes 2 × 1, 2 × 3 et 3 × 2 ; tuiles lisses 1 × 1, 1 × 2 et 2 × 2 dans une nouvelle catégorie. Les anciens identifiants, dimensions et le format des scènes restent compatibles.
+
+Les 127 tests automatisés passent : logements ouverts de chaque modèle, profondeur des plafonds sous les rampes, contact sans vide après rotation, accroches uniquement sur les plots existants, fixation des tuiles par dessous, ajout sans chevauchement et sauvegarde côté serveur des 23 modèles. TypeScript et le build passent.
+
+Les 15 contrôles navigateur des suites catalogue, bibliothèque et géométrie passent sous Chromium, Firefox et WebKit. Le nouveau scénario ajoute chacun des 23 modèles et les retrouve après rechargement ; il inspecte les pixels de chaque miniature pour vérifier un rendu visible sans découpe aux bords. Les contrôles de largeur stable, de défilement et d’empilement restent valides. Les captures des pentes et tuiles ont été inspectées visuellement. Captures : `/tmp/clik-catalog-<famille>-<moteur>.png`.
+
+## Alignement sur les cases et grille persistante
+
+L’aimantation de grille utilise un coin inférieur transformé au lieu d’arrondir le centre. Les 23 modèles sont vérifiés dans les quatre orientations par quarts de tour, aux coordonnées positives et négatives : bords entiers, opération idempotente, rotation conservée et déplacement libre lorsque l’aimantation est désactivée. L’ajout de chaque modèle, l’emboîtement entre largeurs paires et impaires, les groupes rigides et leurs copies sont également vérifiés. Les 152 tests automatisés (147 web, 5 backend), TypeScript et le build passent.
+
+Les 93 contrôles distincts éditeur, gestes, géométrie et grille sont validés sous Chromium, Firefox et WebKit. Le premier passage a donné 88 réussites ; les trois attentes de coordonnées après dissociation ont été actualisées pour la brique 1 × 1 désormais centrée à 0,5, et deux gestes WebKit attendent maintenant le rendu de leur aperçu avant le relâchement synthétique. Les 15 contrôles ciblés passent ensuite ensemble. Les nouveaux scénarios contrôlent les pixels de la grille dans une scène vide après 30 crans de zoom, au-dessus et en dessous du sol, ainsi que le déplacement et la rotation à la molette d’une pièce impaire avec annulation. Captures inspectées : `/tmp/clik-grid-close-<moteur>.png`, `/tmp/clik-grid-below-<moteur>.png`, `/tmp/clik-grid-footprint-<moteur>.png`.
+
+## Grille stable au zoom et masquée par les pièces
+
+Le rendu de la grille précède celui des pièces opaques, avec mélange alpha pour conserver l’anticrénelage et sans lecture/écriture de profondeur. Cela évite de comparer la profondeur interpolée d’un immense plan avec celle des petites surfaces des pièces. Le plan d’ombres conserve son test de profondeur mais n’y écrit plus. Les limites de caméra suivent le zoom ; les mailles affichées deviennent plus larges à grande distance, avec des seuils distincts à l’aller et au retour pour éviter les basculements répétés. L’aimantation conserve son unité.
+
+Deux régressions navigateur contrôlent les images successives pendant les mouvements. La première enregistre les pixels du sol vide pendant 120 crans de dézoom puis 120 crans de zoom, dans trois vues. La seconde observe une zone intérieure d’une tuile rouge pendant le zoom sous trois angles : avant correction, jusqu’à 77 pixels sur 400 perdaient la couleur de la pièce en vue rasante ; après correction, aucun. Les captures ont été inspectées. Les 18 contrôles ciblés grille/occlusion/géométrie passent ensemble sous Chromium, Firefox et WebKit. Les 152 tests automatisés, TypeScript et le build passent.
+
+Captures : `/tmp/clik-grid-far-<vue>-<moteur>.png`, `/tmp/clik-grid-sweep-<vue>-<moteur>.png` et `/tmp/clik-grid-occlusion-<vue>-<moteur>.png`.
+
 ## Mesure de charge
 
 Machine : Apple M2 Pro, 16 Gio de mémoire, macOS. Fenêtre de 1 440 × 1 000 pixels. Serveur Vite en développement, rendu instancié, ombres et antialiasing actifs. Scène de 500 briques 2 × 4 réparties sur une grille et plusieurs niveaux, cinq couleurs. Sélection et cadrage d’une pièce en vue de dessus, puis déplacement réel avec aperçu d’aimantation actif pendant une fenêtre de mesure de trois secondes. Les événements du pointeur sont regroupés par image ; les transformations et couleurs des instances immobiles sont réutilisées, et l’arborescence reste stable pendant le geste.
