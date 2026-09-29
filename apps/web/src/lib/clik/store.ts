@@ -193,17 +193,23 @@ export const useEditor = create<State>((set, get) => ({
   },
   reparent: (id, parentId, before) => {
     const s = get();
-    if (
-      inherited(s.scene, id, "locked") ||
-      (parentId && inherited(s.scene, parentId, "locked"))
-    )
-      return;
-    const scene = reparent(s.scene, [id], parentId);
-    if (before && before !== id) {
-      const node = scene.nodes.find((n) => n.id === id)!;
-      scene.nodes = scene.nodes.filter((n) => n.id !== id);
+    if (parentId && inherited(s.scene, parentId, "locked")) return;
+    // A selected row carries the whole selection, with each branch moved once.
+    const ids = roots(
+      s.scene,
+      s.selection.includes(id) ? s.selection : [id],
+    ).filter((root) => !inherited(s.scene, root, "locked"));
+    if (!ids.length || (before && ids.includes(before))) return;
+    const moving = new Set(ids);
+    const changed = ids.filter(
+      (root) => s.scene.nodes.find((n) => n.id === root)!.parentId !== parentId,
+    );
+    const scene = reparent(s.scene, changed, parentId);
+    if (before) {
+      const nodes = scene.nodes.filter((n) => moving.has(n.id));
+      scene.nodes = scene.nodes.filter((n) => !moving.has(n.id));
       const at = scene.nodes.findIndex((n) => n.id === before);
-      scene.nodes.splice(at < 0 ? scene.nodes.length : at, 0, node);
+      scene.nodes.splice(at < 0 ? scene.nodes.length : at, 0, ...nodes);
     }
     s.commit(scene);
   },

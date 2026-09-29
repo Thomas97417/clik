@@ -16,6 +16,8 @@ import {
   COLOR_NAMES,
   inherited,
   ancestors,
+  descendants,
+  roots,
   hasOverlappingParts,
   type SceneNode,
   type PartType,
@@ -251,6 +253,13 @@ export default function Editor({
     return () => window.removeEventListener("keydown", key);
   }, [publishing]);
   const selected = s.scene.nodes.find((n) => n.id === s.selection[0]);
+  const selectionRoots = roots(s.scene, s.selection);
+  const selectionParents = new Set(
+    selectionRoots.map(
+      (id) => s.scene.nodes.find((n) => n.id === id)!.parentId,
+    ),
+  );
+  const selectionBranches = new Set(descendants(s.scene, selectionRoots));
   const count = s.scene.nodes.filter((n) => n.kind === "part").length;
   const overlap = useMemo(
     () => hasOverlappingParts(s.scene),
@@ -325,6 +334,7 @@ export default function Editor({
             style={{ paddingLeft: 8 + depth * 14 }}
             draggable={!inherited(s.scene, n.id, "locked")}
             onDragStart={(e) => {
+              e.dataTransfer.effectAllowed = "move";
               e.dataTransfer.setData("clik/node", n.id);
             }}
             onDragOver={(e) => {
@@ -934,6 +944,7 @@ export default function Editor({
               className="tree"
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => {
+                e.preventDefault();
                 const id = e.dataTransfer.getData("clik/node");
                 if (id) safe(() => s.reparent(id, null));
               }}
@@ -1009,20 +1020,36 @@ export default function Editor({
                     <label>
                       Groupe parent
                       <select
-                        value={selected.parentId ?? ""}
+                        value={
+                          selectionParents.size > 1
+                            ? "mixed"
+                            : ([...selectionParents][0] ?? "")
+                        }
                         onChange={(e) =>
                           safe(() =>
                             s.reparent(selected.id, e.target.value || null),
                           )
                         }
                       >
+                        {selectionParents.size > 1 && (
+                          <option value="mixed" disabled>
+                            Plusieurs groupes
+                          </option>
+                        )}
                         <option value="">Racine</option>
                         {s.scene.nodes
                           .filter(
                             (n) => n.kind === "group" && n.id !== selected.id,
                           )
                           .map((n) => (
-                            <option key={n.id} value={n.id}>
+                            <option
+                              key={n.id}
+                              value={n.id}
+                              disabled={
+                                selectionBranches.has(n.id) ||
+                                inherited(s.scene, n.id, "locked")
+                              }
+                            >
                               {n.name}
                             </option>
                           ))}
@@ -1060,7 +1087,7 @@ export default function Editor({
                     ))}
                     <p className="property-hint">
                       {s.selection.length > 1
-                        ? "Les poignées déplacent la sélection entière. Les valeurs ci-dessus concernent le premier élément."
+                        ? "Le groupe parent s’applique à toute la sélection. Le nom, la position et la rotation concernent le premier élément."
                         : "Dimensions fixes · positions relatives au groupe"}
                     </p>
                   </>

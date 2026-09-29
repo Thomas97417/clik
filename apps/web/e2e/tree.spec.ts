@@ -75,6 +75,48 @@ async function setup(page: Page) {
   );
 }
 
+for (const method of ["glisser", "propriétés"]) {
+  test(`plusieurs pièces rejoignent un groupe existant via ${method}`, async ({
+    page,
+  }) => {
+    await setup(page);
+    await page.locator('.piece-card[aria-label="Brique 1 × 2"]').click();
+    await row(page, "Pente 2 × 2")
+      .locator(".tree-name")
+      .click({ modifiers: ["Shift"] });
+    await expect(page.locator(".tree-row.selected")).toHaveCount(2);
+    const target = row(page, "Assemblage");
+    const targetId = (await target.getAttribute("data-node-id"))!;
+    if (method === "glisser") {
+      await page
+        .getByRole("button", { name: "Tout replier", exact: true })
+        .click();
+      await row(page, "Pente 2 × 2").dragTo(target);
+    } else {
+      await page
+        .getByRole("combobox", { name: "Groupe parent", exact: true })
+        .selectOption(targetId);
+    }
+    await expect(target.locator(".tree-count")).toHaveText("4");
+    await expect(page.locator(".tree-row.selected")).toHaveCount(2);
+    await expect(
+      page.getByRole("combobox", { name: "Groupe parent", exact: true }),
+    ).toHaveValue(targetId);
+    await page
+      .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
+      .click();
+    await expect(target.locator(".tree-count")).toHaveText("2");
+    for (const name of ["Pente 2 × 2", "Brique 1 × 2"]) {
+      await row(page, name).locator(".tree-name").click();
+      await expect(
+        page.getByRole("combobox", { name: "Groupe parent", exact: true }),
+      ).toHaveValue("");
+    }
+    await page.getByRole("button", { name: "Rétablir", exact: true }).click();
+    await expect(target.locator(".tree-count")).toHaveText("4");
+  });
+}
+
 test("repli des groupes imbriqués, sélection conservée et aucun historique", async ({
   page,
 }, info) => {
