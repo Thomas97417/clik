@@ -14,7 +14,7 @@ import {
   hasTopStud,
   hasBottomSocket,
   archProfile,
-  ROUND_SEGMENTS,
+  roundProfile,
   type PartType,
 } from "@clik/scene";
 
@@ -30,8 +30,10 @@ function outline(w: number, d: number, inset = 0, kind = "block") {
     r = 0.045 - inset;
   const shape = new Shape();
   if (kind === "round") {
-    shape.absarc(0, 0, x, 0, Math.PI * 2, false);
-    return shape;
+    const scale = x / (w / 2 - 0.01);
+    return new Shape(
+      roundProfile(w, d).map(([px, pz]) => new Vector2(px * scale, pz * scale)),
+    );
   }
   if (kind === "corner") {
     const cut = -0.01 - inset;
@@ -84,9 +86,7 @@ export function geometry(type: PartType) {
   const parts: BufferGeometry[] = [];
   const base = outline(w, d, 0, shape);
   const contour = (shape: Shape) => {
-    const points = shape.getPoints(
-      CATALOG[type].shape === "round" ? ROUND_SEGMENTS / 2 : 4,
-    );
+    const points = shape.getPoints(4);
     if (points[0].distanceTo(points.at(-1)!) < 1e-8) points.pop();
     if (!slope) return points;
     return points.flatMap((a, i) => {

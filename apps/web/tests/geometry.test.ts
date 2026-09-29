@@ -19,6 +19,22 @@ import {
 import { geometry } from "../src/lib/clik/geometry";
 
 const types = Object.keys(CATALOG) as PartType[];
+function cells(type: PartType, top = false) {
+  const { w, d } = CATALOG[type];
+  return Array.from({ length: w * d }, (_, i) => ({
+    x: i % w,
+    z: Math.floor(i / w),
+  }))
+    .filter(({ x, z }) =>
+      top ? hasTopStud(type, z, x) : hasBottomSocket(type, x, z),
+    )
+    .map(({ x, z }) => ({ x, z, cx: x - (w - 1) / 2, cz: z - (d - 1) / 2 }));
+}
+function rimOffset(type: PartType, x: number, z: number) {
+  return CATALOG[type].shape === "round" && Math.hypot(x, z) > 0
+    ? new Vector3(-x, 0, -z).normalize().multiplyScalar(0.4)
+    : new Vector3(0.4, 0, 0);
+}
 function hit(
   type: PartType,
   origin: Vector3,
@@ -55,7 +71,7 @@ describe("Géométrie des emboîtements", () => {
           expect(ceiling.point.y).toBeGreaterThan(0.18);
           const rim = hit(
             type,
-            new Vector3(cx + 0.4, -1, cz),
+            new Vector3(cx, -1, cz).add(rimOffset(type, cx, cz)),
             new Vector3(0, 1, 0),
           );
           expect(rim.point.y).toBeCloseTo(0, 6);
@@ -76,16 +92,14 @@ describe("Géométrie des emboîtements", () => {
       const g = geometry(type);
       expect(g.boundingBox!.min.y).toBeCloseTo(0, 6);
       expect(g.boundingBox!.max.y).toBeCloseTo(
-        h + (hasTopStud(type, d - 1) ? 0.18 : 0),
+        h + (cells(type, true).length ? 0.18 : 0),
         6,
       );
-      // Between studs, over the flat rear half even for the slope.
+      const anchor = cells(type, true)[0] ?? cells(type)[0];
       const top = hit(
         type,
-        new Vector3(
-          (CATALOG[type].shape === "corner" ? -(w - 1) / 2 : (w - 1) / 2) + 0.4,
-          h + 1,
-          (d - 1) / 2,
+        new Vector3(anchor.cx, h + 1, anchor.cz).add(
+          rimOffset(type, anchor.cx, anchor.cz),
         ),
         new Vector3(0, -1, 0),
       );
@@ -95,17 +109,16 @@ describe("Géométrie des emboîtements", () => {
       );
     },
   );
-  it.each(types.filter((type) => hasTopStud(type, CATALOG[type].d - 1)))(
+  it.each(types.filter((type) => cells(type, true).length > 0))(
     "%s : contact sans vide après aimantation, même après rotation",
     (type) => {
-      const { h, w, d } = CATALOG[type];
+      const { h } = CATALOG[type];
       const target = makePart(type, "#4079e8", [2, 3, 4]);
       target.rotation = [0.3, 0.7, -0.2];
       const tm = matrix(target),
         normal = new Vector3(0, 1, 0).transformDirection(tm);
-      const column =
-        CATALOG[type].shape === "corner" ? -(w - 1) / 2 : (w - 1) / 2;
-      const center = new Vector3(column, h, (d - 1) / 2).applyMatrix4(tm);
+      const anchor = cells(type, true)[0];
+      const center = new Vector3(anchor.cx, h, anchor.cz).applyMatrix4(tm);
       const upper = makePart(
         "brick-1x1",
         "#ef4444",
@@ -119,7 +132,7 @@ describe("Géométrie des emboîtements", () => {
       );
       expect(result.kind).toBe("attachment");
       const um = matrix(result.part);
-      const contact = new Vector3(0.4, 0, 0).applyMatrix4(um);
+      const contact = rimOffset(type, anchor.cx, anchor.cz).applyMatrix4(um);
       const lowerRoof = hit(
         type,
         contact.clone().addScaledVector(normal, 0.1),
@@ -133,7 +146,7 @@ describe("Géométrie des emboîtements", () => {
         um,
       );
       expect(lowerRoof.point.distanceTo(upperRim.point)).toBeLessThan(0.00001);
-      const studTop = new Vector3(column, h + 0.18, (d - 1) / 2)
+      const studTop = new Vector3(anchor.cx, h + 0.18, anchor.cz)
         .applyMatrix4(tm)
         .applyMatrix4(um.clone().invert());
       expect(studTop.x).toBeCloseTo(0, 6);
@@ -145,9 +158,9 @@ describe("Géométrie des emboîtements", () => {
 
 describe("Nouveaux modèles du catalogue", () => {
   it.each(types)("%s : se fixe par ses logements inférieurs", (type) => {
-    const { w, d } = CATALOG[type];
     const target = makePart("brick-1x1", "#4079e8");
-    const upper = makePart(type, "#ef4444", [(w - 1) / 2, 1.3, (d - 1) / 2]);
+    const anchor = cells(type)[0];
+    const upper = makePart(type, "#ef4444", [-anchor.cx, 1.3, -anchor.cz]);
     const result = snapCandidate(
       { ...emptyScene(), nodes: [target] },
       upper,
@@ -182,7 +195,7 @@ describe("Nouveaux modèles du catalogue", () => {
       ).toBe("grid");
     },
   );
-  it.each(types.filter((type) => !hasTopStud(type, CATALOG[type].d - 1)))(
+  it.each(types.filter((type) => cells(type, true).length === 0))(
     "%s : surface lisse sans plots ni accroches fictives",
     (type) => {
       const { w, d, h } = CATALOG[type];
@@ -267,6 +280,60 @@ describe("Volumes ouverts du catalogue", () => {
       expect(
         hit(type, new Vector3(1, 0.1, 0), new Vector3(-1, 0, 0)).point.x,
       ).toBeCloseTo(0.49);
+    },
+  );
+});
+
+describe("Plaques et tuiles rondes de plusieurs diamètres", () => {
+  it.each([
+    [2, 4],
+    [3, 5],
+    [4, 12],
+    [6, 24],
+    [8, 44],
+  ])(
+    "diamètre %i : %i logements réels, et des plots uniquement sur la plaque",
+    (size, count) => {
+      const plate = `round-plate-${size}x${size}` as PartType;
+      const tile = `round-tile-${size}x${size}` as PartType;
+      expect(cells(plate)).toHaveLength(count);
+      expect(cells(tile)).toHaveLength(count);
+      expect(cells(plate, true)).toHaveLength(count);
+      expect(cells(tile, true)).toHaveLength(0);
+      for (const type of [plate, tile]) {
+        // Bounding-square corners must remain empty, even below the piece.
+        const x = size / 2 - 0.1;
+        expect(
+          hit(type, new Vector3(x, 2, x), new Vector3(0, -1, 0)),
+        ).toBeUndefined();
+        expect(
+          hit(type, new Vector3(x, -1, x), new Vector3(0, 1, 0)),
+        ).toBeUndefined();
+        if (size > 2) {
+          expect(hasBottomSocket(type, 0, 0)).toBe(false);
+          expect(hasTopStud(type, 0, 0)).toBe(false);
+          const support = makePart(type, "#4079e8");
+          const corner = makePart("brick-1x1", "#ef4444", [
+            (size - 1) / 2,
+            0.4,
+            (size - 1) / 2,
+          ]);
+          expect(
+            snapCandidate({ ...emptyScene(), nodes: [support] }, corner, true)
+              .kind,
+          ).toBe("grid");
+        }
+      }
+      const support = makePart(plate, "#4079e8");
+      const upper = makePart(tile, "#ef4444", [0, 0.5, 0]);
+      const result = snapCandidate(
+        { ...emptyScene(), nodes: [support] },
+        upper,
+        true,
+      );
+      expect(result.kind).toBe("attachment");
+      expect(result.part.position).toEqual([0, 0.4, 0]);
+      expect(result.points).toHaveLength(count);
     },
   );
 });

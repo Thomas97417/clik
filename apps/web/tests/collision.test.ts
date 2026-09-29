@@ -235,3 +235,32 @@ describe("Collisions des formes concaves et rondes", () => {
     ).toBe(true);
   });
 });
+
+it.each([2, 3, 4, 6, 8])(
+  "diamètre %i : collisions sur le disque, pas dans les coins de sa boîte",
+  (size) => {
+    for (const family of ["plate", "tile"]) {
+      const disk = makePart(
+        `round-${family}-${size}x${size}` as PartType,
+        "#4079e8",
+      );
+      const scene = { ...emptyScene(), nodes: [disk] };
+      const neighbor = makePart("round-brick-1x1", "#ef4444", [
+        size / 2 + 0.25,
+        0,
+        size / 2 + 0.25,
+      ]);
+      expect(hasOverlappingParts({ ...scene, nodes: [disk, neighbor] })).toBe(
+        false,
+      );
+      expect(snapCandidate(scene, neighbor, false).part).toBe(neighbor);
+      neighbor.position = [size / 2 - 0.2, 0, 0];
+      expect(hasOverlappingParts({ ...scene, nodes: [disk, neighbor] })).toBe(
+        true,
+      );
+      expect(
+        snapCandidate(scene, neighbor, false).part.position[1],
+      ).toBeCloseTo(0.4);
+    }
+  },
+);

@@ -1,9 +1,5 @@
 import { Box3, Matrix4, Vector3 } from "three";
-import {
-  archProfile,
-  ROUND_SEGMENTS,
-  type PartDimensions,
-} from "./part-shapes";
+import { archProfile, roundProfile, type PartDimensions } from "./part-shapes";
 
 type Body = {
   vertices: Vector3[];
@@ -50,14 +46,7 @@ export function placementBody(
   const { w, d, h, shape } = dimensions;
   if (shape === "round") {
     return prism(
-      Array.from({ length: ROUND_SEGMENTS }, (_, i) => {
-        const angle = (i * Math.PI * 2) / ROUND_SEGMENTS;
-        return new Vector3(
-          (w / 2 - 0.01) * Math.cos(angle),
-          0,
-          (d / 2 - 0.01) * Math.sin(angle),
-        );
-      }),
+      roundProfile(w, d).map(([x, z]) => new Vector3(x, 0, z)),
       new Vector3(0, h, 0),
       matrix,
     );

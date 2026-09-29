@@ -5,6 +5,7 @@ import {
   collisionClearance,
   bodiesOverlap,
 } from "./placement-collision";
+import { roundHasSocket } from "./part-shapes";
 export const CATALOG = {
   "brick-1x1": { name: "Brique 1 × 1", w: 1, d: 1, h: 1.2, shape: "block" },
   "brick-1x2": { name: "Brique 1 × 2", w: 2, d: 1, h: 1.2, shape: "block" },
@@ -77,10 +78,85 @@ export const CATALOG = {
     h: 0.4,
     shape: "round",
   },
+  "round-plate-2x2": {
+    name: "Plaque ronde 2 × 2",
+    w: 2,
+    d: 2,
+    h: 0.4,
+    shape: "round",
+  },
+  "round-plate-3x3": {
+    name: "Plaque ronde 3 × 3",
+    w: 3,
+    d: 3,
+    h: 0.4,
+    shape: "round",
+  },
+  "round-plate-4x4": {
+    name: "Plaque ronde 4 × 4",
+    w: 4,
+    d: 4,
+    h: 0.4,
+    shape: "round",
+  },
+  "round-plate-6x6": {
+    name: "Plaque ronde 6 × 6",
+    w: 6,
+    d: 6,
+    h: 0.4,
+    shape: "round",
+  },
+  "round-plate-8x8": {
+    name: "Plaque ronde 8 × 8",
+    w: 8,
+    d: 8,
+    h: 0.4,
+    shape: "round",
+  },
   "round-tile-1x1": {
     name: "Tuile ronde 1 × 1",
     w: 1,
     d: 1,
+    h: 0.4,
+    shape: "round",
+    smooth: true,
+  },
+  "round-tile-2x2": {
+    name: "Tuile ronde 2 × 2",
+    w: 2,
+    d: 2,
+    h: 0.4,
+    shape: "round",
+    smooth: true,
+  },
+  "round-tile-3x3": {
+    name: "Tuile ronde 3 × 3",
+    w: 3,
+    d: 3,
+    h: 0.4,
+    shape: "round",
+    smooth: true,
+  },
+  "round-tile-4x4": {
+    name: "Tuile ronde 4 × 4",
+    w: 4,
+    d: 4,
+    h: 0.4,
+    shape: "round",
+    smooth: true,
+  },
+  "round-tile-6x6": {
+    name: "Tuile ronde 6 × 6",
+    w: 6,
+    d: 6,
+    h: 0.4,
+    shape: "round",
+    smooth: true,
+  },
+  "round-tile-8x8": {
+    name: "Tuile ronde 8 × 8",
+    w: 8,
+    d: 8,
     h: 0.4,
     shape: "round",
     smooth: true,
@@ -115,6 +191,8 @@ export type PartType = keyof typeof CATALOG;
 /** A missing corner and an arch opening have no sockets or imaginary studs. */
 export function hasBottomSocket(type: PartType, column: number, row: number) {
   const part = CATALOG[type];
+  if (part.shape === "round")
+    return roundHasSocket(part.w, part.d, column, row);
   if (part.shape === "corner") return column === 0 || row === 0;
   if (part.shape === "arch") return column === 0 || column === part.w - 1;
   return true;
@@ -122,6 +200,8 @@ export function hasBottomSocket(type: PartType, column: number, row: number) {
 export function hasTopStud(type: PartType, row: number, column = 0) {
   const part = CATALOG[type];
   if (part.shape === "tile" || ("smooth" in part && part.smooth)) return false;
+  if (part.shape === "round")
+    return roundHasSocket(part.w, part.d, column, row);
   if (part.shape === "corner") return column === 0 || row === 0;
   return part.shape !== "slope" || row === part.d - 1;
 }
@@ -830,4 +910,4 @@ export function snapSelection(
   return previewSelection(scene, ids, enabled).scene;
 }
 
-export { archProfile, ROUND_SEGMENTS } from "./part-shapes";
+export { archProfile, roundProfile } from "./part-shapes";
