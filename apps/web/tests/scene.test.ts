@@ -214,6 +214,38 @@ describe("SceneDocument et transformations", () => {
 });
 describe("Historique de l’atelier", () => {
   beforeEach(() => useEditor.getState().load(emptyScene(), "Test"));
+  it("tout sélectionner inclut les groupes une seule fois sans modifier la scène ni l’historique", () => {
+    const a = makePart("brick-1x1", "#4079e8");
+    const b = makePart("brick-2x2", "#4079e8", [3, 0, 0]);
+    const loose = {
+      ...makePart("plate-2x2", "#ef4444", [6, 0, 0]),
+      locked: true,
+      hidden: true,
+    };
+    let scene = group(
+      { ...emptyScene(), nodes: [a, b, loose] },
+      [a.id, b.id],
+      "inner",
+    );
+    scene = group(scene, ["inner"], "outer");
+    const s = useEditor.getState();
+    s.load(scene, "Groupes");
+    s.select(a.id);
+    s.selectAll();
+    expect(new Set(useEditor.getState().selection)).toEqual(
+      new Set(["outer", loose.id]),
+    );
+    expect(new Set(descendants(scene, useEditor.getState().selection))).toEqual(
+      new Set(scene.nodes.map((n) => n.id)),
+    );
+    s.selectAll();
+    expect(useEditor.getState().scene).toEqual(scene);
+    expect(useEditor.getState().past).toEqual([]);
+    expect(useEditor.getState().serial).toBe(0);
+    s.load(emptyScene(), "Vide");
+    s.selectAll();
+    expect(useEditor.getState().selection).toEqual([]);
+  });
   it("regroupe les mouvements intermédiaires en un seul geste annulable", () => {
     const s = useEditor.getState();
     s.add("brick-1x1");

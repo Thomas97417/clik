@@ -92,6 +92,49 @@ test("repli des groupes imbriqués, sélection conservée et aucun historique", 
   ).toBeDisabled();
 });
 
+test("tout sélectionner inclut les groupes repliés sans doubler leurs pièces", async ({
+  page,
+}, info) => {
+  await setup(page);
+  await page.getByRole("button", { name: "Tout replier", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Tout sélectionner", exact: true })
+    .click();
+  await expect(page.locator(".tree-row.selected .tree-name")).toHaveText([
+    "Assemblage",
+    "Pente 2 × 2",
+  ]);
+  await expect(
+    page.getByRole("button", { name: "Déplier Assemblage", exact: true }),
+  ).toHaveAttribute("aria-expanded", "false");
+  await page.setViewportSize({ width: 900, height: 760 });
+  await expect(
+    page.getByRole("button", { name: "Tout sélectionner", exact: true }),
+  ).toBeInViewport();
+  await page.screenshot({
+    path: `/tmp/clik-select-all-${info.project.name}.png`,
+  });
+  await page.getByRole("button", { name: "Dupliquer", exact: true }).click();
+  await expect(page.locator(".viewport-bottom")).toContainText("6 / 500");
+  await page
+    .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
+    .click();
+  await expect(page.locator(".viewport-bottom")).toContainText("3 / 500");
+  await page
+    .getByRole("button", { name: "Tout sélectionner", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Tout déplier", exact: true }).click();
+  await expect(page.locator(".tree-row.selected .tree-name")).toHaveText([
+    "Assemblage",
+    "Pente 2 × 2",
+  ]);
+  await page.getByRole("button", { name: "Supprimer", exact: true }).click();
+  await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+  await expect(
+    page.getByRole("button", { name: "Tout sélectionner", exact: true }),
+  ).toBeDisabled();
+});
+
 test("sélection dans la scène : ouverture des groupes parents", async ({
   page,
 }) => {

@@ -35,6 +35,7 @@ import {
   Grid2X2,
   Grip,
   Layers,
+  ListChecks,
   LockKeyhole,
   Magnet,
   Move3D,
@@ -781,6 +782,15 @@ export default function Editor({
               <h2>Construction</h2>
               <span>{count} pièces</span>
             </div>
+            <button
+              className="tree-select-all"
+              title="Sélectionner toutes les pièces et tous les groupes"
+              disabled={!s.scene.nodes.length}
+              onClick={s.selectAll}
+            >
+              <ListChecks size={17} aria-hidden="true" />
+              Tout sélectionner
+            </button>
             <div className="tree-actions">
               <button
                 title="Grouper"

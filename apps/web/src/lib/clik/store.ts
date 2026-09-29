@@ -50,6 +50,7 @@ type State = Snapshot & {
   load: (scene: SceneDocument, title: string) => void;
   commit: (scene: SceneDocument, title?: string) => void;
   select: (id: string, add?: boolean) => void;
+  selectAll: () => void;
   add: (type: PartType, position?: Vec3) => void;
   patch: (id: string, patch: Partial<SceneNode>) => void;
   remove: () => void;
@@ -122,6 +123,13 @@ export const useEditor = create<State>((set, get) => ({
           ? s.selection.filter((x) => x !== id)
           : [...s.selection, id]
         : [id],
+    })),
+  // Selecting only roots carries every descendant once, including folded groups.
+  selectAll: () =>
+    set((s) => ({
+      selection: s.scene.nodes
+        .filter((n) => n.parentId === null)
+        .map((n) => n.id),
     })),
   add: (type, position) => {
     const s = get();
