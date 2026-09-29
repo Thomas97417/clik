@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from "vitest";
-import { Box3, Matrix4, Vector3 } from "three";
+import { Box3, Euler, Matrix4, Quaternion, Vector3 } from "three";
 import {
   type SceneDocument,
   type Part,
@@ -395,7 +395,10 @@ it("décrit les plots visés dans le repère mondial d’une cible tournée", as
   expect(preview.points).toHaveLength(4);
   const inverse = worldMatrix(scene, target.id).invert();
   for (const point of preview.points)
-    expect(new Vector3(...point).applyMatrix4(inverse).y).toBeCloseTo(1.2, 8);
+    expect(new Vector3(...point.position).applyMatrix4(inverse).y).toBeCloseTo(
+      1.2,
+      8,
+    );
   expect(snapCandidate(scene, p, false).kind).toBe("none");
   expect(snapCandidate(emptyScene(), p, true).points).toEqual([]);
 });
@@ -422,6 +425,93 @@ it("utilise la pièce saisie comme référence et ignore les autres pièces dép
     "grid",
   );
 });
+
+it.each([false, true])(
+  "éclaire tous les supports d’une pièce pont, même tournés (%s)",
+  (rotated) => {
+    const left = makePart("brick-2x2", "#ef4444", [-1, 0, 0]);
+    const right = makePart("brick-2x2", "#ef4444", [1, 0, 0]);
+    right.rotation[1] = Math.PI / 2;
+    const bridge = makePart("plate-2x4", "#4079e8", [0.1, 1.3, 0.1]);
+    let scene: SceneDocument = {
+      ...emptyScene(),
+      nodes: [left, right, bridge],
+    };
+    if (rotated)
+      scene = applyDelta(
+        scene,
+        scene.nodes.map((n) => n.id),
+        new Matrix4().makeRotationX(0.4),
+      );
+    const result = snapCandidate(scene, scene.nodes[2] as Part, true);
+    expect(result.kind).toBe("attachment");
+    expect(result.points).toHaveLength(8);
+    expect(new Set(result.points.map((p) => p.targetId))).toEqual(
+      new Set([left.id, right.id]),
+    );
+    const inverse = new Matrix4()
+      .compose(
+        new Vector3(...result.part.position),
+        new Quaternion().setFromEuler(new Euler(...result.part.rotation)),
+        new Vector3(1, 1, 1),
+      )
+      .invert();
+    for (const point of result.points) {
+      expect(
+        new Vector3(...point.position).applyMatrix4(inverse).y,
+      ).toBeCloseTo(0, 8);
+      const normal = new Vector3(0, 1, 0).applyEuler(
+        new Euler(...point.rotation),
+      );
+      expect(
+        normal.distanceTo(
+          new Vector3(0, 1, 0).transformDirection(
+            worldMatrix(scene, point.targetId),
+          ),
+        ),
+      ).toBeLessThan(1e-8);
+    }
+  },
+);
+
+it("ignore les supports cachés, sans plots, non coplanaires ou incompatibles", () => {
+  const support = makePart("brick-2x2", "#ef4444");
+  const hidden = { ...makePart("brick-2x2", "#ef4444"), hidden: true };
+  const low = makePart("brick-2x2", "#ef4444", [0, -0.01, 0]);
+  const tile = makePart("tile-2x2", "#ef4444", [0, 0.8, 0]);
+  const inverted = makePart("brick-2x2", "#ef4444", [0, 2.4, 0]);
+  inverted.rotation[0] = Math.PI;
+  const result = snapCandidate(
+    { ...emptyScene(), nodes: [support, hidden, low, tile, inverted] },
+    makePart("brick-2x2", "#4079e8", [0, 1.2, 0]),
+    true,
+  );
+  expect(result.points).toHaveLength(4);
+  expect(result.points.every((p) => p.targetId === support.id)).toBe(true);
+});
+
+it.each([false, true])(
+  "éclaire les contacts de toute la sélection, groupée ou non (%s)",
+  (grouped) => {
+    const a = makePart("brick-2x2", "#4079e8", [0.1, 1.3, 0.1]);
+    const b = makePart("brick-2x2", "#4079e8", [3.1, 1.3, 0.1]);
+    const left = makePart("brick-2x2", "#ef4444");
+    const right = makePart("brick-2x2", "#ef4444", [3, 0, 0]);
+    let scene: SceneDocument = { ...emptyScene(), nodes: [a, b, left, right] };
+    if (grouped) scene = group(scene, [a.id, b.id], "assembly");
+    const ids = grouped ? ["assembly"] : [a.id, b.id];
+    const preview = previewSelection(scene, ids, true, a.id);
+    expect(preview.targetId).toBe(left.id);
+    expect(preview.points).toHaveLength(8);
+    expect(new Set(preview.points.map((p) => p.targetId))).toEqual(
+      new Set([left.id, right.id]),
+    );
+    expect(previewSelection(scene, ids, false, a.id).points).toEqual([]);
+    expect(
+      previewSelection(scene, [...ids, left.id, right.id], true, a.id).points,
+    ).toEqual([]);
+  },
+);
 
 it("dépose exactement l’aperçu, sans sérialiser les étapes ni ajouter d’historique pour un clic", () => {
   const s = useEditor.getState();

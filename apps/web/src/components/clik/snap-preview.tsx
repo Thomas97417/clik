@@ -82,18 +82,18 @@ export function SnapPreview({ preview }: { preview: SelectionPreview }) {
   }, [preview]);
   useLayoutEffect(() => {
     if (!studs.current) return;
-    const q = new Quaternion().setFromEuler(new Euler(...preview.rotation));
-    const offset = new Vector3(0, 0.07, 0).applyQuaternion(q);
-    preview.points.forEach((p, i) =>
+    preview.points.forEach((p, i) => {
+      const q = new Quaternion().setFromEuler(new Euler(...p.rotation));
+      const offset = new Vector3(0, 0.07, 0).applyQuaternion(q);
       studs.current!.setMatrixAt(
         i,
         new Matrix4().compose(
-          new Vector3(...p).add(offset),
+          new Vector3(...p.position).add(offset),
           q,
           new Vector3(1, 1, 1),
         ),
-      ),
-    );
+      );
+    });
     studs.current.instanceMatrix.needsUpdate = true;
     studs.current.computeBoundingSphere();
   }, [preview]);

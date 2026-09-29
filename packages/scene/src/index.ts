@@ -404,11 +404,61 @@ function anchors(n: Part, top: boolean) {
     }
   return points;
 }
+export type SnapPoint = {
+  position: Vec3;
+  rotation: Vec3;
+  targetId: string;
+};
+
+/** Contacts of the final preview, including supports beyond the snap reference. */
+function attachmentPoints(scene: SceneDocument, parts: Part[]): SnapPoint[] {
+  const moving = new Set(parts.map((p) => p.id));
+  const bottoms = parts.map((part) => {
+    const m = matrix(part);
+    const points = anchors(part, false).map((p) => p.applyMatrix4(m));
+    return {
+      points,
+      bounds: new Box3().setFromPoints(points).expandByScalar(0.001),
+      normal: new Vector3(0, 1, 0).transformDirection(m),
+    };
+  });
+  const contacts: SnapPoint[] = [];
+  for (const target of scene.nodes) {
+    if (
+      target.kind !== "part" ||
+      moving.has(target.id) ||
+      inherited(scene, target.id, "hidden")
+    )
+      continue;
+    const tm = worldMatrix(scene, target.id);
+    const normal = new Vector3(0, 1, 0).transformDirection(tm);
+    const compatible = bottoms.filter((b) => b.normal.dot(normal) > 1 - 1e-6);
+    if (!compatible.length) continue;
+    const rotation = transform(tm).rotation;
+    for (const point of anchors(target, true)) {
+      point.applyMatrix4(tm);
+      if (
+        compatible.some(
+          (b) =>
+            b.bounds.containsPoint(point) &&
+            b.points.some((p) => p.distanceToSquared(point) < 0.000001),
+        )
+      )
+        contacts.push({
+          position: point.toArray() as Vec3,
+          rotation,
+          targetId: target.id,
+        });
+    }
+  }
+  return contacts;
+}
+
 export type SnapResult = {
   part: Part;
   kind: "attachment" | "grid" | "none";
   targetId?: string;
-  points: Vec3[];
+  points: SnapPoint[];
   rotation: Vec3;
 };
 export function snapCandidate(
@@ -475,20 +525,12 @@ export function snapCandidate(
       points: [],
       rotation: [0, 0, 0],
     };
-  const target = scene.nodes.find((n) => n.id === targetId) as Part;
   const tm = worldMatrix(scene, targetId);
-  const bottoms = anchors(result, false).map((p) =>
-    p.applyMatrix4(matrix(result)),
-  );
-  const points = anchors(target, true)
-    .map((p) => p.applyMatrix4(tm))
-    .filter((p) => bottoms.some((b) => b.distanceTo(p) < 0.001))
-    .map((p) => p.toArray() as Vec3);
   return {
     part: result,
     kind: "attachment",
     targetId,
-    points,
+    points: attachmentPoints(scene, [result]),
     rotation: transform(tm).rotation,
   };
 }
@@ -547,14 +589,26 @@ export function previewSelection(
     nodes: scene.nodes.filter((n) => !moving.has(n.id)),
   };
   const { part, ...metadata } = snapCandidate(candidates, world, true);
+  const snapped = applyDelta(
+    scene,
+    ids,
+    matrix(part).multiply(original.clone().invert()),
+  );
   return {
     ...metadata,
+    points:
+      metadata.kind === "attachment" && eligible.length > 1
+        ? attachmentPoints(
+            candidates,
+            eligible.map((n) => ({
+              ...n,
+              ...transform(worldMatrix(snapped, n.id)),
+              parentId: null,
+            })),
+          )
+        : metadata.points,
     ids,
-    scene: applyDelta(
-      scene,
-      ids,
-      matrix(part).multiply(original.clone().invert()),
-    ),
+    scene: snapped,
   };
 }
 

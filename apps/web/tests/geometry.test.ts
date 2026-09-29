@@ -147,7 +147,7 @@ describe("Nouveaux modèles du catalogue", () => {
     );
     expect(result.kind).toBe("attachment");
     expect(result.part.position[1]).toBeCloseTo(1.2);
-    expect(result.points).toEqual([[0, 1.2, 0]]);
+    expect(result.points.map((p) => p.position)).toEqual([[0, 1.2, 0]]);
   });
   it.each(types.filter((type) => CATALOG[type].shape === "slope"))(
     "%s : rampe continue et accroches uniquement sur la rangée haute",
