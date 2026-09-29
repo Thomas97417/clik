@@ -143,12 +143,17 @@ export const useEditor = create<State>((set, get) => ({
   patch: (id, patch) => {
     const s = get();
     if (inherited(s.scene, id, "locked") && !("locked" in patch)) return;
-    s.commit({
+    const next = {
       ...s.scene,
       nodes: s.scene.nodes.map((n) =>
         n.id === id ? ({ ...n, ...patch } as SceneNode) : n,
       ),
-    });
+    };
+    s.commit(
+      patch.position || patch.rotation
+        ? previewSelection(next, [id], false).scene
+        : next,
+    );
   },
   remove: () => {
     const s = get(),

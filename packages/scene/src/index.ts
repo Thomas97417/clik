@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { Box3, Matrix4, Quaternion, Vector3, Euler } from "three";
-import { placementBody, slopeClearance } from "./slope-clearance";
+import {
+  placementBody,
+  collisionClearance,
+  bodiesOverlap,
+} from "./placement-collision";
 export const CATALOG = {
   "brick-1x1": { name: "Brique 1 × 1", w: 1, d: 1, h: 1.2, shape: "block" },
   "brick-1x2": { name: "Brique 1 × 2", w: 2, d: 1, h: 1.2, shape: "block" },
@@ -405,39 +409,43 @@ function anchors(n: Part, top: boolean) {
     }
   return points;
 }
-function clearanceAboveSlopes(
-  scene: SceneDocument,
-  parts: Part[],
-  grid = false,
-) {
+function placementClearance(scene: SceneDocument, parts: Part[], grid = false) {
   const ids = new Set(parts.map((p) => p.id));
-  const slopes = scene.nodes.filter(
-    (n): n is Part =>
-      n.kind === "part" &&
-      CATALOG[n.type].shape === "slope" &&
-      !ids.has(n.id) &&
-      !inherited(scene, n.id, "hidden"),
+  const obstacles = scene.nodes.filter(
+    (n): n is Part => n.kind === "part" && !ids.has(n.id),
   );
-  if (!slopes.length) return 0;
-  return slopeClearance(
+  if (!obstacles.length) return 0;
+  return collisionClearance(
     parts.map((p) => placementBody(CATALOG[p.type], matrix(p))),
-    slopes.map((p) => placementBody(CATALOG[p.type], worldMatrix(scene, p.id))),
+    obstacles.map((p) =>
+      placementBody(CATALOG[p.type], worldMatrix(scene, p.id)),
+    ),
     grid,
   );
 }
 
-function clearPartFromSlopes(
+function clearPartCollisions(
   scene: SceneDocument,
   part: Part,
   grid = false,
 ): Part {
-  const lift = clearanceAboveSlopes(scene, [part], grid);
+  const lift = placementClearance(scene, [part], grid);
   return lift
     ? {
         ...part,
         position: [part.position[0], part.position[1] + lift, part.position[2]],
       }
     : part;
+}
+
+/** Use actual rotated body shapes, rather than their enclosing boxes. */
+export function hasOverlappingParts(scene: SceneDocument) {
+  const parts = scene.nodes
+    .filter((n): n is Part => n.kind === "part")
+    .map((p) => placementBody(CATALOG[p.type], worldMatrix(scene, p.id)));
+  return parts.some((part, i) =>
+    parts.slice(i + 1).some((other) => bodiesOverlap(part, other)),
+  );
 }
 
 export type SnapPoint = {
@@ -504,7 +512,7 @@ export function snapCandidate(
 ): SnapResult {
   if (!enabled)
     return {
-      part: clearPartFromSlopes(scene, part),
+      part: clearPartCollisions(scene, part),
       kind: "none",
       points: [],
       rotation: [0, 0, 0],
@@ -560,17 +568,29 @@ export function snapCandidate(
         }
       }
   }
-  if (!targetId)
+  if (!targetId) {
+    const snapped = clearPartCollisions(scene, snapToGrid(part), true);
+    const points = attachmentPoints(scene, [snapped]);
     return {
-      part: clearPartFromSlopes(scene, snapToGrid(part), true),
-      kind: "grid",
-      points: [],
-      rotation: [0, 0, 0],
+      part: snapped,
+      kind: points.length ? "attachment" : "grid",
+      targetId: points[0]?.targetId,
+      points,
+      rotation: points[0]?.rotation ?? [0, 0, 0],
     };
+  }
   const tm = worldMatrix(scene, targetId);
-  const safe = clearPartFromSlopes(scene, result, true);
-  if (safe !== result)
-    return { part: safe, kind: "grid", points: [], rotation: [0, 0, 0] };
+  const safe = clearPartCollisions(scene, result, true);
+  if (safe !== result) {
+    const points = attachmentPoints(scene, [safe]);
+    return {
+      part: safe,
+      kind: points.length ? "attachment" : "grid",
+      points,
+      targetId: points[0]?.targetId,
+      rotation: points[0]?.rotation ?? [0, 0, 0],
+    };
+  }
   return {
     part: result,
     kind: "attachment",
@@ -665,41 +685,35 @@ export function previewSelection(
 ): SelectionPreview {
   const preview = rawSelectionPreview(scene, ids, enabled, referenceId);
   const moving = new Set(descendants(scene, ids));
-  if (
-    !scene.nodes.some(
-      (n) =>
-        n.kind === "part" &&
-        CATALOG[n.type].shape === "slope" &&
-        !moving.has(n.id) &&
-        !inherited(scene, n.id, "hidden"),
-    )
-  )
+  if (!scene.nodes.some((n) => n.kind === "part" && !moving.has(n.id)))
     return preview;
   const parts = preview.scene.nodes
-    .filter(
-      (n): n is Part =>
-        n.kind === "part" &&
-        moving.has(n.id) &&
-        !inherited(scene, n.id, "hidden"),
-    )
+    .filter((n): n is Part => n.kind === "part" && moving.has(n.id))
     .map((p) => ({
       ...p,
       ...transform(worldMatrix(preview.scene, p.id)),
       parentId: null,
     }));
-  const lift = clearanceAboveSlopes(preview.scene, parts, enabled);
+  const lift = placementClearance(preview.scene, parts, enabled);
   if (!lift) return preview;
+  const placed = applyDelta(
+    preview.scene,
+    ids,
+    new Matrix4().makeTranslation(0, lift, 0),
+  );
+  const points = enabled
+    ? attachmentPoints(
+        { ...placed, nodes: placed.nodes.filter((n) => !moving.has(n.id)) },
+        parts.map((p) => ({ ...p, ...transform(worldMatrix(placed, p.id)) })),
+      )
+    : [];
   return {
     ...preview,
-    scene: applyDelta(
-      preview.scene,
-      ids,
-      new Matrix4().makeTranslation(0, lift, 0),
-    ),
-    kind: enabled ? "grid" : "none",
-    targetId: undefined,
-    points: [],
-    rotation: [0, 0, 0],
+    scene: placed,
+    kind: enabled ? (points.length ? "attachment" : "grid") : "none",
+    targetId: points[0]?.targetId,
+    points,
+    rotation: points[0]?.rotation ?? [0, 0, 0],
   };
 }
 

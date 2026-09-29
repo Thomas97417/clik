@@ -10,14 +10,13 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useAction, useMutation } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
-import { Box3, Vector3 } from "three";
 import {
   CATALOG,
   COLORS,
   COLOR_NAMES,
   inherited,
   ancestors,
-  worldMatrix,
+  hasOverlappingParts,
   type SceneNode,
   type PartType,
   type Vec3,
@@ -96,6 +95,8 @@ function Numeric({
       onBlur={(e) => {
         const n = Number(e.target.value);
         if (Number.isFinite(n) && n !== value) safe(() => onChange(n));
+        // A collision may resolve back to the same value, without a React remount.
+        e.currentTarget.value = String(+value.toFixed(3));
       }}
       onKeyDown={(e) => {
         if (e.key === "Enter") e.currentTarget.blur();
@@ -244,21 +245,10 @@ export default function Editor({
   }, [publishing]);
   const selected = s.scene.nodes.find((n) => n.id === s.selection[0]);
   const count = s.scene.nodes.filter((n) => n.kind === "part").length;
-  const overlap = useMemo(() => {
-    const parts = s.scene.nodes.filter(
-      (n) => n.kind === "part" && !inherited(s.scene, n.id, "hidden"),
-    );
-    const boxes = parts.map((n) => {
-      const d = CATALOG[(n as Extract<SceneNode, { kind: "part" }>).type];
-      return new Box3(
-        new Vector3(-d.w / 2 + 0.04, 0.04, -d.d / 2 + 0.04),
-        new Vector3(d.w / 2 - 0.04, d.h - 0.04, d.d / 2 - 0.04),
-      ).applyMatrix4(worldMatrix(s.scene, n.id));
-    });
-    return boxes.some((a, i) =>
-      boxes.slice(i + 1).some((b) => a.intersectsBox(b)),
-    );
-  }, [s.gesture ? null : s.scene]);
+  const overlap = useMemo(
+    () => hasOverlappingParts(s.scene),
+    [s.gesture ? null : s.scene],
+  );
   const preserve = async () => {
     const id = await project.copy();
     await navigate({ to: "/editor/$projectId", params: { projectId: id } });
@@ -738,7 +728,7 @@ export default function Editor({
               <span>{count} / 500 pièces</span>
               {overlap && (
                 <span className="overlap">
-                  Chevauchement possible · autorisé
+                  Chevauchement existant à corriger
                 </span>
               )}
               <div className="view-select">

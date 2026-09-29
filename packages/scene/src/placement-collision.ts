@@ -79,15 +79,19 @@ function penetrationLift(a: Body, b: Body, offset: number) {
 }
 
 /** A common lift preserves the relative positions of all members of a group. */
-export function slopeClearance(moving: Body[], slopes: Body[], grid = false) {
+export function collisionClearance(
+  moving: Body[],
+  obstacles: Body[],
+  grid = false,
+) {
   let lift = 0;
   // Every intersecting pair has a finite vertical interval. Once exited upwards,
   // it cannot be entered again, so at most one exit per pair is necessary.
-  for (let pass = 0; pass <= moving.length * slopes.length; pass++) {
+  for (let pass = 0; pass <= moving.length * obstacles.length; pass++) {
     const before = lift;
     for (const part of moving)
-      for (const slope of slopes) {
-        const amount = penetrationLift(part, slope, lift);
+      for (const obstacle of obstacles) {
+        const amount = penetrationLift(part, obstacle, lift);
         if (amount > 1e-8) {
           lift += amount;
           if (grid) lift = Math.ceil((lift - 1e-8) / 0.4) * 0.4;
@@ -96,4 +100,8 @@ export function slopeClearance(moving: Body[], slopes: Body[], grid = false) {
     if (lift === before) break;
   }
   return lift;
+}
+
+export function bodiesOverlap(a: Body, b: Body) {
+  return penetrationLift(a, b, 0) > 1e-8;
 }

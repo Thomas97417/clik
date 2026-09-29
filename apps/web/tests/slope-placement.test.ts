@@ -90,7 +90,9 @@ describe("placement sur les rampes", () => {
     expect(snapCandidate(scene, beside, false).part).toBe(beside);
     target.hidden = true;
     const inside = makePart("brick-1x1", "#ef4444", [0, 0.5, -0.5]);
-    expect(snapCandidate(scene, inside, false).part).toBe(inside);
+    expect(snapCandidate(scene, inside, false).part.position[1]).toBeCloseTo(
+      1.1905,
+    );
   });
 
   it("respecte l’inclinaison et la visibilité héritées du groupe de la pente", () => {
@@ -111,7 +113,7 @@ describe("placement sur les rampes", () => {
     const lift = (1.1905 - 0.725) / (Math.cos(0.3) + 0.95 * Math.sin(0.3));
     expect(result.position[1]).toBeCloseTo(position.y + lift, 8);
     parent.hidden = true;
-    expect(snapCandidate(scene, piece, false).part).toBe(piece);
+    expect(snapCandidate(scene, piece, false).part).toEqual(result);
   });
 
   it("soulève le groupe entier même si la pièce saisie n’est pas sur la pente", () => {

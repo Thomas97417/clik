@@ -145,12 +145,12 @@ test("empilement : plots éclairés, dépôt et désactivation de l’aimantatio
 }, info) => {
   const { canvas, x, y } = await setup(page);
   await page.locator('.piece-card[aria-label="Brique 2 × 2"]').click();
+  await page.getByLabel("position Z", { exact: true }).fill("-3");
+  await page.getByLabel("position Z", { exact: true }).press("Tab");
   await page.getByLabel("position X", { exact: true }).fill("0");
   await page.getByLabel("position X", { exact: true }).press("Tab");
   await page.getByLabel("position Y", { exact: true }).fill("0");
   await page.getByLabel("position Y", { exact: true }).press("Tab");
-  await page.getByLabel("position Z", { exact: true }).fill("-3");
-  await page.getByLabel("position Z", { exact: true }).press("Tab");
   await page.locator(".tree-name").first().click();
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
   await page.mouse.move(x, y);

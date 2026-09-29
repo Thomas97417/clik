@@ -177,7 +177,7 @@ describe("SceneDocument et transformations", () => {
     );
     expect(snapPart({ ...emptyScene(), nodes: [target] }, p, false)).toEqual(p);
   });
-  it("autorise les chevauchements mais refuse cycles, couleurs et plus de 500 pièces", () => {
+  it("charge les anciens chevauchements mais refuse cycles, couleurs et plus de 500 pièces", () => {
     const p = makePart("brick-1x1", "#4079e8");
     expect(
       validateScene({ ...emptyScene(), nodes: [p, { ...p, id: "b" }] }),
@@ -514,12 +514,19 @@ it("ignore les supports cachés, sans plots, non coplanaires ou incompatibles", 
   const inverted = makePart("brick-2x2", "#ef4444", [0, 2.4, 0]);
   inverted.rotation[0] = Math.PI;
   const result = snapCandidate(
-    { ...emptyScene(), nodes: [support, hidden, low, tile, inverted] },
+    { ...emptyScene(), nodes: [support, hidden, low, tile] },
     makePart("brick-2x2", "#4079e8", [0, 1.2, 0]),
     true,
   );
   expect(result.points).toHaveLength(4);
   expect(result.points.every((p) => p.targetId === support.id)).toBe(true);
+  const blocked = snapCandidate(
+    { ...emptyScene(), nodes: [support, inverted] },
+    makePart("brick-2x2", "#4079e8", [0, 1.2, 0]),
+    true,
+  );
+  expect(blocked.points).toEqual([]);
+  expect(blocked.part.position[1]).toBeGreaterThanOrEqual(2.4);
 });
 
 it.each([false, true])(
