@@ -23,7 +23,10 @@ import {
 } from "@clik/scene";
 import {
   ArrowLeft,
+  AlertCircle,
   Box,
+  CloudCheck,
+  CloudUpload,
   ChevronRight,
   ChevronsDownUp,
   ChevronsUpDown,
@@ -33,11 +36,14 @@ import {
   FolderPlus,
   Grid2X2,
   Grip,
+  HardDrive,
   Layers,
   ListChecks,
   LockKeyhole,
+  LoaderCircle,
   Magnet,
   Move3D,
+  Pencil,
   Redo2,
   Rotate3D,
   Scan,
@@ -47,6 +53,7 @@ import {
   Ungroup,
   UnlockKeyhole,
   Upload,
+  WifiOff,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -249,6 +256,26 @@ export default function Editor({
     () => hasOverlappingParts(s.scene),
     [s.gesture ? null : s.scene],
   );
+  const saveState = project.conflict
+    ? "conflict"
+    : project.status.includes("impossible") ||
+        project.status.includes("indisponible")
+      ? "error"
+      : project.status === "Hors ligne"
+        ? "offline"
+        : project.status === "Enregistré"
+          ? "saved"
+          : "saving";
+  const SaveIcon =
+    saveState === "error" || saveState === "conflict"
+      ? AlertCircle
+      : saveState === "offline"
+        ? WifiOff
+        : saveState === "saving"
+          ? LoaderCircle
+          : projectId
+            ? CloudCheck
+            : HardDrive;
   const preserve = async () => {
     const id = await project.copy();
     await navigate({ to: "/editor/$projectId", params: { projectId: id } });
@@ -422,66 +449,133 @@ export default function Editor({
         </Link>
       </div>
       <main className="editor">
-        <div className="editor-top">
-          <Link to="/projects" title="Mes créations" className="icon-button">
-            <ArrowLeft size={19} />
+        <header className="editor-top" aria-label="Projet et sauvegarde">
+          <Link
+            to="/projects"
+            title="Mes créations"
+            aria-label="Mes créations"
+            className="editor-back"
+          >
+            <ArrowLeft size={18} aria-hidden="true" />
           </Link>
-          <Input
-            className="project-title"
-            aria-label="Nom du projet"
-            key={`${projectId}-${project.ready}-${s.title}`}
-            defaultValue={s.title}
-            maxLength={100}
-            onBlur={(e) =>
-              safe(() =>
-                s.commit(s.scene, e.target.value.trim() || "Sans titre"),
-              )
-            }
-          />
-          <span className="draft-tag">
-            {projectId ? "Privé" : "Brouillon local"}
-          </span>
-          <div className="top-spacer" />
-          <span className="save-status" role="status">
-            <span
-              className={project.status === "Enregistré" ? "status-dot" : ""}
-            />
-            {project.status}
-          </span>
-          {projectId ? (
-            <Button
-              disabled={
-                !project.ready ||
-                !captureReady ||
-                !!s.gesture ||
-                project.conflict
-              }
-              onClick={() => {
-                setPubTitle(s.title);
-                setPublishing(true);
-              }}
+          <div className="editor-project">
+            <label className="project-title-field" title="Renommer le projet">
+              <Input
+                className="project-title"
+                aria-label="Nom du projet"
+                key={`${projectId}-${project.ready}-${s.title}`}
+                defaultValue={s.title}
+                disabled={!project.ready}
+                maxLength={100}
+                onFocus={(e) => e.currentTarget.select()}
+                onBlur={(e) => {
+                  const title = e.currentTarget.value.trim() || "Sans titre";
+                  if (title !== s.title) safe(() => s.commit(s.scene, title));
+                  e.currentTarget.value = title;
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") e.currentTarget.blur();
+                  if (e.key === "Escape") {
+                    e.stopPropagation();
+                    e.currentTarget.value = s.title;
+                    e.currentTarget.blur();
+                  }
+                }}
+              />
+              <Pencil size={13} aria-hidden="true" />
+            </label>
+            <div className="project-metadata">
+              <span
+                className="project-visibility"
+                title={
+                  projectId
+                    ? "Ce projet reste privé jusqu’à sa publication."
+                    : "Ce brouillon est conservé dans ce navigateur."
+                }
+              >
+                {projectId ? (
+                  <LockKeyhole size={11} aria-hidden="true" />
+                ) : (
+                  <HardDrive size={11} aria-hidden="true" />
+                )}
+                {projectId ? "Projet privé" : "Brouillon local"}
+              </span>
+              {project.origin && (
+                <Link
+                  className="project-attribution"
+                  to="/creations/$publicationId"
+                  params={{ publicationId: project.origin.publicationId }}
+                  title={`Voir la création originale : « ${project.origin.title} » de ${project.origin.author}`}
+                >
+                  D’après « {project.origin.title} » de {project.origin.author}
+                </Link>
+              )}
+            </div>
+          </div>
+          <div className="editor-project-actions">
+            <div
+              className="save-status"
+              data-state={saveState}
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
             >
-              <Upload size={15} /> Publier
-            </Button>
-          ) : project.isAuthenticated ? (
-            <Button onClick={() => safe(preserve)}>
-              Conserver dans mes projets
-            </Button>
-          ) : (
-            <Link
-              to="/sign-in"
-              onClick={() =>
-                sessionStorage.setItem(
-                  "clik-return-to",
-                  window.location.pathname,
-                )
-              }
-              className="primary-link"
-            >
-              Se connecter pour sauvegarder
-            </Link>
-          )}
-        </div>
+              <SaveIcon size={18} aria-hidden="true" />
+              <div>
+                <span>
+                  {project.conflict ? "Conflit à résoudre" : project.status}
+                </span>
+                <small>
+                  {saveState === "conflict" || saveState === "error"
+                    ? "Sauvegarde interrompue"
+                    : projectId
+                      ? "Sauvegarde automatique"
+                      : "Sur cet appareil"}
+                </small>
+              </div>
+            </div>
+            {projectId ? (
+              <Button
+                className="editor-primary-action"
+                disabled={
+                  !project.ready ||
+                  !captureReady ||
+                  !!s.gesture ||
+                  project.conflict
+                }
+                onClick={() => {
+                  setPubTitle(s.title);
+                  setPublishing(true);
+                }}
+              >
+                <Upload size={15} aria-hidden="true" /> Publier
+              </Button>
+            ) : project.isAuthenticated ? (
+              <Button
+                className="editor-primary-action"
+                disabled={!project.ready || !!s.gesture}
+                onClick={() => safe(preserve)}
+              >
+                <CloudUpload size={16} aria-hidden="true" /> Conserver le projet
+              </Button>
+            ) : (
+              <Link
+                to="/sign-in"
+                onClick={() =>
+                  sessionStorage.setItem(
+                    "clik-return-to",
+                    window.location.pathname + window.location.search,
+                  )
+                }
+                className="primary-link editor-primary-action"
+                aria-label="Se connecter pour sauvegarder"
+                title="Se connecter pour retrouver ce projet sur vos autres appareils"
+              >
+                <CloudUpload size={16} aria-hidden="true" /> Se connecter
+              </Link>
+            )}
+          </div>
+        </header>
         {project.conflict && (
           <div className="conflict" role="alert">
             Ce brouillon a changé dans un autre onglet.{" "}
@@ -978,11 +1072,6 @@ export default function Editor({
                 )}
               </div>
             </div>
-            {project.origin && (
-              <p className="attribution">
-                D’après « {project.origin.title} » de {project.origin.author}.
-              </p>
-            )}
           </aside>
         </div>
         <footer className="editor-footer">

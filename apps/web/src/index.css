@@ -451,58 +451,170 @@ button:focus-visible {
   background: #fff;
 }
 .editor-top {
-  height: 66px;
+  min-height: 82px;
   display: flex;
   align-items: center;
-  gap: 13px;
-  padding: 0 22px;
+  gap: 18px;
+  padding: 12px 22px;
   border-bottom: 1px solid #e5e9f0;
   flex-shrink: 0;
+  background: #fff;
 }
-.icon-button {
+.editor-back {
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 32px;
-  color: #718097;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: 1px solid #e5e9f0;
+  border-radius: 10px;
+  color: #68788e;
+  transition:
+    background 150ms,
+    color 150ms;
+}
+.editor-back:hover {
+  background: #f0f4ff;
+  color: #356ae6;
+}
+.editor-back:focus-visible,
+.project-attribution:focus-visible,
+.editor-primary-action:focus-visible {
+  outline: 2px solid #356ae6;
+  outline-offset: 3px;
+}
+.editor-project {
+  flex: 1;
+  min-width: 0;
+  padding-left: 18px;
+  border-left: 1px solid #e5e9f0;
+}
+.project-title-field {
+  display: flex;
+  align-items: center;
+  position: relative;
+  max-width: 520px;
+  border-radius: 6px;
+}
+.project-title-field > svg {
+  position: absolute;
+  right: 8px;
+  color: #8b99ad;
+  pointer-events: none;
 }
 .project-title {
-  font-size: 15px !important;
-  border: 0;
+  font-size: 16px !important;
+  height: 30px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   box-shadow: none !important;
-  width: 220px;
+  width: 100%;
+  min-width: 0;
   font-weight: 650;
-  padding-left: 5px;
+  padding: 2px 30px 2px 6px;
+  text-overflow: ellipsis;
+  background: transparent;
 }
-.draft-tag {
+.project-title:hover {
+  background: #f5f7fb;
+}
+.project-title:focus-visible {
+  border-color: #356ae6;
+  background: #fff;
+  outline: 2px solid #e1eaff;
+}
+.project-metadata {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  margin-top: 3px;
+  padding-left: 7px;
   font-size: 11px;
-  padding: 4px 8px;
-  border-radius: 5px;
-  background: #f1f4f8;
-  color: #7a879b;
-  white-space: nowrap;
+  line-height: 18px;
 }
-.top-spacer {
-  flex: 1;
+.project-visibility {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  color: #68788e;
+}
+.project-attribution {
+  min-width: 0;
+  padding-left: 10px;
+  border-left: 1px solid #dde4ee;
+  color: #536888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.project-attribution:hover {
+  color: #356ae6;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.editor-project-actions {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-shrink: 0;
 }
 .save-status {
   display: flex;
-  gap: 7px;
+  gap: 9px;
   align-items: center;
-  color: #7b899d;
+  color: #68788e;
   font-size: 12px;
+  max-width: 230px;
+  line-height: 1.4;
+}
+.save-status > svg {
+  flex-shrink: 0;
+}
+.save-status > div {
+  display: grid;
+  gap: 2px;
+}
+.save-status small {
+  font-size: 10px;
+  color: #68788e;
+}
+.save-status[data-state="saved"] > svg {
+  color: #34906c;
+}
+.save-status[data-state="offline"],
+.save-status[data-state="conflict"] {
+  color: #9b660c;
+}
+.save-status[data-state="error"] {
+  color: #c33e42;
+}
+.save-status[data-state="saving"] > svg {
+  color: #356ae6;
+  animation: editor-saving 1.5s linear infinite;
+}
+@keyframes editor-saving {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .save-status[data-state="saving"] > svg {
+    animation: none;
+  }
+}
+.editor-top .editor-primary-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+  height: 38px;
+  padding: 0 15px;
+  border-radius: 9px;
   white-space: nowrap;
-  margin-right: 8px;
-}
-.status-dot {
-  width: 6px;
-  height: 6px;
-  background: #50a780;
-  border-radius: 100%;
-}
-.editor-top .primary-link {
-  font-size: 12px;
-  padding: 9px 12px;
+  box-shadow: 0 2px 4px #356ae615;
 }
 .editor-body {
   flex: 1;
@@ -1343,8 +1455,24 @@ button:focus-visible {
   .scene-toolbar button span {
     display: none;
   }
-  .draft-tag {
-    display: none;
+  .editor-top {
+    gap: 12px;
+    padding-inline: 16px;
+  }
+  .editor-project {
+    padding-left: 12px;
+  }
+  .editor-project-actions {
+    gap: 14px;
+  }
+  .project-metadata {
+    flex-wrap: wrap;
+    gap: 0 10px;
+  }
+  .project-attribution {
+    flex-basis: 100%;
+    padding-left: 0;
+    border: 0;
   }
   .home-intro {
     min-height: 540px;
@@ -1489,7 +1617,6 @@ button:focus-visible {
 .library-tip p,
 .editor-footer,
 .viewport-bottom,
-.draft-tag,
 .save-status,
 .panel-heading > span {
   font-size: 12px;
