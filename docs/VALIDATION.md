@@ -75,6 +75,12 @@ Deux régressions navigateur contrôlent les images successives pendant les mouv
 
 Captures : `/tmp/clik-grid-far-<vue>-<moteur>.png`, `/tmp/clik-grid-sweep-<vue>-<moteur>.png` et `/tmp/clik-grid-occlusion-<vue>-<moteur>.png`.
 
+## Filtrage du quadrillage à l’horizon
+
+Le quadrillage utilise désormais un shader dédié qui intègre la couverture des lignes sur l’empreinte du pixel. Les motifs trop serrés convergent vers leur couverture moyenne avant de devenir non résolubles, au lieu d’alterner entre lignes et espaces avec les petits mouvements de caméra. Le dessin en arrière-plan, les ombres, l’alignement mondial et les niveaux de détail du zoom restent conservés.
+
+Un nouveau scénario suit pendant 2,2 secondes une bande à l’horizon après une rotation horizontale en vue rasante. Il mesure le 95e percentile des variations de luminance entre images, borne les pics pendant le mouvement et vérifie leur stabilisation après 1,2 seconde. Le temps réel est utilisé pour tenir compte des cadences différentes de Chromium, Firefox et WebKit. Les trois contrôles passent, ainsi que les 12 contrôles de grille, zoom et masquage sous les pièces. Les captures `/tmp/clik-grid-horizon-<moteur>.png` ont été inspectées. Les 152 tests automatisés, TypeScript et le build passent.
+
 ## Mesure de charge
 
 Machine : Apple M2 Pro, 16 Gio de mémoire, macOS. Fenêtre de 1 440 × 1 000 pixels. Serveur Vite en développement, rendu instancié, ombres et antialiasing actifs. Scène de 500 briques 2 × 4 réparties sur une grille et plusieurs niveaux, cinq couleurs. Sélection et cadrage d’une pièce en vue de dessus, puis déplacement réel avec aperçu d’aimantation actif pendant une fenêtre de mesure de trois secondes. Les événements du pointeur sont regroupés par image ; les transformations et couleurs des instances immobiles sont réutilisées, et l’arborescence reste stable pendant le geste.

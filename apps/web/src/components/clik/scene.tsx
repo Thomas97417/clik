@@ -11,18 +11,12 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   OrbitControls,
   TransformControls,
-  Grid,
   GizmoHelper,
   GizmoViewport,
 } from "@react-three/drei";
 import {
   Box3,
   Color,
-  CustomBlending,
-  SrcAlphaFactor,
-  OneMinusSrcAlphaFactor,
-  OneFactor,
-  DoubleSide,
   type Group,
   InstancedMesh,
   Matrix4,
@@ -45,6 +39,7 @@ import { useEditor } from "@/lib/clik/store";
 import { toast } from "sonner";
 import { CAMERA_GIZMO_MARGIN, Gestures } from "./gestures";
 import { SnapPreview } from "./snap-preview";
+import { GroundGrid } from "./ground-grid";
 const material = new MeshStandardMaterial({ roughness: 0.32, metalness: 0.02 });
 function Batch({
   type,
@@ -337,44 +332,7 @@ function Stage({
         shadow-camera-bottom={-25}
         shadow-bias={-0.0005}
       />
-      {/* Transparent floor layers must never occlude each other through depth:
-          their nearly coplanar surfaces otherwise flicker as the camera moves. */}
-      <Grid
-        renderOrder={-2}
-        position={[0, -0.025, 0]}
-        args={[2, 2]}
-        onUpdate={(grid) => {
-          // Drei attaches its shader material after the mesh is created.
-          // Apply this to the attached material, not the temporary mesh default.
-          const materials = Array.isArray(grid.material)
-            ? grid.material
-            : [grid.material];
-          materials.forEach((material) => {
-            // Render in the opaque queue BEFORE pieces, but retain alpha
-            // blending for antialiased lines. A giant ground plane must not
-            // compete with tiny piece surfaces through interpolated depth.
-            material.transparent = false;
-            material.blending = CustomBlending;
-            material.blendSrc = SrcAlphaFactor;
-            material.blendDst = OneMinusSrcAlphaFactor;
-            material.blendSrcAlpha = OneFactor;
-            material.blendDstAlpha = OneMinusSrcAlphaFactor;
-            material.depthTest = false;
-            material.depthWrite = false;
-          });
-        }}
-        cellSize={gridStep}
-        cellThickness={1}
-        cellColor="#bcc8d8"
-        sectionSize={gridStep * 5}
-        sectionThickness={1.4}
-        sectionColor="#b4c1d4"
-        fadeDistance={100000}
-        fadeStrength={0}
-        followCamera
-        side={DoubleSide}
-        infiniteGrid
-      />
+      <GroundGrid step={gridStep} />
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -0.035, 0]}
