@@ -962,6 +962,7 @@ export default function Editor({
           <span>
             Glisser : déplacer · Espace + glisser / clic droit : caméra · Maj +
             clic : sélection multiple <ChevronRight size={12} /> F : cadrer{" "}
+            <ChevronRight size={12} /> Pièce saisie : R / Maj + R : ±90°{" "}
             <ChevronRight size={12} /> Échap : annuler
           </span>
         </footer>

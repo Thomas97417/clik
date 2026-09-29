@@ -347,25 +347,27 @@ export function Gestures({
       );
       previewDrag();
     };
-    const wheel = (e: WheelEvent) => {
+    const rotateHeldPiece = (turn: number) => {
       if (useEditor.getState().pending && useEditor.getState().libraryPointer) {
-        stop(e);
-        if (e.deltaY && libraryLocation) {
-          libraryTurns = (libraryTurns - Math.sign(e.deltaY)) % 4;
+        if (libraryLocation) {
+          libraryTurns = (libraryTurns + turn) % 4;
           if (libraryInside) locate(libraryLocation);
         }
-        return;
+        return true;
       }
-      if (!drag || e.deltaY === 0) return;
-      stop(e);
+      if (!drag) return false;
       startDrag();
       if (moveFrame) {
         cancelAnimationFrame(moveFrame);
         updateDrag();
       }
-      // One wheel event is one quarter turn; upward scroll is +90°, downward -90°.
-      drag.turns = (drag.turns - Math.sign(e.deltaY)) % 4;
+      drag.turns = (drag.turns + turn) % 4;
       previewDrag();
+      return true;
+    };
+    const wheel = (e: WheelEvent) => {
+      // Upward scroll is +90°, downward -90°.
+      if (e.deltaY && rotateHeldPiece(-Math.sign(e.deltaY))) stop(e);
     };
     const up = (e: PointerEvent) => {
       if (cameraGesture) finishCamera();
@@ -384,6 +386,26 @@ export function Gestures({
     const keydown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         cancel();
+        return;
+      }
+      if (
+        e.key.toLowerCase() === "r" &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.altKey &&
+        !e.isComposing
+      ) {
+        const target = e.target instanceof HTMLElement ? e.target : null;
+        if (
+          document.querySelector(
+            'dialog[open],[role="dialog"],[role="alertdialog"]',
+          ) ||
+          target?.closest("input,textarea,select,[contenteditable]") ||
+          (target?.closest('button,a,[role="button"],[role="menu"]') &&
+            !target.closest(".piece-card"))
+        )
+          return;
+        if (!e.repeat && rotateHeldPiece(e.shiftKey ? -1 : 1)) stop(e);
         return;
       }
       if (
