@@ -22,7 +22,7 @@ async function layout(page: Page) {
 test("bibliothèque : largeur stable quand le défilement apparaît", async ({
   page,
 }, info) => {
-  await page.setViewportSize({ width: 1100, height: 760 });
+  await page.setViewportSize({ width: 1100, height: 800 });
   await page.goto("/editor");
   await expect(page.locator("canvas").first()).toHaveAttribute(
     "data-rendered",

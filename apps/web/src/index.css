@@ -617,10 +617,89 @@ button:focus-visible {
   box-shadow: 0 2px 4px #356ae615;
 }
 .editor-body {
+  --library-width: 236px;
+  --inspector-width: 264px;
+  --scene-min-width: 300px;
   flex: 1;
   display: grid;
-  grid-template-columns: 236px minmax(300px, 1fr) 264px;
+  grid-template-columns:
+    var(--library-width) minmax(var(--scene-min-width), 1fr)
+    var(--inspector-width);
   min-height: 0;
+}
+.editor-body[data-library-collapsed="true"] {
+  --library-width: 0px;
+}
+.editor-body[data-inspector-collapsed="true"] {
+  --inspector-width: 0px;
+}
+.editor-side {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  background: #fff;
+}
+.editor-side > aside {
+  height: 100%;
+}
+.editor-side > aside[hidden] {
+  display: none;
+}
+.editor-side-left {
+  border-right: 1px solid #e4e9f1;
+}
+.editor-side-right {
+  border-left: 1px solid #e4e9f1;
+}
+.editor-body[data-library-collapsed="true"] > .editor-side-left,
+.editor-body[data-inspector-collapsed="true"] > .editor-side-right {
+  border: 0;
+}
+.side-panel-toggle {
+  position: absolute;
+  top: 12px;
+  right: 8px;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #e4e9f1;
+  border-radius: 7px;
+  background: #fff;
+  color: #68788e;
+}
+.side-panel-toggle:hover {
+  background: #edf3ff;
+  border-color: #cddcfa;
+  color: #356ae6;
+}
+.side-panel-toggle:focus-visible {
+  outline: 2px solid #356ae6;
+  outline-offset: 2px;
+}
+.side-panel-toggle[aria-expanded="false"] {
+  top: 20px;
+  right: 12px;
+  box-shadow: 0 2px 8px #23334d14;
+}
+.editor-side-left .side-panel-toggle[aria-expanded="false"] {
+  left: 12px;
+  right: auto;
+}
+.editor-side .panel-heading-collapsible {
+  padding: 10px 46px 10px 14px;
+  min-height: 54px;
+}
+.panel-heading-collapsible h2 {
+  line-height: 18px;
+}
+.panel-heading-collapsible > div > span {
+  display: block;
+  margin-top: 2px;
+  color: #68788e;
+  font-size: 11px;
+  line-height: 14px;
 }
 .library,
 .inspector {
@@ -631,7 +710,6 @@ button:focus-visible {
   overflow: auto;
 }
 .library {
-  border-right: 1px solid #e4e9f1;
   min-width: 0;
   overflow: hidden;
 }
@@ -943,9 +1021,6 @@ button:focus-visible {
 .canvas-empty p {
   font-size: 12px;
   margin-top: 12px;
-}
-.inspector {
-  border-left: 1px solid #e1e7ef;
 }
 .tree-actions {
   display: flex;
@@ -1439,7 +1514,8 @@ button:focus-visible {
 }
 @media (min-width: 1500px) {
   .editor-body {
-    grid-template-columns: 260px minmax(300px, 1fr) 285px;
+    --library-width: 260px;
+    --inspector-width: 285px;
   }
   .piece-card {
     min-height: 106px;
@@ -1450,7 +1526,9 @@ button:focus-visible {
     gap: 25px;
   }
   .editor-body {
-    grid-template-columns: 210px minmax(280px, 1fr) 230px;
+    --library-width: 210px;
+    --inspector-width: 230px;
+    --scene-min-width: 280px;
   }
   .scene-toolbar button span {
     display: none;

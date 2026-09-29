@@ -45,6 +45,10 @@ import {
   LoaderCircle,
   Magnet,
   Move3D,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
   Pencil,
   Redo2,
   Rotate3D,
@@ -149,6 +153,10 @@ export default function Editor({
   const treeId = useId();
   const propertiesId = useId();
   const [propertiesCollapsed, setPropertiesCollapsed] = useState(false);
+  const [libraryCollapsed, setLibraryCollapsed] = useState(false);
+  const [inspectorCollapsed, setInspectorCollapsed] = useState(false);
+  const libraryId = useId();
+  const inspectorId = useId();
   const hierarchy = useMemo(() => {
     const children = new Map<string | null, SceneNode[]>();
     const groups = s.scene.nodes.filter((n) => n.kind === "group");
@@ -610,149 +618,184 @@ export default function Editor({
             )}
           </div>
         )}
-        <div className="editor-body">
-          <aside className="library" aria-label="Bibliothèque de pièces">
-            <div className="library-header">
-              <div className="panel-heading">
-                <h2>Les pièces</h2>
-                <span>
-                  {visibleParts.length} modèle
-                  {visibleParts.length === 1 ? "" : "s"}
-                </span>
-              </div>
-              <div
-                className="piece-tabs"
-                role="group"
-                aria-label="Catégories de pièces"
-              >
-                {pieceCategories.map(({ name, prefix }) => (
-                  <button
-                    key={name}
-                    className={name === category ? "active" : ""}
-                    aria-label={name}
-                    aria-pressed={name === category}
-                    onClick={() => {
-                      setCategory(name);
-                      if (libraryScroll.current)
-                        libraryScroll.current.scrollTop = 0;
-                    }}
-                  >
-                    <span>{name}</span>
-                    <span className="category-count" aria-hidden="true">
-                      {catalog.filter(([id]) => id.startsWith(prefix)).length}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div
-              className="library-scroll"
-              ref={libraryScroll}
-              role="region"
-              aria-label="Modèles de pièces"
-              tabIndex={0}
+        <div
+          className="editor-body"
+          data-library-collapsed={libraryCollapsed}
+          data-inspector-collapsed={inspectorCollapsed}
+        >
+          <div className="editor-side editor-side-left">
+            <button
+              className="side-panel-toggle"
+              aria-label={
+                libraryCollapsed
+                  ? "Déplier la bibliothèque"
+                  : "Replier la bibliothèque"
+              }
+              title={
+                libraryCollapsed
+                  ? "Déplier la bibliothèque"
+                  : "Replier la bibliothèque"
+              }
+              aria-expanded={!libraryCollapsed}
+              aria-controls={libraryId}
+              onClick={() => setLibraryCollapsed((collapsed) => !collapsed)}
             >
-              <div className="piece-grid">
-                {visibleParts.map(([id, p]) => (
-                  <button
-                    className={`piece-card ${s.pending === id ? "active" : ""}`}
-                    key={id}
-                    draggable={false}
-                    disabled={!project.ready || count >= 500}
-                    aria-label={p.name}
-                    title={`${p.name} — glisser dans la scène ou cliquer pour ajouter`}
-                    onDragStart={(e) => e.preventDefault()}
-                    onPointerDown={(e) => {
-                      if (e.button !== 0 || !e.isPrimary) return;
-                      e.currentTarget.setPointerCapture(e.pointerId);
-                      useEditor.setState({
-                        pending: null,
-                        libraryPointer: {
-                          id: e.pointerId,
-                          type: id,
-                          x: e.clientX,
-                          y: e.clientY,
-                        },
-                        libraryClickSuppressed: false,
-                      });
-                    }}
-                    onClick={(e) => {
-                      if (
-                        e.detail === 0 ||
-                        !useEditor.getState().libraryClickSuppressed
-                      )
-                        safe(() => s.add(id));
-                    }}
-                  >
-                    <span className="piece-preview">
-                      <PartPreview type={id} color={s.color} />
+              {libraryCollapsed ? (
+                <PanelLeftOpen size={17} aria-hidden="true" />
+              ) : (
+                <PanelLeftClose size={17} aria-hidden="true" />
+              )}
+            </button>
+            <aside
+              id={libraryId}
+              className="library"
+              aria-label="Bibliothèque de pièces"
+              hidden={libraryCollapsed}
+            >
+              <div className="library-header">
+                <div className="panel-heading panel-heading-collapsible">
+                  <div>
+                    <h2>Les pièces</h2>
+                    <span>
+                      {visibleParts.length} modèle
+                      {visibleParts.length === 1 ? "" : "s"}
                     </span>
-                    <span>{p.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="library-footer">
-              <div className="palette-section">
-                <div className="panel-heading">
-                  <h2>Couleurs</h2>
-                  <span>{COLOR_NAMES[COLORS.indexOf(s.color)]}</span>
+                  </div>
                 </div>
-                <div className="palette">
-                  {COLORS.map((color, i) => (
+                <div
+                  className="piece-tabs"
+                  role="group"
+                  aria-label="Catégories de pièces"
+                >
+                  {pieceCategories.map(({ name, prefix }) => (
                     <button
-                      key={color}
-                      title={COLOR_NAMES[i]}
-                      aria-label={COLOR_NAMES[i]}
-                      aria-pressed={s.color === color}
-                      style={{ background: color }}
-                      className={s.color === color ? "chosen" : ""}
+                      key={name}
+                      className={name === category ? "active" : ""}
+                      aria-label={name}
+                      aria-pressed={name === category}
                       onClick={() => {
-                        useEditor.setState({ color });
-                        const ids = new Set(
-                          s.selection.flatMap((id) => [
-                            id,
-                            ...s.scene.nodes
-                              .filter((n) => {
-                                let p = n.parentId;
-                                while (p) {
-                                  if (p === id) return true;
-                                  p =
-                                    s.scene.nodes.find((x) => x.id === p)
-                                      ?.parentId ?? null;
-                                }
-                                return false;
-                              })
-                              .map((n) => n.id),
-                          ]),
-                        );
-                        safe(() =>
-                          s.commit({
-                            ...s.scene,
-                            nodes: s.scene.nodes.map((n) =>
-                              n.kind === "part" &&
-                              ids.has(n.id) &&
-                              !inherited(s.scene, n.id, "locked")
-                                ? { ...n, color }
-                                : n,
-                            ),
-                          }),
-                        );
+                        setCategory(name);
+                        if (libraryScroll.current)
+                          libraryScroll.current.scrollTop = 0;
                       }}
-                    />
+                    >
+                      <span>{name}</span>
+                      <span className="category-count" aria-hidden="true">
+                        {catalog.filter(([id]) => id.startsWith(prefix)).length}
+                      </span>
+                    </button>
                   ))}
                 </div>
               </div>
-              <div className="library-tip">
-                <Grip size={16} aria-hidden="true" />
-                <p>
-                  Clic : ajouter une pièce.
-                  <br />
-                  Glisser : choisir sa place.
-                </p>
+              <div
+                className="library-scroll"
+                ref={libraryScroll}
+                role="region"
+                aria-label="Modèles de pièces"
+                tabIndex={0}
+              >
+                <div className="piece-grid">
+                  {visibleParts.map(([id, p]) => (
+                    <button
+                      className={`piece-card ${s.pending === id ? "active" : ""}`}
+                      key={id}
+                      draggable={false}
+                      disabled={!project.ready || count >= 500}
+                      aria-label={p.name}
+                      title={`${p.name} — glisser dans la scène ou cliquer pour ajouter`}
+                      onDragStart={(e) => e.preventDefault()}
+                      onPointerDown={(e) => {
+                        if (e.button !== 0 || !e.isPrimary) return;
+                        e.currentTarget.setPointerCapture(e.pointerId);
+                        useEditor.setState({
+                          pending: null,
+                          libraryPointer: {
+                            id: e.pointerId,
+                            type: id,
+                            x: e.clientX,
+                            y: e.clientY,
+                          },
+                          libraryClickSuppressed: false,
+                        });
+                      }}
+                      onClick={(e) => {
+                        if (
+                          e.detail === 0 ||
+                          !useEditor.getState().libraryClickSuppressed
+                        )
+                          safe(() => s.add(id));
+                      }}
+                    >
+                      <span className="piece-preview">
+                        <PartPreview type={id} color={s.color} />
+                      </span>
+                      <span>{p.name}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          </aside>
+              <div className="library-footer">
+                <div className="palette-section">
+                  <div className="panel-heading">
+                    <h2>Couleurs</h2>
+                    <span>{COLOR_NAMES[COLORS.indexOf(s.color)]}</span>
+                  </div>
+                  <div className="palette">
+                    {COLORS.map((color, i) => (
+                      <button
+                        key={color}
+                        title={COLOR_NAMES[i]}
+                        aria-label={COLOR_NAMES[i]}
+                        aria-pressed={s.color === color}
+                        style={{ background: color }}
+                        className={s.color === color ? "chosen" : ""}
+                        onClick={() => {
+                          useEditor.setState({ color });
+                          const ids = new Set(
+                            s.selection.flatMap((id) => [
+                              id,
+                              ...s.scene.nodes
+                                .filter((n) => {
+                                  let p = n.parentId;
+                                  while (p) {
+                                    if (p === id) return true;
+                                    p =
+                                      s.scene.nodes.find((x) => x.id === p)
+                                        ?.parentId ?? null;
+                                  }
+                                  return false;
+                                })
+                                .map((n) => n.id),
+                            ]),
+                          );
+                          safe(() =>
+                            s.commit({
+                              ...s.scene,
+                              nodes: s.scene.nodes.map((n) =>
+                                n.kind === "part" &&
+                                ids.has(n.id) &&
+                                !inherited(s.scene, n.id, "locked")
+                                  ? { ...n, color }
+                                  : n,
+                              ),
+                            }),
+                          );
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div className="library-tip">
+                  <Grip size={16} aria-hidden="true" />
+                  <p>
+                    Clic : ajouter une pièce.
+                    <br />
+                    Glisser : choisir sa place.
+                  </p>
+                </div>
+              </div>
+            </aside>
+          </div>
           <section className="viewport">
             <div className="scene-toolbar">
               <div className="tool-group">
@@ -873,233 +916,268 @@ export default function Editor({
               </div>
             </div>
           </section>
-          <aside className="inspector">
-            <div className="panel-heading">
-              <h2>Construction</h2>
-              <span>{count} pièces</span>
-            </div>
+          <div className="editor-side editor-side-right">
             <button
-              className="tree-select-all"
-              title="Sélectionner toutes les pièces et tous les groupes"
-              disabled={!s.scene.nodes.length}
-              onClick={s.selectAll}
+              className="side-panel-toggle"
+              aria-label={
+                inspectorCollapsed
+                  ? "Déplier le panneau de construction"
+                  : "Replier le panneau de construction"
+              }
+              title={
+                inspectorCollapsed
+                  ? "Déplier le panneau de construction"
+                  : "Replier le panneau de construction"
+              }
+              aria-expanded={!inspectorCollapsed}
+              aria-controls={inspectorId}
+              onClick={() => setInspectorCollapsed((collapsed) => !collapsed)}
             >
-              <ListChecks size={17} aria-hidden="true" />
-              Tout sélectionner
-            </button>
-            <div className="tree-actions">
-              <button
-                title="Grouper"
-                onClick={() => safe(s.group)}
-                disabled={!s.selection.length}
-              >
-                <FolderPlus size={17} />
-              </button>
-              <button
-                title="Dissocier"
-                onClick={() => safe(s.ungroup)}
-                disabled={selected?.kind !== "group"}
-              >
-                <Ungroup size={17} />
-              </button>
-              <button
-                title="Dupliquer"
-                onClick={() => safe(s.duplicate)}
-                disabled={!s.selection.length}
-              >
-                <Copy size={17} />
-              </button>
-              <button
-                title="Supprimer"
-                onClick={() => safe(s.remove)}
-                disabled={!s.selection.length}
-              >
-                <Trash2 size={17} />
-              </button>
-              <span className="tree-actions-spacer" />
-              <button
-                title="Tout replier"
-                aria-label="Tout replier"
-                disabled={
-                  !hierarchy.groups.some((n) => !collapsedGroups.has(n.id))
-                }
-                onClick={() =>
-                  setCollapsedGroups(new Set(hierarchy.groups.map((n) => n.id)))
-                }
-              >
-                <ChevronsDownUp size={17} />
-              </button>
-              <button
-                title="Tout déplier"
-                aria-label="Tout déplier"
-                disabled={
-                  !hierarchy.groups.some((n) => collapsedGroups.has(n.id))
-                }
-                onClick={() => setCollapsedGroups(new Set())}
-              >
-                <ChevronsUpDown size={17} />
-              </button>
-            </div>
-            <div
-              className="tree"
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => {
-                e.preventDefault();
-                const id = e.dataTransfer.getData("clik/node");
-                if (id) safe(() => s.reparent(id, null));
-              }}
-            >
-              {s.scene.nodes.length ? (
-                <ul className="tree-branch" aria-label="Pièces et groupes">
-                  {tree(null)}
-                </ul>
+              {inspectorCollapsed ? (
+                <PanelRightOpen size={17} aria-hidden="true" />
               ) : (
-                <div className="tree-empty">
-                  <Layers size={28} />
-                  <p>
-                    Votre construction
-                    <br />
-                    prend place ici.
-                  </p>
-                </div>
+                <PanelRightClose size={17} aria-hidden="true" />
               )}
-            </div>
-            <div className="properties">
-              <div className="panel-heading">
-                <h2>
-                  <button
-                    className="properties-toggle"
-                    aria-label={
-                      propertiesCollapsed
-                        ? "Déplier les propriétés"
-                        : "Replier les propriétés"
-                    }
-                    title={
-                      propertiesCollapsed
-                        ? "Déplier les propriétés"
-                        : "Replier les propriétés"
-                    }
-                    aria-expanded={!propertiesCollapsed}
-                    aria-controls={propertiesId}
-                    onClick={() =>
-                      setPropertiesCollapsed((collapsed) => !collapsed)
-                    }
-                  >
-                    <ChevronRight size={16} aria-hidden="true" />
-                    Propriétés
-                  </button>
-                </h2>
-                <span>
-                  {s.selection.length > 1
-                    ? `${s.selection.length} éléments`
-                    : ""}
-                </span>
+            </button>
+            <aside
+              id={inspectorId}
+              className="inspector"
+              aria-label="Construction et propriétés"
+              hidden={inspectorCollapsed}
+            >
+              <div className="panel-heading panel-heading-collapsible">
+                <div>
+                  <h2>Construction</h2>
+                  <span>{count} pièces</span>
+                </div>
+              </div>
+              <button
+                className="tree-select-all"
+                title="Sélectionner toutes les pièces et tous les groupes"
+                disabled={!s.scene.nodes.length}
+                onClick={s.selectAll}
+              >
+                <ListChecks size={17} aria-hidden="true" />
+                Tout sélectionner
+              </button>
+              <div className="tree-actions">
+                <button
+                  title="Grouper"
+                  onClick={() => safe(s.group)}
+                  disabled={!s.selection.length}
+                >
+                  <FolderPlus size={17} />
+                </button>
+                <button
+                  title="Dissocier"
+                  onClick={() => safe(s.ungroup)}
+                  disabled={selected?.kind !== "group"}
+                >
+                  <Ungroup size={17} />
+                </button>
+                <button
+                  title="Dupliquer"
+                  onClick={() => safe(s.duplicate)}
+                  disabled={!s.selection.length}
+                >
+                  <Copy size={17} />
+                </button>
+                <button
+                  title="Supprimer"
+                  onClick={() => safe(s.remove)}
+                  disabled={!s.selection.length}
+                >
+                  <Trash2 size={17} />
+                </button>
+                <span className="tree-actions-spacer" />
+                <button
+                  title="Tout replier"
+                  aria-label="Tout replier"
+                  disabled={
+                    !hierarchy.groups.some((n) => !collapsedGroups.has(n.id))
+                  }
+                  onClick={() =>
+                    setCollapsedGroups(
+                      new Set(hierarchy.groups.map((n) => n.id)),
+                    )
+                  }
+                >
+                  <ChevronsDownUp size={17} />
+                </button>
+                <button
+                  title="Tout déplier"
+                  aria-label="Tout déplier"
+                  disabled={
+                    !hierarchy.groups.some((n) => collapsedGroups.has(n.id))
+                  }
+                  onClick={() => setCollapsedGroups(new Set())}
+                >
+                  <ChevronsUpDown size={17} />
+                </button>
               </div>
               <div
-                id={propertiesId}
-                className="properties-content"
-                hidden={propertiesCollapsed}
+                className="tree"
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const id = e.dataTransfer.getData("clik/node");
+                  if (id) safe(() => s.reparent(id, null));
+                }}
               >
-                {selected ? (
-                  <>
-                    <label>
-                      Nom
-                      <Input
-                        key={selected.id + selected.name}
-                        defaultValue={selected.name}
-                        maxLength={100}
-                        onBlur={(e) =>
-                          safe(() =>
-                            s.patch(selected.id, {
-                              name: e.target.value || selected.name,
-                            }),
-                          )
-                        }
-                      />
-                    </label>
-                    <label>
-                      Groupe parent
-                      <select
-                        value={
-                          selectionParents.size > 1
-                            ? "mixed"
-                            : ([...selectionParents][0] ?? "")
-                        }
-                        onChange={(e) =>
-                          safe(() =>
-                            s.reparent(selected.id, e.target.value || null),
-                          )
-                        }
-                      >
-                        {selectionParents.size > 1 && (
-                          <option value="mixed" disabled>
-                            Plusieurs groupes
-                          </option>
-                        )}
-                        <option value="">Racine</option>
-                        {s.scene.nodes
-                          .filter(
-                            (n) => n.kind === "group" && n.id !== selected.id,
-                          )
-                          .map((n) => (
-                            <option
-                              key={n.id}
-                              value={n.id}
-                              disabled={
-                                selectionBranches.has(n.id) ||
-                                inherited(s.scene, n.id, "locked")
-                              }
-                            >
-                              {n.name}
-                            </option>
-                          ))}
-                      </select>
-                    </label>
-                    {(["position", "rotation"] as const).map((field) => (
-                      <div className="transform-fields" key={field}>
-                        <label>
-                          {field === "position"
-                            ? "Position"
-                            : "Rotation · degrés"}
-                        </label>
-                        <div>
-                          {["X", "Y", "Z"].map((axis, i) => (
-                            <label key={axis}>
-                              <span className={`axis-${axis}`}>{axis}</span>
-                              <Numeric
-                                label={`${field} ${axis}`}
-                                value={
-                                  selected[field][i] *
-                                  (field === "rotation" ? 180 / Math.PI : 1)
-                                }
-                                onChange={(value) => {
-                                  const values = [...selected[field]] as Vec3;
-                                  values[i] =
-                                    value /
-                                    (field === "rotation" ? 180 / Math.PI : 1);
-                                  s.patch(selected.id, { [field]: values });
-                                }}
-                              />
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                    <p className="property-hint">
-                      {s.selection.length > 1
-                        ? "Le groupe parent s’applique à toute la sélection. Le nom, la position et la rotation concernent le premier élément."
-                        : "Dimensions fixes · positions relatives au groupe"}
-                    </p>
-                  </>
+                {s.scene.nodes.length ? (
+                  <ul className="tree-branch" aria-label="Pièces et groupes">
+                    {tree(null)}
+                  </ul>
                 ) : (
-                  <p className="property-hint">
-                    Sélectionnez une pièce pour la modifier. Maintenez Maj pour
-                    en sélectionner plusieurs.
-                  </p>
+                  <div className="tree-empty">
+                    <Layers size={28} />
+                    <p>
+                      Votre construction
+                      <br />
+                      prend place ici.
+                    </p>
+                  </div>
                 )}
               </div>
-            </div>
-          </aside>
+              <div className="properties">
+                <div className="panel-heading">
+                  <h2>
+                    <button
+                      className="properties-toggle"
+                      aria-label={
+                        propertiesCollapsed
+                          ? "Déplier les propriétés"
+                          : "Replier les propriétés"
+                      }
+                      title={
+                        propertiesCollapsed
+                          ? "Déplier les propriétés"
+                          : "Replier les propriétés"
+                      }
+                      aria-expanded={!propertiesCollapsed}
+                      aria-controls={propertiesId}
+                      onClick={() =>
+                        setPropertiesCollapsed((collapsed) => !collapsed)
+                      }
+                    >
+                      <ChevronRight size={16} aria-hidden="true" />
+                      Propriétés
+                    </button>
+                  </h2>
+                  <span>
+                    {s.selection.length > 1
+                      ? `${s.selection.length} éléments`
+                      : ""}
+                  </span>
+                </div>
+                <div
+                  id={propertiesId}
+                  className="properties-content"
+                  hidden={propertiesCollapsed}
+                >
+                  {selected ? (
+                    <>
+                      <label>
+                        Nom
+                        <Input
+                          key={selected.id + selected.name}
+                          defaultValue={selected.name}
+                          maxLength={100}
+                          onBlur={(e) =>
+                            safe(() =>
+                              s.patch(selected.id, {
+                                name: e.target.value || selected.name,
+                              }),
+                            )
+                          }
+                        />
+                      </label>
+                      <label>
+                        Groupe parent
+                        <select
+                          value={
+                            selectionParents.size > 1
+                              ? "mixed"
+                              : ([...selectionParents][0] ?? "")
+                          }
+                          onChange={(e) =>
+                            safe(() =>
+                              s.reparent(selected.id, e.target.value || null),
+                            )
+                          }
+                        >
+                          {selectionParents.size > 1 && (
+                            <option value="mixed" disabled>
+                              Plusieurs groupes
+                            </option>
+                          )}
+                          <option value="">Racine</option>
+                          {s.scene.nodes
+                            .filter(
+                              (n) => n.kind === "group" && n.id !== selected.id,
+                            )
+                            .map((n) => (
+                              <option
+                                key={n.id}
+                                value={n.id}
+                                disabled={
+                                  selectionBranches.has(n.id) ||
+                                  inherited(s.scene, n.id, "locked")
+                                }
+                              >
+                                {n.name}
+                              </option>
+                            ))}
+                        </select>
+                      </label>
+                      {(["position", "rotation"] as const).map((field) => (
+                        <div className="transform-fields" key={field}>
+                          <label>
+                            {field === "position"
+                              ? "Position"
+                              : "Rotation · degrés"}
+                          </label>
+                          <div>
+                            {["X", "Y", "Z"].map((axis, i) => (
+                              <label key={axis}>
+                                <span className={`axis-${axis}`}>{axis}</span>
+                                <Numeric
+                                  label={`${field} ${axis}`}
+                                  value={
+                                    selected[field][i] *
+                                    (field === "rotation" ? 180 / Math.PI : 1)
+                                  }
+                                  onChange={(value) => {
+                                    const values = [...selected[field]] as Vec3;
+                                    values[i] =
+                                      value /
+                                      (field === "rotation"
+                                        ? 180 / Math.PI
+                                        : 1);
+                                    s.patch(selected.id, { [field]: values });
+                                  }}
+                                />
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                      <p className="property-hint">
+                        {s.selection.length > 1
+                          ? "Le groupe parent s’applique à toute la sélection. Le nom, la position et la rotation concernent le premier élément."
+                          : "Dimensions fixes · positions relatives au groupe"}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="property-hint">
+                      Sélectionnez une pièce pour la modifier. Maintenez Maj
+                      pour en sélectionner plusieurs.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </aside>
+          </div>
         </div>
         <footer className="editor-footer">
           <span>
