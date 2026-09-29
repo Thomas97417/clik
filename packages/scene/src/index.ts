@@ -325,10 +325,27 @@ export function duplicate(
 ) {
   const all = descendants(scene, roots(scene, ids)),
     map = new Map(all.map((id) => [id, crypto.randomUUID()]));
+  const groupNames = new Set(
+    [...into.nodes, ...scene.nodes]
+      .filter((n) => n.kind === "group")
+      .map((n) => n.name),
+  );
+  const copyName = (name: string) => {
+    const base = name.replace(/ - Copie(?: \d+)?$/, "").trim() || "Groupe";
+    for (let number = 1; ; number++) {
+      const suffix = number === 1 ? " - Copie" : ` - Copie ${number}`;
+      const candidate = `${base.slice(0, 100 - suffix.length).trimEnd()}${suffix}`;
+      if (!groupNames.has(candidate)) {
+        groupNames.add(candidate);
+        return candidate;
+      }
+    }
+  };
   const copies = scene.nodes
     .filter((n) => all.includes(n.id))
     .map((n) => ({
       ...structuredClone(n),
+      name: n.kind === "group" ? copyName(n.name) : n.name,
       id: map.get(n.id)!,
       parentId: (n.parentId && map.get(n.parentId)) || n.parentId,
     }));
