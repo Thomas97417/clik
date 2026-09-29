@@ -1,3 +1,4 @@
+import { CATALOG } from "@clik/scene";
 import { test, expect, type Page } from "@playwright/test";
 
 async function layout(page: Page) {
@@ -33,16 +34,18 @@ test("bibliothèque : largeur stable quand le défilement apparaît", async ({
     content:
       ".library-scroll { scrollbar-width: auto; } .library-scroll::-webkit-scrollbar { width: 16px; }",
   });
-  await expect(page.locator(".piece-card")).toHaveCount(23);
+  await expect(page.locator(".piece-card")).toHaveCount(
+    Object.keys(CATALOG).length,
+  );
   await expect.poll(async () => (await layout(page)).overflow).toBe(true);
   const all = await layout(page);
-  await page.getByRole("button", { name: "Tuiles", exact: true }).click();
-  await expect(page.locator(".piece-card")).toHaveCount(3);
+  await page.getByRole("button", { name: "Arches", exact: true }).click();
+  await expect(page.locator(".piece-card")).toHaveCount(2);
   await expect(
-    page.getByRole("button", { name: "Tuiles", exact: true }),
+    page.getByRole("button", { name: "Arches", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator(".library-header .panel-heading")).toContainText(
-    "3 modèles",
+    "2 modèles",
   );
   const filtered = await layout(page);
   expect(filtered.overflow).toBe(false);
@@ -61,7 +64,9 @@ test("bibliothèque : largeur stable quand le défilement apparaît", async ({
   await page
     .getByRole("button", { name: "Toutes", exact: true })
     .press("Enter");
-  await expect(page.locator(".piece-card")).toHaveCount(23);
+  await expect(page.locator(".piece-card")).toHaveCount(
+    Object.keys(CATALOG).length,
+  );
   expect((await layout(page)).card).toEqual(all.card);
   await expect
     .poll(() =>
@@ -114,12 +119,14 @@ test("bibliothèque : catégories et couleurs restent accessibles pendant le dé
     "rgb(239, 68, 68)",
   );
   await page.getByRole("button", { name: "Plaques", exact: true }).click();
-  await expect(page.locator(".piece-card")).toHaveCount(8);
+  await expect(page.locator(".piece-card")).toHaveCount(
+    Object.keys(CATALOG).filter((type) => type.startsWith("plate")).length,
+  );
   await expect
     .poll(() => scroll.evaluate((element) => element.scrollTop))
     .toBe(0);
   await expect(page.locator(".library-header .panel-heading")).toContainText(
-    "8 modèles",
+    `${Object.keys(CATALOG).filter((type) => type.startsWith("plate")).length} modèles`,
   );
   await page.screenshot({
     path: `/tmp/clik-library-palette-${info.project.name}.png`,

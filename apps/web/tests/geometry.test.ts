@@ -9,6 +9,7 @@ import {
 import {
   CATALOG,
   hasTopStud,
+  hasBottomSocket,
   emptyScene,
   makePart,
   matrix,
@@ -42,6 +43,7 @@ describe("Géométrie des emboîtements", () => {
       expect(geometry(type)).toBe(geometry(type));
       for (let x = 0; x < w; x++)
         for (let z = 0; z < d; z++) {
+          if (!hasBottomSocket(type, x, z)) continue;
           const cx = x - (w - 1) / 2,
             cz = z - (d - 1) / 2;
           const ceiling = hit(
@@ -80,7 +82,11 @@ describe("Géométrie des emboîtements", () => {
       // Between studs, over the flat rear half even for the slope.
       const top = hit(
         type,
-        new Vector3((w - 1) / 2 + 0.4, h + 1, (d - 1) / 2),
+        new Vector3(
+          (CATALOG[type].shape === "corner" ? -(w - 1) / 2 : (w - 1) / 2) + 0.4,
+          h + 1,
+          (d - 1) / 2,
+        ),
         new Vector3(0, -1, 0),
       );
       expect(top.point.y).toBeCloseTo(h, 6);
@@ -89,7 +95,7 @@ describe("Géométrie des emboîtements", () => {
       );
     },
   );
-  it.each(types.filter((type) => CATALOG[type].shape !== "tile"))(
+  it.each(types.filter((type) => hasTopStud(type, CATALOG[type].d - 1)))(
     "%s : contact sans vide après aimantation, même après rotation",
     (type) => {
       const { h, w, d } = CATALOG[type];
@@ -97,7 +103,9 @@ describe("Géométrie des emboîtements", () => {
       target.rotation = [0.3, 0.7, -0.2];
       const tm = matrix(target),
         normal = new Vector3(0, 1, 0).transformDirection(tm);
-      const center = new Vector3((w - 1) / 2, h, (d - 1) / 2).applyMatrix4(tm);
+      const column =
+        CATALOG[type].shape === "corner" ? -(w - 1) / 2 : (w - 1) / 2;
+      const center = new Vector3(column, h, (d - 1) / 2).applyMatrix4(tm);
       const upper = makePart(
         "brick-1x1",
         "#ef4444",
@@ -125,7 +133,7 @@ describe("Géométrie des emboîtements", () => {
         um,
       );
       expect(lowerRoof.point.distanceTo(upperRim.point)).toBeLessThan(0.00001);
-      const studTop = new Vector3((w - 1) / 2, h + 0.18, (d - 1) / 2)
+      const studTop = new Vector3(column, h + 0.18, (d - 1) / 2)
         .applyMatrix4(tm)
         .applyMatrix4(um.clone().invert());
       expect(studTop.x).toBeCloseTo(0, 6);
@@ -174,13 +182,14 @@ describe("Nouveaux modèles du catalogue", () => {
       ).toBe("grid");
     },
   );
-  it.each(types.filter((type) => CATALOG[type].shape === "tile"))(
+  it.each(types.filter((type) => !hasTopStud(type, CATALOG[type].d - 1)))(
     "%s : surface lisse sans plots ni accroches fictives",
     (type) => {
       const { w, d, h } = CATALOG[type];
       const target = makePart(type, "#4079e8");
       for (let x = 0; x < w; x++)
         for (let z = 0; z < d; z++) {
+          if (!hasBottomSocket(type, x, z)) continue;
           const cx = x - (w - 1) / 2,
             cz = z - (d - 1) / 2;
           expect(
@@ -193,6 +202,71 @@ describe("Nouveaux modèles du catalogue", () => {
               .kind,
           ).toBe("grid");
         }
+    },
+  );
+});
+
+describe("Volumes ouverts du catalogue", () => {
+  it.each(["arch-1x4x3", "arch-1x6x3"] as const)(
+    "%s : l’ouverture est traversable, la voûte et les montants sont visibles",
+    (type) => {
+      expect(
+        hit(type, new Vector3(0, 1, 3), new Vector3(0, 0, -1)),
+      ).toBeUndefined();
+      expect(
+        hit(type, new Vector3(0, 2.8, 3), new Vector3(0, 0, -1)).point.z,
+      ).toBeCloseTo(0.49);
+      expect(
+        hit(type, new Vector3(0, -1, 0), new Vector3(0, 1, 0)).point.y,
+      ).toBeCloseTo(2.4);
+      expect(
+        hit(
+          type,
+          new Vector3((CATALOG[type].w - 1) / 2, 1, 3),
+          new Vector3(0, 0, -1),
+        ).point.z,
+      ).toBeCloseTo(0.49);
+      const arch = makePart(type, "#4079e8", [0, 1.3, 0]);
+      const support = makePart("brick-1x1", "#ef4444");
+      expect(
+        snapCandidate({ ...emptyScene(), nodes: [support] }, arch, true).kind,
+      ).toBe("grid");
+    },
+  );
+  it.each(["corner-brick-2x2", "corner-plate-2x2", "corner-tile-2x2"] as const)(
+    "%s : le coin absent n’a ni matière ni accroche",
+    (type) => {
+      expect(
+        hit(type, new Vector3(0.5, 3, 0.5), new Vector3(0, -1, 0)),
+      ).toBeUndefined();
+      const corner = makePart(type, "#4079e8");
+      const upper = makePart("brick-1x1", "#ef4444", [
+        0.5,
+        CATALOG[type].h,
+        0.5,
+      ]);
+      expect(
+        snapCandidate({ ...emptyScene(), nodes: [corner] }, upper, true).kind,
+      ).toBe("grid");
+      const lower = makePart("brick-1x1", "#ef4444", [0.5, 0, 0.5]);
+      expect(
+        snapCandidate(
+          { ...emptyScene(), nodes: [lower] },
+          { ...corner, position: [0, 1.3, 0] },
+          true,
+        ).kind,
+      ).toBe("grid");
+    },
+  );
+  it.each(["round-brick-1x1", "round-plate-1x1", "round-tile-1x1"] as const)(
+    "%s : le contour est circulaire",
+    (type) => {
+      expect(
+        hit(type, new Vector3(0.4, 3, 0.4), new Vector3(0, -1, 0)),
+      ).toBeUndefined();
+      expect(
+        hit(type, new Vector3(1, 0.1, 0), new Vector3(-1, 0, 0)).point.x,
+      ).toBeCloseTo(0.49);
     },
   );
 });

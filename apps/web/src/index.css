@@ -1454,7 +1454,17 @@ button:focus-visible {
   font-size: 12px;
   line-height: 1.4;
   color: #65738a;
+  white-space: normal;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+.piece-dimensions {
+  display: block;
   white-space: nowrap;
+  font-size: 11px;
+  color: #8290a4;
+  margin-top: 2px;
 }
 .piece-preview {
   display: flex;

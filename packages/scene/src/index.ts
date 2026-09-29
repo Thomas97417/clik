@@ -14,6 +14,9 @@ export const CATALOG = {
   "brick-2x2": { name: "Brique 2 × 2", w: 2, d: 2, h: 1.2, shape: "block" },
   "brick-2x3": { name: "Brique 2 × 3", w: 3, d: 2, h: 1.2, shape: "block" },
   "brick-2x4": { name: "Brique 2 × 4", w: 4, d: 2, h: 1.2, shape: "block" },
+  "brick-1x8": { name: "Brique 1 × 8", w: 8, d: 1, h: 1.2, shape: "block" },
+  "brick-2x6": { name: "Brique 2 × 6", w: 6, d: 2, h: 1.2, shape: "block" },
+  "brick-2x8": { name: "Brique 2 × 8", w: 8, d: 2, h: 1.2, shape: "block" },
   "plate-1x1": { name: "Plaque 1 × 1", w: 1, d: 1, h: 0.4, shape: "block" },
   "plate-1x2": { name: "Plaque 1 × 2", w: 2, d: 1, h: 0.4, shape: "block" },
   "plate-1x3": { name: "Plaque 1 × 3", w: 3, d: 1, h: 0.4, shape: "block" },
@@ -22,21 +25,105 @@ export const CATALOG = {
   "plate-2x3": { name: "Plaque 2 × 3", w: 3, d: 2, h: 0.4, shape: "block" },
   "plate-2x4": { name: "Plaque 2 × 4", w: 4, d: 2, h: 0.4, shape: "block" },
   "plate-4x4": { name: "Plaque 4 × 4", w: 4, d: 4, h: 0.4, shape: "block" },
+  "plate-1x6": { name: "Plaque 1 × 6", w: 6, d: 1, h: 0.4, shape: "block" },
+  "plate-1x8": { name: "Plaque 1 × 8", w: 8, d: 1, h: 0.4, shape: "block" },
+  "plate-2x6": { name: "Plaque 2 × 6", w: 6, d: 2, h: 0.4, shape: "block" },
+  "plate-2x8": { name: "Plaque 2 × 8", w: 8, d: 2, h: 0.4, shape: "block" },
+  "plate-4x6": { name: "Plaque 4 × 6", w: 6, d: 4, h: 0.4, shape: "block" },
+  "plate-6x6": { name: "Plaque 6 × 6", w: 6, d: 6, h: 0.4, shape: "block" },
+  "plate-8x8": { name: "Plaque 8 × 8", w: 8, d: 8, h: 0.4, shape: "block" },
   "slope-2x1": { name: "Pente 2 × 1", w: 1, d: 2, h: 1.2, shape: "slope" },
   "slope-2x2": { name: "Pente 2 × 2", w: 2, d: 2, h: 1.2, shape: "slope" },
   "slope-2x3": { name: "Pente 2 × 3", w: 3, d: 2, h: 1.2, shape: "slope" },
   "slope-3x2": { name: "Pente 3 × 2", w: 2, d: 3, h: 1.2, shape: "slope" },
+  "slope-3x1": { name: "Pente 3 × 1", w: 1, d: 3, h: 1.2, shape: "slope" },
+  "slope-3x3": { name: "Pente 3 × 3", w: 3, d: 3, h: 1.2, shape: "slope" },
+  "slope-4x2": { name: "Pente 4 × 2", w: 2, d: 4, h: 1.2, shape: "slope" },
+  "slope-4x4": { name: "Pente 4 × 4", w: 4, d: 4, h: 1.2, shape: "slope" },
+  "slope-low-2x2": {
+    name: "Pente basse 2 × 2",
+    w: 2,
+    d: 2,
+    h: 0.8,
+    shape: "slope",
+  },
+  "slope-steep-2x2": {
+    name: "Pente haute 2 × 2",
+    w: 2,
+    d: 2,
+    h: 2.4,
+    shape: "slope",
+  },
   "tile-1x1": { name: "Tuile lisse 1 × 1", w: 1, d: 1, h: 0.4, shape: "tile" },
   "tile-1x2": { name: "Tuile lisse 1 × 2", w: 2, d: 1, h: 0.4, shape: "tile" },
   "tile-2x2": { name: "Tuile lisse 2 × 2", w: 2, d: 2, h: 0.4, shape: "tile" },
+  "tile-1x3": { name: "Tuile lisse 1 × 3", w: 3, d: 1, h: 0.4, shape: "tile" },
+  "tile-1x4": { name: "Tuile lisse 1 × 4", w: 4, d: 1, h: 0.4, shape: "tile" },
+  "tile-1x6": { name: "Tuile lisse 1 × 6", w: 6, d: 1, h: 0.4, shape: "tile" },
+  "tile-2x3": { name: "Tuile lisse 2 × 3", w: 3, d: 2, h: 0.4, shape: "tile" },
+  "tile-2x4": { name: "Tuile lisse 2 × 4", w: 4, d: 2, h: 0.4, shape: "tile" },
+  "tile-4x4": { name: "Tuile lisse 4 × 4", w: 4, d: 4, h: 0.4, shape: "tile" },
+  "round-brick-1x1": {
+    name: "Brique ronde 1 × 1",
+    w: 1,
+    d: 1,
+    h: 1.2,
+    shape: "round",
+  },
+  "round-plate-1x1": {
+    name: "Plaque ronde 1 × 1",
+    w: 1,
+    d: 1,
+    h: 0.4,
+    shape: "round",
+  },
+  "round-tile-1x1": {
+    name: "Tuile ronde 1 × 1",
+    w: 1,
+    d: 1,
+    h: 0.4,
+    shape: "round",
+    smooth: true,
+  },
+  "corner-brick-2x2": {
+    name: "Brique d’angle 2 × 2",
+    w: 2,
+    d: 2,
+    h: 1.2,
+    shape: "corner",
+  },
+  "corner-plate-2x2": {
+    name: "Plaque d’angle 2 × 2",
+    w: 2,
+    d: 2,
+    h: 0.4,
+    shape: "corner",
+  },
+  "corner-tile-2x2": {
+    name: "Tuile d’angle 2 × 2",
+    w: 2,
+    d: 2,
+    h: 0.4,
+    shape: "corner",
+    smooth: true,
+  },
+  "arch-1x4x3": { name: "Arche 1 × 4 × 3", w: 4, d: 1, h: 3.6, shape: "arch" },
+  "arch-1x6x3": { name: "Arche 1 × 6 × 3", w: 6, d: 1, h: 3.6, shape: "arch" },
 } as const;
 export type PartType = keyof typeof CATALOG;
-// Rendering and attachment must agree on the flat, studded part of each roof.
-export function hasTopStud(type: PartType, row: number) {
+
+/** A missing corner and an arch opening have no sockets or imaginary studs. */
+export function hasBottomSocket(type: PartType, column: number, row: number) {
   const part = CATALOG[type];
-  return (
-    part.shape !== "tile" && (part.shape !== "slope" || row === part.d - 1)
-  );
+  if (part.shape === "corner") return column === 0 || row === 0;
+  if (part.shape === "arch") return column === 0 || column === part.w - 1;
+  return true;
+}
+export function hasTopStud(type: PartType, row: number, column = 0) {
+  const part = CATALOG[type];
+  if (part.shape === "tile" || ("smooth" in part && part.smooth)) return false;
+  if (part.shape === "corner") return column === 0 || row === 0;
+  return part.shape !== "slope" || row === part.d - 1;
 }
 export const COLORS = [
   "#f5f5f3",
@@ -419,7 +506,8 @@ function anchors(n: Part, top: boolean) {
     points: Vector3[] = [];
   for (let x = 0; x < d.w; x++)
     for (let z = 0; z < d.d; z++) {
-      if (top && !hasTopStud(n.type, z)) continue;
+      if (top ? !hasTopStud(n.type, z, x) : !hasBottomSocket(n.type, x, z))
+        continue;
       points.push(
         new Vector3(x - (d.w - 1) / 2, top ? d.h : 0, z - (d.d - 1) / 2),
       );
@@ -741,3 +829,5 @@ export function snapSelection(
 ) {
   return previewSelection(scene, ids, enabled).scene;
 }
+
+export { archProfile, ROUND_SEGMENTS } from "./part-shapes";

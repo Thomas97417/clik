@@ -79,7 +79,9 @@ describe("Projets privés et versions publiques", () => {
     });
     const saved = await alice.query(api.projects.get, { id });
     expect(JSON.parse(saved.scene)).toEqual(JSON.parse(expanded));
-    expect(validateScene(JSON.parse(saved.scene)).nodes).toHaveLength(23);
+    expect(validateScene(JSON.parse(saved.scene)).nodes).toHaveLength(
+      Object.keys(CATALOG).length,
+    );
   });
   it("refuse lectures et écritures aux visiteurs et aux autres propriétaires", async () => {
     const { t, alice, bob } = setup();

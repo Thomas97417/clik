@@ -4,6 +4,7 @@ import { CATALOG } from "@clik/scene";
 test("catalogue étendu : aperçus entiers, ajout et restauration de chaque modèle", async ({
   page,
 }, info) => {
+  test.setTimeout(120000);
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/editor");
@@ -15,6 +16,9 @@ test("catalogue étendu : aperçus entiers, ajout et restauration de chaque mod�
     ["Plaques", "plate"],
     ["Pentes", "slope"],
     ["Tuiles", "tile"],
+    ["Rondes", "round"],
+    ["Angles", "corner"],
+    ["Arches", "arch"],
   ]) {
     await page.getByRole("button", { name: category, exact: true }).click();
     const models = Object.entries(CATALOG).filter(([type]) =>
@@ -71,7 +75,10 @@ test("catalogue étendu : aperçus entiers, ajout et restauration de chaque mod�
   }
   await expect(page.getByRole("status")).toContainText("Enregistré");
   await page.reload();
-  await expect(canvas).toHaveAttribute("data-rendered", "23");
+  await expect(canvas).toHaveAttribute(
+    "data-rendered",
+    String(Object.keys(CATALOG).length),
+  );
   await expect(page.locator(".tree-name")).toHaveText(
     Object.values(CATALOG).map((model) => model.name),
   );

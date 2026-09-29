@@ -1,17 +1,123 @@
 import { Box3, Matrix4, Vector3 } from "three";
+import {
+  archProfile,
+  ROUND_SEGMENTS,
+  type PartDimensions,
+} from "./part-shapes";
 
 type Body = {
   vertices: Vector3[];
   normals: Vector3[];
   edges: Vector3[];
   bounds: Box3;
+  pieces?: Body[];
 };
 
-// Convex body only: studs intentionally enter the sockets of an attached piece.
+function prism(profile: Vector3[], extrusion: Vector3, matrix: Matrix4): Body {
+  const vertices = profile.flatMap((point) => [
+    point.clone().applyMatrix4(matrix),
+    point.clone().add(extrusion).applyMatrix4(matrix),
+  ]);
+  const edges = [extrusion.clone()];
+  const normals = [extrusion.clone()];
+  profile.forEach((point, i) => {
+    const edge = profile[(i + 1) % profile.length].clone().sub(point);
+    edges.push(edge);
+    normals.push(new Vector3().crossVectors(edge, extrusion));
+  });
+  return {
+    vertices,
+    edges: edges.map((v) => v.transformDirection(matrix)),
+    normals: normals.map((v) => v.transformDirection(matrix)),
+    bounds: new Box3().setFromPoints(vertices),
+  };
+}
+function compound(pieces: Body[]): Body {
+  return {
+    pieces,
+    vertices: [],
+    edges: [],
+    normals: [],
+    bounds: pieces.reduce((box, piece) => box.union(piece.bounds), new Box3()),
+  };
+}
+
+// Studs intentionally enter sockets. Concave shapes are unions of convex solids.
 export function placementBody(
-  { w, d, h, shape }: { w: number; d: number; h: number; shape: string },
+  dimensions: PartDimensions,
   matrix: Matrix4,
 ): Body {
+  const { w, d, h, shape } = dimensions;
+  if (shape === "round") {
+    return prism(
+      Array.from({ length: ROUND_SEGMENTS }, (_, i) => {
+        const angle = (i * Math.PI * 2) / ROUND_SEGMENTS;
+        return new Vector3(
+          (w / 2 - 0.01) * Math.cos(angle),
+          0,
+          (d / 2 - 0.01) * Math.sin(angle),
+        );
+      }),
+      new Vector3(0, h, 0),
+      matrix,
+    );
+  }
+  if (shape === "corner") {
+    const x = w / 2 - 0.01,
+      z = d / 2 - 0.01,
+      cut = -0.01;
+    const rectangle = (
+      left: number,
+      right: number,
+      front: number,
+      back: number,
+    ) =>
+      prism(
+        [
+          [left, front],
+          [right, front],
+          [right, back],
+          [left, back],
+        ].map(([px, pz]) => new Vector3(px, 0, pz)),
+        new Vector3(0, h, 0),
+        matrix,
+      );
+    return compound([rectangle(-x, x, -z, cut), rectangle(-x, cut, cut, z)]);
+  }
+  if (shape === "arch") {
+    const curve = archProfile(dimensions);
+    const sections: [number, number][][] = [
+      [
+        [-w / 2 + 0.01, 0],
+        [curve[0][0], 0],
+        [curve[0][0], h],
+        [-w / 2 + 0.01, h],
+      ],
+      [
+        [curve[curve.length - 1][0], 0],
+        [w / 2 - 0.01, 0],
+        [w / 2 - 0.01, h],
+        [curve[curve.length - 1][0], h],
+      ],
+      ...curve
+        .slice(0, -1)
+        .map((point, i) => [
+          point,
+          curve[i + 1],
+          [curve[i + 1][0], h] as [number, number],
+          [point[0], h] as [number, number],
+        ]),
+    ];
+    return compound(
+      sections.map((section) =>
+        prism(
+          section.map(([x, y]) => new Vector3(x, y, -d / 2 + 0.01)),
+          new Vector3(0, 0, d - 0.02),
+          matrix,
+        ),
+      ),
+    );
+  }
   const x = w / 2 - 0.01,
     z = d / 2 - 0.01;
   const profile =
@@ -57,6 +163,13 @@ function penetrationLift(a: Body, b: Body, offset: number) {
       .intersectsBox(b.bounds)
   )
     return 0;
+  if (a.pieces || b.pieces) {
+    let lift = 0;
+    for (const part of a.pieces ?? [a])
+      for (const other of b.pieces ?? [b])
+        lift = Math.max(lift, penetrationLift(part, other, offset));
+    return lift;
+  }
   const axes = [...a.normals, ...b.normals];
   for (const edge of a.edges)
     for (const other of b.edges) {
@@ -84,6 +197,10 @@ export function collisionClearance(
   obstacles: Body[],
   grid = false,
 ) {
+  const solids = (body: Body): Body[] =>
+    body.pieces ? body.pieces.flatMap(solids) : [body];
+  moving = moving.flatMap(solids);
+  obstacles = obstacles.flatMap(solids);
   let lift = 0;
   // Every intersecting pair has a finite vertical interval. Once exited upwards,
   // it cannot be entered again, so at most one exit per pair is necessary.

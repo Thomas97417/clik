@@ -80,6 +80,9 @@ const pieceCategories = [
   { name: "Plaques", prefix: "plate" },
   { name: "Pentes", prefix: "slope" },
   { name: "Tuiles", prefix: "tile" },
+  { name: "Rondes", prefix: "round" },
+  { name: "Angles", prefix: "corner" },
+  { name: "Arches", prefix: "arch" },
 ];
 const safe = (fn: () => unknown) => {
   try {
@@ -729,7 +732,12 @@ export default function Editor({
                       <span className="piece-preview">
                         <PartPreview type={id} color={s.color} />
                       </span>
-                      <span>{p.name}</span>
+                      <span className="piece-name">
+                        {p.name.replace(/ \d.*$/, "")}
+                        <span className="piece-dimensions">
+                          {p.name.match(/\d.*$/)?.[0]}
+                        </span>
+                      </span>
                     </button>
                   ))}
                 </div>

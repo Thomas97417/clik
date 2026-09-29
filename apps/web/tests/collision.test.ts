@@ -19,7 +19,11 @@ describe("collisions des pièces", () => {
     (type) => {
       const target = makePart(type, "#4079e8");
       const scene = { ...emptyScene(), nodes: [target] };
-      const moving = makePart("brick-2x2", "#ef4444", [0, 0.1, 0]);
+      const moving = makePart("brick-2x2", "#ef4444", [
+        CATALOG[type].shape === "arch" ? -(CATALOG[type].w - 1) / 2 : 0,
+        0.1,
+        0,
+      ]);
       for (const enabled of [false, true]) {
         const preview = snapCandidate(scene, moving, enabled);
         expect(preview.part.position[1]).toBeCloseTo(CATALOG[type].h);
@@ -143,5 +147,91 @@ describe("collisions des pièces", () => {
     expect(useEditor.getState().past).toHaveLength(1);
     s.undo();
     expect(useEditor.getState().scene).toEqual(scene);
+  });
+});
+
+describe("Collisions des formes concaves et rondes", () => {
+  it.each(["arch-1x4x3", "arch-1x6x3"] as const)(
+    "%s laisse passer une pièce sous la voûte, même tournée",
+    (type) => {
+      for (const rotation of [
+        [0, 0, 0],
+        [0, Math.PI / 2, 0],
+        [0.2, 0.7, -0.15],
+      ] as [number, number, number][]) {
+        const arch = { ...makePart(type, "#4079e8", [2, 4, -3]), rotation };
+        const scene = { ...emptyScene(), nodes: [arch] };
+        const tm = worldMatrix(scene, arch.id);
+        const free = makePart(
+          "brick-1x1",
+          "#ef4444",
+          new Vector3(0, 0.2, 0).applyMatrix4(tm).toArray(),
+        );
+        free.rotation = [...rotation];
+        expect(hasOverlappingParts({ ...scene, nodes: [arch, free] })).toBe(
+          false,
+        );
+        expect(snapCandidate(scene, free, false).part.position).toEqual(
+          free.position,
+        );
+        for (const [x, y] of [
+          [0, 2.1],
+          [(CATALOG[type].w - 1) / 2, 0.2],
+        ]) {
+          const blocked = {
+            ...free,
+            position: new Vector3(x, y, 0).applyMatrix4(tm).toArray() as [
+              number,
+              number,
+              number,
+            ],
+          };
+          expect(
+            hasOverlappingParts({ ...scene, nodes: [arch, blocked] }),
+          ).toBe(true);
+          const corrected = snapCandidate(scene, blocked, false).part;
+          expect(
+            hasOverlappingParts({ ...scene, nodes: [arch, corrected] }),
+          ).toBe(false);
+        }
+      }
+    },
+  );
+  it("la pièce d’angle accueille une brique dans son coin, sans laisser traverser ses bras", () => {
+    for (const turn of [0, Math.PI / 2, Math.PI, -Math.PI / 2]) {
+      const corner = makePart("corner-brick-2x2", "#4079e8");
+      corner.rotation[1] = turn;
+      const scene = { ...emptyScene(), nodes: [corner] };
+      const tm = worldMatrix(scene, corner.id);
+      for (const [x, z, overlap] of [
+        [0.5, 0.5, false],
+        [-0.5, 0.5, true],
+        [0.5, -0.5, true],
+        [-0.5, -0.5, true],
+      ] as const) {
+        const brick = makePart(
+          "brick-1x1",
+          "#ef4444",
+          new Vector3(x, 0, z).applyMatrix4(tm).toArray(),
+        );
+        brick.rotation[1] = turn;
+        expect(hasOverlappingParts({ ...scene, nodes: [corner, brick] })).toBe(
+          overlap,
+        );
+        const result = snapCandidate(scene, brick, false).part;
+        expect(result.position[1]).toBeCloseTo(overlap ? 1.2 : 0);
+      }
+    }
+  });
+  it("deux pièces rondes peuvent rapprocher leurs boîtes sans se traverser", () => {
+    const first = makePart("round-brick-1x1", "#4079e8");
+    const second = makePart("round-brick-1x1", "#ef4444", [0.75, 0, 0.75]);
+    expect(
+      hasOverlappingParts({ ...emptyScene(), nodes: [first, second] }),
+    ).toBe(false);
+    second.position = [0.6, 0, 0.6];
+    expect(
+      hasOverlappingParts({ ...emptyScene(), nodes: [first, second] }),
+    ).toBe(true);
   });
 });
