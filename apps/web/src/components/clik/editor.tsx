@@ -277,7 +277,22 @@ export default function Editor({
         return;
       }
       if (state.gesture || state.pending) return;
-      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
+      if (e.key.toLowerCase() === "r" && !mod && !e.altKey) {
+        const target = e.target instanceof HTMLElement ? e.target : null;
+        if (
+          !project.ready ||
+          closed ||
+          e.repeat ||
+          !state.selection.length ||
+          (target && target !== document.body && !target.closest(".editor")) ||
+          target?.closest('[role="menu"],[role="listbox"],[role="combobox"]')
+        )
+          return;
+        e.preventDefault();
+        safe(() => state.rotate(e.shiftKey ? -1 : 1));
+      } else if (
+        ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)
+      ) {
         const target = e.target instanceof HTMLElement ? e.target : null;
         if (
           !project.ready ||
@@ -1333,8 +1348,8 @@ export default function Editor({
             Glisser / flèches : déplacer · Maj + ↑ / ↓ : hauteur · Espace +
             glisser / clic droit : caméra · Maj + clic : sélection multiple{" "}
             <ChevronRight size={12} /> D : dupliquer <ChevronRight size={12} />{" "}
-            F : cadrer <ChevronRight size={12} /> Pièce saisie : R / Maj + R :
-            ±90° <ChevronRight size={12} /> Échap : annuler
+            F : cadrer <ChevronRight size={12} /> R / Maj + R : ±90°{" "}
+            <ChevronRight size={12} /> Échap : annuler
           </span>
         </footer>
       </main>

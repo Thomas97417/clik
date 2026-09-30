@@ -27,7 +27,7 @@ import {
   validateChallengeStock,
   type ChallengeStock,
 } from "@clik/scene";
-import { Matrix4 } from "three";
+import { Matrix4, Vector3 } from "three";
 import { moveTreeBranches } from "./tree-order";
 type Snapshot = { scene: SceneDocument; title: string };
 export type EditorChallenge = {
@@ -76,6 +76,7 @@ type State = Snapshot & {
   add: (type: PartType, position?: Vec3) => void;
   patch: (id: string, patch: Partial<SceneNode>) => void;
   nudge: (delta: Vec3) => void;
+  rotate: (turn: 1 | -1) => void;
   remove: () => void;
   duplicate: () => void;
   group: () => void;
@@ -186,6 +187,29 @@ export const useEditor = create<State>((set, get) => ({
     if (s.gesture || s.pending || s.libraryPointer) return;
     const next = stepSelection(s.scene, s.selection, delta);
     if (next !== s.scene) s.commit(next);
+  },
+  rotate: (turn) => {
+    const s = get();
+    if (s.gesture || s.pending || s.libraryPointer) return;
+    const ids = movableRoots(s.scene, s.selection);
+    const moving = new Set(descendants(s.scene, ids));
+    const anchor = s.scene.nodes.find(
+      (n) =>
+        n.kind === "part" &&
+        moving.has(n.id) &&
+        !inherited(s.scene, n.id, "hidden"),
+    );
+    if (!anchor) return;
+    // Use the same world vertical axis and rigid assembly rotation as dragging.
+    const pivot = new Vector3().setFromMatrixPosition(
+      worldMatrix(s.scene, anchor.id),
+    );
+    const delta = new Matrix4()
+      .makeTranslation(pivot.x, pivot.y, pivot.z)
+      .multiply(new Matrix4().makeRotationY((turn * Math.PI) / 2))
+      .multiply(new Matrix4().makeTranslation(-pivot.x, -pivot.y, -pivot.z));
+    const free = applyDelta(s.scene, ids, delta);
+    s.commit(previewSelection(free, ids, s.snap, anchor.id).scene);
   },
   remove: () => {
     const s = get(),

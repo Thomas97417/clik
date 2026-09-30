@@ -1,6 +1,33 @@
 import { test, expect } from "@playwright/test";
 import { dragLibrary } from "./drag-library";
 
+test("R et Maj+R tournent la sélection sans prise, avec historique et sans répétition", async ({
+  page,
+}) => {
+  await page.goto("/editor");
+  await page.getByRole("button", { name: "Brique 2 × 4", exact: true }).click();
+  const rotation = page.getByLabel("rotation Y", { exact: true });
+  await page.keyboard.down("r");
+  await page.keyboard.down("r");
+  await page.keyboard.up("r");
+  await expect(rotation).toHaveValue("90");
+  await page.keyboard.press("Shift+R");
+  await expect(rotation).toHaveValue("0");
+  await page.keyboard.press("Control+z");
+  await page.locator(".tree-name").click();
+  await expect(rotation).toHaveValue("90");
+  await page.keyboard.press("Control+Shift+z");
+  await page.locator(".tree-name").click();
+  await expect(rotation).toHaveValue("0");
+  const title = page.getByLabel("Nom du projet");
+  await title.focus();
+  await title.press("ArrowRight");
+  const before = await title.inputValue();
+  await title.press("r");
+  await expect(title).toHaveValue(`${before}r`);
+  await expect(rotation).toHaveValue("0");
+});
+
 for (const library of [false, true]) {
   test(`R et Maj+R pendant la prise, répétition ignorée, bibliothèque ${library}`, async ({
     page,
