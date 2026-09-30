@@ -41,7 +41,7 @@ export default function UserMenu() {
         <DropdownMenuGroup>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col gap-1">
-              <p className="break-words text-sm font-medium leading-snug">
+              <p className="wrap-break-word text-sm font-medium leading-snug">
                 {user?.name}
               </p>
               <p className="text-muted-foreground break-all text-xs leading-snug">

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { LogIn } from "lucide-react";
 import z from "zod";
 import { authClient } from "@/lib/auth-client";
 import { authErrorMessage, authReturnTo, emailSchema } from "@/lib/auth-form";
@@ -45,7 +44,6 @@ export default function SignInForm() {
       eyebrow="De retour à l’atelier"
       title="Heureux de vous retrouver"
       description="Connectez-vous pour retrouver vos créations et continuer là où votre imagination s’est arrêtée."
-      icon={LogIn}
     >
       <form
         className="auth-form"

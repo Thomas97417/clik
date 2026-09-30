@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { MailCheck, UserRoundPlus } from "lucide-react";
 import z from "zod";
 import { authClient } from "@/lib/auth-client";
 import {
@@ -50,7 +49,6 @@ export default function SignUpForm() {
         eyebrow="Encore un petit clik"
         title="Confirmez votre email"
         description="Votre compte est créé. Il reste à confirmer votre adresse pour ouvrir votre espace."
-        icon={MailCheck}
       >
         <div className="auth-confirmation" role="status">
           <strong>Un lien vous attend dans votre messagerie.</strong>
@@ -76,7 +74,6 @@ export default function SignUpForm() {
       eyebrow="Faites place à vos idées"
       title="Votre atelier commence ici"
       description="Créez votre compte pour conserver vos constructions en ligne et les partager quand vous le souhaitez."
-      icon={UserRoundPlus}
     >
       <form
         className="auth-form"

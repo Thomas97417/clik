@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, KeyRound, Mail, MailCheck } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import z from "zod";
 import { authClient } from "@/lib/auth-client";
 import { authErrorMessage, emailSchema } from "@/lib/auth-form";
@@ -51,7 +51,6 @@ export default function EmailLinkForm({
             ? "Ça arrive. Indiquez votre email pour choisir un nouveau mot de passe."
             : "Confirmez votre adresse pour accéder à votre compte. Nous vous envoyons un lien de vérification."
       }
-      icon={sent ? MailCheck : reset ? KeyRound : Mail}
     >
       {sent ? (
         <>

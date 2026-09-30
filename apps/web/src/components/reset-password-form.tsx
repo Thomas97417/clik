@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useSearch } from "@tanstack/react-router";
-import { Check, KeyRound, Link2Off } from "lucide-react";
 import z from "zod";
 import { authClient } from "@/lib/auth-client";
 import {
@@ -57,7 +56,6 @@ export default function ResetPasswordForm() {
         eyebrow="Un nouveau départ"
         title="Ce lien n’est plus valide"
         description="Le lien est incomplet ou a expiré. Demandez-en un nouveau pour retrouver votre atelier."
-        icon={Link2Off}
       >
         <Link className="auth-submit" to="/forgot-password">
           Demander un nouveau lien
@@ -73,7 +71,6 @@ export default function ResetPasswordForm() {
         eyebrow="Tout est prêt"
         title="Mot de passe modifié"
         description="Vous pouvez maintenant vous connecter avec votre nouveau mot de passe."
-        icon={Check}
       >
         <div className="auth-confirmation" role="status">
           Votre nouveau mot de passe a bien été enregistré.
@@ -88,7 +85,6 @@ export default function ResetPasswordForm() {
       eyebrow="Les clés de votre atelier"
       title="Un nouveau mot de passe"
       description="Choisissez un mot de passe, puis saisissez-le une seconde fois pour le confirmer."
-      icon={KeyRound}
     >
       <form
         className="auth-form"

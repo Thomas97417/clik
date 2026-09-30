@@ -1,12 +1,6 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import {
-  ArrowLeft,
-  Cloud,
-  FolderHeart,
-  Globe,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowLeft, Cloud, FolderHeart, Globe } from "lucide-react";
 
 function StoryCube({
   x,
@@ -103,13 +97,11 @@ export default function AuthLayout({
   eyebrow,
   title,
   description,
-  icon: Icon,
   children,
 }: {
   eyebrow: string;
   title: string;
   description: string;
-  icon: LucideIcon;
   children: ReactNode;
 }) {
   const heading = useRef<HTMLHeadingElement>(null);
@@ -160,9 +152,6 @@ export default function AuthLayout({
         </aside>
         <section className="auth-card" aria-labelledby="auth-title">
           <div className="auth-card-heading">
-            <span className="auth-icon">
-              <Icon size={23} aria-hidden="true" />
-            </span>
             <span className="eyebrow">{eyebrow}</span>
             <h1 ref={heading} id="auth-title" tabIndex={-1}>
               {title}

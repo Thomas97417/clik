@@ -2963,21 +2963,24 @@ dialog.modal-backdrop::backdrop {
 }
 .auth-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
-  align-items: start;
-  gap: clamp(40px, 6vw, 90px);
-}
-.auth-story {
-  min-width: 0;
-  padding: 32px 32px 26px;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
   overflow: hidden;
-  border: 1px solid #e1e8f5;
+  border: 1px solid #dfe7f4;
   border-radius: 26px;
   background:
-    radial-gradient(ellipse at 75% 40%, #fff9ef 0%, transparent 55%),
+    radial-gradient(ellipse at 35% 40%, #fff9ef 0%, transparent 50%),
     linear-gradient(145deg, #f0f5ff, #f8faff 65%, #edf3ff);
+  box-shadow: 0 16px 48px #233f750c;
+}
+.auth-story {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 40px 36px 32px;
+  overflow: hidden;
 }
 .auth-story > .eyebrow {
+  align-self: flex-start;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -3016,12 +3019,15 @@ dialog.modal-backdrop::backdrop {
   font-size: 14px;
 }
 .auth-story-art {
+  flex: 1;
+  align-content: center;
   margin: 2px -20px 27px;
 }
 .auth-construction {
   display: block;
   width: 100%;
   height: auto;
+  max-height: 320px;
 }
 .auth-cube {
   --cube-top: #7ba5ff;
@@ -3088,12 +3094,13 @@ dialog.modal-backdrop::backdrop {
   flex-shrink: 0;
 }
 .auth-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   min-width: 0;
-  padding: 32px;
-  border: 1px solid #dfe7f4;
-  border-radius: 22px;
-  background: #fff;
-  box-shadow: 0 12px 40px #233f7510;
+  padding: 40px clamp(32px, 4vw, 56px);
+  border-left: 1px solid #e1e8f5;
+  background: #ffffffb3;
 }
 .auth-icon {
   display: grid;
@@ -3397,8 +3404,7 @@ dialog.modal-backdrop::backdrop {
     padding: 36px 28px 24px;
   }
   .auth-layout {
-    gap: 35px;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .auth-story {
     padding: 26px 22px 22px;
@@ -3409,6 +3415,9 @@ dialog.modal-backdrop::backdrop {
   }
   .auth-benefits {
     gap: 9px;
+  }
+  .auth-card {
+    padding: 32px 26px;
   }
 }
 @media (max-width: 800px) {
@@ -3422,6 +3431,9 @@ dialog.modal-backdrop::backdrop {
   .auth-story {
     display: none;
   }
+  .auth-card {
+    border-left: 0;
+  }
   .auth-page-footer {
     margin-top: 25px;
     flex-direction: column;
@@ -3434,9 +3446,11 @@ dialog.modal-backdrop::backdrop {
   .auth-page {
     padding: 22px 14px;
   }
+  .auth-layout {
+    border-radius: 17px;
+  }
   .auth-card {
     padding: 25px 21px;
-    border-radius: 17px;
   }
   .auth-card h1 {
     font-size: 29px;
