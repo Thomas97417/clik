@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { ChevronDown, LogOut, Settings, User } from "lucide-react";
+import { ChevronDown, Globe2, LogOut, Settings, User } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -57,6 +57,18 @@ export default function UserMenu() {
             Mes créations
           </DropdownMenuItem>
 
+          {user && (
+            <DropdownMenuItem
+              onClick={() =>
+                navigate({
+                  to: "/gallery/user/$userId",
+                  params: { userId: user._id },
+                })
+              }
+            >
+              <Globe2 className="mr-2 size-4" /> Ma page publique
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onClick={() => navigate({ to: "/settings" })}>
             <Settings className="mr-2 size-4" />
             Paramètres

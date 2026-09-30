@@ -81,6 +81,12 @@ Les tests navigateur utilisent des contextes isolés et des brouillons locaux je
 
 Les résultats, la machine et les limites de la validation sont documentés dans `VALIDATION.md`.
 
+## Galeries des créateurs
+
+Chaque compte dispose d’une page publique `/gallery/user/<identifiant du compte>`. Cet identifiant reste stable lorsque le nom change. La page affiche le nom et la photo actuels du compte, ou une initiale si la photo manque, puis ses publications actives par ordre de publication décroissant, par pages de 12. Les créations libres et les participations aux défis partagent la même grille ; les défis conservent leur badge. Les projets privés, publications retirées et anciennes versions n’y apparaissent pas.
+
+Le nom de l’auteur ouvre cette page depuis la galerie, les défis, une création et ses commentaires. Le menu du compte propose aussi « Ma page publique ». La consultation ne demande pas de connexion. La requête d’identité publique renvoie uniquement l’identifiant, le nom et l’URL de la photo ; les informations privées du compte restent exclues. L’index `publications.by_owner_recent` permet la pagination par auteur sans parcourir toute la galerie.
+
 ## Le défi du jour
 
 Chaque journée UTC propose un lot commun de 100 pièces réparties sur 12 modèles. Les couleurs sont libres et utiliser tout le stock n’est pas obligatoire. Le tirage est déterministe et versionné ; le lot enregistré ne change plus. Le cron Convex crée le défi à minuit UTC ; l’ouverture de la page initialise aussi celui du jour si nécessaire, sans créer d’archives rétroactives.

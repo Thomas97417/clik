@@ -12,10 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UploadRouteImport } from './routes/upload'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ProjectsRouteImport } from './routes/projects'
-import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ChallengesRouteImport } from './routes/challenges'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GalleryIndexRouteImport } from './routes/gallery.index'
 import { Route as EditorIndexRouteImport } from './routes/editor.index'
 import { Route as EditorProjectIdRouteImport } from './routes/editor.$projectId'
 import { Route as CreationsPublicationIdRouteImport } from './routes/creations.$publicationId'
@@ -24,6 +24,7 @@ import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-password'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
+import { Route as GalleryUserUserIdRouteImport } from './routes/gallery.user.$userId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const UploadRoute = UploadRouteImport.update({
@@ -41,11 +42,6 @@ const ProjectsRoute = ProjectsRouteImport.update({
   path: '/projects',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GalleryRoute = GalleryRouteImport.update({
-  id: '/gallery',
-  path: '/gallery',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -59,6 +55,11 @@ const ChallengesRoute = ChallengesRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GalleryIndexRoute = GalleryIndexRouteImport.update({
+  id: '/gallery/',
+  path: '/gallery/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EditorIndexRoute = EditorIndexRouteImport.update({
@@ -101,6 +102,11 @@ const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GalleryUserUserIdRoute = GalleryUserUserIdRouteImport.update({
+  id: '/gallery/user/$userId',
+  path: '/gallery/user/$userId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -111,7 +117,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/challenges': typeof ChallengesRoute
   '/dashboard': typeof DashboardRoute
-  '/gallery': typeof GalleryRoute
   '/projects': typeof ProjectsRoute
   '/settings': typeof SettingsRoute
   '/upload': typeof UploadRoute
@@ -123,13 +128,14 @@ export interface FileRoutesByFullPath {
   '/creations/$publicationId': typeof CreationsPublicationIdRoute
   '/editor/$projectId': typeof EditorProjectIdRoute
   '/editor/': typeof EditorIndexRoute
+  '/gallery/': typeof GalleryIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/gallery/user/$userId': typeof GalleryUserUserIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/challenges': typeof ChallengesRoute
   '/dashboard': typeof DashboardRoute
-  '/gallery': typeof GalleryRoute
   '/projects': typeof ProjectsRoute
   '/settings': typeof SettingsRoute
   '/upload': typeof UploadRoute
@@ -141,14 +147,15 @@ export interface FileRoutesByTo {
   '/creations/$publicationId': typeof CreationsPublicationIdRoute
   '/editor/$projectId': typeof EditorProjectIdRoute
   '/editor': typeof EditorIndexRoute
+  '/gallery': typeof GalleryIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/gallery/user/$userId': typeof GalleryUserUserIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/challenges': typeof ChallengesRoute
   '/dashboard': typeof DashboardRoute
-  '/gallery': typeof GalleryRoute
   '/projects': typeof ProjectsRoute
   '/settings': typeof SettingsRoute
   '/upload': typeof UploadRoute
@@ -160,7 +167,9 @@ export interface FileRoutesById {
   '/creations/$publicationId': typeof CreationsPublicationIdRoute
   '/editor/$projectId': typeof EditorProjectIdRoute
   '/editor/': typeof EditorIndexRoute
+  '/gallery/': typeof GalleryIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/gallery/user/$userId': typeof GalleryUserUserIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -168,7 +177,6 @@ export interface FileRouteTypes {
     | '/'
     | '/challenges'
     | '/dashboard'
-    | '/gallery'
     | '/projects'
     | '/settings'
     | '/upload'
@@ -180,13 +188,14 @@ export interface FileRouteTypes {
     | '/creations/$publicationId'
     | '/editor/$projectId'
     | '/editor/'
+    | '/gallery/'
     | '/api/auth/$'
+    | '/gallery/user/$userId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/challenges'
     | '/dashboard'
-    | '/gallery'
     | '/projects'
     | '/settings'
     | '/upload'
@@ -198,13 +207,14 @@ export interface FileRouteTypes {
     | '/creations/$publicationId'
     | '/editor/$projectId'
     | '/editor'
+    | '/gallery'
     | '/api/auth/$'
+    | '/gallery/user/$userId'
   id:
     | '__root__'
     | '/'
     | '/challenges'
     | '/dashboard'
-    | '/gallery'
     | '/projects'
     | '/settings'
     | '/upload'
@@ -216,14 +226,15 @@ export interface FileRouteTypes {
     | '/creations/$publicationId'
     | '/editor/$projectId'
     | '/editor/'
+    | '/gallery/'
     | '/api/auth/$'
+    | '/gallery/user/$userId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ChallengesRoute: typeof ChallengesRoute
   DashboardRoute: typeof DashboardRoute
-  GalleryRoute: typeof GalleryRoute
   ProjectsRoute: typeof ProjectsRoute
   SettingsRoute: typeof SettingsRoute
   UploadRoute: typeof UploadRoute
@@ -235,7 +246,9 @@ export interface RootRouteChildren {
   CreationsPublicationIdRoute: typeof CreationsPublicationIdRoute
   EditorProjectIdRoute: typeof EditorProjectIdRoute
   EditorIndexRoute: typeof EditorIndexRoute
+  GalleryIndexRoute: typeof GalleryIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  GalleryUserUserIdRoute: typeof GalleryUserUserIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -261,13 +274,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/gallery': {
-      id: '/gallery'
-      path: '/gallery'
-      fullPath: '/gallery'
-      preLoaderRoute: typeof GalleryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -287,6 +293,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gallery/': {
+      id: '/gallery/'
+      path: '/gallery'
+      fullPath: '/gallery/'
+      preLoaderRoute: typeof GalleryIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/editor/': {
@@ -345,6 +358,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gallery/user/$userId': {
+      id: '/gallery/user/$userId'
+      path: '/gallery/user/$userId'
+      fullPath: '/gallery/user/$userId'
+      preLoaderRoute: typeof GalleryUserUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -359,7 +379,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChallengesRoute: ChallengesRoute,
   DashboardRoute: DashboardRoute,
-  GalleryRoute: GalleryRoute,
   ProjectsRoute: ProjectsRoute,
   SettingsRoute: SettingsRoute,
   UploadRoute: UploadRoute,
@@ -371,7 +390,9 @@ const rootRouteChildren: RootRouteChildren = {
   CreationsPublicationIdRoute: CreationsPublicationIdRoute,
   EditorProjectIdRoute: EditorProjectIdRoute,
   EditorIndexRoute: EditorIndexRoute,
+  GalleryIndexRoute: GalleryIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  GalleryUserUserIdRoute: GalleryUserUserIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

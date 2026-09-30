@@ -11,6 +11,7 @@ import {
 import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { authComponent } from "./auth";
+import { r2 } from "./r2";
 import {
   validateScene,
   validateChallengeStock,
@@ -276,21 +277,31 @@ export const withdraw = mutation({
   },
 });
 export const gallery = query({
-  args: { paginationOpts: paginationOptsValidator },
+  args: {
+    paginationOpts: paginationOptsValidator,
+    ownerId: v.optional(v.string()),
+  },
   handler: async (ctx, a) => {
-    const results = await ctx.db
-      .query("publications")
-      .withIndex("by_recent", (q) => q.eq("active", true))
-      .order("desc")
-      .paginate({
-        ...a.paginationOpts,
-        numItems: Math.min(24, a.paginationOpts.numItems),
-      });
+    const publications =
+      a.ownerId !== undefined
+        ? ctx.db
+            .query("publications")
+            .withIndex("by_owner_recent", (q) =>
+              q.eq("owner", a.ownerId!).eq("active", true),
+            )
+        : ctx.db
+            .query("publications")
+            .withIndex("by_recent", (q) => q.eq("active", true));
+    const results = await publications.order("desc").paginate({
+      ...a.paginationOpts,
+      numItems: Math.min(24, a.paginationOpts.numItems),
+    });
     return {
       ...results,
       page: await Promise.all(
         results.page.map(async (p) => ({
           _id: p._id,
+          owner: p.owner,
           title: p.title,
           author: p.author,
           publishedAt: p.publishedAt,
@@ -299,6 +310,40 @@ export const gallery = query({
           thumbnailUrl: await ctx.storage.getUrl(p.thumbnail),
         })),
       ),
+    };
+  },
+});
+/** Only the public identity is exposed; never return the Better Auth document. */
+export const creator = query({
+  args: { userId: v.string() },
+  handler: async (ctx, { userId }) => {
+    if (!userId || userId.length > 128) return null;
+    let account;
+    try {
+      account = await authComponent.getAnyUserById(ctx, userId);
+    } catch (error) {
+      // The adapter uses db.get, which rejects malformed IDs instead of returning null.
+      if (
+        /invalid.*(?:id|document)|(?:id|document).*invalid/i.test(String(error))
+      )
+        return null;
+      throw error;
+    }
+    if (!account || typeof account.name !== "string") return null;
+    let imageUrl: string | null = null;
+    if (account.image?.startsWith(`avatars/${account._id}/`)) {
+      try {
+        imageUrl = (await r2.getMetadata(ctx, account.image))?.url ?? null;
+      } catch {
+        /* An unavailable avatar must not hide the public gallery. */
+      }
+    } else if (account.image && /^https?:\/\//i.test(account.image)) {
+      imageUrl = account.image;
+    }
+    return {
+      id: account._id,
+      name: account.name?.trim() || "Créateur Clik",
+      imageUrl,
     };
   },
 });

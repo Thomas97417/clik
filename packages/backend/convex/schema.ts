@@ -61,6 +61,7 @@ export default defineSchema({
     origin: v.optional(origin),
   })
     .index("by_recent", ["active", "publishedAt"])
+    .index("by_owner_recent", ["owner", "active", "publishedAt"])
     .index("by_project", ["projectId"])
     .index("by_challenge_recent", ["challengeId", "active", "submittedAt"])
     .index("by_challenge_votes", [

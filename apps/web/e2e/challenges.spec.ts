@@ -206,7 +206,7 @@ test("participations : trois coups de cœur, changement de vote et commentaires"
   await cards.nth(3).getByRole("button").click();
   await cards
     .nth(0)
-    .getByRole("link", { name: "Le petit phare par Créateur 1", exact: true })
+    .getByRole("link", { name: "Le petit phare", exact: true })
     .click();
   await expect(
     page.getByRole("heading", { name: "Le petit phare" }),

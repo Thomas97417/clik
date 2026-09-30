@@ -117,6 +117,14 @@ Le badge « Privée » ouvre un menu d’action puis le formulaire partagé avec
 
 Les 509 tests automatisés, TypeScript et le build passent. Les 18 contrôles navigateur ciblés passent sur Chromium, Firefox et WebKit, incluant la publication et sa mise à jour depuis l’éditeur. Captures inspectées : `/tmp/clik-project-visibility-<moteur>.png` et `/tmp/clik-project-publish-<moteur>.png`.
 
+## Galeries publiques des créateurs
+
+Les tests backend vérifient la pagination par auteur, les participations aux défis, l’exclusion des projets privés et anciennes versions, le retrait puis la republication, ainsi que les seuls champs exposés par l’identité publique. Ils couvrent aussi les comptes inexistants, les identifiants mal formés et les avatars absents ou indisponibles.
+
+Les scénarios navigateur couvrent l’accès anonyme direct, les liens d’auteur depuis la galerie, les défis, les créations et les commentaires, le lien « Ma page publique », le chargement de 12 puis 15 créations, le retrait réactif, le changement de nom sans changement d’adresse et les états vides ou introuvables. Le transport Convex est simulé ; aucune création ni aucun compte réel n’est ajouté. Captures : `/tmp/clik-creator-<moteur>.png` et `/tmp/clik-creator-mobile-<moteur>.png`.
+
+Les 513 tests automatisés, TypeScript et le build passent. Les 27 contrôles navigateur ciblés (créateurs, défis et navigation) sont validés sur Chromium, Firefox et WebKit après adaptation du sélecteur du test des commentaires au lien d’auteur séparé. Les captures ordinateur et mobile ont été inspectées. La synchronisation Convex reste assurée par le processus de développement habituel.
+
 ## Limites et contrôles de recette restants
 
 - WebKit est le moteur utilisé par Safari ; ce test ne remplace pas une recette dans l’application Safari réelle et sur un appareil iOS.

@@ -26,6 +26,7 @@ import {
   MessageCircle,
   Trophy,
 } from "lucide-react";
+import AuthorLink from "@/components/clik/author-link";
 import PartPreview from "@/components/clik/part-preview";
 import { ChallengeDatePicker } from "@/components/challenges/date-picker";
 import {
@@ -312,9 +313,11 @@ function Entries({
                 </div>
                 <div className="card-meta">
                   <h3>{p.title}</h3>
-                  <p>par {p.author}</p>
                 </div>
               </Link>
+              <p className="public-card-author">
+                par <AuthorLink id={p.owner} name={p.author} />
+              </p>
               <div className="challenge-entry-actions">
                 <VoteButton
                   publicationId={p._id}

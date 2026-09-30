@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import Comments from "@/components/challenges/comments";
 import { CreationChallenge } from "@/components/challenges/shared";
+import AuthorLink from "@/components/clik/author-link";
 import ClientScene from "@/components/clik/client-scene";
 export const Route = createFileRoute("/creations/$publicationId")({
   component: Creation,
@@ -62,7 +63,9 @@ function Creation() {
             />
           )}
           <h1>{p.title}</h1>
-          <p className="author">par {p.author}</p>
+          <p className="author">
+            par <AuthorLink id={p.owner} name={p.author} />
+          </p>
           {p.description && <p className="description">{p.description}</p>}
           {p.origin && (
             <p className="attribution">

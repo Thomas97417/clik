@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { usePaginatedQuery } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
-import { ArrowUpRight, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-export const Route = createFileRoute("/gallery")({ component: Gallery });
+import PublicCreationCard from "@/components/clik/public-creation-card";
+export const Route = createFileRoute("/gallery/")({ component: Gallery });
 function Gallery() {
   const { results, status, loadMore } = usePaginatedQuery(
     api.projects.gallery,
@@ -41,30 +42,7 @@ function Gallery() {
       ) : (
         <div className="creation-grid">
           {results.map((p) => (
-            <Link
-              key={p._id}
-              to="/creations/$publicationId"
-              params={{ publicationId: p._id }}
-              className="creation-card"
-            >
-              <div className="thumbnail">
-                {p.thumbnailUrl && (
-                  <img src={p.thumbnailUrl} alt={p.title} loading="lazy" />
-                )}
-                <span className="card-arrow" aria-hidden="true">
-                  <ArrowUpRight size={19} />
-                </span>
-              </div>
-              <div className="card-meta">
-                {p.challenge && (
-                  <span className="challenge-badge">
-                    Défi du {p.challenge.day}
-                  </span>
-                )}
-                <h2>{p.title}</h2>
-                <p>par {p.author}</p>
-              </div>
-            </Link>
+            <PublicCreationCard key={p._id} creation={p} />
           ))}
         </div>
       )}

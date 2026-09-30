@@ -12,6 +12,7 @@ import type {
 } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import { MessageCircle, Send } from "lucide-react";
 import { SignInTo } from "./shared";
+import AuthorLink from "@/components/clik/author-link";
 export default function Comments({
   publicationId,
   count,
@@ -156,7 +157,9 @@ function Comment({
       </div>
       <div className="comment-content">
         <header>
-          <strong>{comment.author}</strong>
+          <strong>
+            <AuthorLink id={comment.owner} name={comment.author} />
+          </strong>
           <time dateTime={new Date(comment.createdAt).toISOString()}>
             {new Date(comment.createdAt).toLocaleDateString("fr-FR", {
               day: "numeric",
