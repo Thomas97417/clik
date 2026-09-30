@@ -43,7 +43,6 @@ export function useTreeDrag(options: Options) {
   const config = useRef(options);
   config.current = options;
   const container = useRef<HTMLDivElement>(null);
-  const ghost = useRef<HTMLDivElement>(null);
   const session = useRef<Session | null>(null);
   const suppressClick = useRef(false);
   const stop = useRef<() => void>(() => {});
@@ -51,7 +50,6 @@ export function useTreeDrag(options: Options) {
     scene: SceneDocument;
     ids: string[];
     target: Destination | null;
-    label: string;
   } | null>(null);
   const positions = useRef(new Map<string, number>());
 
@@ -198,10 +196,6 @@ export function useTreeDrag(options: Options) {
         scene,
         ids: current.ids,
         target,
-        label:
-          current.ids.length === 1
-            ? current.scene.nodes.find((n) => n.id === current.ids[0])!.name
-            : `${current.ids.length} éléments`,
       });
     };
     const tick = (time: number) => {
@@ -209,8 +203,6 @@ export function useTreeDrag(options: Options) {
       if (!current?.active) return;
       const elapsed = lastTime ? Math.min(32, time - lastTime) : 16;
       lastTime = time;
-      if (ghost.current)
-        ghost.current.style.transform = `translate(${Math.max(8, Math.min(innerWidth - 238, current.x + 14))}px, ${Math.min(innerHeight - 72, current.y + 14)}px)`;
       const tree = container.current;
       if (tree) {
         const inspector = tree.closest<HTMLElement>(".inspector")!;
@@ -279,10 +271,6 @@ export function useTreeDrag(options: Options) {
           scene: current.scene,
           ids: current.ids,
           target: null,
-          label:
-            current.ids.length === 1
-              ? current.scene.nodes.find((n) => n.id === current.ids[0])!.name
-              : `${current.ids.length} éléments`,
         });
         frame = requestAnimationFrame(tick);
       }
@@ -415,12 +403,10 @@ export function useTreeDrag(options: Options) {
   };
   return {
     container,
-    ghost,
     onPointerDown,
     active: !!preview,
     scene: preview?.scene ?? options.scene,
     ids: preview?.ids ?? [],
     target: preview?.target,
-    label: preview?.label,
   };
 }

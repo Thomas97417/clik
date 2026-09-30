@@ -6,7 +6,6 @@ import {
   useState,
   useId,
 } from "react";
-import { createPortal } from "react-dom";
 import { useTreeDrag } from "./use-tree-drag";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAction, useMutation } from "convex/react";
@@ -1192,34 +1191,7 @@ export default function Editor({
                     </p>
                   </div>
                 )}
-                {treeDrag.active && (
-                  <div
-                    className="tree-drop-end"
-                    data-active={treeDrag.target?.mode === "end" || undefined}
-                  >
-                    Fin de la construction
-                  </div>
-                )}
               </div>
-              {treeDrag.active &&
-                createPortal(
-                  <div
-                    ref={treeDrag.ghost}
-                    className="tree-drag-ghost"
-                    data-valid={!!treeDrag.target}
-                    aria-hidden="true"
-                  >
-                    <Grip size={16} />
-                    <div>
-                      <strong>{treeDrag.label}</strong>
-                      <span>
-                        {treeDrag.target?.label ??
-                          "Choisissez un emplacement dans la liste"}
-                      </span>
-                    </div>
-                  </div>,
-                  document.body,
-                )}
               <span className="sr-only" role="status" aria-live="polite">
                 {treeDrag.active ? treeDrag.target?.label : ""}
               </span>

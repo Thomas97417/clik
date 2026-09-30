@@ -99,7 +99,10 @@ test("un groupe se range avec ses enfants et s’ouvre au survol, même en panne
   await page.mouse.move(child.x + 85, child.y + child.height / 2);
   await page.mouse.down();
   await page.mouse.move(child.x + 85, child.y + 100, { steps: 5 });
-  await expect(page.locator(".tree-drag-ghost")).toHaveCount(0);
+  await expect(page.locator(".tree")).not.toHaveAttribute(
+    "data-dragging",
+    "true",
+  );
   await page.mouse.up();
   expect((await state(page)).scene).toEqual(locked.scene);
   expect((await state(page)).past).toBe(locked.past);
@@ -109,7 +112,8 @@ async function take(page: Page, id: string) {
   await page.mouse.move(box.x + 90, box.y + box.height / 2);
   await page.mouse.down();
   await page.mouse.move(box.x + 96, box.y + box.height / 2);
-  await expect(page.locator(".tree-drag-ghost")).toBeVisible();
+  await expect(page.locator(".tree")).toHaveAttribute("data-dragging", "true");
+  await expect(page.locator(".tree-drag-ghost, .tree-drop-end")).toHaveCount(0);
 }
 async function state(page: Page) {
   return page.evaluate(async () => {
@@ -127,8 +131,8 @@ test("ordre visible pendant la prise, dépôt tout en bas, un seul annuler", asy
   await setup(page);
   const before = await state(page);
   await take(page, "p0");
-  const end = (await page.locator(".tree-drop-end").boundingBox())!;
-  await page.mouse.move(end.x + 70, end.y + end.height / 2, { steps: 10 });
+  const end = (await page.locator(".tree").boundingBox())!;
+  await page.mouse.move(end.x + 70, end.y + end.height - 3, { steps: 10 });
   await expect(page.locator(".tree-row .tree-name")).toHaveText([
     "Pièce 2",
     "Pièce 3",
@@ -169,11 +173,11 @@ test("défilement automatique jusqu’au dernier élément en maintenant le poin
       timeout: 12000,
     })
     .toBeGreaterThan(700);
-  await expect(page.locator(".tree-drop-end")).toBeInViewport({
+  await expect(item(page, "p34")).toBeInViewport({
     timeout: 12000,
   });
-  const end = (await page.locator(".tree-drop-end").boundingBox())!;
-  await page.mouse.move(end.x + 100, end.y + 20);
+  const end = (await page.locator(".tree").boundingBox())!;
+  await page.mouse.move(end.x + 100, end.y + end.height - 3);
   await expect(page.locator(".tree-row").last()).toHaveAttribute(
     "data-node-id",
     "p0",
@@ -221,8 +225,8 @@ test("Échap et une sortie de la liste annulent l’aperçu sans toucher à la s
   const before = await state(page);
   for (const cancel of ["Escape", "outside", "blur"]) {
     await take(page, "p0");
-    const end = (await page.locator(".tree-drop-end").boundingBox())!;
-    await page.mouse.move(end.x + 70, end.y + 20, { steps: 8 });
+    const end = (await page.locator(".tree").boundingBox())!;
+    await page.mouse.move(end.x + 70, end.y + end.height - 3, { steps: 8 });
     await expect(page.locator(".tree-row").last()).toHaveAttribute(
       "data-node-id",
       "p0",
@@ -232,7 +236,10 @@ test("Échap et une sortie de la liste annulent l’aperçu sans toucher à la s
       await page.mouse.move(600, 400, { steps: 3 });
     else await page.evaluate(() => window.dispatchEvent(new Event("blur")));
     await page.mouse.up();
-    await expect(page.locator(".tree-drag-ghost")).toHaveCount(0);
+    await expect(page.locator(".tree")).not.toHaveAttribute(
+      "data-dragging",
+      "true",
+    );
     expect((await state(page)).scene).toEqual(before.scene);
     expect((await state(page)).past).toBe(0);
   }
