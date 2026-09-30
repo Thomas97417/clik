@@ -7,7 +7,6 @@ import {
   group,
   inherited,
   makePart,
-  reparent,
   roots,
   snapPart,
   placeInFreeSpace,
@@ -29,6 +28,7 @@ import {
   type ChallengeStock,
 } from "@clik/scene";
 import { Matrix4 } from "three";
+import { moveTreeBranches } from "./tree-order";
 type Snapshot = { scene: SceneDocument; title: string };
 export type EditorChallenge = {
   stock: ChallengeStock;
@@ -232,18 +232,7 @@ export const useEditor = create<State>((set, get) => ({
       s.selection.includes(id) ? s.selection : [id],
     ).filter((root) => !inherited(s.scene, root, "locked"));
     if (!ids.length || (before && ids.includes(before))) return;
-    const moving = new Set(ids);
-    const changed = ids.filter(
-      (root) => s.scene.nodes.find((n) => n.id === root)!.parentId !== parentId,
-    );
-    const scene = reparent(s.scene, changed, parentId);
-    if (before) {
-      const nodes = scene.nodes.filter((n) => moving.has(n.id));
-      scene.nodes = scene.nodes.filter((n) => !moving.has(n.id));
-      const at = scene.nodes.findIndex((n) => n.id === before);
-      scene.nodes.splice(at < 0 ? scene.nodes.length : at, 0, ...nodes);
-    }
-    s.commit(scene);
+    s.commit(moveTreeBranches(s.scene, ids, parentId, before));
   },
   undo: () => {
     const s = get(),

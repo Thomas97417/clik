@@ -6,6 +6,8 @@ import {
   useState,
   useId,
 } from "react";
+import { createPortal } from "react-dom";
+import { useTreeDrag } from "./use-tree-drag";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAction, useMutation } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
@@ -190,10 +192,29 @@ export default function Editor({
   const [inspectorCollapsed, setInspectorCollapsed] = useState(false);
   const libraryId = useId();
   const inspectorId = useId();
+  const treeDrag = useTreeDrag({
+    scene: s.scene,
+    selection: s.selection,
+    disabled:
+      !project.ready ||
+      closed ||
+      publishing ||
+      inspectorCollapsed ||
+      !!s.gesture,
+    collapsed: collapsedGroups,
+    expand: (id) =>
+      setCollapsedGroups((previous) => {
+        if (!previous.has(id)) return previous;
+        const next = new Set(previous);
+        next.delete(id);
+        return next;
+      }),
+  });
+  const treeScene = treeDrag.scene;
   const hierarchy = useMemo(() => {
     const children = new Map<string | null, SceneNode[]>();
-    const groups = s.scene.nodes.filter((n) => n.kind === "group");
-    for (const node of s.scene.nodes) {
+    const groups = treeScene.nodes.filter((n) => n.kind === "group");
+    for (const node of treeScene.nodes) {
       const siblings = children.get(node.parentId) ?? [];
       siblings.push(node);
       children.set(node.parentId, siblings);
@@ -212,7 +233,7 @@ export default function Editor({
     };
     (children.get(null) ?? []).forEach(countParts);
     return { children, groups, counts };
-  }, [s.scene]);
+  }, [treeScene]);
   const selectedParents = new Set(
     s.selection.flatMap((id) => ancestors(s.scene, id)),
   );
@@ -393,7 +414,8 @@ export default function Editor({
   const tree = (parent: string | null, depth = 0): React.ReactNode =>
     (hierarchy.children.get(parent) ?? []).map((n) => {
       const isGroup = n.kind === "group";
-      const collapsed = isGroup && collapsedGroups.has(n.id);
+      const collapsed =
+        isGroup && (collapsedGroups.has(n.id) || treeDrag.ids.includes(n.id));
       const containsSelection = collapsed && selectedParents.has(n.id);
       const childrenId = `${treeId}-${encodeURIComponent(n.id)}`;
       const partCount = hierarchy.counts.get(n.id) ?? 0;
@@ -404,34 +426,13 @@ export default function Editor({
             data-node-id={n.id}
             className={`tree-row ${s.selection.includes(n.id) ? "selected" : ""} ${containsSelection ? "contains-selection" : ""}`}
             style={{ paddingLeft: 8 + depth * 14 }}
-            draggable={!inherited(s.scene, n.id, "locked")}
-            onDragStart={(e) => {
-              e.dataTransfer.effectAllowed = "move";
-              e.dataTransfer.setData("clik/node", n.id);
-            }}
-            onDragOver={(e) => {
-              e.preventDefault();
-            }}
-            onDrop={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              const id = e.dataTransfer.getData("clik/node");
-              if (id)
-                safe(() => {
-                  s.reparent(
-                    id,
-                    isGroup ? n.id : n.parentId,
-                    isGroup ? undefined : n.id,
-                  );
-                  // A folded group remains a drop target; reveal the result.
-                  if (isGroup)
-                    setCollapsedGroups((previous) => {
-                      const next = new Set(previous);
-                      next.delete(n.id);
-                      return next;
-                    });
-                });
-            }}
+            draggable={false}
+            data-drag-source={treeDrag.ids.includes(n.id) || undefined}
+            data-drop-inside={
+              (treeDrag.target?.mode === "inside" &&
+                treeDrag.target.parentId === n.id) ||
+              undefined
+            }
           >
             {isGroup ? (
               <button
@@ -1171,13 +1172,11 @@ export default function Editor({
                 </button>
               </div>
               <div
+                ref={treeDrag.container}
                 className="tree"
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  const id = e.dataTransfer.getData("clik/node");
-                  if (id) safe(() => s.reparent(id, null));
-                }}
+                data-dragging={treeDrag.active || undefined}
+                onPointerDown={treeDrag.onPointerDown}
+                onDragStart={(event) => event.preventDefault()}
               >
                 {s.scene.nodes.length ? (
                   <ul className="tree-branch" aria-label="Pièces et groupes">
@@ -1193,7 +1192,37 @@ export default function Editor({
                     </p>
                   </div>
                 )}
+                {treeDrag.active && (
+                  <div
+                    className="tree-drop-end"
+                    data-active={treeDrag.target?.mode === "end" || undefined}
+                  >
+                    Fin de la construction
+                  </div>
+                )}
               </div>
+              {treeDrag.active &&
+                createPortal(
+                  <div
+                    ref={treeDrag.ghost}
+                    className="tree-drag-ghost"
+                    data-valid={!!treeDrag.target}
+                    aria-hidden="true"
+                  >
+                    <Grip size={16} />
+                    <div>
+                      <strong>{treeDrag.label}</strong>
+                      <span>
+                        {treeDrag.target?.label ??
+                          "Choisissez un emplacement dans la liste"}
+                      </span>
+                    </div>
+                  </div>,
+                  document.body,
+                )}
+              <span className="sr-only" role="status" aria-live="polite">
+                {treeDrag.active ? treeDrag.target?.label : ""}
+              </span>
               <div className="properties">
                 <div className="panel-heading">
                   <h2>

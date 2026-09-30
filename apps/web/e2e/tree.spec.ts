@@ -259,13 +259,7 @@ test("déposer dans un groupe replié le déplie et conserve la position", async
     ),
   );
   await page.getByRole("button", { name: "Tout replier", exact: true }).click();
-  const transfer = await page.evaluateHandle(() => new DataTransfer());
-  await row(page, "Pente 2 × 2").dispatchEvent("dragstart", {
-    dataTransfer: transfer,
-  });
-  await row(page, "Assemblage").dispatchEvent("drop", {
-    dataTransfer: transfer,
-  });
+  await row(page, "Pente 2 × 2").dragTo(row(page, "Assemblage"));
   await expect(
     page.getByRole("button", { name: "Replier Assemblage", exact: true }),
   ).toHaveAttribute("aria-expanded", "true");

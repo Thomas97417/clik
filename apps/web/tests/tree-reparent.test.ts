@@ -89,6 +89,31 @@ describe("réorganisation de la sélection", () => {
       useEditor.getState().scene.nodes.find((n) => n.id === b.id)!.parentId,
     ).toBeNull();
   });
+  it("place les branches tout en bas, même si leur parent ne change pas", () => {
+    const { a, b, scene, store } = setup();
+    store.reparent(a.id, null);
+    const after = useEditor.getState();
+    expect(
+      after.scene.nodes.filter((n) => !n.parentId).map((n) => n.id),
+    ).toEqual(["target", a.id, b.id]);
+    expectWorldUnchanged(scene, after.scene);
+    expect(after.past).toHaveLength(1);
+    store.reparent(a.id, null);
+    expect(useEditor.getState().past).toHaveLength(1);
+  });
+  it("range à la fin d’un groupe sans créer d’historique pour un ordre identique", () => {
+    const { a, b, support, store } = setup();
+    store.reparent(a.id, "target", support.id);
+    store.reparent(a.id, "target");
+    const after = useEditor.getState();
+    expect(
+      after.scene.nodes.filter((n) => n.parentId === "target").map((n) => n.id),
+    ).toEqual([support.id, a.id, b.id]);
+    expect(after.past).toHaveLength(2);
+    // The global array also contains the group header, which is not a sibling.
+    store.reparent(a.id, "target");
+    expect(useEditor.getState().past).toHaveLength(2);
+  });
   it("respecte le verrouillage des pièces sélectionnées et du groupe cible", () => {
     const { a, b, scene, store } = setup();
     scene.nodes.find((n) => n.id === b.id)!.locked = true;

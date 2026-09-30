@@ -3779,3 +3779,84 @@ dialog.modal-backdrop::backdrop {
     display: none;
   }
 }
+
+/* Live ordering preview in the construction tree. */
+.tree-row {
+  touch-action: none;
+  user-select: none;
+}
+.tree-row .tree-name {
+  cursor: grab;
+}
+.tree[data-dragging] {
+  overflow-anchor: none;
+  cursor: grabbing;
+}
+.tree[data-dragging] .tree-name {
+  cursor: grabbing;
+}
+.tree-row[data-drag-source] {
+  background: #edf3ff;
+  outline: 1px dashed #779bec;
+  outline-offset: -2px;
+  color: #356ae6;
+  opacity: 0.65;
+}
+.tree-row[data-drop-inside] {
+  background: #e7efff;
+  box-shadow: inset 3px 0 #356ae6;
+}
+.tree-drop-end {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  margin: 5px 8px;
+  border: 1px dashed #c9d7ef;
+  border-radius: 6px;
+  font-size: 11px;
+  color: #7285a5;
+}
+.tree-drop-end[data-active] {
+  color: #2458ce;
+  background: #edf3ff;
+  border-color: #356ae6;
+}
+.tree-drag-ghost {
+  transform: translate(-100vw, -100vh);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 230px;
+  padding: 10px 12px;
+  border: 1px solid #bdd0f5;
+  border-radius: 9px;
+  background: #fff;
+  color: #356ae6;
+  box-shadow: 0 6px 22px #203d7130;
+  pointer-events: none;
+}
+.tree-drag-ghost > div {
+  min-width: 0;
+}
+.tree-drag-ghost strong,
+.tree-drag-ghost span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tree-drag-ghost strong {
+  font-size: 12px;
+  font-weight: 650;
+  color: #34435c;
+}
+.tree-drag-ghost span {
+  margin-top: 3px;
+  font-size: 11px;
+  color: #68788e;
+}

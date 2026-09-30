@@ -105,6 +105,12 @@ Le compteur mesure les rendus effectifs de la scène, pas seulement les appels `
 
 Le Chromium « headless-shell » utilisait SwiftShader (rendu logiciel), mesuré à 3,6 images/s. La configuration Playwright sélectionne donc explicitement `channel: "chromium"` pour utiliser Chrome complet et l’accélération Metal. Un poste sans accélération graphique peut rester nettement plus lent.
 
+## Rangement interactif de l’arborescence
+
+Le déplacement affiche l’ordre provisoire pendant la prise, avec animation des lignes, emplacement réservé et destination explicite. Les tests couvrent les insertions avant/après, le dépôt tout en bas, le défilement automatique, les sélections multiples, les groupes complets, l’ouverture au survol, les branches verrouillées et l’annulation (Échap, sortie de liste, perte de focus). L’aperçu ne modifie pas la scène ; le dépôt conserve les transformations mondiales et crée une seule opération d’historique. Un dépôt qui ne change pas l’ordre n’en crée aucune.
+
+Les 509 tests automatisés, TypeScript et le build passent. Les 42 contrôles navigateur ciblés (arborescence et panneaux latéraux) passent sur Chromium, Firefox et WebKit. Les captures d’aperçu et du panneau étroit ont été inspectées : `/tmp/clik-tree-order-<moteur>.png` et `/tmp/clik-tree-group-<moteur>.png`.
+
 ## Limites et contrôles de recette restants
 
 - WebKit est le moteur utilisé par Safari ; ce test ne remplace pas une recette dans l’application Safari réelle et sur un appareil iOS.
