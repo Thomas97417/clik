@@ -13,13 +13,12 @@ import {
   House,
   TowerControl,
   Monitor,
-  MousePointer2,
   Palette,
   Plus,
-  Sparkles,
 } from "lucide-react";
 import { CATALOG, COLORS } from "@clik/scene";
 import CreationPreview from "@/components/clik/creation-preview";
+import HomeStepArt from "@/components/clik/home-step-art";
 import { writeDraft } from "@/lib/clik/local";
 import {
   STARTER_COLORS,
@@ -262,59 +261,49 @@ function Home() {
         aria-labelledby="home-how-title"
       >
         <div className="home-section-heading">
-          <div>
-            <h2 id="home-how-title">
-              Prenez le temps
-              <br />
-              de <em>jouer.</em>
-            </h2>
-          </div>
+          <h2 id="home-how-title">
+            Prenez le temps de <em>jouer.</em>
+          </h2>
         </div>
         <div className="home-steps">
           <article>
             <div className="home-step-top">
-              <span>01</span>
-              <MousePointer2 size={25} aria-hidden="true" />
+              <span className="home-step-number" aria-hidden="true">
+                01
+              </span>
+              <HomeStepArt step="build" />
             </div>
             <h3>Posez la première pièce.</h3>
             <p>
               Glissez une forme dans l’atelier. Les pièces s’aimantent pour vous
               aider à les assembler.
             </p>
-            <span className="home-step-label">
-              <Blocks size={14} aria-hidden="true" /> Briques, plaques, pentes…
-            </span>
           </article>
           <article>
             <div className="home-step-top">
-              <span>02</span>
-              <Palette size={25} aria-hidden="true" />
+              <span className="home-step-number" aria-hidden="true">
+                02
+              </span>
+              <HomeStepArt step="play" />
             </div>
             <h3>Faites-la à votre façon.</h3>
             <p>
               Changez les couleurs, tournez, dupliquez. Essayez une autre
               direction : vous pouvez toujours annuler.
             </p>
-            <div className="home-step-colors" aria-hidden="true">
-              {STARTER_COLORS.map((swatch) => (
-                <span key={swatch.value} style={{ background: swatch.value }} />
-              ))}
-            </div>
           </article>
           <article>
             <div className="home-step-top">
-              <span>03</span>
-              <Sparkles size={25} aria-hidden="true" />
+              <span className="home-step-number" aria-hidden="true">
+                03
+              </span>
+              <HomeStepArt step="share" />
             </div>
             <h3>Gardez-la. Ou partagez-la.</h3>
             <p>
               Retrouvez votre création sur cet appareil. Avec un compte,
               conservez-la en ligne et publiez-la quand vous le souhaitez.
             </p>
-            <span className="home-step-label">
-              <Check size={14} aria-hidden="true" /> Vous choisissez ce qui est
-              public.
-            </span>
           </article>
         </div>
       </section>
