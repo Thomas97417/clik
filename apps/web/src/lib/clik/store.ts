@@ -232,7 +232,7 @@ export const useEditor = create<State>((set, get) => ({
   group: () => {
     const s = get(),
       ids = s.selection.filter((id) => !inherited(s.scene, id, "locked"));
-    if (!ids.length) return;
+    if (s.selection.length && !ids.length) return;
     const id = crypto.randomUUID();
     s.commit(group(s.scene, ids, id));
     set({ selection: [id] });

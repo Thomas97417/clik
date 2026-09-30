@@ -5,6 +5,43 @@ const row = (page: Page, name: string) =>
     .locator(".tree-row")
     .filter({ has: page.getByRole("button", { name, exact: true }) });
 
+test("créer un groupe vide puis y ranger une pièce, avec annuler et rétablir", async ({
+  page,
+}) => {
+  await page.goto("/editor");
+  const create = page.getByRole("button", {
+    name: "Nouveau groupe",
+    exact: true,
+  });
+  await expect(create).toBeEnabled();
+  await create.click();
+  await expect(page.locator(".tree-row.selected .tree-name")).toHaveText(
+    "Nouveau groupe",
+  );
+  await expect(
+    page.getByRole("button", { name: "Grouper", exact: true }),
+  ).toBeEnabled();
+  await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+  await page
+    .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
+    .click();
+  await expect(page.locator(".tree-row")).toHaveCount(0);
+  await expect(create).toBeEnabled();
+  await page.getByRole("button", { name: "Rétablir", exact: true }).click();
+  const target = row(page, "Nouveau groupe");
+  await target.locator(".tree-name").click();
+  await rename(page, "Structure");
+  const targetId = (await row(page, "Structure").getAttribute("data-node-id"))!;
+  await page.locator('.piece-card[aria-label="Brique 2 × 2"]').click();
+  await expect(
+    page.getByRole("button", { name: "Grouper", exact: true }),
+  ).toBeEnabled();
+  await page
+    .getByRole("combobox", { name: "Groupe parent", exact: true })
+    .selectOption(targetId);
+  await expect(row(page, "Structure").locator(".tree-count")).toHaveText("1");
+});
+
 test("replier les propriétés libère la liste et conserve les modifications", async ({
   page,
 }, info) => {

@@ -1120,9 +1120,11 @@ export default function Editor({
                   <ListChecks size={17} aria-hidden="true" />
                 </button>
                 <button
-                  title="Grouper"
+                  title={s.selection.length ? "Grouper" : "Nouveau groupe"}
                   onClick={() => safe(s.group)}
-                  disabled={!s.selection.length}
+                  disabled={
+                    !project.ready || closed || !!s.gesture || !!s.pending
+                  }
                 >
                   <FolderPlus size={17} />
                 </button>

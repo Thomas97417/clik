@@ -361,6 +361,8 @@ describe("Historique de l’atelier", () => {
     const g = useEditor.getState().selection[0];
     s.patch(g, { locked: true });
     s.select(id);
+    s.group();
+    expect(useEditor.getState().scene.nodes).toHaveLength(2);
     s.remove();
     expect(useEditor.getState().scene.nodes).toHaveLength(2);
     s.patch(id, { position: [10, 0, 0] });

@@ -378,7 +378,7 @@ export function group(
   id: string = crypto.randomUUID(),
 ) {
   const chosen = roots(scene, ids);
-  if (!chosen.length) return scene;
+  if (ids.length && !chosen.length) return scene;
   const next = structuredClone(scene);
   next.nodes.push({
     id,
