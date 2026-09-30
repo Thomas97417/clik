@@ -2141,13 +2141,6 @@ button:focus-visible {
   border-radius: 14px;
   overflow: hidden;
   background: white;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
-}
-.creation-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 35px #485d781a;
 }
 .thumbnail {
   aspect-ratio: 4/3;
@@ -2359,11 +2352,6 @@ button:focus-visible {
   width: 32px;
   height: 32px;
   color: #356ae6;
-  transition: background 150ms;
-}
-.project-card-open:hover .card-arrow {
-  background: #356ae6;
-  color: white;
 }
 .project-card .card-meta {
   padding: 18px 18px 20px;
@@ -2550,14 +2538,6 @@ button:focus-visible {
   }
   .projects-toolbar {
     gap: 12px;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .project-card {
-    transition: none;
-  }
-  .project-card:hover {
-    transform: none;
   }
 }
 .creation-page {
