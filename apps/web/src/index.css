@@ -2158,11 +2158,17 @@ button:focus-visible {
   right: 15px;
   background: #ffffffde;
   border-radius: 50%;
-  height: 34px;
-  width: 34px;
+  height: 32px;
+  width: 32px;
   display: grid;
   place-items: center;
-  color: #587296;
+  color: #356ae6;
+  transition: background 150ms;
+}
+a.creation-card:hover .card-arrow,
+.creation-card > a:hover .card-arrow {
+  background: #356ae6;
+  color: white;
 }
 .card-meta {
   padding: 18px 20px;
@@ -2358,11 +2364,6 @@ button:focus-visible {
 }
 .project-visibility-trigger:disabled {
   cursor: wait;
-}
-.project-card .card-arrow {
-  width: 32px;
-  height: 32px;
-  color: #356ae6;
 }
 .project-card .card-meta {
   padding: 18px 18px 20px;

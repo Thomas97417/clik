@@ -21,6 +21,7 @@ import {
 import {
   ArrowLeft,
   ArrowRight,
+  ArrowUpRight,
   Clock3,
   MessageCircle,
   Trophy,
@@ -306,6 +307,9 @@ function Entries({
                   {p.thumbnailUrl && (
                     <img src={p.thumbnailUrl} alt={p.title} loading="lazy" />
                   )}
+                  <span className="card-arrow" aria-hidden="true">
+                    <ArrowUpRight size={19} />
+                  </span>
                 </div>
                 <div className="card-meta">
                   <h3>{p.title}</h3>

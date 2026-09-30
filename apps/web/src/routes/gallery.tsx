@@ -51,8 +51,8 @@ function Gallery() {
                 {p.thumbnailUrl && (
                   <img src={p.thumbnailUrl} alt={p.title} loading="lazy" />
                 )}
-                <span className="card-arrow">
-                  <ArrowUpRight size={20} />
+                <span className="card-arrow" aria-hidden="true">
+                  <ArrowUpRight size={19} />
                 </span>
               </div>
               <div className="card-meta">
