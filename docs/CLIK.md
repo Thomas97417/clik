@@ -27,7 +27,9 @@ Le serveur frontend utilise le port 3001. Après modification des fonctions ou d
 
 Une copie locale créée après un conflit est accessible par `/editor?draft=…`. Garder cette adresse pour retrouver la copie. Le brouillon initial est conservé.
 
-Sur l’accueil uniquement, l’aperçu se tourne par glissement à la souris ou au doigt. Les boutons + / − et le pincement permettent de zoomer ; la molette agit après avoir donné le focus à l’aperçu, pour préserver le défilement de la page. Au clavier, les flèches tournent la vue, + / − règlent le zoom et Début réinitialise le cadrage. Un bouton réinitialise aussi la vue. La manipulation ne modifie ni les pièces du modèle ni les miniatures publiées. Les aperçus de « Mes créations » et des formulaires restent statiques. Le rendu interactif partage le moteur WebGL des miniatures et ne redessine que sur interaction.
+Sur l’accueil uniquement, l’aperçu se tourne par glissement à la souris ou au doigt. Les boutons + / − et le pincement permettent de zoomer ; la molette agit après avoir donné le focus à l’aperçu, pour préserver le défilement de la page. Au clavier, les flèches tournent la vue, + / − règlent le zoom et Début réinitialise le cadrage. Un bouton réinitialise aussi la vue. La manipulation ne modifie ni les pièces du modèle ni les miniatures publiées. Les aperçus de « Mes créations » restent statiques. Le rendu interactif partage le moteur WebGL des miniatures et ne redessine que sur interaction.
+
+Le terrain de jeu propose une maison avec jardin (70 pièces), un robot sur son socle (48 pièces) et un pont à deux arches avec ses berges (98 pièces). Les cinq couleurs modifient les accents du modèle sans changer l’assemblage. La palette reste sous l’aperçu, hors de la zone de manipulation. Un tracé de bifurcation relie le modèle au bouton « Créer ma version » : celui-ci crée une copie locale indépendante avec la couleur choisie, sans écraser une création existante. Le numéro de version de la clé d’aperçu est à changer lors d’une modification des modèles.
 
 ## Manipuler
 

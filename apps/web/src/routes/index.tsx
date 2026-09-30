@@ -9,6 +9,7 @@ import {
   Check,
   ChevronRight,
   FolderOpen,
+  GitBranch,
   House,
   Layers3,
   Monitor,
@@ -128,40 +129,7 @@ function Home() {
             <span>
               <span className="home-live-dot" /> Le terrain de jeu
             </span>
-            <span>À vous d’essayer</span>
-          </div>
-          <div className="home-model-stage">
-            <div className="home-model-halo" aria-hidden="true" />
-            <CreationPreview
-              interactive
-              scene={scene}
-              cacheKey={`starter-v1:${model.id}:${color}`}
-              title={model.name}
-            />
-            <span className="home-model-caption">
-              <Blocks size={14} aria-hidden="true" /> {scene.nodes.length}{" "}
-              pièces. Votre touche.
-            </span>
-            <div
-              className="home-palette"
-              role="group"
-              aria-label="Couleur du modèle"
-            >
-              {STARTER_COLORS.map((swatch) => (
-                <button
-                  key={swatch.value}
-                  style={{ "--swatch": swatch.value } as CSSProperties}
-                  aria-label={swatch.name}
-                  aria-pressed={color === swatch.value}
-                  title={swatch.name}
-                  onClick={() => setColor(swatch.value)}
-                >
-                  {color === swatch.value && (
-                    <Check size={17} aria-hidden="true" />
-                  )}
-                </button>
-              ))}
-            </div>
+            <span>Explorez. Transformez. Recommencez.</span>
           </div>
           <div
             className="home-model-options"
@@ -184,18 +152,80 @@ function Home() {
               );
             })}
           </div>
-          <div className="home-model-details">
-            <div aria-live="polite">
+          <div className="home-model-stage">
+            <div className="home-model-halo" aria-hidden="true" />
+            <CreationPreview
+              interactive
+              scene={scene}
+              cacheKey={`starter-v2:${model.id}:${color}`}
+              title={model.name}
+            />
+          </div>
+          <div className="home-palette-row">
+            <span>Couleur d’accent</span>
+            <div
+              className="home-palette"
+              role="group"
+              aria-label="Couleur du modèle"
+            >
+              {STARTER_COLORS.map((swatch) => (
+                <button
+                  key={swatch.value}
+                  style={{ "--swatch": swatch.value } as CSSProperties}
+                  aria-label={swatch.name}
+                  aria-pressed={color === swatch.value}
+                  title={swatch.name}
+                  onClick={() => setColor(swatch.value)}
+                >
+                  {color === swatch.value && (
+                    <Check size={17} aria-hidden="true" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="home-model-details" aria-live="polite">
+            <div>
               <h2>{model.name}</h2>
               <p>{model.description}</p>
             </div>
+            <span className="home-model-count">
+              <Blocks size={14} aria-hidden="true" /> {scene.nodes.length}{" "}
+              pièces
+            </span>
+          </div>
+          <div className="home-fork home-desktop-actions">
+            <svg
+              className="home-fork-path"
+              viewBox="0 0 44 100"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path className="home-fork-original" d="M8 9v80" />
+              <path
+                className="home-fork-branch"
+                d="M8 9v18c0 24 28 12 28 36v12"
+              />
+              <circle cx="8" cy="9" r="4" />
+              <circle className="home-fork-end" cx="36" cy="79" r="4" />
+            </svg>
+            <span className="home-fork-source">
+              Le modèle est le point de départ.
+            </span>
             <button
-              className="home-model-start home-desktop-actions"
+              className="home-model-start"
+              aria-label={busy ? "Ouverture…" : "Créer ma version"}
               disabled={busy}
               onClick={() => void create(true)}
             >
-              {busy ? "Ouverture…" : "Créer ma version"}
-              <ArrowRight size={16} aria-hidden="true" />
+              <span>
+                <strong>
+                  <GitBranch size={16} aria-hidden="true" />{" "}
+                  {busy ? "Ouverture…" : "Créer ma version"}
+                </strong>
+                <span>Une copie à transformer. Une nouvelle direction.</span>
+              </span>
+              <ArrowUpRight size={19} aria-hidden="true" />
             </button>
           </div>
           {error && (
