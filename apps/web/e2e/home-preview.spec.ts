@@ -53,10 +53,10 @@ test("aperçu de l’accueil : rotation, zoom, clavier et remise à zéro", asyn
   await expect(surface).toBeVisible();
   await surface.press("ArrowLeft");
   await expect(canvas).toBeVisible();
-  await page.getByRole("button", { name: "Robot", exact: true }).click();
+  await page.getByRole("button", { name: "Phare", exact: true }).click();
   await expect(
     page.getByRole("group", {
-      name: "Manipuler Le robot curieux",
+      name: "Manipuler Le phare des marées",
       exact: true,
     }),
   ).toBeVisible();

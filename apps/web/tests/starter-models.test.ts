@@ -7,6 +7,13 @@ import {
 } from "../src/lib/clik/starter-models";
 
 describe("Modèles de départ de l’accueil", () => {
+  it("propose trois constructions de plus en plus ambitieuses", () => {
+    const counts = STARTER_MODELS.map(
+      (model) => starterScene(model.id, model.color).nodes.length,
+    );
+    expect(counts[1]).toBeGreaterThan(counts[0] * 1.5);
+    expect(counts[2]).toBeGreaterThan(counts[1] * 1.5);
+  });
   for (const model of STARTER_MODELS) {
     it(`${model.name} est éditable et sans pièces superposées dans chaque couleur`, () => {
       for (const color of STARTER_COLORS) {

@@ -5,13 +5,13 @@ import {
   ArrowRight,
   ArrowUpRight,
   Blocks,
-  Bot,
+  Castle,
   Check,
   ChevronRight,
   FolderOpen,
   GitBranch,
   House,
-  Layers3,
+  TowerControl,
   Monitor,
   MousePointer2,
   Palette,
@@ -41,7 +41,7 @@ export const Route = createFileRoute("/")({
   }),
   component: Home,
 });
-const modelIcons = [House, Bot, Layers3];
+const modelIcons = [House, TowerControl, Castle];
 
 function Home() {
   const navigate = useNavigate();
@@ -91,8 +91,8 @@ function Home() {
             <br /> <em>idée.</em>
           </h1>
           <p>
-            Une maison, un drôle de robot, un monde à vous. Donnez forme à ce
-            que vous avez en tête, brique après brique.
+            Une maison, un phare, tout un château. Donnez forme à ce que vous
+            avez en tête, brique après brique.
           </p>
           <div className="home-buttons home-desktop-actions">
             <button
@@ -157,7 +157,7 @@ function Home() {
             <CreationPreview
               interactive
               scene={scene}
-              cacheKey={`starter-v2:${model.id}:${color}`}
+              cacheKey={`starter-v3:${model.id}:${color}`}
               title={model.name}
             />
           </div>

@@ -28,10 +28,10 @@ test("les modèles et couleurs ouvrent une copie fidèle sans écraser la créat
       page.getByRole("img", { name: `Aperçu de ${model.name}`, exact: true }),
     ).toBeVisible();
   }
-  await page.getByRole("button", { name: "Robot", exact: true }).click();
+  await page.getByRole("button", { name: "Phare", exact: true }).click();
   await page.getByRole("button", { name: "Violet", exact: true }).click();
   const interactive = page.getByRole("group", {
-    name: "Manipuler Le robot curieux",
+    name: "Manipuler Le phare des marées",
     exact: true,
   });
   await interactive.press("ArrowRight");
@@ -65,11 +65,11 @@ test("les modèles et couleurs ouvrent une copie fidèle sans écraser la créat
     .click();
   await expect(page).toHaveURL(/\/editor\?draft=/);
   await expect(page.getByLabel("Nom du projet")).toHaveValue(
-    "Le robot curieux · ma version",
+    "Le phare des marées · ma version",
   );
   await expect(page.locator("canvas").first()).toHaveAttribute(
     "data-rendered",
-    String(starterScene("robot", "#8b5bd6").nodes.length),
+    String(starterScene("lighthouse", "#8b5bd6").nodes.length),
   );
   const entries = await page.evaluate(async () => {
     const db = await new Promise<IDBDatabase>((resolve) => {
@@ -87,8 +87,8 @@ test("les modèles et couleurs ouvrent une copie fidèle sans écraser la créat
   expect(entries.find((entry) => entry.stamp === "original")?.title).toBe(
     "Ma création à garder",
   );
-  expect(entries.find((entry) => entry.title.includes("robot"))?.scene).toEqual(
-    starterScene("robot", "#8b5bd6"),
+  expect(entries.find((entry) => entry.title.includes("phare"))?.scene).toEqual(
+    starterScene("lighthouse", "#8b5bd6"),
   );
   expect(errors).toEqual([]);
 });
@@ -134,10 +134,10 @@ test("parcours mobile, clavier et démarrage sur une page blanche", async ({
   await page.screenshot({
     path: `/tmp/clik-home-mobile-${info.project.name}.png`,
   });
-  await page.getByRole("button", { name: "Pont", exact: true }).click();
+  await page.getByRole("button", { name: "Château", exact: true }).click();
   await expect(
     page.getByRole("img", {
-      name: "Aperçu de Le pont des possibles",
+      name: "Aperçu de Le château des horizons",
       exact: true,
     }),
   ).toBeVisible();
