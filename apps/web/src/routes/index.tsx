@@ -322,7 +322,6 @@ function Home() {
       <section className="home-next" aria-label="Poursuivre l’aventure">
         <Link to="/gallery" className="home-gallery-link">
           <div>
-            <span className="eyebrow">L’imagination se partage</span>
             <h2>
               Une idée en fait
               <br />
