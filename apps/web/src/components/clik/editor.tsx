@@ -29,6 +29,7 @@ import {
   Box,
   CloudCheck,
   CloudUpload,
+  Check,
   ChevronRight,
   ChevronsDownUp,
   ChevronsUpDown,
@@ -183,6 +184,8 @@ export default function Editor({
   const treeId = useId();
   const propertiesId = useId();
   const [propertiesCollapsed, setPropertiesCollapsed] = useState(false);
+  const paletteId = useId();
+  const [paletteCollapsed, setPaletteCollapsed] = useState(false);
   const [libraryCollapsed, setLibraryCollapsed] = useState(false);
   const [inspectorCollapsed, setInspectorCollapsed] = useState(false);
   const libraryId = useId();
@@ -803,18 +806,44 @@ export default function Editor({
               </div>
               <div className="library-footer">
                 <div className="palette-section">
-                  <div className="panel-heading">
-                    <h2>Couleurs</h2>
-                    <span>{COLOR_NAMES[COLORS.indexOf(s.color)]}</span>
-                  </div>
-                  <div className="palette">
+                  <h2>
+                    <button
+                      className="palette-toggle"
+                      aria-label={
+                        paletteCollapsed
+                          ? "Déplier les couleurs"
+                          : "Replier les couleurs"
+                      }
+                      aria-expanded={!paletteCollapsed}
+                      aria-controls={paletteId}
+                      onClick={() =>
+                        setPaletteCollapsed((collapsed) => !collapsed)
+                      }
+                    >
+                      <ChevronRight size={16} aria-hidden="true" />
+                      Couleurs
+                      <span className="palette-current">
+                        <span
+                          style={{ background: s.color }}
+                          aria-hidden="true"
+                        />
+                        {COLOR_NAMES[COLORS.indexOf(s.color)]}
+                      </span>
+                    </button>
+                  </h2>
+                  <div
+                    id={paletteId}
+                    className="palette"
+                    hidden={paletteCollapsed}
+                    role="group"
+                    aria-label="Choisir une couleur"
+                  >
                     {COLORS.map((color, i) => (
                       <button
                         key={color}
                         title={COLOR_NAMES[i]}
                         aria-label={COLOR_NAMES[i]}
                         aria-pressed={s.color === color}
-                        style={{ background: color }}
                         className={s.color === color ? "chosen" : ""}
                         onClick={() => {
                           useEditor.setState({ color });
@@ -848,7 +877,25 @@ export default function Editor({
                             }),
                           );
                         }}
-                      />
+                      >
+                        <span
+                          className="palette-swatch"
+                          style={{
+                            background: color,
+                            color: [2, 3, 4, 7, 9, 10].includes(i)
+                              ? "#fff"
+                              : "#25354e",
+                          }}
+                        >
+                          {s.color === color && (
+                            <Check
+                              size={15}
+                              strokeWidth={3}
+                              aria-hidden="true"
+                            />
+                          )}
+                        </span>
+                      </button>
                     ))}
                   </div>
                 </div>
