@@ -38,7 +38,12 @@ describe("Projets privés et versions publiques", () => {
     });
     const paginationOpts = { numItems: 12, cursor: null };
     const first = await alice.query(api.projects.list, { paginationOpts });
-    expect(first.page[0]).toMatchObject({ _id: id, scene, revision: 0 });
+    expect(first.page[0]).toMatchObject({
+      _id: id,
+      scene,
+      revision: 0,
+      description: "",
+    });
     const changed = JSON.stringify(emptyScene());
     await alice.mutation(api.projects.save, {
       id,
@@ -136,12 +141,19 @@ describe("Projets privés et versions publiques", () => {
     const pub = await alice.mutation(api.projects.publish, {
       id,
       title: "Version 1",
-      description: "",
+      description: "Une première construction.",
       thumbnail,
       revision: 0,
     });
     const first = await t.query(api.projects.creation, { id: pub });
     expect(first?.scene).toBe(scene);
+    expect(
+      (
+        await alice.query(api.projects.list, {
+          paginationOpts: { numItems: 12, cursor: null },
+        })
+      ).page[0].description,
+    ).toBe("Une première construction.");
     await alice.mutation(api.projects.save, {
       id,
       title: "Brouillon changé",
@@ -154,7 +166,7 @@ describe("Projets privés et versions publiques", () => {
     await alice.mutation(api.projects.publish, {
       id,
       title: "Version 2",
-      description: "",
+      description: "Une description à conserver après retrait.",
       thumbnail,
       revision: 1,
     });
@@ -169,6 +181,16 @@ describe("Projets privés et versions publiques", () => {
       bob.mutation(api.projects.withdraw, { id: pub }),
     ).rejects.toThrow();
     await alice.mutation(api.projects.withdraw, { id: pub });
+    expect(
+      (
+        await alice.query(api.projects.list, {
+          paginationOpts: { numItems: 12, cursor: null },
+        })
+      ).page[0],
+    ).toMatchObject({
+      publicationId: null,
+      description: "Une description à conserver après retrait.",
+    });
     expect(
       await t.query(api.projects.creation, { id: pub, versionId: first!._id }),
     ).toBeNull();

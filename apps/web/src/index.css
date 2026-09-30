@@ -2070,6 +2070,9 @@ button:focus-visible {
   font-size: 13px;
   line-height: 1.7;
 }
+.publish-dialog .publish-error {
+  color: #b42318;
+}
 .publish-dialog label {
   font-size: 13px;
   display: flex;
@@ -2279,6 +2282,7 @@ button:focus-visible {
   font-size: 12px;
 }
 .project-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -2339,6 +2343,18 @@ button:focus-visible {
   color: #267453;
   background: #f0fcf6ed;
 }
+.project-visibility-trigger {
+  cursor: pointer;
+}
+.project-visibility-trigger:hover,
+.project-visibility-trigger[data-popup-open] {
+  background: #fff;
+  color: #356ae6;
+}
+.project-visibility-trigger:focus-visible {
+  outline: 2px solid #356ae6;
+  outline-offset: 3px;
+}
 .project-card .card-arrow {
   width: 32px;
   height: 32px;
@@ -2352,7 +2368,7 @@ button:focus-visible {
 .project-card .card-meta {
   padding: 18px 18px 20px;
 }
-.project-card h2 {
+.project-card .card-meta h2 {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;

@@ -146,7 +146,9 @@ test("une nouvelle création préserve les précédentes et obtient son propre a
   await page.locator('.piece-card[aria-label="Brique 2 × 2"]').click();
   await page.getByLabel("Nom du projet").fill("Nouvelle sculpture");
   await page.getByLabel("Nom du projet").press("Enter");
-  await expect(page.getByRole("status")).toContainText("Enregistré");
+  await expect(
+    page.getByLabel("Projet et sauvegarde").getByRole("status"),
+  ).toContainText("Enregistré");
   await page
     .getByRole("navigation", { name: "Navigation principale" })
     .getByRole("link", { name: "Mes créations", exact: true })

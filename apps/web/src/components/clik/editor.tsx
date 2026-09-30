@@ -7,6 +7,7 @@ import {
   useId,
 } from "react";
 import { useTreeDrag } from "./use-tree-drag";
+import PublishDialog from "./publish-dialog";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAction, useMutation } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
@@ -61,7 +62,6 @@ import {
   UnlockKeyhole,
   Upload,
   WifiOff,
-  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
@@ -260,10 +260,6 @@ export default function Editor({
     });
   const capture = useRef<() => Promise<ArrayBuffer>>(undefined);
   const [captureReady, setCaptureReady] = useState(false);
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    if (publishing) dialogRef.current?.showModal();
-  }, [publishing]);
   const onCapture = useCallback((fn: () => Promise<ArrayBuffer>) => {
     capture.current = fn;
     setCaptureReady(true);
@@ -1349,72 +1345,17 @@ export default function Editor({
         </footer>
       </main>
       {publishing && (
-        <dialog
-          ref={dialogRef}
-          className="modal-backdrop"
-          onCancel={(e) => {
-            if (busy) e.preventDefault();
-            else setPublishing(false);
-          }}
+        <PublishDialog
+          title={pubTitle}
+          description={description}
+          onTitleChange={setPubTitle}
+          onDescriptionChange={setDescription}
           onClose={() => setPublishing(false)}
-        >
-          <section
-            className="publish-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="publish-title"
-          >
-            <button
-              className="close-modal"
-              aria-label="Fermer"
-              disabled={busy}
-              onClick={() => setPublishing(false)}
-            >
-              <X size={20} />
-            </button>
-            <span className="eyebrow">À partager, à réinventer</span>
-            <h2 id="publish-title">
-              {project.challenge
-                ? "Votre participation au défi"
-                : "Publier votre création"}
-            </h2>
-            <p>
-              Une version de votre scène sera visible et réutilisable dans Clik
-              avec attribution. Vos prochaines modifications resteront privées.
-            </p>
-            <label>
-              Titre
-              <Input
-                autoFocus
-                value={pubTitle}
-                maxLength={100}
-                onChange={(e) => setPubTitle(e.target.value)}
-              />
-            </label>
-            <label>
-              Description <span>facultative</span>
-              <textarea
-                maxLength={2000}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={4}
-              />
-            </label>
-            <p>La vue actuelle servira de miniature.</p>
-            <Button
-              disabled={
-                busy || !pubTitle.trim() || closed || (!!stock && !count)
-              }
-              onClick={() => void doPublish()}
-            >
-              {busy
-                ? "Publication…"
-                : project.challenge
-                  ? "Valider ma participation"
-                  : "Publier cette version"}
-            </Button>
-          </section>
-        </dialog>
+          onPublish={() => void doPublish()}
+          busy={busy}
+          disabled={closed || (!!stock && !count)}
+          challenge={!!project.challenge}
+        />
       )}
     </>
   );

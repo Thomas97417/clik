@@ -20,7 +20,7 @@ Le serveur frontend utilise le port 3001. Après modification des fonctions ou d
 - `/` : accueil et démonstration 3D manipulable.
 - `/editor` : brouillon invité conservé dans IndexedDB ; connexion puis « Conserver dans mes projets » pour en créer une copie privée en ligne.
 - `/editor/$projectId` : atelier d’un projet personnel et publication explicite.
-- `/projects` : projets personnels et retrait des publications.
+- `/projects` : projets personnels, publication et retrait des publications. Le badge « Privée » ouvre un menu « Publier », puis le même formulaire que dans l’atelier, prérempli avec le titre de la création et la dernière description publiée si elle existe. L’aperçu de la carte devient la miniature ; après confirmation, le statut et le lien de publication s’actualisent sur place.
 - `/gallery` : publications récentes, chargées par pages.
 - `/challenges` : défi du jour, lot commun, participations et archives via `?date=AAAA-MM-JJ`.
 - `/creations/$publicationId` : version publique, caméra, reprise privée avec attribution et commentaires. Les créations ordinaires restent figées au début de la consultation ; une participation à un défi suit sa dernière version publiée.

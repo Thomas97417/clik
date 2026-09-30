@@ -111,6 +111,12 @@ Le déplacement affiche l’ordre provisoire pendant la prise, avec animation de
 
 Les 509 tests automatisés, TypeScript et le build passent. Les 42 contrôles navigateur ciblés (arborescence et panneaux latéraux) passent sur Chromium, Firefox et WebKit. Les captures d’aperçu et du panneau étroit ont été inspectées : `/tmp/clik-tree-order-<moteur>.png` et `/tmp/clik-tree-group-<moteur>.png`.
 
+## Publication depuis Mes créations
+
+Le badge « Privée » ouvre un menu d’action puis le formulaire partagé avec l’éditeur. Les tests vérifient le titre et la dernière description préremplis, l’annulation sans publication, le focus clavier, le rendu mobile, le refus des défis terminés, la miniature PNG, la révision envoyée, la conservation de la saisie après erreur et l’actualisation du statut après succès. Le transport Convex est simulé dans le navigateur ; aucune publication réelle n’est créée. Les fonctions Convex sont aussi testées directement, notamment la récupération de la description après retrait.
+
+Les 509 tests automatisés, TypeScript et le build passent. Les 18 contrôles navigateur ciblés passent sur Chromium, Firefox et WebKit, incluant la publication et sa mise à jour depuis l’éditeur. Captures inspectées : `/tmp/clik-project-visibility-<moteur>.png` et `/tmp/clik-project-publish-<moteur>.png`.
+
 ## Limites et contrôles de recette restants
 
 - WebKit est le moteur utilisé par Safari ; ce test ne remplace pas une recette dans l’application Safari réelle et sur un appareil iOS.

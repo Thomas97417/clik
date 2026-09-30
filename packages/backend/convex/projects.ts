@@ -68,6 +68,7 @@ export const list = query({
             origin: p.origin,
             challenge: p.challengeId ? await ctx.db.get(p.challengeId) : null,
             publicationId: publication?.active ? publication._id : null,
+            description: publication?.description ?? "",
           };
         }),
       ),
