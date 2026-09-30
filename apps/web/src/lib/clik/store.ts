@@ -14,6 +14,7 @@ import {
   snapToGrid,
   previewSelection,
   movableRoots,
+  stepSelection,
   type SelectionPreview,
   ungroup,
   validateScene,
@@ -74,6 +75,7 @@ type State = Snapshot & {
   selectAll: () => void;
   add: (type: PartType, position?: Vec3) => void;
   patch: (id: string, patch: Partial<SceneNode>) => void;
+  nudge: (delta: Vec3) => void;
   remove: () => void;
   duplicate: () => void;
   group: () => void;
@@ -178,6 +180,12 @@ export const useEditor = create<State>((set, get) => ({
         ? previewSelection(next, [id], false).scene
         : next,
     );
+  },
+  nudge: (delta) => {
+    const s = get();
+    if (s.gesture || s.pending || s.libraryPointer) return;
+    const next = stepSelection(s.scene, s.selection, delta);
+    if (next !== s.scene) s.commit(next);
   },
   remove: () => {
     const s = get(),

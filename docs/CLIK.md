@@ -55,6 +55,8 @@ Le menu de parent dans les propriétés et le glisser-déposer sur un groupe ré
 
 Raccourcis : Supprimer / Retour arrière, Échap, F pour cadrer, Cmd/Ctrl-Z et Maj-Cmd/Ctrl-Z, Cmd/Ctrl-Y, Cmd/Ctrl-C/V/D, Cmd/Ctrl-G et Maj-Cmd/Ctrl-G. Les formulaires gardent leurs raccourcis de saisie.
 
+Les flèches déplacent la sélection d’une case sur les axes fixes du quadrillage : gauche/droite sur X, haut/bas sur Z. Maj + haut/bas monte ou descend de 1,2 unité, soit la hauteur d’une brique. Les groupes restent rigides et conservent leur rotation ; les branches verrouillées restent immobiles. Une destination occupée ou sous le sol est refusée sans créer d’historique. Chaque pas accepté s’annule normalement. Les flèches restent réservées à la saisie dans les champs, aux contrôles et aux fenêtres modales ; elles ne modifient pas une manipulation en cours.
+
 ## Modèle et sécurité
 
 `packages/scene` définit `SceneDocument` version 1, catalogue `clik-1`, positions et rotations Euler XYZ en radians. Chaque nœud référence un parent ; les matrices locales sont composées dans l’ordre de la hiérarchie. Le validateur partagé contrôle les valeurs finies, couleurs, modèles, unicité des identifiants, existence des parents, absence de cycle, 500 pièces et 512 Kio en UTF-8. Les groupes sont limités par le plafond de 1 000 nœuds total.

@@ -808,6 +808,35 @@ export function movableRoots(scene: SceneDocument, ids: string[]) {
   );
 }
 
+/** A keyboard step stays on its requested axis; occupied destinations are refused. */
+export function stepSelection(
+  scene: SceneDocument,
+  ids: string[],
+  delta: Vec3,
+) {
+  const movable = movableRoots(scene, ids);
+  if (!movable.length) return scene;
+  const next = applyDelta(
+    scene,
+    movable,
+    new Matrix4().makeTranslation(...delta),
+  );
+  const movingIds = new Set(descendants(scene, movable));
+  const moving = next.nodes
+    .filter((n): n is Part => n.kind === "part" && movingIds.has(n.id))
+    .map((n) => placementBody(CATALOG[n.type], worldMatrix(next, n.id)));
+  if (!moving.length || moving.some((body) => body.bounds.min.y < -1e-6))
+    return scene;
+  const obstacles = next.nodes
+    .filter((n): n is Part => n.kind === "part" && !movingIds.has(n.id))
+    .map((n) => placementBody(CATALOG[n.type], worldMatrix(next, n.id)));
+  if (
+    moving.some((body) => obstacles.some((other) => bodiesOverlap(body, other)))
+  )
+    return scene;
+  return next;
+}
+
 /** Snap a selection as a rigid assembly, never against its own children. */
 function rawSelectionPreview(
   scene: SceneDocument,

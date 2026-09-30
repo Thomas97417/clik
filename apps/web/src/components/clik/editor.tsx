@@ -252,10 +252,18 @@ export default function Editor({
     publish = useMutation(api.projects.publish);
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
-      if (publishing) return;
+      if (
+        publishing ||
+        e.defaultPrevented ||
+        e.isComposing ||
+        document.querySelector(
+          'dialog[open],[role="dialog"],[role="alertdialog"]',
+        )
+      )
+        return;
       if (
         (e.target as HTMLElement)?.closest(
-          'input,textarea,select,[contenteditable="true"]',
+          'input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"]',
         )
       )
         return;
@@ -266,7 +274,30 @@ export default function Editor({
         return;
       }
       if (state.gesture || state.pending) return;
-      if (e.key === "Delete" || e.key === "Backspace") {
+      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
+        const target = e.target instanceof HTMLElement ? e.target : null;
+        if (
+          !project.ready ||
+          closed ||
+          mod ||
+          e.altKey ||
+          !state.selection.length ||
+          (target && target !== document.body && !target.closest(".editor")) ||
+          target?.closest(
+            '[role="menu"],[role="listbox"],[role="combobox"],[role="slider"],[role="spinbutton"],[role="tablist"],[role="radiogroup"]',
+          ) ||
+          (e.shiftKey && (e.key === "ArrowLeft" || e.key === "ArrowRight"))
+        )
+          return;
+        const direction = e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 1;
+        const delta: Vec3 = e.shiftKey
+          ? [0, -direction * 1.2, 0]
+          : e.key === "ArrowLeft" || e.key === "ArrowRight"
+            ? [direction, 0, 0]
+            : [0, 0, direction];
+        e.preventDefault();
+        safe(() => state.nudge(delta));
+      } else if (e.key === "Delete" || e.key === "Backspace") {
         e.preventDefault();
         safe(state.remove);
       } else if (mod && e.key.toLowerCase() === "z") {
@@ -292,7 +323,7 @@ export default function Editor({
     };
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
-  }, [publishing]);
+  }, [publishing, project.ready, closed]);
   const selected = s.scene.nodes.find((n) => n.id === s.selection[0]);
   const selectionRoots = roots(s.scene, s.selection);
   const selectionParents = new Set(
@@ -1308,10 +1339,11 @@ export default function Editor({
             <span className="brand-mini">clik</span> L’atelier des possibles
           </span>
           <span>
-            Glisser : déplacer · Espace + glisser / clic droit : caméra · Maj +
-            clic : sélection multiple <ChevronRight size={12} /> F : cadrer{" "}
-            <ChevronRight size={12} /> Pièce saisie : R / Maj + R : ±90°{" "}
-            <ChevronRight size={12} /> Échap : annuler
+            Glisser / flèches : déplacer · Maj + ↑ / ↓ : hauteur · Espace +
+            glisser / clic droit : caméra · Maj + clic : sélection multiple{" "}
+            <ChevronRight size={12} /> F : cadrer <ChevronRight size={12} />{" "}
+            Pièce saisie : R / Maj + R : ±90° <ChevronRight size={12} /> Échap :
+            annuler
           </span>
         </footer>
       </main>

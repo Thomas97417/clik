@@ -71,7 +71,8 @@ test("R laisse les champs éditables et Échap annule la rotation de bibliothèq
   );
   const title = page.getByRole("textbox", { name: "Nom du projet" });
   await title.focus();
-  await title.press("End");
+  // Focus selects the whole title; ArrowRight collapses it to the end on every OS.
+  await title.press("ArrowRight");
   const before = await title.inputValue();
   await page.keyboard.press("r");
   await expect(title).toHaveValue(`${before}r`);
