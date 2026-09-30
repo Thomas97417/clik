@@ -56,6 +56,11 @@ function Gallery() {
                 </span>
               </div>
               <div className="card-meta">
+                {p.challenge && (
+                  <span className="challenge-badge">
+                    Défi du {p.challenge.day}
+                  </span>
+                )}
                 <h2>{p.title}</h2>
                 <p>par {p.author}</p>
               </div>

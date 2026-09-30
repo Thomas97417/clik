@@ -6,6 +6,8 @@ import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import { ArrowLeft, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import Comments from "@/components/challenges/comments";
+import { CreationChallenge } from "@/components/challenges/shared";
 import ClientScene from "@/components/clik/client-scene";
 export const Route = createFileRoute("/creations/$publicationId")({
   component: Creation,
@@ -21,7 +23,7 @@ function Creation() {
     }),
     remix = useMutation(api.projects.remix),
     [busy, setBusy] = useState(false);
-  if (p && versionId !== p._id) setVersionId(p._id);
+  if (p && !p.challenge && versionId !== p._id) setVersionId(p._id);
   if (p === undefined)
     return <div className="empty-state">Chargement de la création…</div>;
   if (!p)
@@ -48,7 +50,17 @@ function Creation() {
           <span>Glissez pour explorer · Pincez ou défilez pour zoomer</span>
         </div>
         <aside>
-          <span className="eyebrow">Création de la communauté</span>
+          <span className="eyebrow">
+            {p.challenge ? "Création du défi" : "Création de la communauté"}
+          </span>
+          {p.challenge && (
+            <CreationChallenge
+              day={p.challenge.day}
+              publicationId={publicationId as Id<"publications">}
+              owner={p.owner}
+              count={p.voteCount}
+            />
+          )}
           <h1>{p.title}</h1>
           <p className="author">par {p.author}</p>
           {p.description && <p className="description">{p.description}</p>}
@@ -60,6 +72,15 @@ function Creation() {
           <p className="publication-date">
             Publiée le {new Date(p.createdAt).toLocaleDateString("fr-FR")}
           </p>
+          {p.challenge &&
+            p.updatedAt &&
+            p.submittedAt &&
+            p.updatedAt > p.submittedAt && (
+              <p className="publication-date">
+                Mise à jour le {new Date(p.updatedAt).toLocaleString("fr-FR")}.
+                Les votes sont conservés.
+              </p>
+            )}
           {isAuthenticated ? (
             <Button
               disabled={busy}
@@ -104,6 +125,10 @@ function Creation() {
           </p>
         </aside>
       </div>
+      <Comments
+        publicationId={publicationId as Id<"publications">}
+        count={p.commentCount}
+      />
     </main>
   );
 }

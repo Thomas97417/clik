@@ -8,7 +8,7 @@ import {
 } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
-import { emptyScene } from "@clik/scene";
+import { emptyScene, type ChallengeStock } from "@clik/scene";
 import { useEditor } from "./store";
 import { readDraft, writeDraft, type Draft } from "./local";
 import { toast } from "sonner";
@@ -76,6 +76,13 @@ export function useProject(projectId?: string, draftId?: string) {
                 ? JSON.parse(remote.scene)
                 : emptyScene(),
             recover ? local.title : (remote?.title ?? "Ma première création"),
+            remote?.challenge
+              ? {
+                  stock: remote.challenge.stock as ChallengeStock,
+                  closesAt: remote.challenge.closesAt,
+                  serverOffset: remote.serverNow - Date.now(),
+                }
+              : null,
           );
         savedSerial.current = local?.dirty && projectId ? -1 : 0;
         setConflict(
@@ -230,6 +237,13 @@ export function useProject(projectId?: string, draftId?: string) {
       .load(
         p ? JSON.parse(p.scene) : (local?.scene ?? emptyScene()),
         p?.title ?? local?.title ?? "Ma création",
+        p?.challenge
+          ? {
+              stock: p.challenge.stock as ChallengeStock,
+              closesAt: p.challenge.closesAt,
+              serverOffset: p.serverNow - Date.now(),
+            }
+          : null,
       );
     revision.current = p?.revision ?? 0;
     savedSerial.current = 0;
@@ -257,5 +271,7 @@ export function useProject(projectId?: string, draftId?: string) {
     isLoading,
     revision: revision.current,
     origin: remote?.origin,
+    challenge: remote?.challenge,
+    publicationId: remote?.publicationId,
   };
 }

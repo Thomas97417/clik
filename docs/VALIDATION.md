@@ -2,6 +2,16 @@
 
 Date : 28 septembre 2026.
 
+## Le défi du jour — 30 septembre 2026
+
+- `bun run test` : 498 tests réussis (482 web/scène et 16 backend).
+- `bun run check-types` et `git diff --check` : réussis.
+- `bun run build` avec Node 22 : client et serveur construits ; l’avertissement existant sur la taille du bundle principal reste présent (496 Ko gzip).
+- 12 contrôles Playwright réussis : quatre parcours sur Chromium, Firefox et WebKit. Ils couvrent la participation et sa mise à jour, les 100 pièces du lot, le calendrier, les archives, la navigation mobile jusqu’à 320 px, les limites dans l’éditeur, l’annulation, la clôture, les trois votes et leur réattribution, puis l’ajout/modification/suppression de commentaires.
+- Les fonctions Convex réelles sont testées avec `convex-test` : date UTC, unicité du projet, quotas de pièces y compris masquées/groupées, publication vide ou tardive, concurrence de quatre votes, neuf votes sur trois journées, auto-vote interdit, retrait/republication, classement, commentaires et permissions. Les mises à jour préservent votes et commentaires.
+- Les parcours connectés dans le navigateur utilisent un transport Convex et une session simulés, sans créer de comptes ni de publications distantes. Le parcours public consulte le backend de développement. Les captures ordinateur/mobile, du stock et des commentaires ont été inspectées.
+- Schéma, fonctions et cron quotidien synchronisés sur Convex de développement. Aucun déploiement de production.
+
 ## Vérifications automatisées
 
 - `bun run test` : 21 tests réussis (14 transformations/historique/aimantation, 3 sauvegarde React, 4 sécurité/publication Convex).

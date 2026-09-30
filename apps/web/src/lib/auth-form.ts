@@ -42,8 +42,9 @@ export function authErrorMessage(
 export function authReturnTo() {
   try {
     const path = sessionStorage.getItem("clik-return-to") || "/editor";
-    return /^\/(editor|creations|projects|gallery)(\/|\?|$)/.test(path) &&
-      !path.includes("\\")
+    return /^\/(editor|creations|projects|gallery|challenges)(\/|\?|$)/.test(
+      path,
+    ) && !path.includes("\\")
       ? path
       : "/editor";
   } catch {

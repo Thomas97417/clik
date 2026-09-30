@@ -22,7 +22,8 @@ Le serveur frontend utilise le port 3001. Après modification des fonctions ou d
 - `/editor/$projectId` : atelier d’un projet personnel et publication explicite.
 - `/projects` : projets personnels et retrait des publications.
 - `/gallery` : publications récentes, chargées par pages.
-- `/creations/$publicationId` : version publique figée au début de la consultation, caméra et reprise privée avec attribution.
+- `/challenges` : défi du jour, lot commun, participations et archives via `?date=AAAA-MM-JJ`.
+- `/creations/$publicationId` : version publique, caméra, reprise privée avec attribution et commentaires. Les créations ordinaires restent figées au début de la consultation ; une participation à un défi suit sa dernière version publiée.
 
 Une copie locale créée après un conflit est accessible par `/editor?draft=…`. Garder cette adresse pour retrouver la copie. Le brouillon initial est conservé.
 
@@ -78,6 +79,14 @@ Les tests navigateur utilisent des contextes isolés et des brouillons locaux je
 
 Les résultats, la machine et les limites de la validation sont documentés dans `VALIDATION.md`.
 
-## Idées
+## Le défi du jour
 
-Les défis du jours : chaque jour, un défi avec un certains nombres de pièces prédéterminés, et les gens doivent faire les meilleurs créations possibles. Les gens peuvent upvote les meilleurs créations du jour.
+Chaque journée UTC propose un lot commun de 100 pièces réparties sur 12 modèles. Les couleurs sont libres et utiliser tout le stock n’est pas obligatoire. Le tirage est déterministe et versionné ; le lot enregistré ne change plus. Le cron Convex crée le défi à minuit UTC ; l’ouverture de la page initialise aussi celui du jour si nécessaire, sans créer d’archives rétroactives.
+
+Un compte dispose d’un projet et d’une participation par défi. L’éditeur limite tous les ajouts, duplications, collages et annulations au stock disponible, y compris les pièces masquées et groupées. Convex contrôle aussi les quantités et la clôture lors de la publication. Une participation peut être mise à jour jusqu’à minuit UTC en conservant ses votes et commentaires. Après clôture, le projet devient consultable et peut être copié dans une création libre ; les modifications privées non publiées restent conservées.
+
+Chaque compte peut soutenir trois créations par défi, retirer un vote pour changer de choix, et voter sur les journées précédentes sans partager leurs quotas. Voter pour sa propre création est interdit. Retirer une publication invalide ses votes et libère les quotas ; la republier ne restaure pas ces votes.
+
+Toutes les créations publiques disposent de commentaires en texte simple (1 à 1 000 caractères), paginés par 20, du plus récent au plus ancien. La lecture est publique ; publier, voter et commenter demandent une connexion. Seul l’auteur peut modifier ou supprimer son commentaire.
+
+Les tables `challenges`, `challengeVotes` et `comments` complètent les projets/publications existants. Aucun changement du format JSON des scènes n’est nécessaire. Synchroniser les fonctions et le schéma Convex en même temps que le frontend, avec le cron de `convex/crons.ts`.

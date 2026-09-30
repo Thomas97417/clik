@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Authenticated, Unauthenticated } from "convex/react";
-import { FolderOpen, Hammer, Images, UserRound } from "lucide-react";
+import { FolderOpen, Hammer, Images, UserRound, Trophy } from "lucide-react";
 import UserMenu from "./user-menu";
 
 export default function Header() {
@@ -17,6 +17,10 @@ export default function Header() {
         <Link to="/gallery" activeProps={{ className: "active" }}>
           <Images size={17} aria-hidden="true" />
           La galerie
+        </Link>
+        <Link to="/challenges" activeProps={{ className: "active" }}>
+          <Trophy size={17} aria-hidden="true" />
+          Les défis
         </Link>
         <Link to="/projects" activeProps={{ className: "active" }}>
           <FolderOpen size={17} aria-hidden="true" />

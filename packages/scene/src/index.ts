@@ -911,3 +911,13 @@ export function snapSelection(
 }
 
 export { archProfile, roundProfile } from "./part-shapes";
+
+export {
+  challengeDay,
+  challengeStart,
+  challengeStock,
+  countStock,
+  validateChallengeStock,
+  CHALLENGE_DAY_MS,
+  type ChallengeStock,
+} from "./challenges";

@@ -24,10 +24,27 @@ import {
   type PartType,
   type Vec3,
   COLORS,
+  validateChallengeStock,
+  type ChallengeStock,
 } from "@clik/scene";
 import { Matrix4 } from "three";
 type Snapshot = { scene: SceneDocument; title: string };
+export type EditorChallenge = {
+  stock: ChallengeStock;
+  closesAt: number;
+  serverOffset: number;
+};
+function checkChallenge(
+  scene: SceneDocument,
+  challenge: EditorChallenge | null,
+) {
+  if (!challenge) return;
+  if (Date.now() + challenge.serverOffset >= challenge.closesAt)
+    throw Error("Ce défi est clos. Continuez dans une copie libre.");
+  validateChallengeStock(scene, challenge.stock);
+}
 type State = Snapshot & {
+  challenge: EditorChallenge | null;
   selection: string[];
   past: Snapshot[];
   future: Snapshot[];
@@ -47,7 +64,11 @@ type State = Snapshot & {
   gestureIds: string[];
   referenceId?: string;
   clipboard: SceneDocument | null;
-  load: (scene: SceneDocument, title: string) => void;
+  load: (
+    scene: SceneDocument,
+    title: string,
+    challenge?: EditorChallenge | null,
+  ) => void;
   commit: (scene: SceneDocument, title?: string) => void;
   select: (id: string, add?: boolean) => void;
   selectAll: () => void;
@@ -69,6 +90,7 @@ type State = Snapshot & {
 };
 const snapshot = (s: State): Snapshot => ({ scene: s.scene, title: s.title });
 export const useEditor = create<State>((set, get) => ({
+  challenge: null,
   scene: emptyScene(),
   title: "Ma première création",
   selection: [],
@@ -89,9 +111,10 @@ export const useEditor = create<State>((set, get) => ({
   snapPreview: null,
   gestureIds: [],
   clipboard: null,
-  load: (scene, title) =>
+  load: (scene, title, challenge = null) =>
     set({
       scene: validateScene(scene),
+      challenge,
       title,
       selection: [],
       past: [],
@@ -106,6 +129,7 @@ export const useEditor = create<State>((set, get) => ({
   commit: (scene, title = get().title) => {
     validateScene(scene);
     const s = get();
+    checkChallenge(scene, s.challenge);
     if (JSON.stringify(scene) === JSON.stringify(s.scene) && title === s.title)
       return;
     set({
@@ -216,7 +240,8 @@ export const useEditor = create<State>((set, get) => ({
   undo: () => {
     const s = get(),
       previous = s.past.at(-1);
-    if (previous)
+    if (previous) {
+      checkChallenge(previous.scene, s.challenge);
       set({
         ...previous,
         past: s.past.slice(0, -1),
@@ -224,11 +249,13 @@ export const useEditor = create<State>((set, get) => ({
         selection: [],
         serial: s.serial + 1,
       });
+    }
   },
   redo: () => {
     const s = get(),
       next = s.future[0];
-    if (next)
+    if (next) {
+      checkChallenge(next.scene, s.challenge);
       set({
         ...next,
         past: [...s.past, snapshot(s)],
@@ -236,14 +263,22 @@ export const useEditor = create<State>((set, get) => ({
         selection: [],
         serial: s.serial + 1,
       });
+    }
   },
-  begin: (referenceId) =>
+  begin: (referenceId) => {
+    const s = get();
+    if (
+      s.challenge &&
+      Date.now() + s.challenge.serverOffset >= s.challenge.closesAt
+    )
+      return;
     set((s) => ({
       gesture: snapshot(s),
       snapPreview: null,
       gestureIds: movableRoots(s.scene, s.selection),
       referenceId,
-    })),
+    }));
+  },
   preview: (delta) => {
     const s = get();
     if (!s.gesture) return;

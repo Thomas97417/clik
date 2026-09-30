@@ -11,7 +11,13 @@ import {
 import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { authComponent } from "./auth";
-import { validateScene } from "@clik/scene";
+import {
+  validateScene,
+  validateChallengeStock,
+  inherited,
+  type ChallengeStock,
+} from "@clik/scene";
+import { assertOpen } from "./challenges";
 async function user(ctx: QueryCtx | MutationCtx) {
   const u = await authComponent.safeGetAuthUser(ctx);
   if (!u) throw new ConvexError("Connexion requise.");
@@ -60,6 +66,7 @@ export const list = query({
             revision: p.revision,
             updatedAt: p.updatedAt,
             origin: p.origin,
+            challenge: p.challengeId ? await ctx.db.get(p.challengeId) : null,
             publicationId: publication?.active ? publication._id : null,
           };
         }),
@@ -69,7 +76,19 @@ export const list = query({
 });
 export const get = query({
   args: { id: v.id("projects") },
-  handler: (ctx, { id }) => owned(ctx, id),
+  handler: async (ctx, { id }) => {
+    const p = await owned(ctx, id);
+    const publication = await ctx.db
+      .query("publications")
+      .withIndex("by_project", (q) => q.eq("projectId", id))
+      .unique();
+    return {
+      ...p,
+      challenge: p.challengeId ? await ctx.db.get(p.challengeId) : null,
+      publicationId: publication?.active ? publication._id : null,
+      serverNow: Date.now(),
+    };
+  },
 });
 export const create = mutation({
   args: { title: v.string(), scene: v.string() },
@@ -98,6 +117,14 @@ export const save = mutation({
         code: "CONFLICT",
         message: "Ce projet a été modifié dans un autre onglet.",
       });
+    if (p.challengeId) {
+      const challenge = await ctx.db.get(p.challengeId);
+      if (!challenge) throw new ConvexError("Défi introuvable.");
+      validateChallengeStock(
+        validateScene(JSON.parse(a.scene)),
+        challenge.stock as ChallengeStock,
+      );
+    }
     await ctx.db.patch(a.id, {
       title: title(a.title),
       scene: scene(a.scene),
@@ -154,6 +181,30 @@ export const publish = mutation({
   handler: async (ctx, a) => {
     const p = await owned(ctx, a.id),
       u = await user(ctx);
+    if (p.challengeId) {
+      const challenge = await ctx.db.get(p.challengeId);
+      assertOpen(challenge);
+      const document = validateChallengeStock(
+        validateScene(JSON.parse(p.scene)),
+        challenge!.stock as ChallengeStock,
+      );
+      if (
+        !document.nodes.some(
+          (n) => n.kind === "part" && !inherited(document, n.id, "hidden"),
+        )
+      )
+        throw new ConvexError(
+          "Ajoutez au moins une pièce visible avant de participer.",
+        );
+      const other = await ctx.db
+        .query("publications")
+        .withIndex("by_owner_challenge", (q) =>
+          q.eq("owner", p.owner).eq("challengeId", p.challengeId),
+        )
+        .unique();
+      if (other && other.projectId !== p._id)
+        throw new ConvexError("Vous avez déjà une participation à ce défi.");
+    }
     if (p.revision !== a.revision)
       throw new ConvexError(
         "La création a changé. Enregistrez puis réessayez.",
@@ -178,6 +229,16 @@ export const publish = mutation({
       author: u.name || "Créateur Clik",
       active: true,
       publishedAt: Date.now(),
+      ...(p.challengeId
+        ? {
+            challengeId: p.challengeId,
+            submittedAt: existing?.submittedAt ?? Date.now(),
+            rankTie: existing?.rankTie ?? -Date.now(),
+            updatedAt: Date.now(),
+            voteCount: existing?.voteCount ?? 0,
+            voteEpoch: existing?.voteEpoch ?? 0,
+          }
+        : {}),
       thumbnail: a.thumbnail,
       ...(p.origin ? { origin: p.origin } : {}),
     };
@@ -205,7 +266,12 @@ export const withdraw = mutation({
       p = await ctx.db.get(id);
     if (!p || p.owner !== u._id)
       throw new ConvexError("Publication introuvable.");
-    await ctx.db.patch(id, { active: false });
+    await ctx.db.patch(id, {
+      active: false,
+      ...(p.challengeId
+        ? { voteCount: 0, voteEpoch: (p.voteEpoch ?? 0) + 1 }
+        : {}),
+    });
   },
 });
 export const gallery = query({
@@ -227,6 +293,8 @@ export const gallery = query({
           title: p.title,
           author: p.author,
           publishedAt: p.publishedAt,
+          challenge: p.challengeId ? await ctx.db.get(p.challengeId) : null,
+          commentCount: p.commentCount ?? 0,
           thumbnailUrl: await ctx.storage.getUrl(p.thumbnail),
         })),
       ),
@@ -243,6 +311,11 @@ export const creation = query({
     return {
       ...version,
       owner: p.owner,
+      challenge: p.challengeId ? await ctx.db.get(p.challengeId) : null,
+      voteCount: p.voteCount ?? 0,
+      commentCount: p.commentCount ?? 0,
+      updatedAt: p.updatedAt,
+      submittedAt: p.submittedAt,
       thumbnailUrl: await ctx.storage.getUrl(version.thumbnail),
     };
   },

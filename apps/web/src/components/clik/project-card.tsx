@@ -28,6 +28,7 @@ export type CreationItem = {
   scene: string | SceneDocument;
   cacheKey: string;
   updatedAt?: number;
+  challenge?: { day: string } | null;
   origin?: { title: string; author: string };
 } & (
   | { location: "local"; draftId?: string }
@@ -78,6 +79,11 @@ export default function ProjectCard({ creation }: { creation: CreationItem }) {
           </span>
         </div>
         <div className="card-meta">
+          {creation.challenge && (
+            <span className="challenge-badge">
+              Défi du {creation.challenge.day}
+            </span>
+          )}
           <h2 title={creation.title}>{creation.title}</h2>
           <p>
             {creation.updatedAt ? (

@@ -9,6 +9,9 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as challenges from "../challenges.js";
+import type * as comments from "../comments.js";
+import type * as crons from "../crons.js";
 import type * as env from "../env.js";
 import type * as healthCheck from "../healthCheck.js";
 import type * as http from "../http.js";
@@ -25,6 +28,9 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  challenges: typeof challenges;
+  comments: typeof comments;
+  crons: typeof crons;
   env: typeof env;
   healthCheck: typeof healthCheck;
   http: typeof http;

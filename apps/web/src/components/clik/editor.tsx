@@ -12,6 +12,7 @@ import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import {
   CATALOG,
+  countStock,
   COLORS,
   COLOR_NAMES,
   inherited,
@@ -141,11 +142,39 @@ export default function Editor({
     [busy, setBusy] = useState(false),
     [pubTitle, setPubTitle] = useState(""),
     [description, setDescription] = useState("");
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    if (!s.challenge) return;
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, [s.challenge]);
+  const closed =
+    !!s.challenge && now + s.challenge.serverOffset >= s.challenge.closesAt;
+  useEffect(() => {
+    if (closed) {
+      useEditor.getState().cancel();
+      setPublishing(false);
+    }
+  }, [closed]);
+  const stock = s.challenge?.stock;
+  const used = countStock(s.scene);
+  const availableCatalog = useMemo(
+    () =>
+      catalog.filter(
+        ([id]) => !stock || stock.some((item) => item.type === id),
+      ),
+    [stock],
+  );
+  const remaining = (type: PartType) =>
+    stock
+      ? (stock.find((item) => item.type === type)?.quantity ?? 0) -
+        (used[type] ?? 0)
+      : 500;
   const visibleParts = useMemo(() => {
     const prefix =
       pieceCategories.find((c) => c.name === category)?.prefix ?? "";
-    return catalog.filter(([id]) => id.startsWith(prefix));
-  }, [category]);
+    return availableCatalog.filter(([id]) => id.startsWith(prefix));
+  }, [category, availableCatalog]);
   const libraryScroll = useRef<HTMLDivElement>(null);
   // Presentation state only: folding never changes the scene or its history.
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
@@ -480,7 +509,7 @@ export default function Editor({
                 autoComplete="off"
                 key={`${projectId}-${project.ready}-${s.title}`}
                 defaultValue={s.title}
-                disabled={!project.ready}
+                disabled={!project.ready || closed}
                 maxLength={100}
                 onFocus={(e) => e.currentTarget.select()}
                 onBlur={(e) => {
@@ -555,14 +584,20 @@ export default function Editor({
                   !project.ready ||
                   !captureReady ||
                   !!s.gesture ||
-                  project.conflict
+                  project.conflict ||
+                  closed
                 }
                 onClick={() => {
                   setPubTitle(s.title);
                   setPublishing(true);
                 }}
               >
-                <Upload size={15} aria-hidden="true" /> Publier
+                <Upload size={15} aria-hidden="true" />{" "}
+                {project.challenge
+                  ? project.publicationId
+                    ? "Mettre à jour ma participation"
+                    : "Proposer au défi"
+                  : "Publier"}
               </Button>
             ) : project.isAuthenticated ? (
               <Button
@@ -590,6 +625,23 @@ export default function Editor({
             )}
           </div>
         </header>
+        {project.challenge && (
+          <div className="challenge-editor-banner">
+            <Link to="/challenges" search={{ date: project.challenge.day }}>
+              Défi du {project.challenge.day} · UTC
+            </Link>
+            <span>
+              {closed
+                ? "Participations closes · votre travail privé est conservé"
+                : `Clôture dans ${Math.max(0, Math.floor((project.challenge.closesAt - now - (s.challenge?.serverOffset ?? 0)) / 3600000))} h ${Math.max(0, Math.floor((project.challenge.closesAt - now - (s.challenge?.serverOffset ?? 0)) / 60000) % 60)} min`}
+            </span>
+            {closed && (
+              <button onClick={() => safe(preserve)}>
+                Continuer dans une copie libre
+              </button>
+            )}
+          </div>
+        )}
         {project.conflict && (
           <div className="conflict" role="alert">
             Cette création a changé dans un autre onglet.{" "}
@@ -677,7 +729,11 @@ export default function Editor({
                     >
                       <span>{name}</span>
                       <span className="category-count" aria-hidden="true">
-                        {catalog.filter(([id]) => id.startsWith(prefix)).length}
+                        {
+                          availableCatalog.filter(([id]) =>
+                            id.startsWith(prefix),
+                          ).length
+                        }
                       </span>
                     </button>
                   ))}
@@ -696,7 +752,12 @@ export default function Editor({
                       className={`piece-card ${s.pending === id ? "active" : ""}`}
                       key={id}
                       draggable={false}
-                      disabled={!project.ready || count >= 500}
+                      disabled={
+                        !project.ready ||
+                        closed ||
+                        count >= 500 ||
+                        remaining(id) <= 0
+                      }
                       aria-label={p.name}
                       title={`${p.name} — glisser dans la scène ou cliquer pour ajouter`}
                       onDragStart={(e) => e.preventDefault()}
@@ -722,6 +783,11 @@ export default function Editor({
                           safe(() => s.add(id));
                       }}
                     >
+                      {stock && (
+                        <span className="piece-stock">
+                          {remaining(id)} restante{remaining(id) > 1 ? "s" : ""}
+                        </span>
+                      )}
                       <span className="piece-preview">
                         <PartPreview type={id} color={s.color} />
                       </span>
@@ -858,7 +924,11 @@ export default function Editor({
               </button>
             </div>
             {project.ready ? (
-              <ClientScene scene={s.scene} editable onCapture={onCapture} />
+              <ClientScene
+                scene={s.scene}
+                editable={!closed}
+                onCapture={onCapture}
+              />
             ) : (
               <div className="empty-state">Chargement de la création…</div>
             )}
@@ -873,7 +943,13 @@ export default function Editor({
               </div>
             )}
             <div className="viewport-bottom">
-              <span>{count} / 500 pièces</span>
+              <span>
+                {count} /{" "}
+                {stock
+                  ? stock.reduce((sum, item) => sum + item.quantity, 0)
+                  : 500}{" "}
+                pièces
+              </span>
               {overlap && (
                 <span className="overlap">
                   Chevauchement existant à corriger
@@ -1217,7 +1293,11 @@ export default function Editor({
               <X size={20} />
             </button>
             <span className="eyebrow">À partager, à réinventer</span>
-            <h2 id="publish-title">Publier votre création</h2>
+            <h2 id="publish-title">
+              {project.challenge
+                ? "Votre participation au défi"
+                : "Publier votre création"}
+            </h2>
             <p>
               Une version de votre scène sera visible et réutilisable dans Clik
               avec attribution. Vos prochaines modifications resteront privées.
@@ -1242,10 +1322,16 @@ export default function Editor({
             </label>
             <p>La vue actuelle servira de miniature.</p>
             <Button
-              disabled={busy || !pubTitle.trim()}
+              disabled={
+                busy || !pubTitle.trim() || closed || (!!stock && !count)
+              }
               onClick={() => void doPublish()}
             >
-              {busy ? "Publication…" : "Publier cette version"}
+              {busy
+                ? "Publication…"
+                : project.challenge
+                  ? "Valider ma participation"
+                  : "Publier cette version"}
             </Button>
           </section>
         </dialog>
