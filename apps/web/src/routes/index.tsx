@@ -19,6 +19,7 @@ import {
 import { CATALOG, COLORS } from "@clik/scene";
 import CreationPreview from "@/components/clik/creation-preview";
 import HomeStepArt from "@/components/clik/home-step-art";
+import HomeNextArt from "@/components/clik/home-next-art";
 import { writeDraft } from "@/lib/clik/local";
 import {
   STARTER_COLORS,
@@ -310,56 +311,41 @@ function Home() {
 
       <section className="home-next" aria-label="Poursuivre l’aventure">
         <Link to="/gallery" className="home-gallery-link">
-          <div>
+          <div className="home-next-copy">
             <h2>
               Une idée en fait
               <br />
               naître une autre.
             </h2>
             <p>
-              Explorez la galerie, ouvrez une création
-              <br />
-              et inventez sa prochaine version.
+              Une création vous inspire ? Ouvrez-la dans l’atelier et donnez-lui
+              votre propre direction.
             </p>
             <span className="home-next-action">
-              Découvrir la galerie <ArrowUpRight size={19} aria-hidden="true" />
+              Découvrir la galerie
+              <span className="home-next-arrow">
+                <ArrowUpRight size={18} aria-hidden="true" />
+              </span>
             </span>
           </div>
-          <div className="home-gallery-art" aria-hidden="true">
-            <span className="home-art-brick brick-one">
-              <i />
-              <i />
-              <i />
-              <i />
-            </span>
-            <span className="home-art-brick brick-two">
-              <i />
-              <i />
-              <i />
-              <i />
-            </span>
-            <span className="home-art-brick brick-three">
-              <i />
-              <i />
-            </span>
-            <span className="home-art-spark">✳</span>
-          </div>
+          <HomeNextArt kind="fork" />
         </Link>
         <Link to="/projects" className="home-projects-link">
-          <span className="home-projects-icon">
-            <FolderOpen size={28} aria-hidden="true" />
-          </span>
+          <HomeNextArt kind="collection" />
           <h2>
-            Vos idées ont
+            Vos idées,
             <br />
-            leur place ici.
+            au même endroit.
           </h2>
           <p>
-            Petites expériences et grandes constructions : retrouvez tout dans
-            votre collection.
+            Petites expériences et grandes constructions : retrouvez votre
+            collection et reprenez là où vous en étiez.
           </p>
           <span className="home-next-action">
-            Mes créations <ArrowUpRight size={19} aria-hidden="true" />
+            Mes créations
+            <span className="home-next-arrow">
+              <ArrowUpRight size={18} aria-hidden="true" />
+            </span>
           </span>
         </Link>
       </section>
