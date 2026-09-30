@@ -278,7 +278,7 @@ function Stage({
     const center = box.getCenter(new Vector3()),
       aspect = "aspect" in camera ? (camera.aspect as number) : 1,
       size = Math.max(
-        9,
+        editable ? 25 : 9,
         box.getSize(new Vector3()).length() * 1.6 * Math.max(1, 1 / aspect),
       );
     const direction =
