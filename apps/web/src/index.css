@@ -1436,6 +1436,10 @@ button:focus-visible {
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+}
+.library-scroll,
+.inspector,
+.tree {
   scrollbar-gutter: stable;
   scrollbar-width: thin;
   scrollbar-color: #c4cede transparent;
