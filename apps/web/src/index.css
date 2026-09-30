@@ -1806,28 +1806,8 @@ button:focus-visible {
 .tree-actions {
   display: flex;
   gap: 3px;
-  padding: 0 12px 12px;
+  padding: 0 8px 12px;
   border-bottom: 1px solid #edf0f5;
-}
-.tree-select-all {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  margin: 0 12px 10px;
-  padding: 7px 10px;
-  border: 1px solid #dce5f4;
-  border-radius: 6px;
-  background: #f3f6fd;
-  color: #356ae6;
-  font-size: 12px;
-}
-.tree-select-all:hover:not(:disabled) {
-  background: #eaf0ff;
-}
-.tree-select-all:focus-visible {
-  outline: 2px solid #356ae6;
-  outline-offset: 2px;
 }
 .tree {
   flex: 1;
@@ -2896,8 +2876,9 @@ dialog.modal-backdrop::backdrop {
 }
 
 .tree-actions button {
-  min-width: 30px;
-  padding-inline: 6px;
+  flex: 0 1 30px;
+  min-width: 0;
+  padding-inline: 0;
 }
 
 .library .piece-tabs button {

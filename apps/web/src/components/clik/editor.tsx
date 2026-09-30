@@ -1085,16 +1085,15 @@ export default function Editor({
                   <span>{count} pièces</span>
                 </div>
               </div>
-              <button
-                className="tree-select-all"
-                title="Sélectionner toutes les pièces et tous les groupes"
-                disabled={!s.scene.nodes.length}
-                onClick={s.selectAll}
-              >
-                <ListChecks size={17} aria-hidden="true" />
-                Tout sélectionner
-              </button>
               <div className="tree-actions">
+                <button
+                  title="Tout sélectionner"
+                  aria-label="Tout sélectionner"
+                  disabled={!s.scene.nodes.length}
+                  onClick={s.selectAll}
+                >
+                  <ListChecks size={17} aria-hidden="true" />
+                </button>
                 <button
                   title="Grouper"
                   onClick={() => safe(s.group)}
