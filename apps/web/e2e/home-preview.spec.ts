@@ -73,7 +73,9 @@ test("aperçu mobile : zoom tactile, rotation et absence de débordement", async
     name: "Manipuler La petite maison",
     exact: true,
   });
-  await surface.scrollIntoViewIfNeeded();
+  // Reveal the lazy-loaded preview before waiting for its interactive surface.
+  await page.locator(".home-model-stage").scrollIntoViewIfNeeded();
+  await expect(surface).toBeVisible();
   await page
     .getByRole("button", { name: "Zoomer l’aperçu", exact: true })
     .tap();

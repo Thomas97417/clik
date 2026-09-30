@@ -546,46 +546,18 @@ button:focus-visible {
   overflow: hidden;
   box-shadow: 0 24px 65px -35px #7185b454;
 }
-.home-playground-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 19px 24px;
-  font-size: 10px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  font-weight: 750;
-}
-.home-playground-heading > span:first-child {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.home-live-dot {
-  width: 7px;
-  height: 7px;
-  background: #41a66b;
-  border-radius: 50%;
-}
-.home-playground-heading > span:last-child {
-  color: #78869e;
-  text-transform: none;
-  letter-spacing: 0;
-  font-weight: 500;
-  font-size: 11px;
-}
-.home-model-stage {
-  height: clamp(280px, 25vw, 350px);
-  position: relative;
-  isolation: isolate;
+.home-model-viewer {
   background: radial-gradient(
     ellipse at 50% 45%,
     #fff 0%,
     #f3f6fc 65%,
     #edf2fa
   );
+}
+.home-model-stage {
+  height: clamp(280px, 25vw, 350px);
+  position: relative;
+  isolation: isolate;
   overflow: hidden;
 }
 .home-model-halo {
@@ -649,30 +621,52 @@ button:focus-visible {
   outline-offset: 4px;
 }
 .home-model-options {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  padding: 0 20px 16px;
-}
-.home-model-options button {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 4px;
+  padding: 12px 16px 0;
+}
+.home-model-options button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   min-height: 40px;
-  color: #71829a;
-  border: 1px solid #e9eef7;
-  border-radius: 10px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  color: #667894;
   font-size: 12px;
-  font-weight: 650;
+  font-weight: 550;
+  transition:
+    background 150ms,
+    color 150ms;
+}
+.home-model-options button svg {
+  flex-shrink: 0;
+}
+.home-model-options button::after {
+  position: absolute;
+  bottom: 2px;
+  left: 14px;
+  right: 14px;
+  height: 2px;
+  border-radius: 2px;
+  background: #356ae6;
+  content: "";
+  opacity: 0;
 }
 .home-model-options button:hover {
-  background: #f6f8fc;
+  background: #ffffffa6;
+  color: #345fbb;
 }
 .home-model-options button[aria-pressed="true"] {
-  background: #edf2ff;
-  border-color: #c9d8fb;
-  color: #356ae6;
+  background: #ffffffb3;
+  color: #285abd;
+}
+.home-model-options button[aria-pressed="true"]::after {
+  opacity: 1;
 }
 .home-model-options button:focus-visible,
 .home-model-start:focus-visible {
@@ -1163,9 +1157,6 @@ button:focus-visible {
   .home-playground {
     border-radius: 16px;
   }
-  .home-playground-heading {
-    padding: 17px 18px;
-  }
   .home-model-stage {
     height: 290px;
   }
@@ -1187,7 +1178,14 @@ button:focus-visible {
     height: 28px;
   }
   .home-model-options {
-    padding: 10px;
+    gap: 2px;
+    padding: 8px 8px 0;
+  }
+  .home-model-options button {
+    min-height: 44px;
+    padding-inline: 10px;
+    gap: 6px;
+    font-size: 11px;
   }
   .home-model-details {
     gap: 12px;

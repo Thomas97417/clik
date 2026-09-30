@@ -125,41 +125,41 @@ function Home() {
           </Link>
         </div>
         <div className="home-playground">
-          <div className="home-playground-heading">
-            <span>
-              <span className="home-live-dot" /> Le terrain de jeu
-            </span>
-            <span>Explorez. Transformez. Recommencez.</span>
-          </div>
-          <div
-            className="home-model-options"
-            role="group"
-            aria-label="Choisir un modèle"
-          >
-            {STARTER_MODELS.map((item, index) => {
-              const Icon = modelIcons[index];
-              return (
-                <button
-                  key={item.id}
-                  aria-pressed={selected === index}
-                  onClick={() => {
-                    setSelected(index);
-                    setColor(item.color);
-                  }}
-                >
-                  <Icon size={17} aria-hidden="true" /> {item.label}
-                </button>
-              );
-            })}
-          </div>
-          <div className="home-model-stage">
-            <div className="home-model-halo" aria-hidden="true" />
-            <CreationPreview
-              interactive
-              scene={scene}
-              cacheKey={`starter-v3:${model.id}:${color}`}
-              title={model.name}
-            />
+          <div className="home-model-viewer">
+            <div
+              className="home-model-options"
+              role="group"
+              aria-label="Choisir un modèle"
+            >
+              {STARTER_MODELS.map((item, index) => {
+                const Icon = modelIcons[index];
+                return (
+                  <button
+                    key={item.id}
+                    aria-label={item.label}
+                    aria-controls="home-model-preview"
+                    aria-pressed={selected === index}
+                    onClick={() => {
+                      if (selected === index) return;
+                      setSelected(index);
+                      setColor(item.color);
+                    }}
+                  >
+                    <Icon size={15} aria-hidden="true" />
+                    {item.label}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="home-model-stage" id="home-model-preview">
+              <div className="home-model-halo" aria-hidden="true" />
+              <CreationPreview
+                interactive
+                scene={scene}
+                cacheKey={`starter-v3:${model.id}:${color}`}
+                title={model.name}
+              />
+            </div>
           </div>
           <div className="home-palette-row">
             <span>Couleur d’accent</span>
