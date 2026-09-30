@@ -36,7 +36,6 @@ export default function EmailLinkForm({
   });
   return (
     <AuthLayout
-      eyebrow={reset ? "Retrouvons votre atelier" : "La dernière petite étape"}
       title={
         sent
           ? "Consultez votre messagerie"

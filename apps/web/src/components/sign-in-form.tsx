@@ -41,7 +41,6 @@ export default function SignInForm() {
   const busy = form.busy || socialBusy;
   return (
     <AuthLayout
-      eyebrow="De retour à l’atelier"
       title="Heureux de vous retrouver"
       description="Connectez-vous pour retrouver vos créations et continuer là où votre imagination s’est arrêtée."
     >

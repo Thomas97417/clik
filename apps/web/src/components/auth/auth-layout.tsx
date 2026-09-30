@@ -94,12 +94,10 @@ function StoryConstruction() {
 }
 
 export default function AuthLayout({
-  eyebrow,
   title,
   description,
   children,
 }: {
-  eyebrow: string;
   title: string;
   description: string;
   children: ReactNode;
@@ -152,7 +150,6 @@ export default function AuthLayout({
         </aside>
         <section className="auth-card" aria-labelledby="auth-title">
           <div className="auth-card-heading">
-            <span className="eyebrow">{eyebrow}</span>
             <h1 ref={heading} id="auth-title" tabIndex={-1}>
               {title}
               {!/[?!]$/.test(title) && <span>.</span>}

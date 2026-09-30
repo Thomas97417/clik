@@ -53,7 +53,6 @@ export default function ResetPasswordForm() {
   if (!token || search.error || expired)
     return (
       <AuthLayout
-        eyebrow="Un nouveau départ"
         title="Ce lien n’est plus valide"
         description="Le lien est incomplet ou a expiré. Demandez-en un nouveau pour retrouver votre atelier."
       >
@@ -68,7 +67,6 @@ export default function ResetPasswordForm() {
   if (done)
     return (
       <AuthLayout
-        eyebrow="Tout est prêt"
         title="Mot de passe modifié"
         description="Vous pouvez maintenant vous connecter avec votre nouveau mot de passe."
       >
@@ -82,7 +80,6 @@ export default function ResetPasswordForm() {
     );
   return (
     <AuthLayout
-      eyebrow="Les clés de votre atelier"
       title="Un nouveau mot de passe"
       description="Choisissez un mot de passe, puis saisissez-le une seconde fois pour le confirmer."
     >
