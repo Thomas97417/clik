@@ -18,6 +18,9 @@ test("Privée ouvre un menu puis la modale préremplie, sans ouvrir l’éditeur
     page.getByRole("menuitem", { name: "Publier", exact: true }),
   ).toBeVisible();
   await expect(page).toHaveURL(/\/projects$/);
+  await expect(
+    page.getByRole("menuitem", { name: "Publier", exact: true }).locator("svg"),
+  ).toHaveCount(0);
   await page.screenshot({
     path: `/tmp/clik-project-visibility-${info.project.name}.png`,
   });
@@ -59,6 +62,74 @@ test("Privée ouvre un menu puis la modale préremplie, sans ouvrir l’éditeur
   await expect(
     page.getByRole("menuitem", { name: "Défi terminé" }),
   ).toBeDisabled();
+});
+
+test("Version publiée permet de repasser en privé depuis un menu compact", async ({
+  page,
+}, info) => {
+  const fixture = await projectsFixture(page, { published: true });
+  fixture.failWithdrawal(true);
+  await page.goto("/projects");
+  const card = page
+    .locator(".project-card")
+    .filter({
+      has: page.getByRole("heading", { name: "Le phare bleu", exact: true }),
+    });
+  const published = card.getByRole("button", {
+    name: "Visibilité de Le phare bleu : Version publiée",
+    exact: true,
+  });
+  await expect(card.getByRole("button", { name: /Actions pour/ })).toHaveCount(
+    0,
+  );
+  await expect(
+    card.getByText("Retirer de la galerie", { exact: true }),
+  ).toHaveCount(0);
+  await published.click();
+  const action = page.getByRole("menuitem", {
+    name: "Passer en privé",
+    exact: true,
+  });
+  await expect(action).toBeVisible();
+  await expect(action.locator("svg")).toHaveCount(0);
+  const triggerBox = (await published.boundingBox())!;
+  const menuBox = (await page
+    .locator(".project-visibility-menu")
+    .boundingBox())!;
+  expect(menuBox.width).toBeLessThanOrEqual(triggerBox.width + 2);
+  await page.screenshot({
+    path: `/tmp/clik-project-private-menu-${info.project.name}.png`,
+  });
+  await action.click();
+  await expect(page.getByText(/Retrait indisponible, réessayez/)).toBeVisible();
+  await expect(published).toBeEnabled();
+  await expect(
+    card.getByRole("link", { name: /Voir la publication/ }),
+  ).toBeVisible();
+  fixture.failWithdrawal(false);
+  await published.press("Enter");
+  await action.press("Enter");
+  const privateBadge = card.getByRole("button", {
+    name: "Visibilité de Le phare bleu : Privée",
+    exact: true,
+  });
+  await expect(privateBadge).toBeVisible();
+  await expect(
+    card.getByRole("link", { name: /Voir la publication/ }),
+  ).toHaveCount(0);
+  await expect(
+    card.getByText("Visible uniquement par vous", { exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/projects$/);
+  expect(fixture.calls.withdrawals).toEqual([
+    { id: "publication" },
+    { id: "publication" },
+  ]);
+  await privateBadge.click();
+  await page.getByRole("menuitem", { name: "Publier", exact: true }).click();
+  await expect(
+    page.getByRole("dialog").getByLabel("Description", { exact: false }),
+  ).toHaveValue("Une lumière au bord de la mer.");
 });
 
 test("publier depuis la collection : miniature, révision, erreur récupérable et statut actualisé", async ({

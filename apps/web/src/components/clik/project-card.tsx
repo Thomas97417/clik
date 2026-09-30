@@ -6,10 +6,7 @@ import {
   Globe2,
   HardDrive,
   LockKeyhole,
-  MoreHorizontal,
-  EyeOff,
   ChevronDown,
-  Upload,
 } from "lucide-react";
 import { useAction, useMutation } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
@@ -99,6 +96,18 @@ export default function ProjectCard({ creation }: { creation: CreationItem }) {
   };
   const online = creation.location === "online";
   const published = online && creation.publicationId;
+  const makePrivate = async () => {
+    if (!published || busy) return;
+    setBusy(true);
+    try {
+      await withdraw({ id: published });
+      toast.success("Votre création est maintenant privée.");
+    } catch (error) {
+      toast.error(String(error));
+    } finally {
+      setBusy(false);
+    }
+  };
   const target = online
     ? {
         to: "/editor/$projectId" as const,
@@ -119,12 +128,10 @@ export default function ProjectCard({ creation }: { creation: CreationItem }) {
             cacheKey={creation.cacheKey}
             title={creation.title}
           />
-          {(!online || published) && (
-            <span
-              className={`project-visibility-badge ${published ? "is-published" : ""}`}
-            >
-              <VisibilityIcon size={12} aria-hidden="true" />
-              {published ? "Version publiée" : "Sur cet appareil"}
+          {!online && (
+            <span className="project-visibility-badge">
+              <HardDrive size={12} aria-hidden="true" />
+              Sur cet appareil
             </span>
           )}
           <span className="card-arrow" aria-hidden="true">
@@ -164,42 +171,51 @@ export default function ProjectCard({ creation }: { creation: CreationItem }) {
           )}
         </div>
       </Link>
-      {online && !published ? (
+      {online && (
         <DropdownMenu>
           <DropdownMenuTrigger
             ref={visibilityTrigger}
-            className="project-visibility-badge project-visibility-trigger"
-            aria-label={`Visibilité de ${creation.title} : Privée`}
+            className={`project-visibility-badge project-visibility-trigger ${published ? "is-published" : ""}`}
+            aria-label={`Visibilité de ${creation.title} : ${published ? "Version publiée" : "Privée"}`}
+            disabled={busy}
+            aria-busy={busy}
           >
-            <LockKeyhole size={12} aria-hidden="true" /> Privée
+            <VisibilityIcon size={12} aria-hidden="true" />
+            {published ? "Version publiée" : "Privée"}
             <ChevronDown size={12} aria-hidden="true" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="start"
-            className="project-card-menu"
+            className="project-visibility-menu"
             finalFocus={publication ? false : undefined}
           >
             <DropdownMenuItem
               disabled={
-                !!creation.challenge &&
-                Date.now() >= creation.challenge.closesAt
+                busy ||
+                (!published &&
+                  !!creation.challenge &&
+                  Date.now() >= creation.challenge.closesAt)
               }
-              onClick={() =>
-                setPublication({
-                  creation,
-                  title: creation.title,
-                  description: creation.description ?? "",
-                })
-              }
+              onClick={() => {
+                if (published) void makePrivate();
+                else
+                  setPublication({
+                    creation,
+                    title: creation.title,
+                    description: creation.description ?? "",
+                  });
+              }}
             >
-              <Upload size={15} aria-hidden="true" />
-              {creation.challenge && Date.now() >= creation.challenge.closesAt
-                ? "Défi terminé"
-                : "Publier"}
+              {published
+                ? "Passer en privé"
+                : creation.challenge &&
+                    Date.now() >= creation.challenge.closesAt
+                  ? "Défi terminé"
+                  : "Publier"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      ) : null}
+      )}
       <div className="project-card-footer">
         <span>
           {online ? (
@@ -217,35 +233,6 @@ export default function ProjectCard({ creation }: { creation: CreationItem }) {
             >
               Voir la publication <ArrowUpRight size={13} aria-hidden="true" />
             </Link>
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                className="project-menu-trigger"
-                aria-label={`Actions pour ${creation.title}`}
-                disabled={busy}
-              >
-                <MoreHorizontal size={18} />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="project-card-menu">
-                <DropdownMenuItem
-                  disabled={busy}
-                  onClick={async () => {
-                    setBusy(true);
-                    try {
-                      await withdraw({ id: published });
-                      toast.success(
-                        "Publication retirée. Votre création reste dans votre espace privé.",
-                      );
-                    } catch (error) {
-                      toast.error(String(error));
-                    } finally {
-                      setBusy(false);
-                    }
-                  }}
-                >
-                  <EyeOff size={15} /> Retirer de la galerie
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         ) : (
           <span className="project-private-note">

@@ -2,7 +2,10 @@ import type { Page } from "@playwright/test";
 import { emptyScene, makePart } from "@clik/scene";
 
 // Transport fixture only: no real account, upload or publication is created.
-export async function projectsFixture(page: Page) {
+export async function projectsFixture(
+  page: Page,
+  options: { published?: boolean } = {},
+) {
   const user = {
     _id: "viewer",
     id: "viewer",
@@ -20,11 +23,16 @@ export async function projectsFixture(page: Page) {
     }),
     revision: 7,
     updatedAt: Date.now(),
-    publicationId: null as string | null,
+    publicationId: (options.published ? "publication" : null) as string | null,
     challenge: null,
   };
-  const calls = { uploads: [] as any[], publications: [] as any[] };
+  const calls = {
+    uploads: [] as any[],
+    publications: [] as any[],
+    withdrawals: [] as any[],
+  };
   let fail = false;
+  let failWithdrawal = false;
   const b64 = (value: unknown) =>
     Buffer.from(JSON.stringify(value)).toString("base64url");
   const token = `${b64({ alg: "RS256" })}.${b64({ sub: "viewer", exp: Math.floor(Date.now() / 1000) + 3600, iat: Math.floor(Date.now() / 1000) })}.signature`;
@@ -117,6 +125,12 @@ export async function projectsFixture(page: Page) {
         );
       } else if (message.type === "Mutation") {
         const args = message.args[0];
+        const withdrawing = message.udfPath === "projects:withdraw";
+        const failed = withdrawing ? failWithdrawal : fail;
+        if (withdrawing) {
+          calls.withdrawals.push(args);
+          if (!failed) project.publicationId = null;
+        }
         if (message.udfPath === "projects:publish") {
           calls.publications.push(args);
           if (!fail) {
@@ -129,9 +143,11 @@ export async function projectsFixture(page: Page) {
           JSON.stringify({
             type: "MutationResponse",
             requestId: message.requestId,
-            success: !fail,
-            result: fail
-              ? "Publication indisponible, réessayez."
+            success: !failed,
+            result: failed
+              ? withdrawing
+                ? "Retrait indisponible, réessayez."
+                : "Publication indisponible, réessayez."
               : "publication",
             ts: ts(),
             logLines: [],
@@ -145,6 +161,9 @@ export async function projectsFixture(page: Page) {
     calls,
     failPublication: (value: boolean) => {
       fail = value;
+    },
+    failWithdrawal: (value: boolean) => {
+      failWithdrawal = value;
     },
   };
 }
