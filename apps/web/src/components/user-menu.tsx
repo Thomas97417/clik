@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { LogOut, Settings, User } from "lucide-react";
+import { ChevronDown, LogOut, Settings, User } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -22,20 +22,29 @@ export default function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        render={
-          <Button variant="outline" className="flex items-center gap-2 px-2" />
-        }
+        aria-label={user?.name ? `Compte de ${user.name}` : "Mon compte"}
+        render={<Button variant="outline" className="header-user-trigger" />}
       >
-        <span className="hidden text-sm font-medium sm:inline-block">
-          {user?.name}
+        <span className="header-avatar" aria-hidden="true">
+          {user?.name?.trim().charAt(0).toLocaleUpperCase() || (
+            <User size={16} />
+          )}
         </span>
+        <span className="header-user-name">{user?.name || "Mon compte"}</span>
+        <ChevronDown size={14} aria-hidden="true" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 bg-card">
+      <DropdownMenuContent
+        align="end"
+        className="w-64 rounded-xl bg-card p-1.5"
+        sideOffset={8}
+      >
         <DropdownMenuGroup>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col gap-1">
-              <p className="text-sm font-medium leading-none">{user?.name}</p>
-              <p className="text-muted-foreground text-xs leading-none">
+              <p className="break-words text-sm font-medium leading-snug">
+                {user?.name}
+              </p>
+              <p className="text-muted-foreground break-all text-xs leading-snug">
                 {user?.email}
               </p>
             </div>
