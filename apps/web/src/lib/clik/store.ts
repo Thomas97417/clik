@@ -291,12 +291,15 @@ export const useEditor = create<State>((set, get) => ({
     const s = get();
     if (!s.gesture) return;
     const free = applyDelta(s.gesture.scene, s.gestureIds, delta);
+    // Resolve the intended attachment before a temporary overlap with an upper
+    // brick can lift the selection out of an otherwise usable gap.
+    const snapPreview = s.snap
+      ? previewSelection(free, s.gestureIds, true, s.referenceId)
+      : null;
     const scene = previewSelection(free, s.gestureIds, false).scene;
     set({
-      scene,
-      snapPreview: s.snap
-        ? previewSelection(scene, s.gestureIds, true, s.referenceId)
-        : null,
+      scene: scene !== free && snapPreview ? snapPreview.scene : scene,
+      snapPreview,
     });
   },
   end: () => {

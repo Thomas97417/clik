@@ -328,22 +328,16 @@ export function Gestures({
       moveFrame = 0;
       if (!drag || !lastMove) return;
       setRay(lastMove);
+      // Pick the support beneath the grabbed point, not the surface in front
+      // of that point (which may be the upper brick of a narrow opening).
+      // Translating the ray preserves the horizontal grab offset at every angle.
+      ray.ray.origin.y -= drag.point.y - drag.bottom;
       const surface = hits(drag.moving)[0]?.point ?? ground();
       if (!surface) return;
-      // Project on the grabbed point's height above the supporting surface. This
-      // keeps the original horizontal grab offset, including on tall assemblies.
-      const point = ray.ray.intersectPlane(
-        new Plane(
-          new Vector3(0, 1, 0),
-          -(surface.y + drag.point.y - drag.bottom),
-        ),
-        new Vector3(),
-      );
-      if (!point) return;
       drag.offset.set(
-        point.x - drag.point.x,
+        surface.x - drag.point.x,
         surface.y - drag.bottom,
-        point.z - drag.point.z,
+        surface.z - drag.point.z,
       );
       previewDrag();
     };
@@ -447,19 +441,18 @@ export function Gestures({
         library?.free.type === state.pending
           ? { ...library.free, position: point.toArray() }
           : makePart(state.pending, state.color, point.toArray());
-      const free = snapCandidate(
-        state.scene,
-        {
-          ...proposed,
-          rotation: [0, (libraryTurns * Math.PI) / 2, 0],
-        },
-        false,
-      ).part;
+      proposed.rotation = [0, (libraryTurns * Math.PI) / 2, 0];
+      // Snap from the pointer's intended position, before collision clearance
+      // could move it above a ceiling instead of into the gap below it.
       const { part, ...metadata } = snapCandidate(
         state.scene,
-        free,
+        proposed,
         state.snap,
       );
+      const cleared = state.snap
+        ? snapCandidate(state.scene, proposed, false).part
+        : part;
+      const free = state.snap && cleared !== proposed ? part : cleared;
       const preview = state.snap
         ? {
             ...metadata,
