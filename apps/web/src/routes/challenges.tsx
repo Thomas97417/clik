@@ -131,7 +131,6 @@ function Challenges() {
         >
           Aujourd’hui
         </button>
-        <span>Toutes les journées sont en UTC</span>
       </div>
       {error && (
         <p className="challenge-error" role="alert">
