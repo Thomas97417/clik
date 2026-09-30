@@ -13,7 +13,9 @@ test("construction, couleurs, historique et récupération du brouillon", async 
   await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
   await expect(page.locator("canvas").first()).toBeVisible();
   await page.getByRole("button", { name: "Rouge", exact: true }).click();
-  await page.getByRole("button", { name: "Dupliquer", exact: true }).click();
+  await page.keyboard.down("d");
+  await page.keyboard.down("d"); // Holding D must create only one copy.
+  await page.keyboard.up("d");
   await expect(page.locator(".viewport-bottom")).toContainText("2 / 500");
   await expect(page.getByLabel("position X", { exact: true })).toHaveValue(
     "2.5",
@@ -27,7 +29,9 @@ test("construction, couleurs, historique et récupération du brouillon", async 
   await expect(page.locator(".viewport-bottom")).toContainText("2 / 500");
   await page.getByLabel("Nom du projet").fill("Ma construction test");
   await page.getByLabel("Nom du projet").press("Tab");
-  await expect(page.getByRole("status")).toContainText("Enregistré");
+  await expect(
+    page.getByLabel("Projet et sauvegarde").getByRole("status"),
+  ).toContainText("Enregistré");
   await page.reload();
   await expect(page.locator(".viewport-bottom")).toContainText("2 / 500");
   await expect(page.getByLabel("Nom du projet")).toHaveValue(
@@ -42,7 +46,7 @@ test("construction, couleurs, historique et récupération du brouillon", async 
   });
   expect(errors).toEqual([]);
 });
-test("un formulaire ne déclenche pas les raccourcis de suppression", async ({
+test("un formulaire ne déclenche pas les raccourcis de suppression ou duplication", async ({
   page,
 }) => {
   await page.goto("/editor");
@@ -50,6 +54,8 @@ test("un formulaire ne déclenche pas les raccourcis de suppression", async ({
   const input = page.getByLabel("Nom du projet");
   await input.focus();
   await input.press("Backspace");
+  await input.press("d");
+  await expect(input).toHaveValue(/d/);
   await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
 });
 test("conflit entre deux onglets sans écrasement silencieux", async ({

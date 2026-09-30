@@ -204,7 +204,7 @@ test("tout sélectionner inclut les groupes repliés sans doubler leurs pièces"
   await page.screenshot({
     path: `/tmp/clik-select-all-${info.project.name}.png`,
   });
-  await page.getByRole("button", { name: "Dupliquer", exact: true }).click();
+  await page.keyboard.press("d");
   await expect(page.locator(".viewport-bottom")).toContainText("6 / 500");
   await page
     .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })

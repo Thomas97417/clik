@@ -315,7 +315,17 @@ export default function Editor({
       } else if (mod && e.key.toLowerCase() === "v") {
         e.preventDefault();
         safe(state.paste);
-      } else if (mod && e.key.toLowerCase() === "d") {
+      } else if (e.key.toLowerCase() === "d" && !e.altKey) {
+        const target = e.target instanceof HTMLElement ? e.target : null;
+        if (
+          !project.ready ||
+          closed ||
+          e.repeat ||
+          !state.selection.length ||
+          (target && target !== document.body && !target.closest(".editor")) ||
+          target?.closest('[role="menu"],[role="listbox"],[role="combobox"]')
+        )
+          return;
         e.preventDefault();
         safe(state.duplicate);
       } else if (mod && e.key.toLowerCase() === "g") {
@@ -1109,7 +1119,9 @@ export default function Editor({
                   <Ungroup size={17} />
                 </button>
                 <button
-                  title="Dupliquer"
+                  title="Dupliquer (D)"
+                  aria-label="Dupliquer"
+                  aria-keyshortcuts="d Control+d Meta+d"
                   onClick={() => safe(s.duplicate)}
                   disabled={!s.selection.length}
                 >
@@ -1320,9 +1332,9 @@ export default function Editor({
           <span>
             Glisser / flèches : déplacer · Maj + ↑ / ↓ : hauteur · Espace +
             glisser / clic droit : caméra · Maj + clic : sélection multiple{" "}
-            <ChevronRight size={12} /> F : cadrer <ChevronRight size={12} />{" "}
-            Pièce saisie : R / Maj + R : ±90° <ChevronRight size={12} /> Échap :
-            annuler
+            <ChevronRight size={12} /> D : dupliquer <ChevronRight size={12} />{" "}
+            F : cadrer <ChevronRight size={12} /> Pièce saisie : R / Maj + R :
+            ±90° <ChevronRight size={12} /> Échap : annuler
           </span>
         </footer>
       </main>
