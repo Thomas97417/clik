@@ -9,6 +9,7 @@ import {
 // Browser-only transport fixture. No test users, publications or emails are created remotely.
 // Business invariants are exercised against real Convex functions in backend tests.
 export async function challengeFixture(page: Page) {
+  const uploads: { projectId: string; bytes: { $bytes: string } }[] = [];
   const today = challengeDay(),
     start = challengeStart(today);
   const challenge = {
@@ -192,6 +193,7 @@ export async function challengeFixture(page: Page) {
         message.type === "Action" &&
         message.udfPath === "projects:uploadThumbnail"
       ) {
+        uploads.push(message.args[0]);
         ws.send(
           JSON.stringify({
             type: "ActionResponse",
@@ -276,4 +278,5 @@ export async function challengeFixture(page: Page) {
       }
     });
   });
+  return { uploads };
 }

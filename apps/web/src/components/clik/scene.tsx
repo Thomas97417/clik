@@ -195,11 +195,9 @@ function Manipulator({
 function Stage({
   scene,
   editable,
-  onCapture,
 }: {
   scene: SceneDocument;
   editable: boolean;
-  onCapture?: (capture: () => Promise<ArrayBuffer>) => void;
 }) {
   const { camera, gl, scene: threeScene } = useThree(),
     controls = useRef<ComponentRef<typeof OrbitControls>>(null),
@@ -301,24 +299,6 @@ function Stage({
     controls.current?.target.copy(center);
     controls.current?.update();
   }, [frame, view]);
-  useEffect(() => {
-    onCapture?.(async () => {
-      gl.render(threeScene, camera);
-      const canvas = document.createElement("canvas");
-      canvas.width = 800;
-      canvas.height = 600;
-      canvas.getContext("2d")!.drawImage(gl.domElement, 0, 0, 800, 600);
-      return new Promise<ArrayBuffer>((resolve, reject) =>
-        canvas.toBlob(
-          async (blob) =>
-            blob
-              ? resolve(await blob.arrayBuffer())
-              : reject(Error("Capture impossible.")),
-          "image/png",
-        ),
-      );
-    });
-  }, [onCapture, gl, threeScene, camera]);
   return (
     <>
       <color attach="background" args={["#edf1f7"]} />
@@ -391,11 +371,9 @@ function Stage({
 export default function Scene({
   scene,
   editable = false,
-  onCapture,
 }: {
   scene: SceneDocument;
   editable?: boolean;
-  onCapture?: (capture: () => Promise<ArrayBuffer>) => void;
 }) {
   const liveScene = useEditor((s) => (editable ? s.scene : scene));
   const [supported] = useState(() => {
@@ -422,7 +400,7 @@ export default function Scene({
       camera={{ position: [11, 10, 11], fov: 40, near: 0.1, far: 1000 }}
       gl={{ preserveDrawingBuffer: true, antialias: true }}
     >
-      <Stage scene={liveScene} editable={editable} onCapture={onCapture} />
+      <Stage scene={liveScene} editable={editable} />
     </Canvas>
   );
 }

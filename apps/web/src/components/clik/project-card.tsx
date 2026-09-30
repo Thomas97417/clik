@@ -64,20 +64,13 @@ export default function ProjectCard({ creation }: { creation: CreationItem }) {
     setPublicationError(undefined);
     try {
       const { creation: snapshot, title, description } = publication;
-      const { creationThumbnail } = await import("@/lib/clik/thumbnail");
+      const { publicationThumbnail } = await import("@/lib/clik/thumbnail");
       const document = validateScene(
         typeof snapshot.scene === "string"
           ? JSON.parse(snapshot.scene)
           : snapshot.scene,
       );
-      const url = await creationThumbnail(
-        document,
-        snapshot.cacheKey,
-        () => true,
-      );
-      if (!url)
-        throw new Error("Ajoutez au moins une pièce visible avant de publier.");
-      const bytes = await (await fetch(url)).arrayBuffer();
+      const bytes = await publicationThumbnail(document, snapshot.cacheKey);
       const thumbnail = await upload({ projectId: snapshot.projectId, bytes });
       await publish({
         id: snapshot.projectId,
@@ -259,7 +252,6 @@ export default function ProjectCard({ creation }: { creation: CreationItem }) {
             !!publication.creation.challenge &&
             Date.now() >= publication.creation.challenge.closesAt
           }
-          thumbnailHint="L’aperçu de votre création servira de miniature."
         />
       )}
     </article>

@@ -33,7 +33,6 @@ class SceneBoundary extends Component<
 export default function ClientScene(props: {
   scene: SceneDocument;
   editable?: boolean;
-  onCapture?: (capture: () => Promise<ArrayBuffer>) => void;
 }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);

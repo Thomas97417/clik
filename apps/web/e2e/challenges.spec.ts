@@ -4,7 +4,7 @@ test("participer : créer, proposer et mettre à jour la même création", async
   page,
 }) => {
   const { challengeFixture } = await import("./fixtures/challenges");
-  await challengeFixture(page);
+  const fixture = await challengeFixture(page);
   await page.goto("/challenges");
   await page.getByRole("button", { name: "Participer au défi" }).click();
   await expect(page).toHaveURL(/\/editor\/project$/);
@@ -18,6 +18,28 @@ test("participer : créer, proposer et mettre à jour la même création", async
   await page.getByLabel("Titre", { exact: true }).fill("Mon phare du jour");
   await page.getByRole("button", { name: "Valider ma participation" }).click();
   await expect(page).toHaveURL(/\/creations\/own-entry$/);
+  expect(fixture.uploads).toHaveLength(1);
+  const firstThumbnail = fixture.uploads[0].bytes.$bytes;
+  const png = Buffer.from(firstThumbnail, "base64");
+  expect(png.readUInt32BE(16)).toBe(640);
+  expect(png.readUInt32BE(20)).toBe(480);
+  const pixels = await page.evaluate(async (base64) => {
+    const image = new Image();
+    image.src = `data:image/png;base64,${base64}`;
+    await image.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext("2d")!;
+    context.drawImage(image, 0, 0);
+    const data = context.getImageData(0, 0, canvas.width, canvas.height).data;
+    return {
+      cornerAlpha: data[3],
+      visiblePixels: data.filter((value, i) => i % 4 === 3 && value > 0).length,
+    };
+  }, firstThumbnail);
+  expect(pixels.cornerAlpha).toBe(0);
+  expect(pixels.visiblePixels).toBeGreaterThan(1000);
   await expect(
     page.getByRole("heading", { name: "Mon phare du jour" }),
   ).toBeVisible();
@@ -26,6 +48,10 @@ test("participer : créer, proposer et mettre à jour la même création", async
   ).toBeDisabled();
   await page.locator(".creation-challenge").getByRole("link").click();
   await page.getByRole("button", { name: "Reprendre ma création" }).click();
+  await page.getByRole("button", { name: "Grille", exact: true }).click();
+  await page.getByLabel("Vue de la caméra").selectOption("top");
+  await page.getByLabel("Angle de l’éclairage").press("End");
+  await page.getByLabel("Angle de l’éclairage").press("ArrowLeft");
   await expect(page.locator("canvas").first()).toHaveAttribute(
     "data-rendered",
     "1",
@@ -38,6 +64,8 @@ test("participer : créer, proposer et mettre à jour la même création", async
     .fill("Mon phare, deuxième version");
   await page.getByRole("button", { name: "Valider ma participation" }).click();
   await expect(page).toHaveURL(/\/creations\/own-entry$/);
+  expect(fixture.uploads).toHaveLength(2);
+  expect(fixture.uploads[1].bytes.$bytes).toBe(firstThumbnail);
   await expect(
     page.getByRole("heading", { name: "Mon phare, deuxième version" }),
   ).toBeVisible();

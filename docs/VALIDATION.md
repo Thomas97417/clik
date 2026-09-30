@@ -125,6 +125,10 @@ Les scénarios navigateur couvrent l’accès anonyme direct, les liens d’aute
 
 Les 513 tests automatisés, TypeScript et le build passent. Les 27 contrôles navigateur ciblés (créateurs, défis et navigation) sont validés sur Chromium, Firefox et WebKit après adaptation du sélecteur du test des commentaires au lien d’auteur séparé. Les captures ordinateur et mobile ont été inspectées. La synchronisation Convex reste assurée par le processus de développement habituel.
 
+## Miniatures de publication uniformes
+
+La publication depuis l’atelier utilise le même générateur que « Mes créations ». Le test de participation vérifie le PNG envoyé (640 × 480, fond transparent et pièces visibles), puis compare les deux images après changement de caméra, d’éclairage et de visibilité du quadrillage : elles sont identiques. Les six contrôles ciblés de publication passent sur Chromium, Firefox et WebKit, ainsi que les 513 tests automatisés, TypeScript et le build.
+
 ## Limites et contrôles de recette restants
 
 - WebKit est le moteur utilisé par Safari ; ce test ne remplace pas une recette dans l’application Safari réelle et sur un appareil iOS.

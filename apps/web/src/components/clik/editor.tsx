@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useId,
-} from "react";
+import { useEffect, useMemo, useRef, useState, useId } from "react";
 import { useTreeDrag } from "./use-tree-drag";
 import PublishDialog from "./publish-dialog";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -258,12 +251,6 @@ export default function Editor({
       else next.add(id);
       return next;
     });
-  const capture = useRef<() => Promise<ArrayBuffer>>(undefined);
-  const [captureReady, setCaptureReady] = useState(false);
-  const onCapture = useCallback((fn: () => Promise<ArrayBuffer>) => {
-    capture.current = fn;
-    setCaptureReady(true);
-  }, []);
   const upload = useAction(api.projects.uploadThumbnail),
     publish = useMutation(api.projects.publish);
   useEffect(() => {
@@ -378,11 +365,15 @@ export default function Editor({
     await navigate({ to: "/editor/$projectId", params: { projectId: id } });
   };
   const doPublish = async () => {
-    if (!projectId || !capture.current) return;
+    if (!projectId || busy) return;
     setBusy(true);
     try {
-      const revision = await project.flush(),
-        bytes = await capture.current();
+      const revision = await project.flush();
+      const { publicationThumbnail } = await import("@/lib/clik/thumbnail");
+      const bytes = await publicationThumbnail(
+        useEditor.getState().scene,
+        `publication:${projectId}:${revision}`,
+      );
       const thumbnail = await upload({
         projectId: projectId as Id<"projects">,
         bytes,
@@ -611,11 +602,7 @@ export default function Editor({
               <Button
                 className="editor-primary-action"
                 disabled={
-                  !project.ready ||
-                  !captureReady ||
-                  !!s.gesture ||
-                  project.conflict ||
-                  closed
+                  !project.ready || !!s.gesture || project.conflict || closed
                 }
                 onClick={() => {
                   setPubTitle(s.title);
@@ -998,11 +985,7 @@ export default function Editor({
               </button>
             </div>
             {project.ready ? (
-              <ClientScene
-                scene={s.scene}
-                editable={!closed}
-                onCapture={onCapture}
-              />
+              <ClientScene scene={s.scene} editable={!closed} />
             ) : (
               <div className="empty-state">Chargement de la création…</div>
             )}

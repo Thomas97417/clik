@@ -13,7 +13,6 @@ export default function PublishDialog({
   busy,
   disabled = false,
   challenge = false,
-  thumbnailHint = "La vue actuelle servira de miniature.",
   error,
 }: {
   title: string;
@@ -25,7 +24,6 @@ export default function PublishDialog({
   busy: boolean;
   disabled?: boolean;
   challenge?: boolean;
-  thumbnailHint?: string;
   error?: string;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -91,7 +89,7 @@ export default function PublishDialog({
             rows={4}
           />
         </label>
-        <p>{thumbnailHint}</p>
+        <p>La miniature sera cadrée automatiquement, sans quadrillage.</p>
         {error && (
           <p className="publish-error" role="alert">
             {error}

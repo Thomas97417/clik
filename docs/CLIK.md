@@ -67,6 +67,8 @@ Les tableaux Convex séparent `projects`, `publications`, `versions` et les asso
 
 Les miniatures passent par une action authentifiée qui vérifie le projet, la signature PNG, les dimensions et la taille, puis utilise Convex Storage. L’enregistrement d’appartenance est interne ; un identifiant de fichier arbitraire ne permet pas de publier une miniature étrangère.
 
+La publication depuis l’atelier et depuis « Mes créations » utilise le même rendu PNG de 640 × 480 : cadrage automatique sur toutes les pièces visibles, fond transparent, éclairage fixe et aucun quadrillage ni outil de sélection. La caméra et l’éclairage choisis dans l’atelier n’affectent pas la miniature. Les images déjà publiées sont renouvelées lors de la prochaine mise à jour de leur publication.
+
 ## Vérifications
 
 ```sh

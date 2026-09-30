@@ -64,6 +64,14 @@ export function partThumbnail(type: PartType, color: string) {
 const sceneCache = new Map<string, string | null>();
 let previewQueue = Promise.resolve();
 
+/** Publish the same automatically framed, grid-free image as the collection. */
+export async function publicationThumbnail(document: SceneDocument, key: string) {
+  const url = await creationThumbnail(document, key, () => true);
+  if (!url)
+    throw new Error("Ajoutez au moins une pièce visible avant de publier.");
+  return (await fetch(url)).arrayBuffer();
+}
+
 /** One shared renderer and one preview per frame, rather than a canvas per card. */
 export function creationThumbnail(
   document: SceneDocument,
