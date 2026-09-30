@@ -30,6 +30,12 @@ test("les modèles et couleurs ouvrent une copie fidèle sans écraser la créat
   }
   await page.getByRole("button", { name: "Robot", exact: true }).click();
   await page.getByRole("button", { name: "Violet", exact: true }).click();
+  const interactive = page.getByRole("group", {
+    name: "Manipuler Le robot curieux",
+    exact: true,
+  });
+  await interactive.press("ArrowRight");
+  await interactive.press("+");
   await page.evaluate(async () => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
       const req = indexedDB.open("clik", 1);

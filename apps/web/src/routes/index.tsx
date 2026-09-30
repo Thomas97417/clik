@@ -133,6 +133,7 @@ function Home() {
           <div className="home-model-stage">
             <div className="home-model-halo" aria-hidden="true" />
             <CreationPreview
+              interactive
               scene={scene}
               cacheKey={`starter-v1:${model.id}:${color}`}
               title={model.name}

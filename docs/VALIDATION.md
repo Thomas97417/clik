@@ -129,6 +129,12 @@ Les 513 tests automatisés, TypeScript et le build passent. Les 27 contrôles na
 
 La publication depuis l’atelier utilise le même générateur que « Mes créations ». Le test de participation vérifie le PNG envoyé (640 × 480, fond transparent et pièces visibles), puis compare les deux images après changement de caméra, d’éclairage et de visibilité du quadrillage : elles sont identiques. Les six contrôles ciblés de publication passent sur Chromium, Firefox et WebKit, ainsi que les 513 tests automatisés, TypeScript et le build.
 
+## Aperçu manipulable de l’accueil
+
+Les tests comparent les pixels de l’aperçu après rotation à la souris, zoom, rotation au clavier et réinitialisation. Les commandes tactiles de zoom passent sur les trois navigateurs ; un glissement tactile réel est aussi vérifié sous Chromium. Les captures sur ordinateur et mobile ont été inspectées : `/tmp/clik-home-preview-<moteur>.png` et `/tmp/clik-home-preview-mobile-<moteur>.png`.
+
+Les parcours existants vérifient que les cartes de « Mes créations » restent statiques, que la copie créée après manipulation conserve exactement les pièces du modèle et que les publications conservent leur miniature automatique. Les 33 contrôles ciblés passent sous Chromium, Firefox et WebKit, ainsi que les 496 tests du frontend, TypeScript et le build.
+
 ## Limites et contrôles de recette restants
 
 - WebKit est le moteur utilisé par Safari ; ce test ne remplace pas une recette dans l’application Safari réelle et sur un appareil iOS.
