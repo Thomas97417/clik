@@ -81,11 +81,8 @@ function Home() {
     <main className="home">
       <section className="home-hero" aria-labelledby="home-title">
         <div className="home-copy">
-          <span className="eyebrow">
-            <span /> L’atelier de vos idées
-          </span>
           <h1 id="home-title">
-            Un petit clik.
+            Un petit clik<em>.</em>
             <br />
             Une <em>grande</em>
             <br /> <em>idée.</em>
@@ -111,10 +108,6 @@ function Home() {
               Explorer la galerie <ArrowRight size={18} aria-hidden="true" />
             </Link>
           </div>
-          <p className="home-reassurance">
-            <Check size={15} aria-hidden="true" /> Gratuit. Sans installation.
-            Sans compte pour essayer.
-          </p>
           <p className="home-device-note">
             <Monitor size={15} aria-hidden="true" /> Pour construire, ouvrez
             l’atelier sur ordinateur.
@@ -270,18 +263,12 @@ function Home() {
       >
         <div className="home-section-heading">
           <div>
-            <span className="eyebrow">De l’idée à la dernière brique</span>
             <h2 id="home-how-title">
               Prenez le temps
               <br />
               de <em>jouer.</em>
             </h2>
           </div>
-          <p>
-            Pas besoin de savoir dessiner ou modéliser.
-            <br />
-            Une pièce, une couleur, et c’est parti.
-          </p>
         </div>
         <div className="home-steps">
           <article>

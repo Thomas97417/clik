@@ -508,7 +508,7 @@ button:focus-visible {
 .home-resume:hover {
   color: #2458ce;
 }
-.home-copy .home-reassurance,
+
 .home-copy .home-device-note {
   display: flex;
   align-items: center;
@@ -516,10 +516,7 @@ button:focus-visible {
   font-size: 11px;
   line-height: 1.7;
 }
-.home-reassurance svg {
-  color: #27835f;
-  flex-shrink: 0;
-}
+
 .home-copy .home-device-note {
   display: none;
 }
