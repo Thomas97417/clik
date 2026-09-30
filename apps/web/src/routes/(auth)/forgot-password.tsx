@@ -4,16 +4,17 @@ import ForgotPasswordForm from "@/components/forgot-password-form";
 export const Route = createFileRoute("/(auth)/forgot-password")({
   head: () => ({
     meta: [
-      { title: "Forgot Password — Toma Stack" },
+      { title: "Mot de passe oublié — Clik" },
       {
         name: "description",
-        content: "Reset your Toma Stack account password.",
+        content:
+          "Recevez un lien pour réinitialiser le mot de passe de votre compte Clik.",
       },
     ],
   }),
   beforeLoad: async ({ context }) => {
     if (context.isAuthenticated) {
-      throw redirect({ to: "/dashboard" });
+      throw redirect({ to: "/editor" });
     }
   },
   component: RouteComponent,

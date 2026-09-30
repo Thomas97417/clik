@@ -7,7 +7,8 @@ export const Route = createFileRoute("/(auth)/sign-in")({
       { title: "Connexion — Clik" },
       {
         name: "description",
-        content: "Sign in to your Clik account.",
+        content:
+          "Retrouvez votre atelier et vos créations. Connectez-vous à votre compte Clik.",
       },
     ],
   }),

@@ -4,10 +4,11 @@ import SignUpForm from "@/components/sign-up-form";
 export const Route = createFileRoute("/(auth)/sign-up")({
   head: () => ({
     meta: [
-      { title: "Inscription — Clik" },
+      { title: "Créer un compte — Clik" },
       {
         name: "description",
-        content: "Create a new Clik account.",
+        content:
+          "Créez votre compte Clik pour conserver vos constructions en ligne et les partager.",
       },
     ],
   }),

@@ -1,47 +1,37 @@
-import { useState } from "react";
+import { useState, type ComponentProps } from "react";
 import { Input } from "./input";
 import { Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function PasswordInput({
-  id,
-  placeholder,
-  autoComplete,
-  value,
-  onBlur,
-  onChange,
   className,
-}: {
-  id: string;
-  placeholder: string;
-  autoComplete: string;
-  value: string;
-  onBlur: () => void;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  className?: string;
-}) {
+  ...props
+}: ComponentProps<typeof Input> & { id: string }) {
   const [visible, setVisible] = useState(false);
-
   return (
-    <div className={cn("relative w-full", className)}>
+    <div className={cn("relative w-full password-field", className)}>
       <Input
-        id={id}
+        {...props}
+        required={props.required ?? true}
         type={visible ? "text" : "password"}
-        placeholder={placeholder}
-        autoComplete={autoComplete}
-        required
-        value={value}
-        onBlur={onBlur}
-        onChange={onChange}
-        className="bg-transparent pr-9"
+        className="bg-transparent pr-11"
       />
       <button
         type="button"
-        tabIndex={-1}
-        className="text-muted-foreground hover:text-foreground absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer transition-colors"
+        className="password-toggle"
+        aria-label={
+          visible ? "Masquer le mot de passe" : "Afficher le mot de passe"
+        }
+        aria-controls={props.id}
+        aria-pressed={visible}
+        disabled={props.disabled}
         onClick={() => setVisible((v) => !v)}
       >
-        {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+        {visible ? (
+          <EyeOff size={17} aria-hidden="true" />
+        ) : (
+          <Eye size={17} aria-hidden="true" />
+        )}
       </button>
     </div>
   );

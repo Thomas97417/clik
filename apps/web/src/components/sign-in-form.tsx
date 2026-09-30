@@ -1,174 +1,107 @@
-import { useForm } from "@tanstack/react-form";
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { toast } from "sonner";
+import { LogIn } from "lucide-react";
 import z from "zod";
-
 import { authClient } from "@/lib/auth-client";
+import { authErrorMessage, authReturnTo, emailSchema } from "@/lib/auth-form";
+import AuthLayout from "./auth/auth-layout";
+import {
+  AuthError,
+  AuthField,
+  AuthSubmit,
+  useAuthForm,
+} from "./auth/form-controls";
+import SocialLoginButtons from "./social-login-buttons";
 
-import { GitHubLoginButton, GoogleLoginButton } from "./social-login-buttons";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import PasswordInput from "./ui/password-input";
+const schema = z.object({
+  email: emailSchema,
+  password: z.string().min(1, "Indiquez votre mot de passe."),
+});
 
 export default function SignInForm() {
-  const form = useForm({
-    defaultValues: {
-      email: "",
-      password: "",
+  const [verify, setVerify] = useState(false);
+  const [socialBusy, setSocialBusy] = useState(false);
+  const form = useAuthForm(
+    { email: "", password: "" },
+    schema,
+    async (value) => {
+      setVerify(false);
+      const { error } = await authClient.signIn.email(value);
+      if (error) {
+        setVerify(error.code === "EMAIL_NOT_VERIFIED" || error.status === 403);
+        throw new Error(
+          authErrorMessage(
+            error,
+            "Connexion impossible. Vérifiez vos identifiants et réessayez.",
+          ),
+        );
+      }
+      window.location.assign(authReturnTo());
     },
-    onSubmit: async ({ value }) => {
-      await authClient.signIn.email(
-        {
-          email: value.email,
-          password: value.password,
-        },
-        {
-          onSuccess: () => {
-            const back = sessionStorage.getItem("clik-return-to") || "/editor";
-            window.location.assign(
-              /^\/(editor|creations|projects)(\/|$)/.test(back)
-                ? back
-                : "/editor",
-            );
-            toast.success("Connexion réussie");
-          },
-          onError: (error) => {
-            if (error.error.status === 403) {
-              toast.error(
-                "Vérifiez votre adresse email avant de vous connecter.",
-              );
-            } else {
-              toast.error(error.error.message || error.error.statusText);
-            }
-          },
-        },
-      );
-    },
-    validators: {
-      onSubmit: z.object({
-        email: z.email("Adresse email invalide"),
-        password: z
-          .string()
-          .min(8, "Le mot de passe doit contenir au moins 8 caractères"),
-      }),
-    },
-  });
-
+  );
+  const busy = form.busy || socialBusy;
   return (
-    <div className="mx-auto w-full mt-10 max-w-md p-6">
-      <h1 className="mb-6 text-center text-3xl font-bold">
-        Heureux de vous retrouver
-      </h1>
-
+    <AuthLayout
+      eyebrow="De retour à l’atelier"
+      title="Heureux de vous retrouver"
+      description="Connectez-vous pour retrouver vos créations et continuer là où votre imagination s’est arrêtée."
+      icon={LogIn}
+    >
       <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          form.handleSubmit();
-        }}
-        className="space-y-4"
+        className="auth-form"
+        noValidate
+        onSubmit={form.submit}
+        aria-busy={busy}
       >
-        <div>
-          <form.Field name="email">
-            {(field) => (
-              <div className="space-y-2">
-                <Label htmlFor={field.name}>Email</Label>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  type="email"
-                  placeholder="john.doe@example.com"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                />
-                {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-red-500 text-xs">
-                    {error?.message}
-                  </p>
-                ))}
-              </div>
-            )}
-          </form.Field>
-        </div>
-
-        <div>
-          <form.Field name="password">
-            {(field) => (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor={field.name}>Mot de passe</Label>
-                  <Link
-                    to="/forgot-password"
-                    className="text-xs text-muted-foreground hover:underline cursor-pointer"
-                  >
-                    Mot de passe oublié ?
-                  </Link>
-                </div>
-                <PasswordInput
-                  id={field.name}
-                  placeholder="********"
-                  autoComplete="current-password"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                />
-                {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-red-500 text-xs">
-                    {error?.message}
-                  </p>
-                ))}
-              </div>
-            )}
-          </form.Field>
-        </div>
-
-        <form.Subscribe>
-          {(state) => (
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={!state.canSubmit || state.isSubmitting}
-            >
-              {state.isSubmitting ? "Envoi…" : "Se connecter"}
-            </Button>
+        <fieldset disabled={busy}>
+          <AuthField
+            id="email"
+            label="Adresse email"
+            type="email"
+            autoComplete="email"
+            placeholder="vous@exemple.fr"
+            required
+            value={form.values.email}
+            onChange={(e) => {
+              form.change("email", e.target.value);
+              setVerify(false);
+            }}
+            error={form.errors.email}
+          />
+          <AuthField
+            id="password"
+            label="Mot de passe"
+            type="password"
+            autoComplete="current-password"
+            placeholder="Votre mot de passe"
+            required
+            value={form.values.password}
+            onChange={(e) => form.change("password", e.target.value)}
+            error={form.errors.password}
+            action={<Link to="/forgot-password">Mot de passe oublié ?</Link>}
+          />
+        </fieldset>
+        <AuthError>
+          {form.error && (
+            <>
+              {form.error}
+              {verify && (
+                <Link to="/verify-email">Recevoir un lien de vérification</Link>
+              )}
+            </>
           )}
-        </form.Subscribe>
+        </AuthError>
+        <AuthSubmit busy={busy} pending="Connexion en cours…">
+          Se connecter
+        </AuthSubmit>
       </form>
-
-      <div className="relative my-6">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">
-            Ou continuer avec
-          </span>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <GitHubLoginButton />
-        <GoogleLoginButton />
-      </div>
-
-      <div className="mt-4 text-center text-sm text-muted-foreground">
-        <span>Need an account? </span>
-        <Link
-          to="/sign-up"
-          className="hover:underline hover:text-foreground cursor-pointer font-bold"
-        >
-          Créer un compte
-        </Link>
-        <span className="mx-2">·</span>
-        <Link
-          to="/verify-email"
-          className="hover:underline hover:text-foreground cursor-pointer"
-        >
-          Verify your email
-        </Link>
-      </div>
-    </div>
+      <SocialLoginButtons disabled={form.busy} onBusyChange={setSocialBusy} />
+      <p className="auth-switch">
+        Première visite ? <Link to="/sign-up">Créer un compte</Link>
+      </p>
+      <Link className="auth-secondary-link" to="/verify-email">
+        Vérifier mon adresse email
+      </Link>
+    </AuthLayout>
   );
 }
