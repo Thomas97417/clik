@@ -2968,100 +2968,123 @@ dialog.modal-backdrop::backdrop {
   gap: clamp(40px, 6vw, 90px);
 }
 .auth-story {
-  padding-top: 20px;
+  min-width: 0;
+  padding: 32px 32px 26px;
+  overflow: hidden;
+  border: 1px solid #e1e8f5;
+  border-radius: 26px;
+  background:
+    radial-gradient(ellipse at 75% 40%, #fff9ef 0%, transparent 55%),
+    linear-gradient(145deg, #f0f5ff, #f8faff 65%, #edf3ff);
 }
 .auth-story > .eyebrow {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px solid #dce6f7;
+  border-radius: 7px;
+  background: #ffffffa6;
+  color: #526d95;
+  font-size: 10px;
+  letter-spacing: 1.1px;
 }
 .auth-dot {
   display: inline-block;
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: #356ae6;
   flex-shrink: 0;
 }
 .auth-story h2 {
-  margin: 22px 0 16px;
-  font-size: clamp(38px, 4vw, 54px);
+  margin: 24px 0 16px;
+  font-size: clamp(32px, 3.4vw, 44px);
   font-weight: 850;
-  letter-spacing: -2px;
-  line-height: 1.1;
+  letter-spacing: -1.8px;
+  line-height: 1.14;
 }
 .auth-story h2 em {
   font-style: normal;
   color: #356ae6;
 }
 .auth-story > p {
-  max-width: 410px;
-  color: #687d9b;
-  line-height: 1.8;
-  font-size: 15px;
+  max-width: 355px;
+  margin: 0;
+  color: #617594;
+  line-height: 1.75;
+  font-size: 14px;
 }
-.auth-model {
-  margin-top: 28px;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid #dfe7f4;
-  border-radius: 20px;
-  background: #f0f3ff;
+.auth-story-art {
+  margin: 2px -20px 27px;
 }
-.auth-model-heading {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 17px 20px;
-  font-size: 10px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  font-weight: 750;
-  color: #526e95;
-}
-.auth-model-heading .auth-dot {
-  background: #3baa77;
-  width: 6px;
-  height: 6px;
-}
-.auth-model-stage {
-  position: relative;
-  height: 220px;
-  background-image: radial-gradient(#c5d2ef 0.75px, transparent 0.75px);
-  background-size: 22px 22px;
-}
-.auth-model-stage .creation-preview {
-  inset: -25px 20px -15px;
-}
-.auth-model-stage .creation-preview img {
-  width: 100%;
-  height: 100%;
-}
-.auth-model-caption {
+.auth-construction {
   display: block;
-  padding: 14px 20px;
+  width: 100%;
+  height: auto;
+}
+.auth-cube {
+  --cube-top: #7ba5ff;
+  --cube-left: #4c7ee8;
+  --cube-right: #3562c4;
+}
+.auth-cube-sky {
+  --cube-top: #d7e7ff;
+  --cube-left: #a9c6f4;
+  --cube-right: #84a9e0;
+}
+.auth-cube-peach {
+  --cube-top: #ffd0b4;
+  --cube-left: #f2ab87;
+  --cube-right: #d88866;
+}
+.auth-cube-cream {
+  --cube-top: #fffaf0;
+  --cube-left: #eae0cd;
+  --cube-right: #d1c4ad;
+}
+.auth-cube-top {
+  fill: var(--cube-top);
+}
+.auth-cube-left {
+  fill: var(--cube-left);
+}
+.auth-cube-right {
+  fill: var(--cube-right);
+}
+.auth-story-caption {
+  margin: -6px 20px 0;
   text-align: center;
-  color: #697e9f;
+  color: #6b7e9b;
   font-size: 11px;
-  background: #ffffff80;
-  border-top: 1px solid #e4eafa;
 }
 .auth-benefits {
   display: grid;
-  gap: 12px;
-  margin: 25px 0 0;
-  padding: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 22px 0 0;
+  border-top: 1px solid #dce5f3;
   list-style: none;
 }
 .auth-benefits li {
   display: flex;
-  align-items: center;
-  gap: 11px;
-  font-size: 13px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 11px;
+  line-height: 1.6;
   color: #617594;
 }
+.auth-benefits strong {
+  display: block;
+  margin-bottom: 1px;
+  color: #344d73;
+  font-size: 12px;
+  font-weight: 650;
+}
 .auth-benefits svg {
-  color: #356ae6;
+  color: #527dc9;
   flex-shrink: 0;
 }
 .auth-card {
@@ -3377,11 +3400,15 @@ dialog.modal-backdrop::backdrop {
     gap: 35px;
     grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
   }
-  .auth-story h2 {
-    font-size: 40px;
+  .auth-story {
+    padding: 26px 22px 22px;
   }
-  .auth-model-stage {
-    height: 190px;
+  .auth-story h2 {
+    font-size: 32px;
+    letter-spacing: -1.3px;
+  }
+  .auth-benefits {
+    gap: 9px;
   }
 }
 @media (max-width: 800px) {
