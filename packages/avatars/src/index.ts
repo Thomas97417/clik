@@ -1,4 +1,43 @@
-export type AvatarDescriptor = { seed: string; version: 1 };
+export const CROWNS = [
+  { id: "gold", name: "Or", rank: 1, color: "#edb83f", shade: "#9e681b" },
+  { id: "silver", name: "Argent", rank: 2, color: "#c1cedc", shade: "#65778e" },
+  { id: "bronze", name: "Bronze", rank: 3, color: "#cf9266", shade: "#885035" },
+] as const;
+export const RINGS = [
+  {
+    id: "participation-1",
+    name: "Première brique",
+    threshold: 1,
+    color: "#356ae6",
+  },
+  { id: "participation-5", name: "Bâtisseur", threshold: 5, color: "#39836a" },
+  {
+    id: "participation-10",
+    name: "Architecte",
+    threshold: 10,
+    color: "#8558bd",
+  },
+  {
+    id: "participation-25",
+    name: "Maître d’œuvre",
+    threshold: 25,
+    color: "#c56b31",
+  },
+  {
+    id: "participation-50",
+    name: "Grand créateur",
+    threshold: 50,
+    color: "#21385e",
+  },
+] as const;
+export type CrownId = (typeof CROWNS)[number]["id"];
+export type RingId = (typeof RINGS)[number]["id"];
+export type AvatarDescriptor = {
+  seed: string;
+  version: 1;
+  crown?: CrownId;
+  ring?: RingId;
+};
 export type AvatarBrick = { x: number; y: number; width: 1 | 2; color: string };
 export const AVATAR_COLORS = [
   "#5787eb",

@@ -4271,3 +4271,228 @@ dialog.modal-backdrop::backdrop {
   width: 100%;
   height: 100%;
 }
+
+/* Reward wardrobe: the same small SVG identity, with earned accessories. */
+.avatar-wardrobe {
+  margin-top: 26px;
+  display: grid;
+  gap: 24px;
+}
+.avatar-wardrobe fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.avatar-wardrobe legend {
+  width: 100%;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #243753;
+}
+.avatar-wardrobe legend span {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #697b94;
+}
+.avatar-reward-options {
+  display: grid;
+  gap: 8px;
+}
+.avatar-crown-options {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.avatar-ring-options {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.avatar-reward-item {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.avatar-reward-option {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 7px;
+  border: 1px solid #e0e7f1;
+  border-radius: 12px;
+  background: #fff;
+  color: #344760;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color 150ms,
+    background 150ms;
+}
+.avatar-reward-option:not(:disabled):hover {
+  border-color: #8eadee;
+  background: #f7f9ff;
+}
+.avatar-reward-option[aria-pressed="true"] {
+  border-color: #356ae6;
+  box-shadow: inset 0 0 0 1px #356ae6;
+  background: #f2f6ff;
+}
+.avatar-reward-option:focus-visible {
+  outline: 3px solid #356ae6;
+  outline-offset: 3px;
+}
+.avatar-reward-option:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+  background: #f7f8fa;
+}
+.avatar-reward-option:disabled .brick-avatar {
+  opacity: 0.55;
+}
+.avatar-reward-option strong {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.avatar-reward-option small {
+  font-size: 10px;
+  line-height: 1.5;
+  color: #65758e;
+}
+.avatar-reward-option progress {
+  width: 75%;
+  height: 4px;
+  accent-color: #356ae6;
+  border: 0;
+}
+.avatar-reward-source {
+  padding-top: 7px;
+  text-align: center;
+  color: #356ae6;
+  font-size: 10px;
+}
+.avatar-reward-source:hover {
+  text-decoration: underline;
+}
+.avatar-reward-note {
+  font-size: 12px;
+  color: #697b94;
+  line-height: 1.6;
+  margin: 0;
+}
+.challenge-rewards {
+  padding: 24px;
+  border: 1px solid #dfe6f2;
+  border-radius: 16px;
+  background: linear-gradient(120deg, #f7f9ff, #fffaf0);
+  margin: 24px 0 36px;
+}
+.challenge-rewards-heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.challenge-rewards-mark {
+  font-size: 38px;
+  line-height: 1;
+  color: #ae7b25;
+}
+.challenge-rewards-heading > div {
+  flex: 1;
+  min-width: 0;
+}
+.challenge-rewards h2 {
+  margin: 0 0 6px;
+  font-size: 19px;
+  color: #243753;
+}
+.challenge-rewards p {
+  font-size: 13px;
+  line-height: 1.65;
+  color: #65758e;
+}
+.challenge-rewards-heading p {
+  margin: 0;
+}
+.challenge-rewards-settings {
+  font-size: 12px;
+  color: #356ae6;
+}
+.challenge-rewards-settings:hover {
+  text-decoration: underline;
+}
+.challenge-rewards-rules {
+  margin: 16px 0 0;
+}
+.challenge-podium {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+}
+.challenge-winner {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 18px;
+  background: #fff;
+  border: 1px solid #e4e8ef;
+  border-radius: 12px;
+}
+.challenge-winner-rank {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 6px;
+  align-items: center;
+  padding: 4px 9px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.challenge-winner-title,
+.challenge-winner > strong {
+  color: #243753;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.challenge-winner-title:hover {
+  color: #356ae6;
+}
+.challenge-winner small {
+  color: #65758e;
+  font-size: 12px;
+  margin-top: auto;
+}
+.challenge-podium-more {
+  display: block;
+  margin: 18px auto 0;
+  padding: 10px 16px;
+  border: 1px solid #dfe6f2;
+  border-radius: 8px;
+  background: #fff;
+  color: #356ae6;
+  cursor: pointer;
+}
+@media (max-width: 640px) {
+  .avatar-crown-options,
+  .avatar-ring-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .challenge-rewards {
+    padding: 18px;
+  }
+  .challenge-rewards-heading {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .challenge-rewards-settings {
+    width: 100%;
+  }
+  .challenge-podium {
+    grid-template-columns: 1fr;
+  }
+}

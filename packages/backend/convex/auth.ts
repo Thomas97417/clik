@@ -1,3 +1,4 @@
+import { markRewardsDeleted } from "./lib/rewards";
 import {
   createClient,
   type GenericCtx,
@@ -29,6 +30,10 @@ export const authComponent = createClient<DataModel>(components.betterAuth, {
     user: {
       onDelete: async (ctx, user) => {
         await deleteAvatar(ctx, user._id);
+        await markRewardsDeleted(ctx, user._id);
+        await ctx.scheduler.runAfter(0, internal.rewards.cleanup, {
+          owner: user._id,
+        });
       },
     },
   },

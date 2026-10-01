@@ -24,7 +24,7 @@ test("avatar : prévisualiser, annuler, réessayer et conserver le choix partout
   };
   await openSettings();
   const card = page.locator(".avatar-settings-card");
-  const preview = card.locator(".brick-avatar");
+  const preview = card.locator(".avatar-settings-preview > .brick-avatar");
   const shuffle = card.getByRole("button", {
     name: "Nouvel avatar",
     exact: true,

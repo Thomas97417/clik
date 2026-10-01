@@ -1,3 +1,5 @@
+import { activateRewards } from "./lib/rewards";
+import { internal } from "./_generated/api";
 import { readAvatars } from "./lib/avatars";
 import { ConvexError, v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
@@ -24,6 +26,7 @@ export async function requireUser(ctx: QueryCtx | MutationCtx) {
   return user;
 }
 async function ensure(ctx: MutationCtx) {
+  const config = await activateRewards(ctx);
   const day = challengeDay();
   const existing = await ctx.db
     .query("challenges")
@@ -31,13 +34,26 @@ async function ensure(ctx: MutationCtx) {
     .unique();
   if (existing) return existing._id;
   const opensAt = challengeStart(day);
-  return ctx.db.insert("challenges", {
+  const challengeId = await ctx.db.insert("challenges", {
     day,
     opensAt,
     closesAt: opensAt + CHALLENGE_DAY_MS,
     generatorVersion: 1,
     stock: challengeStock(day),
+    ...(day >= config.firstDay
+      ? {
+          rewardAt: opensAt + 2 * CHALLENGE_DAY_MS,
+          rewardStatus: "pending" as const,
+        }
+      : {}),
   });
+  if (day >= config.firstDay)
+    await ctx.scheduler.runAt(
+      opensAt + 2 * CHALLENGE_DAY_MS,
+      internal.rewards.settle,
+      { challengeId },
+    );
+  return challengeId;
 }
 export const ensureToday = mutation({ args: {}, handler: ensure });
 export const createToday = internalMutation({ args: {}, handler: ensure });
@@ -222,7 +238,16 @@ export const vote = mutation({
         challengeId: entry.challengeId,
         choices,
       });
+    const challenge = await ctx.db.get(entry.challengeId);
     await ctx.db.patch(entry._id, {
+      ...(challenge?.rewardAt && Date.now() < challenge.rewardAt
+        ? {
+            rewardScore: Math.max(
+              0,
+              (entry.rewardScore ?? 0) + (args.voted ? 1 : -1),
+            ),
+          }
+        : {}),
       voteCount: Math.max(0, (entry.voteCount ?? 0) + (args.voted ? 1 : -1)),
     });
   },

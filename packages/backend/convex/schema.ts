@@ -1,5 +1,17 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+export const crownId = v.union(
+  v.literal("gold"),
+  v.literal("silver"),
+  v.literal("bronze"),
+);
+export const ringId = v.union(
+  v.literal("participation-1"),
+  v.literal("participation-5"),
+  v.literal("participation-10"),
+  v.literal("participation-25"),
+  v.literal("participation-50"),
+);
 export const origin = v.object({
   publicationId: v.id("publications"),
   versionId: v.id("versions"),
@@ -8,10 +20,44 @@ export const origin = v.object({
 });
 export const stockItem = v.object({ type: v.string(), quantity: v.number() });
 export default defineSchema({
+  rewardConfig: defineTable({
+    key: v.literal("v1"),
+    firstDay: v.string(),
+    activatedAt: v.number(),
+    historyCursor: v.optional(v.string()),
+    historyDone: v.boolean(),
+  }).index("by_key", ["key"]),
+  rewardProgress: defineTable({
+    owner: v.string(),
+    count: v.number(),
+    deleted: v.optional(v.boolean()),
+  }).index("by_owner", ["owner"]),
+  challengeParticipations: defineTable({
+    owner: v.string(),
+    challengeId: v.id("challenges"),
+  }).index("by_owner_challenge", ["owner", "challengeId"]),
+  avatarRewards: defineTable({
+    owner: v.string(),
+    key: v.string(),
+    earnedAt: v.number(),
+    challengeId: v.optional(v.id("challenges")),
+  }).index("by_owner_key", ["owner", "key"]),
+  challengeAwards: defineTable({
+    challengeId: v.id("challenges"),
+    publicationId: v.id("publications"),
+    owner: v.optional(v.string()),
+    rank: v.number(),
+    score: v.number(),
+  })
+    .index("by_challenge_rank", ["challengeId", "rank"])
+    .index("by_publication", ["publicationId"])
+    .index("by_owner", ["owner"]),
   userAvatars: defineTable({
     owner: v.string(),
     seed: v.string(),
     version: v.literal(1),
+    crown: v.optional(crownId),
+    ring: v.optional(ringId),
   }).index("by_owner", ["owner"]),
   challenges: defineTable({
     day: v.string(),
@@ -19,7 +65,21 @@ export default defineSchema({
     closesAt: v.number(),
     generatorVersion: v.number(),
     stock: v.array(stockItem),
-  }).index("by_day", ["day"]),
+    rewardAt: v.optional(v.number()),
+    rewardStatus: v.optional(
+      v.union(
+        v.literal("pending"),
+        v.literal("processing"),
+        v.literal("complete"),
+      ),
+    ),
+    rewardCursor: v.optional(v.string()),
+    rewardProcessed: v.optional(v.number()),
+    rewardLastScore: v.optional(v.number()),
+    rewardLastRank: v.optional(v.number()),
+  })
+    .index("by_day", ["day"])
+    .index("by_reward_status", ["rewardStatus", "rewardAt"]),
   challengeVotes: defineTable({
     owner: v.string(),
     challengeId: v.id("challenges"),
@@ -57,6 +117,8 @@ export default defineSchema({
     submittedAt: v.optional(v.number()),
     updatedAt: v.optional(v.number()),
     voteCount: v.optional(v.number()),
+    rewardScore: v.optional(v.number()),
+    rewardEligible: v.optional(v.boolean()),
     rankTie: v.optional(v.number()),
     voteEpoch: v.optional(v.number()),
     commentCount: v.optional(v.number()),
@@ -75,7 +137,12 @@ export default defineSchema({
       "voteCount",
       "rankTie",
     ])
-    .index("by_owner_challenge", ["owner", "challengeId"]),
+    .index("by_owner_challenge", ["owner", "challengeId"])
+    .index("by_challenge_rewards", [
+      "challengeId",
+      "rewardEligible",
+      "rewardScore",
+    ]),
   versions: defineTable({
     publicationId: v.id("publications"),
     scene: v.string(),

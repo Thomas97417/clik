@@ -1,3 +1,4 @@
+import { recordParticipation } from "./lib/rewards";
 import { v, ConvexError } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import {
@@ -258,6 +259,15 @@ export const publish = mutation({
       ...(p.origin ? { origin: p.origin } : {}),
     });
     await ctx.db.patch(id, { ...data, versionId });
+    if (p.challengeId) {
+      await recordParticipation(ctx, p.owner, p.challengeId);
+      const challenge = await ctx.db.get(p.challengeId);
+      if (challenge?.rewardAt)
+        await ctx.db.patch(id, {
+          rewardEligible: true,
+          rewardScore: existing?.rewardScore ?? 0,
+        });
+    }
     return id;
   },
 });
@@ -268,7 +278,15 @@ export const withdraw = mutation({
       p = await ctx.db.get(id);
     if (!p || p.owner !== u._id)
       throw new ConvexError("Publication introuvable.");
+    const challenge = p.challengeId ? await ctx.db.get(p.challengeId) : null;
+    // Preserve an existing public participation if it is withdrawn before the
+    // historical import reaches it. Already recorded entries are a no-op.
+    if (p.active && p.challengeId)
+      await recordParticipation(ctx, p.owner, p.challengeId);
     await ctx.db.patch(id, {
+      ...(challenge?.rewardAt && Date.now() < challenge.rewardAt
+        ? { rewardEligible: false, rewardScore: 0 }
+        : {}),
       active: false,
       ...(p.challengeId
         ? { voteCount: 0, voteEpoch: (p.voteEpoch ?? 0) + 1 }

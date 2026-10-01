@@ -7,4 +7,5 @@ crons.daily(
   internal.challenges.createToday,
   {},
 );
+crons.interval("challenge rewards", { minutes: 5 }, internal.rewards.tick, {});
 export default crons;

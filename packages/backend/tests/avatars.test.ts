@@ -120,7 +120,19 @@ describe("Choix d’avatar", () => {
       return { publicationId, challengeId };
     });
     const paginationOpts = { numItems: 12, cursor: null };
-    for (const avatar of [first, second]) {
+    await t.run(async (ctx) => {
+      for (const key of ["gold", "participation-1"])
+        await ctx.db.insert("avatarRewards", {
+          owner: "alice",
+          key,
+          earnedAt: Date.now(),
+        });
+    });
+    for (const avatar of [
+      first,
+      second,
+      { ...second, crown: "gold" as const, ring: "participation-1" as const },
+    ]) {
       await t
         .withIdentity({ subject: "alice" })
         .mutation(api.avatars.save, avatar);

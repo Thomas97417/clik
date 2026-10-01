@@ -1,3 +1,4 @@
+import ChallengeRewards from "@/components/challenges/rewards";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
@@ -237,6 +238,11 @@ function Challenges() {
               voter et commenter sur mobile.
             </p>
           </section>
+          <ChallengeRewards
+            key={`rewards-${challenge._id}`}
+            challenge={challenge}
+            now={now}
+          />
           <Entries
             key={challenge._id}
             challenge={challenge}

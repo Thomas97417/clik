@@ -10,7 +10,12 @@ export async function readAvatar(
     .withIndex("by_owner", (q) => q.eq("owner", owner))
     .unique();
   return stored
-    ? { seed: stored.seed, version: stored.version }
+    ? {
+        seed: stored.seed,
+        version: stored.version,
+        ...(stored.crown ? { crown: stored.crown } : {}),
+        ...(stored.ring ? { ring: stored.ring } : {}),
+      }
     : defaultAvatar(owner);
 }
 

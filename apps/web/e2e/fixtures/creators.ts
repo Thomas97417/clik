@@ -1,4 +1,9 @@
-import { defaultAvatar, type AvatarDescriptor } from "@clik/avatars";
+import {
+  CROWNS,
+  RINGS,
+  defaultAvatar,
+  type AvatarDescriptor,
+} from "@clik/avatars";
 import type { Page } from "@playwright/test";
 import {
   challengeDay,
@@ -21,6 +26,8 @@ export async function creatorsFixture(page: Page, authenticated = false) {
     closesAt: start + 86400000,
     stock: challengeStock(day),
     generatorVersion: 1,
+    rewardAt: undefined as number | undefined,
+    rewardStatus: undefined as "pending" | "complete" | undefined,
   };
   const user = {
     _id: "viewer",
@@ -29,6 +36,8 @@ export async function creatorsFixture(page: Page, authenticated = false) {
     email: "private@example.test",
     emailVerified: true,
   };
+  let rewardCount = 0;
+  let rewardKeys: string[] = [];
   const avatars = new Map<string, AvatarDescriptor>();
   const avatarFor = (owner: string) =>
     avatars.get(owner) ?? defaultAvatar(owner);
@@ -130,6 +139,54 @@ export async function creatorsFixture(page: Page, authenticated = false) {
     let version = { querySet: 0, identity: 0, ts: ts() };
     const queries = new Map<number, { udfPath: string; args: any[] }>();
     const query = (path: string, args: any) => {
+      if (path === "rewards:mine")
+        return authenticated
+          ? {
+              count: rewardCount,
+              rewards: rewardKeys.map((key) => ({
+                key,
+                earnedAt: now,
+                day: CROWNS.some((c) => c.id === key) ? day : undefined,
+              })),
+            }
+          : null;
+      if (path === "rewards:podium")
+        return {
+          page: [
+            {
+              _id: "award-1",
+              rank: 1,
+              score: 7,
+              publicationId: "creation-1",
+              title: "Le phare couronné",
+              owner: "alice",
+              author: "Alice",
+              avatar: avatarFor("alice"),
+            },
+            {
+              _id: "award-2",
+              rank: 1,
+              score: 7,
+              publicationId: null,
+              title: "Création retirée",
+              owner: null,
+              author: null,
+              avatar: null,
+            },
+            {
+              _id: "award-3",
+              rank: 3,
+              score: 4,
+              publicationId: "creation-2",
+              title: "Le pont de bronze",
+              owner: "bob",
+              author: "Bob",
+              avatar: avatarFor("bob"),
+            },
+          ],
+          isDone: true,
+          continueCursor: "",
+        };
       if (path === "auth:getCurrentUser")
         return authenticated ? { ...user, avatar: avatarFor(user._id) } : null;
       if (path === "projects:creator") {
@@ -244,7 +301,21 @@ export async function creatorsFixture(page: Page, authenticated = false) {
         const failed = savingAvatar && avatarFailure;
         if (savingAvatar) {
           avatarSaves.push(message.args[0]);
-          if (!failed) avatars.set(user._id, message.args[0]);
+          if (!failed) {
+            const args = message.args[0];
+            avatars.set(user._id, {
+              ...avatarFor(user._id),
+              ...args,
+              crown:
+                args.crown === null
+                  ? undefined
+                  : (args.crown ?? avatarFor(user._id).crown),
+              ring:
+                args.ring === null
+                  ? undefined
+                  : (args.ring ?? avatarFor(user._id).ring),
+            });
+          }
         }
         seq++;
         ws.send(
@@ -267,6 +338,20 @@ export async function creatorsFixture(page: Page, authenticated = false) {
   });
   return {
     avatarSaves,
+    setRewards: (count: number, crowns: string[] = []) => {
+      rewardCount = count;
+      rewardKeys = [
+        ...crowns,
+        ...RINGS.filter((r) => r.threshold <= count).map((r) => r.id),
+      ];
+      refreshers.forEach((refresh) => refresh());
+    },
+    setRewardPhase: (phase: "pending" | "complete") => {
+      challenge.rewardAt =
+        phase === "complete" ? now - 1000 : start + 2 * 86400000;
+      challenge.rewardStatus = phase;
+      refreshers.forEach((refresh) => refresh());
+    },
     failAvatarSave: (value: boolean) => {
       avatarFailure = value;
     },
