@@ -411,7 +411,7 @@ button:focus-visible {
   display: flex;
   align-items: center;
   gap: 11px;
-  padding: 12px 10px;
+  padding: 18px 16px;
 }
 .header-menu-identity > div {
   min-width: 0;
@@ -436,6 +436,16 @@ button:focus-visible {
   border-radius: 8px;
   font-size: 13px;
   cursor: pointer;
+}
+.header-account-menu {
+  padding: 0;
+}
+.header-account-menu [data-slot="dropdown-menu-item"] {
+  padding-inline: 18px;
+  border-radius: 0;
+}
+.header-account-menu [data-slot="dropdown-menu-separator"] {
+  margin-inline: 0;
 }
 .header-account-menu [data-slot="dropdown-menu-item"]:focus,
 .header-nav-menu [data-slot="dropdown-menu-item"]:focus {
