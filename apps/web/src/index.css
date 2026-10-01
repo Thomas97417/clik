@@ -306,7 +306,7 @@ button:focus-visible {
 .header-nav-links {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 14px;
 }
 .header-nav-links a {
   position: relative;
@@ -552,7 +552,7 @@ button:focus-visible {
     gap: 20px;
   }
   .header-nav-links {
-    gap: 2px;
+    gap: 10px;
   }
   .header-nav-links a {
     padding: 0 17px;
