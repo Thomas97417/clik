@@ -1,3 +1,4 @@
+import { defaultAvatar } from "@clik/avatars";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { convexTest } from "convex-test";
 import schema from "../convex/schema";
@@ -146,62 +147,31 @@ describe("Galeries publiques des créateurs", () => {
     );
     expect((await query()).page[0]._id).toBe(ids[16]);
   });
-  it("expose uniquement le nom et la photo actuels, sans connexion", async () => {
+  it("expose le nom et l’avatar généré, sans photo ni données privées", async () => {
     const t = convexTest(schema, modules);
-    const account = {
-      _id: "alice",
-      name: "Alice",
-      image: "https://images.example.test/alice.png",
-      email: "private@example.test",
-      emailVerified: true,
-    };
-    accounts.set("alice", account);
-    expect(await t.query(api.projects.creator, { userId: "alice" })).toEqual({
-      id: "alice",
-      name: "Alice",
-      imageUrl: account.image,
-    });
-    accounts.set("alice", {
-      ...account,
-      name: "Alice renommée",
-      image: "avatars/alice/photo",
-    });
-    avatar.mockResolvedValue({
-      url: "https://images.example.test/signed-avatar.png",
-      bucketLink: "private-bucket",
-      key: "private-key",
-    });
-    expect(await t.query(api.projects.creator, { userId: "alice" })).toEqual({
-      id: "alice",
-      name: "Alice renommée",
-      imageUrl: "https://images.example.test/signed-avatar.png",
-    });
-    expect(avatar).toHaveBeenCalledWith(
-      expect.anything(),
+    for (const image of [
+      undefined,
+      "https://images.example.test/alice.png",
       "avatars/alice/photo",
-    );
+      "avatars/other/private",
+    ]) {
+      accounts.set("alice", {
+        _id: "alice",
+        name: "Alice",
+        image,
+        email: "private@example.test",
+        emailVerified: true,
+      });
+      expect(await t.query(api.projects.creator, { userId: "alice" })).toEqual({
+        id: "alice",
+        name: "Alice",
+        avatar: defaultAvatar("alice"),
+      });
+    }
+    expect(avatar).not.toHaveBeenCalled();
   });
-  it("gère une photo absente ou indisponible et les comptes inexistants", async () => {
+  it("gère les comptes inexistants sans masquer les erreurs du service", async () => {
     const t = convexTest(schema, modules);
-    const account = {
-      _id: "alice",
-      name: "Alice",
-      email: "private@example.test",
-      emailVerified: false,
-    };
-    accounts.set("alice", account);
-    expect(
-      (await t.query(api.projects.creator, { userId: "alice" }))?.imageUrl,
-    ).toBeNull();
-    accounts.set("alice", { ...account, image: "avatars/alice/broken" });
-    avatar.mockRejectedValue(Error("R2 unavailable"));
-    expect(
-      (await t.query(api.projects.creator, { userId: "alice" }))?.imageUrl,
-    ).toBeNull();
-    accounts.set("alice", { ...account, image: "avatars/other/private" });
-    expect(
-      (await t.query(api.projects.creator, { userId: "alice" }))?.imageUrl,
-    ).toBeNull();
     for (const userId of ["", "missing", "malformed", "a".repeat(129)])
       expect(await t.query(api.projects.creator, { userId })).toBeNull();
     await expect(

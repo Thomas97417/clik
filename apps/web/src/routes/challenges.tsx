@@ -316,7 +316,8 @@ function Entries({
                 </div>
               </Link>
               <p className="public-card-author">
-                par <AuthorLink id={p.owner} name={p.author} />
+                par{" "}
+                <AuthorLink id={p.owner} name={p.author} avatar={p.avatar} />
               </p>
               <div className="challenge-entry-actions">
                 <VoteButton

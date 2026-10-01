@@ -9,12 +9,14 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as avatars from "../avatars.js";
 import type * as challenges from "../challenges.js";
 import type * as comments from "../comments.js";
 import type * as crons from "../crons.js";
 import type * as env from "../env.js";
 import type * as healthCheck from "../healthCheck.js";
 import type * as http from "../http.js";
+import type * as lib_avatars from "../lib/avatars.js";
 import type * as privateData from "../privateData.js";
 import type * as projects from "../projects.js";
 import type * as r2 from "../r2.js";
@@ -28,12 +30,14 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  avatars: typeof avatars;
   challenges: typeof challenges;
   comments: typeof comments;
   crons: typeof crons;
   env: typeof env;
   healthCheck: typeof healthCheck;
   http: typeof http;
+  "lib/avatars": typeof lib_avatars;
   privateData: typeof privateData;
   projects: typeof projects;
   r2: typeof r2;

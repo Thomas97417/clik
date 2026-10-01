@@ -1,3 +1,5 @@
+import { defaultAvatar, type AvatarDescriptor } from "@clik/avatars";
+import BrickAvatar from "@/components/ui/brick-avatar";
 import { useEffect, useState } from "react";
 import {
   useConvexAuth,
@@ -127,7 +129,7 @@ function Comment({
   comment,
   mine,
 }: {
-  comment: Doc<"comments">;
+  comment: Doc<"comments"> & { avatar?: AvatarDescriptor };
   mine: boolean;
 }) {
   const [editing, setEditing] = useState(false),
@@ -153,12 +155,19 @@ function Comment({
   return (
     <article className="comment">
       <div className="comment-avatar" aria-hidden="true">
-        {comment.author.charAt(0).toLocaleUpperCase()}
+        <BrickAvatar
+          avatar={comment.avatar ?? defaultAvatar(comment.owner)}
+          size={32}
+        />
       </div>
       <div className="comment-content">
         <header>
           <strong>
-            <AuthorLink id={comment.owner} name={comment.author} />
+            <AuthorLink
+              id={comment.owner}
+              name={comment.author}
+              showAvatar={false}
+            />
           </strong>
           <time dateTime={new Date(comment.createdAt).toISOString()}>
             {new Date(comment.createdAt).toLocaleDateString("fr-FR", {

@@ -1,13 +1,15 @@
 import { test, expect } from "@playwright/test";
 import { creatorsFixture } from "./fixtures/creators";
 
-test("galerie publique : nom, photo, pagination, défis et retrait réactif", async ({
+test("galerie publique : nom, avatar, pagination, défis et retrait réactif", async ({
   page,
 }, info) => {
   const fixture = await creatorsFixture(page);
   await page.goto("/gallery/user/alice");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Alice.");
-  await expect(page.getByRole("img", { name: "Photo de Alice" })).toBeVisible();
+  await expect(
+    page.getByRole("img", { name: "Avatar de Alice" }),
+  ).toBeVisible();
   await expect(page.locator(".public-creation-card")).toHaveCount(12);
   await expect(page.locator(".challenge-badge")).toHaveCount(1);
   await expect(page.locator(".public-card-author")).not.toContainText(["Bob"]);
@@ -109,7 +111,9 @@ test("comptes vides ou introuvables, avatar indisponible et lien vers ma page pu
     ).toBeVisible();
   }
   await page.goto("/gallery/user/broken");
-  await expect(page.locator(".creator-avatar")).toHaveText("P");
+  await expect(
+    page.getByRole("img", { name: "Avatar de Photo indisponible" }),
+  ).toBeVisible();
   await expect(page.locator(".creator-avatar img")).toHaveCount(0);
   await page.locator(".creator-page > .back-link").click();
   await expect(page).toHaveURL(/\/gallery\/?$/);

@@ -1,0 +1,125 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Avatars Clik v1 > garde le même dessin pour une graine donnée, sans dépendre d’un nom ou d’un rendu 1`] = `
+{
+  "accent": "#f3b18e",
+  "background": "#f1f5fc",
+  "bricks": [
+    {
+      "color": "#81b79b",
+      "width": 1,
+      "x": 0,
+      "y": 0,
+    },
+    {
+      "color": "#f3b18e",
+      "width": 1,
+      "x": 1,
+      "y": 0,
+    },
+    {
+      "color": "#f3b18e",
+      "width": 1,
+      "x": 3,
+      "y": 0,
+    },
+    {
+      "color": "#81b79b",
+      "width": 1,
+      "x": 4,
+      "y": 0,
+    },
+    {
+      "color": "#81b79b",
+      "width": 1,
+      "x": 2,
+      "y": 0,
+    },
+    {
+      "color": "#81b79b",
+      "width": 1,
+      "x": 1,
+      "y": 1,
+    },
+    {
+      "color": "#81b79b",
+      "width": 1,
+      "x": 3,
+      "y": 1,
+    },
+    {
+      "color": "#81b79b",
+      "width": 1,
+      "x": 2,
+      "y": 1,
+    },
+    {
+      "color": "#81b79b",
+      "width": 1,
+      "x": 0,
+      "y": 2,
+    },
+    {
+      "color": "#81b79b",
+      "width": 1,
+      "x": 1,
+      "y": 2,
+    },
+    {
+      "color": "#81b79b",
+      "width": 1,
+      "x": 3,
+      "y": 2,
+    },
+    {
+      "color": "#81b79b",
+      "width": 1,
+      "x": 4,
+      "y": 2,
+    },
+    {
+      "color": "#81b79b",
+      "width": 1,
+      "x": 2,
+      "y": 2,
+    },
+    {
+      "color": "#f3b18e",
+      "width": 1,
+      "x": 1,
+      "y": 3,
+    },
+    {
+      "color": "#f3b18e",
+      "width": 1,
+      "x": 3,
+      "y": 3,
+    },
+    {
+      "color": "#81b79b",
+      "width": 1,
+      "x": 2,
+      "y": 3,
+    },
+    {
+      "color": "#81b79b",
+      "width": 1,
+      "x": 1,
+      "y": 4,
+    },
+    {
+      "color": "#81b79b",
+      "width": 1,
+      "x": 3,
+      "y": 4,
+    },
+    {
+      "color": "#81b79b",
+      "width": 1,
+      "x": 2,
+      "y": 4,
+    },
+  ],
+  "primary": "#81b79b",
+}
+`;

@@ -1,4 +1,8 @@
-import { createClient, type GenericCtx } from "@convex-dev/better-auth";
+import {
+  createClient,
+  type GenericCtx,
+  type AuthFunctions,
+} from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
 import { betterAuth } from "better-auth";
 
@@ -7,6 +11,7 @@ import type { DataModel } from "./_generated/dataModel";
 import { components, internal } from "./_generated/api";
 import { query, type ActionCtx } from "./_generated/server";
 import authConfig from "./auth.config";
+import { readAvatar, deleteAvatar } from "./lib/avatars";
 import {
   SITE_URL,
   EMAIL_FROM,
@@ -17,7 +22,18 @@ import {
   BETTER_AUTH_URL,
 } from "./env";
 
-export const authComponent = createClient<DataModel>(components.betterAuth);
+const authFunctions: AuthFunctions = { onDelete: internal.auth.onDelete };
+export const authComponent = createClient<DataModel>(components.betterAuth, {
+  authFunctions,
+  triggers: {
+    user: {
+      onDelete: async (ctx, user) => {
+        await deleteAvatar(ctx, user._id);
+      },
+    },
+  },
+});
+export const { onDelete } = authComponent.triggersApi();
 
 function createAuth(ctx: GenericCtx<DataModel>) {
   return betterAuth({
@@ -81,6 +97,7 @@ export { createAuth };
 export const getCurrentUser = query({
   args: {},
   handler: async (ctx) => {
-    return await authComponent.safeGetAuthUser(ctx);
+    const user = await authComponent.safeGetAuthUser(ctx);
+    return user ? { ...user, avatar: await readAvatar(ctx, user._id) } : null;
   },
 });

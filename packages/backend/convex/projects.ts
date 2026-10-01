@@ -11,7 +11,7 @@ import {
 import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { authComponent } from "./auth";
-import { r2 } from "./r2";
+import { readAvatar, readAvatars } from "./lib/avatars";
 import {
   validateScene,
   validateChallengeStock,
@@ -296,6 +296,10 @@ export const gallery = query({
       ...a.paginationOpts,
       numItems: Math.min(24, a.paginationOpts.numItems),
     });
+    const avatars = await readAvatars(
+      ctx,
+      results.page.map((p) => p.owner),
+    );
     return {
       ...results,
       page: await Promise.all(
@@ -304,6 +308,7 @@ export const gallery = query({
           owner: p.owner,
           title: p.title,
           author: p.author,
+          avatar: avatars.get(p.owner)!,
           publishedAt: p.publishedAt,
           challenge: p.challengeId ? await ctx.db.get(p.challengeId) : null,
           commentCount: p.commentCount ?? 0,
@@ -330,20 +335,10 @@ export const creator = query({
       throw error;
     }
     if (!account || typeof account.name !== "string") return null;
-    let imageUrl: string | null = null;
-    if (account.image?.startsWith(`avatars/${account._id}/`)) {
-      try {
-        imageUrl = (await r2.getMetadata(ctx, account.image))?.url ?? null;
-      } catch {
-        /* An unavailable avatar must not hide the public gallery. */
-      }
-    } else if (account.image && /^https?:\/\//i.test(account.image)) {
-      imageUrl = account.image;
-    }
     return {
       id: account._id,
       name: account.name?.trim() || "Créateur Clik",
-      imageUrl,
+      avatar: await readAvatar(ctx, account._id),
     };
   },
 });
@@ -357,6 +352,7 @@ export const creation = query({
     return {
       ...version,
       owner: p.owner,
+      avatar: await readAvatar(ctx, p.owner),
       challenge: p.challengeId ? await ctx.db.get(p.challengeId) : null,
       voteCount: p.voteCount ?? 0,
       commentCount: p.commentCount ?? 0,

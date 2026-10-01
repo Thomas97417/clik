@@ -1,3 +1,4 @@
+import { defaultAvatar, type AvatarDescriptor } from "@clik/avatars";
 import type { Page } from "@playwright/test";
 import {
   challengeDay,
@@ -28,6 +29,11 @@ export async function creatorsFixture(page: Page, authenticated = false) {
     email: "private@example.test",
     emailVerified: true,
   };
+  const avatars = new Map<string, AvatarDescriptor>();
+  const avatarFor = (owner: string) =>
+    avatars.get(owner) ?? defaultAvatar(owner);
+  let avatarFailure = false;
+  const avatarSaves: AvatarDescriptor[] = [];
   const profiles = new Map([
     [
       "alice",
@@ -97,6 +103,22 @@ export async function creatorsFixture(page: Page, authenticated = false) {
   await page.route("**/api/auth/convex/token*", (route) =>
     route.fulfill({ json: { token: authenticated ? token : null } }),
   );
+  if (authenticated) {
+    // The server-side auth guard uses this RPC during client navigation.
+    // Only mock getAuth; never use or create a real server session.
+    await page.route("**/_serverFn/**", (route) => {
+      const identifier = new URL(route.request().url()).pathname
+        .split("/")
+        .pop()!;
+      const decoded = Buffer.from(identifier, "base64url").toString();
+      if (decoded.includes("getAuth_createServerFn_handler"))
+        return route.fulfill({ json: { result: token, context: {} } });
+      return route.fallback();
+    });
+    await page.route("**/api/auth/list-sessions*", (route) =>
+      route.fulfill({ json: [] }),
+    );
+  }
   const refreshers = new Set<() => void>();
   await page.routeWebSocket(/\/api\/.*\/sync/, (ws) => {
     let seq = 0;
@@ -108,8 +130,12 @@ export async function creatorsFixture(page: Page, authenticated = false) {
     let version = { querySet: 0, identity: 0, ts: ts() };
     const queries = new Map<number, { udfPath: string; args: any[] }>();
     const query = (path: string, args: any) => {
-      if (path === "auth:getCurrentUser") return authenticated ? user : null;
-      if (path === "projects:creator") return profiles.get(args.userId) ?? null;
+      if (path === "auth:getCurrentUser")
+        return authenticated ? { ...user, avatar: avatarFor(user._id) } : null;
+      if (path === "projects:creator") {
+        const profile = profiles.get(args.userId);
+        return profile ? { ...profile, avatar: avatarFor(args.userId) } : null;
+      }
       if (path === "projects:gallery") {
         const rows = publications
           .filter(
@@ -121,7 +147,9 @@ export async function creatorsFixture(page: Page, authenticated = false) {
         const from = Number(args.paginationOpts.cursor || 0),
           end = from + args.paginationOpts.numItems;
         return {
-          page: rows.slice(from, end),
+          page: rows
+            .slice(from, end)
+            .map((p) => ({ ...p, avatar: avatarFor(p.owner) })),
           isDone: end >= rows.length,
           continueCursor: String(Math.min(end, rows.length)),
         };
@@ -131,6 +159,7 @@ export async function creatorsFixture(page: Page, authenticated = false) {
         return p
           ? {
               ...p,
+              avatar: avatarFor(p.owner),
               _id: `version-${p._id}`,
               publicationId: p._id,
               createdAt: p.publishedAt,
@@ -151,6 +180,7 @@ export async function creatorsFixture(page: Page, authenticated = false) {
               publicationId: args.publicationId,
               owner: "bob",
               author: "Bob",
+              avatar: avatarFor("bob"),
               body: "Une très belle idée !",
               createdAt: now,
             },
@@ -169,7 +199,9 @@ export async function creatorsFixture(page: Page, authenticated = false) {
         };
       if (path === "challenges:entries")
         return {
-          page: publications.filter((p) => p.active && p.challenge),
+          page: publications
+            .filter((p) => p.active && p.challenge)
+            .map((p) => ({ ...p, avatar: avatarFor(p.owner) })),
           isDone: true,
           continueCursor: "",
         };
@@ -208,13 +240,23 @@ export async function creatorsFixture(page: Page, authenticated = false) {
       } else if (message.type === "Authenticate")
         transition({ ...version, identity: message.baseVersion + 1 });
       else if (message.type === "Mutation") {
+        const savingAvatar = message.udfPath === "avatars:save";
+        const failed = savingAvatar && avatarFailure;
+        if (savingAvatar) {
+          avatarSaves.push(message.args[0]);
+          if (!failed) avatars.set(user._id, message.args[0]);
+        }
         seq++;
         ws.send(
           JSON.stringify({
             type: "MutationResponse",
             requestId: message.requestId,
-            success: true,
-            result: "challenge",
+            success: !failed,
+            result: failed
+              ? "Enregistrement indisponible"
+              : savingAvatar
+                ? message.args[0]
+                : "challenge",
             ts: ts(),
             logLines: [],
           }),
@@ -224,6 +266,14 @@ export async function creatorsFixture(page: Page, authenticated = false) {
     });
   });
   return {
+    avatarSaves,
+    failAvatarSave: (value: boolean) => {
+      avatarFailure = value;
+    },
+    setAvatar: (owner: string, avatar: AvatarDescriptor) => {
+      avatars.set(owner, avatar);
+      refreshers.forEach((refresh) => refresh());
+    },
     rename: (name: string) => {
       profiles.get("alice")!.name = name;
       refreshers.forEach((refresh) => refresh());

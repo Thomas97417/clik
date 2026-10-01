@@ -64,7 +64,7 @@ function Creation() {
           )}
           <h1>{p.title}</h1>
           <p className="author">
-            par <AuthorLink id={p.owner} name={p.author} />
+            par <AuthorLink id={p.owner} name={p.author} avatar={p.avatar} />
           </p>
           {p.description && <p className="description">{p.description}</p>}
           {p.origin && (

@@ -1,3 +1,4 @@
+import { readAvatars } from "./lib/avatars";
 import { ConvexError, v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import { query, mutation } from "./_generated/server";
@@ -18,7 +19,7 @@ export const list = query({
   handler: async (ctx, args) => {
     const p = await ctx.db.get(args.publicationId);
     if (!p?.active) return { page: [], isDone: true, continueCursor: "" };
-    return ctx.db
+    const results = await ctx.db
       .query("comments")
       .withIndex("by_publication", (q) => q.eq("publicationId", p._id))
       .order("desc")
@@ -26,6 +27,14 @@ export const list = query({
         ...args.paginationOpts,
         numItems: Math.min(20, args.paginationOpts.numItems),
       });
+    const avatars = await readAvatars(
+      ctx,
+      results.page.map((c) => c.owner),
+    );
+    return {
+      ...results,
+      page: results.page.map((c) => ({ ...c, avatar: avatars.get(c.owner)! })),
+    };
   },
 });
 export const add = mutation({

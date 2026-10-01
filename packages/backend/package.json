@@ -24,7 +24,8 @@
     "react-dom": "^19.2.4",
     "react-email": "^5.2.9",
     "resend": "^6.9.2",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@clik/avatars": "workspace:*"
   },
   "devDependencies": {
     "@my-better-t-app/config": "workspace:*",

@@ -18,6 +18,7 @@
       "name": "web",
       "dependencies": {
         "@base-ui/react": "^1.0.0",
+        "@clik/avatars": "workspace:*",
         "@clik/scene": "workspace:*",
         "@convex-dev/better-auth": "catalog:",
         "@convex-dev/r2": "^0.9.1",
@@ -74,10 +75,15 @@
         "web-vitals": "^5.0.3",
       },
     },
+    "packages/avatars": {
+      "name": "@clik/avatars",
+      "version": "1.0.0",
+    },
     "packages/backend": {
       "name": "@my-better-t-app/backend",
       "version": "1.0.0",
       "dependencies": {
+        "@clik/avatars": "workspace:*",
         "@clik/scene": "workspace:*",
         "@convex-dev/better-auth": "catalog:",
         "@convex-dev/r2": "^0.9.1",
@@ -303,6 +309,8 @@
     "@better-fetch/fetch": ["@better-fetch/fetch@1.1.21", "", {}, "sha512-/ImESw0sskqlVR94jB+5+Pxjf+xBwDZF/N5+y2/q4EqD7IARUTSpPfIo8uf39SYpCxyOCtbyYpUrZ3F/k0zT4A=="],
 
     "@borewit/text-codec": ["@borewit/text-codec@0.2.1", "", {}, "sha512-k7vvKPbf7J2fZ5klGRD9AeKfUvojuZIQ3BT5u7Jfv+puwXkUBUT5PVyMDfJZpy30CBDXGMgw7fguK/lpOMBvgw=="],
+
+    "@clik/avatars": ["@clik/avatars@workspace:packages/avatars"],
 
     "@clik/scene": ["@clik/scene@workspace:packages/scene"],
 

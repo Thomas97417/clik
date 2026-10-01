@@ -3,7 +3,8 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 
 import ChangePasswordCard from "@/components/settings/change-password-card";
 import DeleteAccountCard from "@/components/settings/delete-account-card";
-import ProfileImageCard from "@/components/settings/profile-image-card";
+import AvatarCard from "@/components/settings/avatar-card";
+import { defaultAvatar } from "@clik/avatars";
 import SessionsCard from "@/components/settings/sessions-card";
 import EmailCard from "@/components/settings/update-email-card";
 import UpdateNameCard from "@/components/settings/update-name-card";
@@ -11,10 +12,10 @@ import UpdateNameCard from "@/components/settings/update-name-card";
 export const Route = createFileRoute("/settings")({
   head: () => ({
     meta: [
-      { title: "Settings — Toma Stack" },
+      { title: "Paramètres — Clik" },
       {
         name: "description",
-        content: "Manage your account settings, email, password, and sessions.",
+        content: "Gérez votre avatar, votre compte et vos préférences Clik.",
       },
     ],
   }),
@@ -34,12 +35,15 @@ function RouteComponent() {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4">
       <div>
-        <h1 className="text-2xl font-bold">Settings</h1>
+        <h1 className="text-2xl font-bold">Paramètres</h1>
         <p className="text-sm text-muted-foreground">
-          Manage your account settings.
+          Votre identité et les réglages de votre compte.
         </p>
       </div>
-      <ProfileImageCard image={user.image ?? undefined} />
+      <AvatarCard
+        key={user._id}
+        avatar={user.avatar ?? defaultAvatar(user._id)}
+      />
       <UpdateNameCard name={user.name} />
       <EmailCard email={user.email} />
       <ChangePasswordCard />

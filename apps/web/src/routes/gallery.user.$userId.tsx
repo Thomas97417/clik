@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { usePaginatedQuery, useQuery } from "convex/react";
-import { useState } from "react";
+import BrickAvatar from "@/components/ui/brick-avatar";
+import { defaultAvatar } from "@clik/avatars";
 import { ArrowLeft, Box } from "lucide-react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -30,7 +31,6 @@ function CreatorGallery({ userId }: { userId: string }) {
     creator ? { ownerId: userId } : "skip",
     { initialNumItems: 12 },
   );
-  const [failedImage, setFailedImage] = useState<string>();
   return (
     <main className="collection-page creator-page">
       <Link to="/gallery" className="back-link">
@@ -49,17 +49,11 @@ function CreatorGallery({ userId }: { userId: string }) {
         <>
           <div className="page-heading creator-heading">
             <div className="creator-avatar">
-              {creator.imageUrl && creator.imageUrl !== failedImage ? (
-                <img
-                  src={creator.imageUrl}
-                  alt={`Photo de ${creator.name}`}
-                  onError={() => setFailedImage(creator.imageUrl!)}
-                />
-              ) : (
-                <span aria-hidden="true">
-                  {creator.name.charAt(0).toLocaleUpperCase("fr-FR")}
-                </span>
-              )}
+              <BrickAvatar
+                avatar={creator.avatar ?? defaultAvatar(creator.id)}
+                size={96}
+                label={`Avatar de ${creator.name}`}
+              />
             </div>
             <div className="creator-identity">
               <span className="eyebrow">Un univers à découvrir</span>

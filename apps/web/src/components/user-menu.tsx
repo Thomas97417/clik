@@ -1,3 +1,5 @@
+import BrickAvatar from "./ui/brick-avatar";
+import { defaultAvatar } from "@clik/avatars";
 import { useNavigate } from "@tanstack/react-router";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { ChevronDown } from "lucide-react";
@@ -26,7 +28,9 @@ export default function UserMenu() {
         render={<Button variant="outline" className="header-user-trigger" />}
       >
         <span className="header-avatar" aria-hidden="true">
-          {user?.name?.trim().charAt(0).toLocaleUpperCase() || "C"}
+          {user && (
+            <BrickAvatar avatar={user.avatar ?? defaultAvatar(user._id)} />
+          )}
         </span>
         <span className="header-user-copy">
           <span className="header-user-name">{user?.name || "Mon compte"}</span>
@@ -45,7 +49,9 @@ export default function UserMenu() {
         <DropdownMenuGroup>
           <DropdownMenuLabel className="header-menu-identity">
             <span className="header-avatar" aria-hidden="true">
-              {user?.name?.trim().charAt(0).toLocaleUpperCase() || "C"}
+              {user && (
+                <BrickAvatar avatar={user.avatar ?? defaultAvatar(user._id)} />
+              )}
             </span>
             <div>
               <p className="header-menu-name">{user?.name || "Mon compte"}</p>

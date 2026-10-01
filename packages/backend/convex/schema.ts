@@ -8,6 +8,11 @@ export const origin = v.object({
 });
 export const stockItem = v.object({ type: v.string(), quantity: v.number() });
 export default defineSchema({
+  userAvatars: defineTable({
+    owner: v.string(),
+    seed: v.string(),
+    version: v.literal(1),
+  }).index("by_owner", ["owner"]),
   challenges: defineTable({
     day: v.string(),
     opensAt: v.number(),

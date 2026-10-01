@@ -1,3 +1,4 @@
+import type { AvatarDescriptor } from "@clik/avatars";
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Box } from "lucide-react";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
@@ -11,6 +12,7 @@ export default function PublicCreationCard({
     owner: string;
     title: string;
     author: string;
+    avatar?: AvatarDescriptor;
     thumbnailUrl: string | null;
     challenge?: { day: string } | null;
   };
@@ -52,7 +54,12 @@ export default function PublicCreationCard({
         </div>
       </Link>
       <p className="public-card-author">
-        par <AuthorLink id={creation.owner} name={creation.author} />
+        par{" "}
+        <AuthorLink
+          id={creation.owner}
+          name={creation.author}
+          avatar={creation.avatar}
+        />
       </p>
     </article>
   );
