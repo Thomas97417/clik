@@ -11,10 +11,10 @@ import {
 import UserMenu from "./user-menu";
 
 const navigation = [
-  { to: "/editor", label: "L’atelier", short: "Atelier" },
-  { to: "/gallery", label: "La galerie", short: "Galerie" },
-  { to: "/challenges", label: "Les défis", short: "Défis" },
-  { to: "/projects", label: "Mes créations", short: "Créations" },
+  { to: "/editor", label: "L’atelier", short: "Atelier", tone: "blue" },
+  { to: "/gallery", label: "La galerie", short: "Galerie", tone: "peach" },
+  { to: "/challenges", label: "Les défis", short: "Défis", tone: "lilac" },
+  { to: "/projects", label: "Mes créations", short: "Créations", tone: "mint" },
 ] as const;
 
 const compactQuery = "(max-width: 680px)";
@@ -48,11 +48,12 @@ export default function Header() {
       </Link>
       <nav aria-label="Navigation principale">
         <div className="header-nav-links">
-          {navigation.map(({ to, label, short }) => (
+          {navigation.map(({ to, label, short, tone }) => (
             <Link
               key={to}
               to={to}
               aria-label={label}
+              data-nav-tone={tone}
               activeProps={{ className: "active" }}
             >
               <span className="header-nav-label">{label}</span>
@@ -67,6 +68,7 @@ export default function Header() {
             <DropdownMenuTrigger
               className="header-nav-trigger"
               aria-label="Explorer les rubriques"
+              data-nav-tone={current?.tone || "blue"}
             >
               <span>{current?.short || "Explorer"}</span>
               <ChevronDown size={14} aria-hidden="true" />
@@ -76,16 +78,14 @@ export default function Header() {
               align="center"
               sideOffset={16}
             >
-              {navigation.map(({ to, label }, index) => (
+              {navigation.map(({ to, label, tone }) => (
                 <DropdownMenuItem
                   key={to}
                   render={<Link to={to} />}
                   nativeButton={false}
+                  data-nav-tone={tone}
                   aria-current={current?.to === to ? "page" : undefined}
                 >
-                  <span className="header-nav-number" aria-hidden="true">
-                    0{index + 1}
-                  </span>
                   {label}
                   {current?.to === to && (
                     <span className="header-nav-dot" aria-hidden="true" />

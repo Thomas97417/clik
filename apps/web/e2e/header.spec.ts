@@ -126,6 +126,10 @@ test("toutes les rubriques restent disponibles sur mobile et la connexion garde 
   await expect(page).toHaveURL(/\/projects$/);
   await nav.getByRole("button", { name: "Explorer les rubriques" }).click();
   await page.setViewportSize({ width: 900, height: 900 });
+  // Wait for the compact menu to unmount, not only for its CSS to hide it.
+  await expect(
+    nav.getByRole("button", { name: "Explorer les rubriques" }),
+  ).toHaveCount(0);
   await expect(page.getByRole("menu")).toBeHidden();
   await expect(nav.getByRole("link", { name: "Mes créations" })).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
