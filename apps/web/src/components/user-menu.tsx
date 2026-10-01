@@ -1,13 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import {
-  ChevronDown,
-  FolderOpen,
-  Globe2,
-  LogOut,
-  Settings,
-  User,
-} from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -33,12 +26,9 @@ export default function UserMenu() {
         render={<Button variant="outline" className="header-user-trigger" />}
       >
         <span className="header-avatar" aria-hidden="true">
-          {user?.name?.trim().charAt(0).toLocaleUpperCase() || (
-            <User size={16} />
-          )}
+          {user?.name?.trim().charAt(0).toLocaleUpperCase() || "C"}
         </span>
         <span className="header-user-copy">
-          <span>Mon espace</span>
           <span className="header-user-name">{user?.name || "Mon compte"}</span>
         </span>
         <ChevronDown
@@ -55,9 +45,7 @@ export default function UserMenu() {
         <DropdownMenuGroup>
           <DropdownMenuLabel className="header-menu-identity">
             <span className="header-avatar" aria-hidden="true">
-              {user?.name?.trim().charAt(0).toLocaleUpperCase() || (
-                <User size={16} />
-              )}
+              {user?.name?.trim().charAt(0).toLocaleUpperCase() || "C"}
             </span>
             <div>
               <p className="header-menu-name">{user?.name || "Mon compte"}</p>
@@ -68,7 +56,6 @@ export default function UserMenu() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={() => navigate({ to: "/projects" })}>
-            <FolderOpen className="size-4" />
             Mes créations
           </DropdownMenuItem>
 
@@ -81,11 +68,10 @@ export default function UserMenu() {
                 })
               }
             >
-              <Globe2 className="size-4" /> Ma page publique
+              Ma page publique
             </DropdownMenuItem>
           )}
           <DropdownMenuItem onClick={() => navigate({ to: "/settings" })}>
-            <Settings className="size-4" />
             Paramètres
           </DropdownMenuItem>
         </DropdownMenuGroup>
@@ -103,7 +89,6 @@ export default function UserMenu() {
             });
           }}
         >
-          <LogOut className="size-4" />
           Se déconnecter
         </DropdownMenuItem>
       </DropdownMenuContent>

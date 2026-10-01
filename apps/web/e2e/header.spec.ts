@@ -59,18 +59,43 @@ test("toutes les rubriques restent disponibles sur mobile et la connexion garde 
   const header = page.locator(".site-header");
   const nav = header.getByRole("navigation", { name: "Navigation principale" });
   for (const width of [
-    1440, 1200, 1101, 1100, 1024, 900, 800, 761, 760, 641, 640, 390, 320,
+    1440, 1200, 1101, 1100, 1024, 900, 800, 761, 760, 681, 680, 640, 390, 320,
   ]) {
     await page.setViewportSize({ width, height: 900 });
+    const compact = width <= 680;
+    const trigger = nav.getByRole("button", { name: "Explorer les rubriques" });
+    const before = (await header.boundingBox())!;
+    expect(before.height).toBeLessThanOrEqual(76);
+    const brand = (await header.locator(".brand").boundingBox())!;
+    const account = (await header.locator(".header-account").boundingBox())!;
+    expect(
+      Math.abs(brand.y + brand.height / 2 - account.y - account.height / 2),
+    ).toBeLessThan(2);
+    if (compact) await trigger.click();
     for (const name of [
       "L’atelier",
       "La galerie",
       "Les défis",
       "Mes créations",
     ]) {
-      await expect(nav.getByRole("link", { name })).toBeVisible();
-      await expect(nav.getByRole("link", { name })).toBeInViewport();
+      const item = compact
+        ? page.getByRole("menuitem", { name })
+        : nav.getByRole("link", { name });
+      await expect(item).toBeVisible();
+      await expect(item).toBeInViewport();
     }
+    if (compact) {
+      await expect(
+        page.getByRole("menuitem", { name: "Mes créations" }),
+      ).toHaveAttribute("aria-current", "page");
+      expect((await header.boundingBox())!.height).toBe(before.height);
+      await page.keyboard.press("Escape");
+      await expect(trigger).toBeFocused();
+    }
+    if ([1440, 900, 681, 680, 320].includes(width))
+      await header.screenshot({
+        path: `/tmp/clik-header-simple-${width}-${info.project.name}.png`,
+      });
     await expect(
       header.getByRole("link", { name: "Se connecter" }),
     ).toBeInViewport();
@@ -84,7 +109,11 @@ test("toutes les rubriques restent disponibles sur mobile et la connexion garde 
     ).toBe(true);
   }
   await page.setViewportSize({ width: 390, height: 844 });
-  await nav.getByRole("link", { name: "La galerie" }).click();
+  await nav
+    .getByRole("button", { name: "Explorer les rubriques" })
+    .press("Enter");
+  await page.getByRole("menuitem", { name: "La galerie" }).click();
+  await expect(page.getByRole("menu")).toBeHidden();
   await expect(page).toHaveURL(/\/gallery$/);
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "La galerie",
@@ -92,8 +121,14 @@ test("toutes les rubriques restent disponibles sur mobile et la connexion garde 
   await page.screenshot({
     path: `/tmp/clik-header-mobile-${info.project.name}.png`,
   });
-  await nav.getByRole("link", { name: "Mes créations" }).click();
+  await nav.getByRole("button", { name: "Explorer les rubriques" }).click();
+  await page.getByRole("menuitem", { name: "Mes créations" }).click();
   await expect(page).toHaveURL(/\/projects$/);
+  await nav.getByRole("button", { name: "Explorer les rubriques" }).click();
+  await page.setViewportSize({ width: 900, height: 900 });
+  await expect(page.getByRole("menu")).toBeHidden();
+  await expect(nav.getByRole("link", { name: "Mes créations" })).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
   await header.getByRole("link", { name: "Se connecter" }).click();
   await expect(page).toHaveURL(/\/sign-in$/);
   expect(
