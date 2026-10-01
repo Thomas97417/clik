@@ -4,13 +4,13 @@ import { emptyScene, makePart } from "@clik/scene";
 // Transport fixture only: no real account, upload or publication is created.
 export async function projectsFixture(
   page: Page,
-  options: { published?: boolean } = {},
+  options: { published?: boolean; userName?: string; userEmail?: string } = {},
 ) {
   const user = {
     _id: "viewer",
     id: "viewer",
-    name: "Camille",
-    email: "camille@example.test",
+    name: options.userName ?? "Camille",
+    email: options.userEmail ?? "camille@example.test",
     emailVerified: true,
   };
   const project = {

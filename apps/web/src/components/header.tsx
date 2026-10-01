@@ -1,7 +1,26 @@
 import { Link } from "@tanstack/react-router";
 import { Authenticated, Unauthenticated } from "convex/react";
-import { FolderOpen, Hammer, Images, UserRound, Trophy } from "lucide-react";
+import {
+  ArrowUpRight,
+  FolderOpen,
+  Hammer,
+  Images,
+  UserRound,
+  Trophy,
+} from "lucide-react";
 import UserMenu from "./user-menu";
+
+const navigation = [
+  { to: "/editor", label: "L’atelier", short: "Atelier", icon: Hammer },
+  { to: "/gallery", label: "La galerie", short: "Galerie", icon: Images },
+  { to: "/challenges", label: "Les défis", short: "Défis", icon: Trophy },
+  {
+    to: "/projects",
+    label: "Mes créations",
+    short: "Créations",
+    icon: FolderOpen,
+  },
+] as const;
 
 export default function Header() {
   return (
@@ -10,22 +29,22 @@ export default function Header() {
         clik<span className="brand-period">.</span>
       </Link>
       <nav aria-label="Navigation principale">
-        <Link to="/editor" activeProps={{ className: "active" }}>
-          <Hammer size={17} aria-hidden="true" />
-          L’atelier
-        </Link>
-        <Link to="/gallery" activeProps={{ className: "active" }}>
-          <Images size={17} aria-hidden="true" />
-          La galerie
-        </Link>
-        <Link to="/challenges" activeProps={{ className: "active" }}>
-          <Trophy size={17} aria-hidden="true" />
-          Les défis
-        </Link>
-        <Link to="/projects" activeProps={{ className: "active" }}>
-          <FolderOpen size={17} aria-hidden="true" />
-          Mes créations
-        </Link>
+        {navigation.map(({ to, label, short, icon: Icon }) => (
+          <Link
+            key={to}
+            to={to}
+            aria-label={label}
+            activeProps={{ className: "active" }}
+          >
+            <span className="header-nav-block" aria-hidden="true">
+              <Icon size={17} />
+            </span>
+            <span className="header-nav-label">{label}</span>
+            <span className="header-nav-short" aria-hidden="true">
+              {short}
+            </span>
+          </Link>
+        ))}
       </nav>
       <div className="header-account">
         <Authenticated>
@@ -42,8 +61,15 @@ export default function Header() {
               )
             }
           >
-            <UserRound size={17} aria-hidden="true" />
-            Se connecter
+            <span className="header-avatar" aria-hidden="true">
+              <UserRound size={16} />
+            </span>
+            <span>Se connecter</span>
+            <ArrowUpRight
+              className="header-account-chevron"
+              size={14}
+              aria-hidden="true"
+            />
           </Link>
         </Unauthenticated>
       </div>

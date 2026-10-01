@@ -14,7 +14,9 @@ test("renommer avec Entrée, annuler avec Échap et garder un titre long accessi
   await expect(page.locator(".project-title-field svg")).toHaveCount(0);
   await title.fill("Mon atelier miniature");
   await title.press("Enter");
-  await expect(page.getByRole("status")).toContainText("Enregistré");
+  await expect(
+    page.getByLabel("Projet et sauvegarde").getByRole("status"),
+  ).toContainText("Enregistré");
   await title.fill("Modification abandonnée");
   await title.press("Escape");
   await expect(title).toHaveValue("Mon atelier miniature");

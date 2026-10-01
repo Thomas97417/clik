@@ -1,6 +1,13 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { ChevronDown, Globe2, LogOut, Settings, User } from "lucide-react";
+import {
+  ChevronDown,
+  FolderOpen,
+  Globe2,
+  LogOut,
+  Settings,
+  User,
+} from "lucide-react";
 
 import {
   DropdownMenu,
@@ -30,30 +37,38 @@ export default function UserMenu() {
             <User size={16} />
           )}
         </span>
-        <span className="header-user-name">{user?.name || "Mon compte"}</span>
-        <ChevronDown size={14} aria-hidden="true" />
+        <span className="header-user-copy">
+          <span>Mon espace</span>
+          <span className="header-user-name">{user?.name || "Mon compte"}</span>
+        </span>
+        <ChevronDown
+          className="header-account-chevron"
+          size={14}
+          aria-hidden="true"
+        />
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-64 rounded-xl bg-card p-1.5"
+        className="header-account-menu"
         sideOffset={8}
       >
         <DropdownMenuGroup>
-          <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col gap-1">
-              <p className="wrap-break-word text-sm font-medium leading-snug">
-                {user?.name}
-              </p>
-              <p className="text-muted-foreground break-all text-xs leading-snug">
-                {user?.email}
-              </p>
+          <DropdownMenuLabel className="header-menu-identity">
+            <span className="header-avatar" aria-hidden="true">
+              {user?.name?.trim().charAt(0).toLocaleUpperCase() || (
+                <User size={16} />
+              )}
+            </span>
+            <div>
+              <p className="header-menu-name">{user?.name || "Mon compte"}</p>
+              <p className="header-menu-email">{user?.email}</p>
             </div>
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={() => navigate({ to: "/projects" })}>
-            <User className="mr-2 size-4" />
+            <FolderOpen className="size-4" />
             Mes créations
           </DropdownMenuItem>
 
@@ -66,11 +81,11 @@ export default function UserMenu() {
                 })
               }
             >
-              <Globe2 className="mr-2 size-4" /> Ma page publique
+              <Globe2 className="size-4" /> Ma page publique
             </DropdownMenuItem>
           )}
           <DropdownMenuItem onClick={() => navigate({ to: "/settings" })}>
-            <Settings className="mr-2 size-4" />
+            <Settings className="size-4" />
             Paramètres
           </DropdownMenuItem>
         </DropdownMenuGroup>
@@ -88,7 +103,7 @@ export default function UserMenu() {
             });
           }}
         >
-          <LogOut className="mr-2 size-4" />
+          <LogOut className="size-4" />
           Se déconnecter
         </DropdownMenuItem>
       </DropdownMenuContent>

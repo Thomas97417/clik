@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { projectsFixture } from "./fixtures/projects";
 
 test("la navigation reste accessible au clavier et indique la page courante", async ({
   page,
@@ -29,6 +30,13 @@ test("la navigation reste accessible au clavier et indique la page courante", as
     "aria-current",
     "page",
   );
+  for (const width of [1440, 1100, 900]) {
+    await page.setViewportSize({ width, height: 1000 });
+    const footer = (await page.locator(".editor-footer").boundingBox())!;
+    expect(footer.y + footer.height).toBeLessThanOrEqual(1001);
+    await expect(page.locator(".editor-footer")).toBeInViewport();
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 });
   await page.screenshot({
     path: `/tmp/clik-header-editor-${info.project.name}.png`,
   });
@@ -50,9 +58,16 @@ test("toutes les rubriques restent disponibles sur mobile et la connexion garde 
   await expect(page.locator(".projects-count")).toContainText("affichée");
   const header = page.locator(".site-header");
   const nav = header.getByRole("navigation", { name: "Navigation principale" });
-  for (const width of [1440, 900, 768, 641, 640, 390, 320]) {
+  for (const width of [
+    1440, 1200, 1101, 1100, 1024, 900, 800, 761, 760, 641, 640, 390, 320,
+  ]) {
     await page.setViewportSize({ width, height: 900 });
-    for (const name of ["L’atelier", "La galerie", "Mes créations"]) {
+    for (const name of [
+      "L’atelier",
+      "La galerie",
+      "Les défis",
+      "Mes créations",
+    ]) {
       await expect(nav.getByRole("link", { name })).toBeVisible();
       await expect(nav.getByRole("link", { name })).toBeInViewport();
     }
@@ -84,4 +99,56 @@ test("toutes les rubriques restent disponibles sur mobile et la connexion garde 
   expect(
     await page.evaluate(() => sessionStorage.getItem("clik-return-to")),
   ).toBe("/projects");
+});
+
+test("le compte reste utilisable avec un nom long et son menu tient sur mobile", async ({
+  page,
+}, info) => {
+  const name = "Camille de la Vallée des Constructions Extraordinaires";
+  const email = "camille.constructions.extraordinaires@example.test";
+  await projectsFixture(page, { userName: name, userEmail: email });
+  await page.goto("/");
+  const account = page.getByRole("button", {
+    name: `Compte de ${name}`,
+    exact: true,
+  });
+  await expect(account).toBeVisible();
+  for (const width of [1440, 1101, 1100, 900, 761, 760, 390, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expect(account).toBeInViewport();
+    expect(
+      await page
+        .locator(".site-header")
+        .evaluate((el) => el.scrollWidth <= el.clientWidth),
+    ).toBe(true);
+    await account.click();
+    const menu = page.getByRole("menu");
+    await expect(menu).toBeVisible();
+    await expect(menu.getByText(email, { exact: true })).toBeVisible();
+    for (const label of [
+      "Mes créations",
+      "Ma page publique",
+      "Paramètres",
+      "Se déconnecter",
+    ]) {
+      await expect(
+        menu.getByRole("menuitem", { name: label, exact: true }),
+      ).toBeInViewport();
+    }
+    const box = (await menu.boundingBox())!;
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(width);
+    if ([1440, 900, 320].includes(width))
+      await page.screenshot({
+        path: `/tmp/clik-header-account-${width}-${info.project.name}.png`,
+      });
+    await page.keyboard.press("Escape");
+    await expect(menu).toBeHidden();
+    await expect(account).toBeFocused();
+  }
+  await account.press("Enter");
+  await page
+    .getByRole("menuitem", { name: "Mes créations", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/projects$/);
 });
