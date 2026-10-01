@@ -8,11 +8,13 @@ export default function CreationPreview({
   cacheKey,
   title,
   interactive = false,
+  initialZoom = 1,
 }: {
   scene: SceneDocument | string;
   cacheKey: string;
   title: string;
   interactive?: boolean;
+  initialZoom?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const surface = useRef<HTMLDivElement>(null);
@@ -70,6 +72,7 @@ export default function CreationPreview({
           surface.current,
           canvas.current,
           validateScene(typeof scene === "string" ? JSON.parse(scene) : scene),
+          initialZoom,
         );
         setInteractiveReady(!!controls.current);
       })
@@ -81,7 +84,7 @@ export default function CreationPreview({
       controls.current?.dispose();
       controls.current = undefined;
     };
-  }, [interactive, current?.url, scene, cacheKey]);
+  }, [interactive, current?.url, scene, cacheKey, initialZoom]);
   return (
     <div ref={ref} className="creation-preview" aria-busy={!current}>
       {current?.url ? (
@@ -98,6 +101,11 @@ export default function CreationPreview({
               src={current.url}
               alt={`Aperçu de ${title}`}
               draggable={false}
+              style={
+                initialZoom === 1
+                  ? undefined
+                  : { transform: `scale(${initialZoom})` }
+              }
             />
             {interactive && <canvas ref={canvas} hidden aria-hidden="true" />}
           </div>

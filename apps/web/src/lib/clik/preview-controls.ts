@@ -7,6 +7,7 @@ export function attachPreviewControls(
   host: HTMLElement,
   canvas: HTMLCanvasElement,
   document: SceneDocument,
+  initialZoom = 1,
 ) {
   const model = createCreationModel(document);
   if (!model) return;
@@ -18,6 +19,8 @@ export function attachPreviewControls(
   controls.enableZoom = false;
   controls.minZoom = model.camera.zoom * 0.5;
   controls.maxZoom = model.camera.zoom * 3;
+  model.camera.zoom *= initialZoom;
+  model.camera.updateProjectionMatrix();
   controls.minPolarAngle = 0.05;
   controls.maxPolarAngle = Math.PI - 0.05;
   controls.mouseButtons = { LEFT: MOUSE.ROTATE, MIDDLE: MOUSE.DOLLY };

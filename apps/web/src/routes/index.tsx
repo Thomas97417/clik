@@ -148,6 +148,7 @@ function Home() {
               <div className="home-model-halo" aria-hidden="true" />
               <CreationPreview
                 interactive
+                initialZoom={model.id === "house" ? 1 : 1.2}
                 scene={scene}
                 cacheKey={`starter-v3:${model.id}:${color}`}
                 title={model.name}
