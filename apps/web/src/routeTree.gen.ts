@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as UploadRouteImport } from './routes/upload'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -27,11 +26,6 @@ import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-p
 import { Route as GalleryUserUserIdRouteImport } from './routes/gallery.user.$userId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
-const UploadRoute = UploadRouteImport.update({
-  id: '/upload',
-  path: '/upload',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -119,7 +113,6 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/projects': typeof ProjectsRoute
   '/settings': typeof SettingsRoute
-  '/upload': typeof UploadRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/reset-password': typeof authResetPasswordRoute
   '/sign-in': typeof authSignInRoute
@@ -138,7 +131,6 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/projects': typeof ProjectsRoute
   '/settings': typeof SettingsRoute
-  '/upload': typeof UploadRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/reset-password': typeof authResetPasswordRoute
   '/sign-in': typeof authSignInRoute
@@ -158,7 +150,6 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/projects': typeof ProjectsRoute
   '/settings': typeof SettingsRoute
-  '/upload': typeof UploadRoute
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/reset-password': typeof authResetPasswordRoute
   '/(auth)/sign-in': typeof authSignInRoute
@@ -179,7 +170,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/projects'
     | '/settings'
-    | '/upload'
     | '/forgot-password'
     | '/reset-password'
     | '/sign-in'
@@ -198,7 +188,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/projects'
     | '/settings'
-    | '/upload'
     | '/forgot-password'
     | '/reset-password'
     | '/sign-in'
@@ -217,7 +206,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/projects'
     | '/settings'
-    | '/upload'
     | '/(auth)/forgot-password'
     | '/(auth)/reset-password'
     | '/(auth)/sign-in'
@@ -237,7 +225,6 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   ProjectsRoute: typeof ProjectsRoute
   SettingsRoute: typeof SettingsRoute
-  UploadRoute: typeof UploadRoute
   authForgotPasswordRoute: typeof authForgotPasswordRoute
   authResetPasswordRoute: typeof authResetPasswordRoute
   authSignInRoute: typeof authSignInRoute
@@ -253,13 +240,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/upload': {
-      id: '/upload'
-      path: '/upload'
-      fullPath: '/upload'
-      preLoaderRoute: typeof UploadRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -381,7 +361,6 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   ProjectsRoute: ProjectsRoute,
   SettingsRoute: SettingsRoute,
-  UploadRoute: UploadRoute,
   authForgotPasswordRoute: authForgotPasswordRoute,
   authResetPasswordRoute: authResetPasswordRoute,
   authSignInRoute: authSignInRoute,
