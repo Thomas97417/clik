@@ -68,21 +68,19 @@ function CreationDetail({
             aria-label={`Aperçu 3D de ${p.title}`}
           >
             <ClientScene scene={scene} showGrid={false} showViewControls />
+            <p className="creation-view-hint">
+              <MousePointer2 size={14} aria-hidden="true" />
+              <span>
+                Glissez pour explorer
+                <span className="creation-view-hint-zoom">
+                  {" "}
+                  · Pincez ou défilez pour zoomer
+                </span>
+              </span>
+            </p>
           </div>
-          <p className="creation-view-hint">
-            <MousePointer2 size={14} aria-hidden="true" />
-            Glissez pour explorer · Pincez ou défilez pour zoomer
-          </p>
         </div>
         <aside className="creation-details">
-          {p.challenge && (
-            <CreationChallenge
-              day={p.challenge.day}
-              publicationId={publicationId}
-              owner={p.owner}
-              count={p.voteCount}
-            />
-          )}
           <h1>{p.title}</h1>
           <p className="author">
             par <AuthorLink id={p.owner} name={p.author} avatar={p.avatar} />
@@ -226,6 +224,14 @@ function CreationDetail({
           </div>
         </aside>
       </div>
+      {p.challenge && (
+        <CreationChallenge
+          day={p.challenge.day}
+          publicationId={publicationId}
+          owner={p.owner}
+          count={p.voteCount}
+        />
+      )}
       <CreationRemixes publicationId={publicationId} />
       <Comments publicationId={publicationId} count={p.commentCount} />
     </main>

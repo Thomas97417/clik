@@ -3208,18 +3208,32 @@ a.creation-card:hover .card-arrow,
   background: #edf1f7;
 }
 .creation-view-hint {
+  position: absolute;
+  bottom: 5px;
+  left: 12px;
+  right: 110px;
+  min-height: 30px;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   gap: 7px;
-  padding: 14px 8px 0;
   font-size: 11px;
   color: #8190a5;
-  text-align: center;
   line-height: 1.6;
+  pointer-events: none;
 }
 .creation-view-hint svg {
   flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  .creation-view-hint {
+    font-size: 10px;
+    gap: 5px;
+    left: 10px;
+  }
+  .creation-view-hint-zoom {
+    display: none;
+  }
 }
 .creation-layout h1 {
   font-size: clamp(28px, 3vw, 42px);
@@ -4424,17 +4438,26 @@ dialog.modal-backdrop::backdrop {
   margin-bottom: 3px;
 }
 .creation-challenge {
-  margin: 0 0 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin: 20px 0 0;
+  padding: 10px 16px;
   border: 1px solid #e4dbee;
-  border-radius: 16px;
+  border-radius: 12px;
   background: #f6f2fb;
   overflow: hidden;
+}
+.creation-challenge + .creation-remixes {
+  margin-top: 24px;
 }
 .creation-challenge-heading {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px 18px;
+  gap: 10px;
+  padding: 2px 0;
+  border-radius: 6px;
   color: #644780;
 }
 .creation-challenge-heading:hover {
@@ -4445,8 +4468,8 @@ dialog.modal-backdrop::backdrop {
   outline-offset: -3px;
 }
 .creation-challenge-art {
-  width: 42px;
-  height: 42px;
+  width: 32px;
+  height: 32px;
   flex-shrink: 0;
 }
 .creation-challenge-heading > span {
@@ -4456,16 +4479,16 @@ dialog.modal-backdrop::backdrop {
   display: block;
   font-size: 11px;
   color: #9987aa;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 .creation-challenge-heading time {
   display: block;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
   line-height: 1.4;
 }
 .creation-challenge-heading > svg:last-child {
-  margin-left: auto;
+  margin-left: 4px;
   flex-shrink: 0;
   color: #9982b2;
 }
@@ -4474,9 +4497,7 @@ dialog.modal-backdrop::backdrop {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 14px;
-  padding: 16px 18px 0;
-  border-top: 1px dashed #ded1ec;
+  gap: 18px;
 }
 .challenge-vote-budget {
   display: flex;
@@ -4512,11 +4533,22 @@ dialog.modal-backdrop::backdrop {
 .challenge-vote-studs i[data-used] {
   background: #a385c4;
 }
-.creation-challenge-note {
-  padding: 12px 18px 16px;
-  font-size: 11px;
-  line-height: 1.7;
-  color: #93829f;
+@media (max-width: 640px) {
+  .creation-challenge {
+    flex-wrap: wrap;
+    padding: 12px 14px;
+  }
+  .creation-challenge-heading {
+    width: 100%;
+  }
+  .creation-challenge-heading > svg:last-child {
+    margin-left: auto;
+  }
+  .creation-challenge-voting {
+    width: 100%;
+    padding-top: 10px;
+    border-top: 1px dashed #ded1ec;
+  }
 }
 .challenge-error {
   display: flex;

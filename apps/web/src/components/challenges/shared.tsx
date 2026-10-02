@@ -187,13 +187,10 @@ export function CreationChallenge({
         <ArrowUpRight size={17} aria-hidden="true" />
       </Link>
       <div className="creation-challenge-voting">
-        <VoteButton
-          publicationId={publicationId}
-          owner={owner}
-          count={count}
-          choices={data?.choices ?? []}
-        />
-        <div className="challenge-vote-budget">
+        <div
+          className="challenge-vote-budget"
+          title="Vous pouvez soutenir trois créations par défi et retirer un vote pour changer de choix."
+        >
           <span className="challenge-vote-studs" aria-hidden="true">
             {[0, 1, 2].map((index) => (
               <i
@@ -210,16 +207,13 @@ export function CreationChallenge({
               : "3 votes par défi"}
           </span>
         </div>
+        <VoteButton
+          publicationId={publicationId}
+          owner={owner}
+          count={count}
+          choices={data?.choices ?? []}
+        />
       </div>
-      <p className="creation-challenge-note">
-        {isAuthenticated && used >= 3
-          ? "Un autre coup de cœur ? Retirez un vote pour changer de choix."
-          : data?.choices.some(
-                (choice) => choice.publicationId === publicationId,
-              )
-            ? "Votre soutien est enregistré. Vous pouvez le retirer à tout moment."
-            : "Un coup de cœur ? Offrez-lui une place parmi vos trois choix."}
-      </p>
     </div>
   );
 }
