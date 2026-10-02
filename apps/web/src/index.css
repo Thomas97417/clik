@@ -3709,16 +3709,7 @@ dialog.modal-backdrop::backdrop {
 .challenges-page {
   max-width: 1320px;
 }
-.challenge-emblem {
-  display: grid;
-  place-items: center;
-  width: 64px;
-  height: 64px;
-  border: 1px solid #dfe7f5;
-  border-radius: 20px;
-  color: #356ae6;
-  background: #eff4ff;
-}
+
 .challenge-navigation {
   display: flex;
   align-items: center;
@@ -4174,11 +4165,6 @@ dialog.modal-backdrop::backdrop {
   }
   .comment-form {
     padding: 15px;
-  }
-}
-@media (max-width: 640px) {
-  .challenge-emblem {
-    display: none;
   }
 }
 

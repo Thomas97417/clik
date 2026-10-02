@@ -89,7 +89,6 @@ function Challenges() {
     <main className="collection-page challenges-page">
       <div className="page-heading">
         <div>
-          <span className="eyebrow">Un même lot. Mille possibilités.</span>
           <h1>
             Le défi du jour<span>.</span>
           </h1>
@@ -97,9 +96,6 @@ function Challenges() {
             100 pièces à votre disposition. 24 heures pour en faire votre idée.
           </p>
         </div>
-        <span className="challenge-emblem">
-          <Trophy size={29} aria-hidden="true" />
-        </span>
       </div>
       <div className="challenge-navigation">
         <button
