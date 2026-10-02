@@ -45,12 +45,6 @@ export default function GalleryArt() {
                 <path d="M-32-11 0 5 32-11M0 5v28" stroke="#ffffff40" />
               </g>
             ))}
-            <path
-              d="m-12 39 24-12"
-              stroke="#a7b7d0"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
           </g>
         );
       })}
