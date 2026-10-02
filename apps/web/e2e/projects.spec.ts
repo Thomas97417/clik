@@ -193,3 +193,25 @@ test("sans WebGL, les créations restent accessibles", async ({ page }) => {
     page.getByRole("link", { name: "Ouvrir La maison solaire", exact: true }),
   ).toHaveAttribute("href", "/editor");
 });
+
+test("une création locale propose la connexion avant de publier", async ({
+  page,
+}) => {
+  await seed(page);
+  await page
+    .getByRole("button", {
+      name: "Visibilité de La maison solaire : Sur cet appareil",
+    })
+    .click();
+  await page
+    .getByRole("menuitem", { name: "Se connecter pour publier" })
+    .click();
+  await expect(page).toHaveURL(/\/sign-in$/);
+  expect(
+    await page.evaluate(() => sessionStorage.getItem("clik-return-to")),
+  ).toBe("/projects");
+  await page.goto("/projects");
+  await expect(
+    page.getByRole("heading", { name: "La maison solaire", exact: true }),
+  ).toBeVisible();
+});

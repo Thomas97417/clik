@@ -61,6 +61,30 @@ function setup() {
   return { t, user, publish, doc };
 }
 describe("Défis et publications", () => {
+  it("permet de recréer une participation supprimée sans récupérer ses votes", async () => {
+    const { t, user, publish } = setup();
+    const entry = await publish("alice");
+    const voter = user("voter");
+    await voter.mutation(api.challenges.vote, {
+      publicationId: entry.id,
+      voted: true,
+    });
+    await entry.u.mutation(api.projects.remove, { id: entry.projectId });
+    expect(await t.query(api.projects.creation, { id: entry.id })).toBeNull();
+    expect((await voter.query(api.challenges.day, { day })).choices).toEqual(
+      [],
+    );
+    const replacement = await publish("alice");
+    expect(replacement.projectId).not.toBe(entry.projectId);
+    expect(replacement.id).not.toBe(entry.id);
+    expect(await t.query(api.projects.creation, { id: entry.id })).toBeNull();
+    expect(
+      (await t.query(api.projects.creation, { id: replacement.id }))?.voteCount,
+    ).toBe(0);
+    expect((await voter.query(api.challenges.day, { day })).choices).toEqual(
+      [],
+    );
+  });
   it("initialise une seule journée UTC et un seul projet par compte", async () => {
     const { t, user } = setup();
     const ids = await Promise.all([

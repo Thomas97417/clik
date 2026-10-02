@@ -94,11 +94,28 @@ export const get = query({
   },
 });
 export const create = mutation({
-  args: { title: v.string(), scene: v.string() },
+  args: {
+    title: v.string(),
+    scene: v.string(),
+    localSourceId: v.optional(v.string()),
+  },
   handler: async (ctx, a) => {
     const u = await user(ctx);
+    if (a.localSourceId !== undefined) {
+      if (!a.localSourceId || a.localSourceId.length > 240)
+        throw new ConvexError("Identifiant local invalide.");
+      // Reuse an import after a failed publication, including across reloads.
+      const existing = await ctx.db
+        .query("projects")
+        .withIndex("by_local_source", (q) =>
+          q.eq("owner", u._id).eq("localSourceId", a.localSourceId),
+        )
+        .unique();
+      if (existing) return existing._id;
+    }
     return ctx.db.insert("projects", {
       owner: u._id,
+      localSourceId: a.localSourceId,
       title: title(a.title),
       scene: scene(a.scene),
       revision: 0,
@@ -205,8 +222,13 @@ export const publish = mutation({
           q.eq("owner", p.owner).eq("challengeId", p.challengeId),
         )
         .unique();
-      if (other && other.projectId !== p._id)
-        throw new ConvexError("Vous avez déjà une participation à ce défi.");
+      if (other && other.projectId !== p._id) {
+        // A deleted entry may be replaced while this day's challenge is open.
+        // Give it a new public identity: old versions, votes and comments stay unavailable.
+        if (other.active || (await ctx.db.get(other.projectId)))
+          throw new ConvexError("Vous avez déjà une participation à ce défi.");
+        await ctx.db.delete(other._id);
+      }
     }
     if (p.revision !== a.revision)
       throw new ConvexError(
@@ -278,22 +300,39 @@ export const withdraw = mutation({
       p = await ctx.db.get(id);
     if (!p || p.owner !== u._id)
       throw new ConvexError("Publication introuvable.");
-    const challenge = p.challengeId ? await ctx.db.get(p.challengeId) : null;
-    // Preserve an existing public participation if it is withdrawn before the
-    // historical import reaches it. Already recorded entries are a no-op.
-    if (p.active && p.challengeId)
-      await recordParticipation(ctx, p.owner, p.challengeId);
-    await ctx.db.patch(id, {
-      ...(challenge?.rewardAt && Date.now() < challenge.rewardAt
-        ? { rewardEligible: false, rewardScore: 0 }
-        : {}),
-      active: false,
-      ...(p.challengeId
-        ? { voteCount: 0, voteEpoch: (p.voteEpoch ?? 0) + 1 }
-        : {}),
-    });
+    await withdrawPublication(ctx, p);
   },
 });
+async function withdrawPublication(ctx: MutationCtx, p: Doc<"publications">) {
+  const challenge = p.challengeId ? await ctx.db.get(p.challengeId) : null;
+  // Preserve an existing public participation if it is withdrawn before the
+  // historical import reaches it. Already recorded entries are a no-op.
+  if (p.active && p.challengeId)
+    await recordParticipation(ctx, p.owner, p.challengeId);
+  await ctx.db.patch(p._id, {
+    ...(challenge?.rewardAt && Date.now() < challenge.rewardAt
+      ? { rewardEligible: false, rewardScore: 0 }
+      : {}),
+    active: false,
+    ...(p.challengeId
+      ? { voteCount: 0, voteEpoch: (p.voteEpoch ?? 0) + 1 }
+      : {}),
+  });
+}
+export const remove = mutation({
+  args: { id: v.id("projects") },
+  handler: async (ctx, { id }) => {
+    await owned(ctx, id);
+    const publication = await ctx.db
+      .query("publications")
+      .withIndex("by_project", (q) => q.eq("projectId", id))
+      .unique();
+    // Keep inactive attribution/reward history; public queries cannot access it.
+    if (publication?.active) await withdrawPublication(ctx, publication);
+    await ctx.db.delete(id);
+  },
+});
+
 async function publicCards(ctx: QueryCtx, publications: Doc<"publications">[]) {
   const avatars = await readAvatars(
     ctx,

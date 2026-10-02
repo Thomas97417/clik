@@ -3036,6 +3036,39 @@ a.creation-card:hover .card-arrow,
   color: #356ae6;
   background: #f0f4ff;
 }
+.project-visibility-menu [data-variant="destructive"] {
+  color: #b43b47;
+}
+.project-visibility-menu [data-variant="destructive"][data-highlighted] {
+  color: #9d2632;
+  background: #fff0f1;
+}
+.project-delete-dialog[data-slot="dialog-content"] {
+  max-width: min(440px, calc(100% - 32px));
+  padding: 24px;
+  gap: 18px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 20px 80px #223a6026;
+}
+.project-delete-dialog [data-slot="dialog-title"] {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.project-delete-dialog [data-slot="dialog-description"] {
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.project-delete-dialog button {
+  min-height: 36px;
+  border-radius: 8px;
+}
+.project-delete-error {
+  color: #b43b47;
+  font-size: 12px;
+}
 .projects-empty {
   display: flex;
   align-items: center;

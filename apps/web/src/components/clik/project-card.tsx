@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowUpRight,
   Cloud,
@@ -8,7 +8,7 @@ import {
   LockKeyhole,
   ChevronDown,
 } from "lucide-react";
-import { useAction, useMutation } from "convex/react";
+import { useAction, useMutation, useConvexAuth } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import { validateScene, type SceneDocument } from "@clik/scene";
@@ -18,7 +18,17 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { removeLocalCreation } from "@/lib/clik/local";
 import CreationPreview from "./creation-preview";
 import PublishDialog from "./publish-dialog";
 
@@ -31,7 +41,7 @@ export type CreationItem = {
   challenge?: { day: string; closesAt: number } | null;
   origin?: { title: string; author: string };
 } & (
-  | { location: "local"; draftId?: string }
+  | { location: "local"; draftId?: string; stamp: string }
   | {
       location: "online";
       projectId: Id<"projects">;
@@ -41,14 +51,27 @@ export type CreationItem = {
     }
 );
 
-export default function ProjectCard({ creation }: { creation: CreationItem }) {
+export default function ProjectCard({
+  creation,
+  onLocalChange,
+}: {
+  creation: CreationItem;
+  onLocalChange: () => void;
+}) {
+  const { isAuthenticated, isLoading } = useConvexAuth();
+  const navigate = useNavigate();
+  const create = useMutation(api.projects.create);
+  const remove = useMutation(api.projects.remove);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string>();
+  const cancelDelete = useRef<HTMLButtonElement>(null);
   const withdraw = useMutation(api.projects.withdraw);
   const publish = useMutation(api.projects.publish);
   const upload = useAction(api.projects.uploadThumbnail);
   const [busy, setBusy] = useState(false);
   const [publicationError, setPublicationError] = useState<string>();
   const [publication, setPublication] = useState<{
-    creation: Extract<CreationItem, { location: "online" }>;
+    creation: CreationItem;
     title: string;
     description: string;
   } | null>(null);
@@ -71,14 +94,32 @@ export default function ProjectCard({ creation }: { creation: CreationItem }) {
           : snapshot.scene,
       );
       const bytes = await publicationThumbnail(document, snapshot.cacheKey);
-      const thumbnail = await upload({ projectId: snapshot.projectId, bytes });
+      const projectId =
+        snapshot.location === "online"
+          ? snapshot.projectId
+          : await create({
+              title: snapshot.title,
+              scene: JSON.stringify(document),
+              localSourceId: snapshot.cacheKey,
+            });
+      const thumbnail = await upload({ projectId, bytes });
       await publish({
-        id: snapshot.projectId,
+        id: projectId,
         title,
         description,
         thumbnail,
-        revision: snapshot.revision,
+        revision: snapshot.location === "online" ? snapshot.revision : 0,
       });
+      if (snapshot.location === "local") {
+        try {
+          await removeLocalCreation(snapshot.id, snapshot.stamp);
+        } catch {
+          toast.info(
+            "La publication a réussi. La copie locale a été conservée car elle a changé ou n’a pas pu être retirée.",
+          );
+        }
+        onLocalChange();
+      }
       closePublication();
       toast.success("Votre création est publiée.");
     } catch (error) {
@@ -101,6 +142,30 @@ export default function ProjectCard({ creation }: { creation: CreationItem }) {
       setBusy(false);
     }
   };
+  const doDelete = async () => {
+    if (busy) return;
+    setBusy(true);
+    setDeleteError(undefined);
+    try {
+      if (creation.location === "online")
+        await remove({ id: creation.projectId });
+      else {
+        await removeLocalCreation(creation.id, creation.stamp);
+        onLocalChange();
+      }
+      setDeleting(false);
+      toast.success("Votre création a été supprimée.");
+    } catch (error) {
+      setDeleteError(String(error));
+    } finally {
+      setBusy(false);
+    }
+  };
+  const visibility = published
+    ? "Version publiée"
+    : online
+      ? "Privée"
+      : "Sur cet appareil";
   const target = online
     ? {
         to: "/editor/$projectId" as const,
@@ -121,12 +186,6 @@ export default function ProjectCard({ creation }: { creation: CreationItem }) {
             cacheKey={creation.cacheKey}
             title={creation.title}
           />
-          {!online && (
-            <span className="project-visibility-badge">
-              <HardDrive size={12} aria-hidden="true" />
-              Sur cet appareil
-            </span>
-          )}
           <span className="card-arrow" aria-hidden="true">
             <ArrowUpRight size={19} />
           </span>
@@ -164,51 +223,69 @@ export default function ProjectCard({ creation }: { creation: CreationItem }) {
           )}
         </div>
       </Link>
-      {online && (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            ref={visibilityTrigger}
-            className={`project-visibility-badge project-visibility-trigger ${published ? "is-published" : ""}`}
-            aria-label={`Visibilité de ${creation.title} : ${published ? "Version publiée" : "Privée"}`}
-            disabled={busy}
-            aria-busy={busy}
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          ref={visibilityTrigger}
+          className={`project-visibility-badge project-visibility-trigger ${published ? "is-published" : ""}`}
+          aria-label={`Visibilité de ${creation.title} : ${visibility}`}
+          disabled={busy}
+          aria-busy={busy}
+        >
+          <VisibilityIcon size={12} aria-hidden="true" />
+          {visibility}
+          <ChevronDown size={12} aria-hidden="true" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="start"
+          className="project-visibility-menu"
+          finalFocus={publication || deleting ? false : undefined}
+        >
+          <DropdownMenuItem
+            disabled={
+              busy ||
+              isLoading ||
+              (!published &&
+                !!creation.challenge &&
+                Date.now() >= creation.challenge.closesAt)
+            }
+            onClick={() => {
+              if (published) void makePrivate();
+              else if (!isAuthenticated) {
+                try {
+                  sessionStorage.setItem("clik-return-to", "/projects");
+                } catch {
+                  /* Login still works without storage. */
+                }
+                void navigate({ to: "/sign-in" });
+              } else
+                setPublication({
+                  creation,
+                  title: creation.title,
+                  description: online ? (creation.description ?? "") : "",
+                });
+            }}
           >
-            <VisibilityIcon size={12} aria-hidden="true" />
-            {published ? "Version publiée" : "Privée"}
-            <ChevronDown size={12} aria-hidden="true" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="start"
-            className="project-visibility-menu"
-            finalFocus={publication ? false : undefined}
-          >
-            <DropdownMenuItem
-              disabled={
-                busy ||
-                (!published &&
-                  !!creation.challenge &&
-                  Date.now() >= creation.challenge.closesAt)
-              }
-              onClick={() => {
-                if (published) void makePrivate();
-                else
-                  setPublication({
-                    creation,
-                    title: creation.title,
-                    description: creation.description ?? "",
-                  });
-              }}
-            >
-              {published
-                ? "Passer en privé"
-                : creation.challenge &&
-                    Date.now() >= creation.challenge.closesAt
-                  ? "Défi terminé"
+            {published
+              ? "Passer en privé"
+              : creation.challenge && Date.now() >= creation.challenge.closesAt
+                ? "Défi terminé"
+                : !isAuthenticated
+                  ? "Se connecter pour publier"
                   : "Publier"}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            variant="destructive"
+            disabled={busy}
+            onClick={() => {
+              setDeleteError(undefined);
+              setDeleting(true);
+            }}
+          >
+            Supprimer
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <div className="project-card-footer">
         <span>
           {online ? (
@@ -235,6 +312,53 @@ export default function ProjectCard({ creation }: { creation: CreationItem }) {
           </span>
         )}
       </div>
+      <Dialog
+        open={deleting}
+        onOpenChange={(open) => {
+          if (!busy) setDeleting(open);
+        }}
+      >
+        <DialogContent
+          className="project-delete-dialog"
+          showCloseButton={false}
+          initialFocus={cancelDelete}
+          finalFocus={visibilityTrigger}
+        >
+          <DialogTitle>Supprimer cette création ?</DialogTitle>
+          <DialogDescription>
+            « {creation.title} » sera définitivement supprimée
+            {published
+              ? " et sa publication retirée de la galerie et des défis"
+              : ""}
+            .
+            {published
+              ? " Les créations que d’autres personnes en ont tirées seront conservées."
+              : " Cette action est irréversible."}
+          </DialogDescription>
+          {deleteError && (
+            <p className="project-delete-error" role="alert">
+              {deleteError}
+            </p>
+          )}
+          <DialogFooter>
+            <Button
+              ref={cancelDelete}
+              variant="outline"
+              onClick={() => setDeleting(false)}
+              disabled={busy}
+            >
+              Annuler
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => void doDelete()}
+              disabled={busy}
+            >
+              {busy ? "Suppression…" : "Supprimer la création"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       {publication && (
         <PublishDialog
           title={publication.title}

@@ -96,6 +96,7 @@ export default defineSchema({
     updatedAt: v.optional(v.number()),
   }).index("by_publication", ["publicationId", "createdAt"]),
   projects: defineTable({
+    localSourceId: v.optional(v.string()),
     owner: v.string(),
     title: v.string(),
     scene: v.string(),
@@ -105,6 +106,7 @@ export default defineSchema({
     origin: v.optional(origin),
   })
     .index("by_owner", ["owner", "updatedAt"])
+    .index("by_local_source", ["owner", "localSourceId"])
     .index("by_owner_challenge", ["owner", "challengeId"]),
   publications: defineTable({
     owner: v.string(),

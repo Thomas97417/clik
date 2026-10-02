@@ -30,6 +30,83 @@ const scene = JSON.stringify(
   validateScene({ ...emptyScene(), nodes: [makePart("brick-2x2", "#4079e8")] }),
 );
 describe("Projets privés et versions publiques", () => {
+  it("importe une version locale une seule fois, par propriétaire", async () => {
+    const { alice, bob } = setup();
+    const args = { title: "Locale", scene, localSourceId: "local:guest:stamp" };
+    const id = await alice.mutation(api.projects.create, args);
+    expect(await alice.mutation(api.projects.create, args)).toBe(id);
+    expect(await bob.mutation(api.projects.create, args)).not.toBe(id);
+    expect(
+      await alice.mutation(api.projects.create, {
+        ...args,
+        localSourceId: "local:guest:new",
+      }),
+    ).not.toBe(id);
+  });
+  it("supprime uniquement sa création, retire sa publication et préserve les reprises", async () => {
+    const { alice, bob, t } = setup();
+    const id = await alice.mutation(api.projects.create, {
+      title: "Original",
+      scene,
+    });
+    const thumbnail = await t.run((ctx) =>
+      ctx.storage.store(new Blob(["test"])),
+    );
+    await alice.mutation(internal.projects.registerThumbnail, {
+      projectId: id,
+      storageId: thumbnail,
+    });
+    const pub = await alice.mutation(api.projects.publish, {
+      id,
+      title: "Original",
+      description: "",
+      thumbnail,
+      revision: 0,
+    });
+    const version = await t.query(api.projects.creation, { id: pub });
+    const copy = await bob.mutation(api.projects.remix, {
+      id: pub,
+      versionId: version!._id,
+    });
+    await expect(bob.mutation(api.projects.remove, { id })).rejects.toThrow(
+      "introuvable",
+    );
+    await expect(t.mutation(api.projects.remove, { id })).rejects.toThrow(
+      "Connexion",
+    );
+    await alice.mutation(api.projects.remove, { id });
+    expect(
+      (
+        await alice.query(api.projects.list, {
+          paginationOpts: { numItems: 12, cursor: null },
+        })
+      ).page,
+    ).toEqual([]);
+    expect(await t.query(api.projects.creation, { id: pub })).toBeNull();
+    expect(
+      (
+        await t.query(api.projects.gallery, {
+          paginationOpts: { numItems: 12, cursor: null },
+        })
+      ).page,
+    ).toEqual([]);
+    await expect(
+      alice.mutation(api.projects.save, {
+        id,
+        title: "Obsolète",
+        scene,
+        revision: 0,
+      }),
+    ).rejects.toThrow("introuvable");
+    expect((await bob.query(api.projects.get, { id: copy })).scene).toBe(scene);
+    await expect(
+      bob.mutation(api.projects.remix, { id: pub, versionId: version!._id }),
+    ).rejects.toThrow("indisponible");
+    await bob.mutation(api.projects.remove, { id: copy });
+    await expect(bob.query(api.projects.get, { id: copy })).rejects.toThrow(
+      "introuvable",
+    );
+  });
   it("renvoie la scène actuelle et sa révision pour les aperçus du propriétaire", async () => {
     const { alice, bob, t } = setup();
     const id = await alice.mutation(api.projects.create, {

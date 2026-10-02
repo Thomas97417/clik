@@ -43,6 +43,7 @@ function Projects() {
             cacheKey: `local:${entry.key}:${entry.stamp}`,
             updatedAt: entry.updatedAt,
             location: "local",
+            stamp: entry.stamp,
             draftId: entry.key === "guest" ? undefined : entry.key.slice(6),
           })),
         );
@@ -169,7 +170,11 @@ function Projects() {
       ) : creations.length ? (
         <div className="creation-grid projects-grid">
           {creations.map((creation) => (
-            <ProjectCard key={creation.id} creation={creation} />
+            <ProjectCard
+              key={creation.id}
+              creation={creation}
+              onLocalChange={() => setRetry((value) => value + 1)}
+            />
           ))}
         </div>
       ) : (

@@ -96,3 +96,34 @@ export async function listLocalCreations(): Promise<
     db.close();
   }
 }
+
+/** Delete exactly the local version confirmed by the user, never a newer edit. */
+export async function removeLocalCreation(key: string, expectedStamp: string) {
+  if (key !== "guest" && !/^guest:[a-z0-9-]{1,80}$/i.test(key))
+    throw Error("Création locale introuvable.");
+  const db = await database();
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction("drafts", "readwrite");
+      const store = tx.objectStore("drafts");
+      const request = store.get(key);
+      request.onsuccess = () => {
+        if (request.result && request.result.stamp !== expectedStamp) {
+          tx.abort();
+          return;
+        }
+        store.delete(key);
+      };
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () =>
+        reject(
+          Error(
+            "Cette création a été modifiée dans un autre onglet. Actualisez la page avant de réessayer.",
+          ),
+        );
+    });
+  } finally {
+    db.close();
+  }
+}

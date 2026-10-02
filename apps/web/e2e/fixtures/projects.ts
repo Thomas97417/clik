@@ -30,7 +30,12 @@ export async function projectsFixture(
     uploads: [] as any[],
     publications: [] as any[],
     withdrawals: [] as any[],
+    creations: [] as any[],
+    deletions: [] as any[],
   };
+  const imported = new Map<string, typeof project>();
+  const deleted = new Set<string>();
+  let failDelete = false;
   let fail = false;
   let failWithdrawal = false;
   const b64 = (value: unknown) =>
@@ -66,6 +71,7 @@ export async function projectsFixture(
       if (path === "projects:list")
         return {
           page: [
+            ...imported.values(),
             project,
             {
               ...project,
@@ -74,7 +80,7 @@ export async function projectsFixture(
               publicationId: null,
               challenge: { day: "2020-01-01", closesAt: 1 },
             },
-          ],
+          ].filter((p) => !deleted.has(p._id)),
           isDone: true,
           continueCursor: "",
         };
@@ -126,7 +132,33 @@ export async function projectsFixture(
       } else if (message.type === "Mutation") {
         const args = message.args[0];
         const withdrawing = message.udfPath === "projects:withdraw";
-        const failed = withdrawing ? failWithdrawal : fail;
+        const removing = message.udfPath === "projects:remove";
+        const creating = message.udfPath === "projects:create";
+        const failed = removing
+          ? failDelete
+          : creating
+            ? false
+            : withdrawing
+              ? failWithdrawal
+              : fail;
+        let result = "publication";
+        if (removing) {
+          calls.deletions.push(args);
+          if (!failed) deleted.add(args.id);
+        }
+        if (creating) {
+          calls.creations.push(args);
+          if (!imported.has(args.localSourceId))
+            imported.set(args.localSourceId, {
+              ...project,
+              _id: "imported",
+              title: args.title,
+              scene: args.scene,
+              revision: 0,
+              publicationId: null,
+            });
+          result = "imported";
+        }
         if (withdrawing) {
           calls.withdrawals.push(args);
           if (!failed) project.publicationId = null;
@@ -134,8 +166,12 @@ export async function projectsFixture(
         if (message.udfPath === "projects:publish") {
           calls.publications.push(args);
           if (!fail) {
-            project.publicationId = "publication";
-            project.description = args.description;
+            const target =
+              args.id === "project"
+                ? project
+                : [...imported.values()].find((p) => p._id === args.id)!;
+            target.publicationId = "publication";
+            target.description = args.description;
           }
         }
         seq++;
@@ -145,10 +181,12 @@ export async function projectsFixture(
             requestId: message.requestId,
             success: !failed,
             result: failed
-              ? withdrawing
-                ? "Retrait indisponible, réessayez."
-                : "Publication indisponible, réessayez."
-              : "publication",
+              ? removing
+                ? "Suppression indisponible, réessayez."
+                : withdrawing
+                  ? "Retrait indisponible, réessayez."
+                  : "Publication indisponible, réessayez."
+              : result,
             ts: ts(),
             logLines: [],
           }),
@@ -159,6 +197,9 @@ export async function projectsFixture(
   });
   return {
     calls,
+    failDelete: (value: boolean) => {
+      failDelete = value;
+    },
     failPublication: (value: boolean) => {
       fail = value;
     },
