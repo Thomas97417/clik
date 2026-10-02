@@ -83,7 +83,6 @@ function Projects() {
     <main className="collection-page projects-page">
       <div className="page-heading">
         <div>
-          <span className="eyebrow">Votre collection, votre imagination</span>
           <h1>
             Mes créations<span>.</span>
           </h1>
