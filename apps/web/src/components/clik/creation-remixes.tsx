@@ -1,10 +1,11 @@
 import { useId, useState } from "react";
 import { usePaginatedQuery } from "convex/react";
-import { ChevronDown, GitBranch, Plus } from "lucide-react";
+import { ChevronDown, Plus } from "lucide-react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import PublicCreationCard from "./public-creation-card";
+import CommunityArt from "./community-art";
 
 export default function CreationRemixes({
   publicationId,
@@ -28,22 +29,19 @@ export default function CreationRemixes({
           aria-controls={`${id}-content`}
           onClick={() => setExpanded((value) => !value)}
         >
-          <span className="creation-remixes-icon">
-            <GitBranch size={22} aria-hidden="true" />
-          </span>
+          <CommunityArt kind="remixes" />
           <span className="creation-remixes-title">
             À partir de cette création
           </span>
           <span className="creation-remixes-action" aria-hidden="true">
             {expanded ? "Replier" : "Déplier"}
+            <ChevronDown size={16} />
           </span>
-          <ChevronDown size={18} aria-hidden="true" />
         </button>
       </h2>
       <div id={`${id}-content`} hidden={!expanded}>
         <p className="creation-remixes-intro">
-          Une même idée, d’autres chemins. Découvrez les versions publiques
-          imaginées à partir de cette création.
+          Tout commence avec une idée. Voici les chemins qu’elle a inspirés.
         </p>
         {status === "LoadingFirstPage" ? (
           <p className="creation-remixes-empty" role="status">
@@ -59,7 +57,8 @@ export default function CreationRemixes({
           <div className="creation-remixes-empty">
             <p>La prochaine version pourrait être la vôtre.</p>
             <span>
-              Aucune création issue de celle-ci n’a encore été publiée.
+              Pour l’instant, cette idée attend sa première nouvelle branche.
+              Les reprises publiées trouveront leur place ici.
             </span>
           </div>
         )}

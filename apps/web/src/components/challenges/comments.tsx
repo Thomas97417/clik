@@ -13,9 +13,10 @@ import type {
   Doc,
   Id,
 } from "@my-better-t-app/backend/convex/_generated/dataModel";
-import { MessageCircle, Send } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { SignInTo } from "./shared";
 import AuthorLink from "@/components/clik/author-link";
+import CommunityArt from "@/components/clik/community-art";
 export default function Comments({
   publicationId,
   count,
@@ -44,86 +45,100 @@ export default function Comments({
       className="creation-comments"
       aria-labelledby="comments-title"
     >
-      <div className="comments-heading">
-        <MessageCircle size={22} aria-hidden="true" />
+      <header className="comments-heading">
+        <CommunityArt kind="comments" />
         <h2 id="comments-title">
           Commentaires<span> {count}</span>
         </h2>
-      </div>
-      <p>
-        Une idée, un détail qui vous plaît, un encouragement ? La discussion est
-        ouverte.
-      </p>
-      {isAuthenticated ? (
-        <form
-          className="comment-form"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            if (busy || !body.trim()) return;
-            setBusy(true);
-            setError("");
-            try {
-              await add({ publicationId, body });
-              setBody("");
-            } catch (e) {
-              setError(String(e));
-            } finally {
-              setBusy(false);
-            }
-          }}
-        >
-          <label htmlFor="new-comment">Votre commentaire</label>
-          <Textarea
-            id="new-comment"
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            maxLength={1000}
-            aria-describedby="comment-length"
-            rows={3}
-            placeholder="Qu’en pensez-vous ?"
-            disabled={busy}
-            required
-          />
-          <div>
-            <span id="comment-length">{body.length} / 1 000</span>
-            <button className="primary-link" disabled={busy || !body.trim()}>
-              <Send size={15} aria-hidden="true" />
-              {busy ? "Envoi…" : "Publier le commentaire"}
-            </button>
+        <p>
+          Les idées s’assemblent aussi à plusieurs. Un petit mot peut donner
+          envie d’aller plus loin.
+        </p>
+      </header>
+      <div className="comments-thread">
+        {isAuthenticated ? (
+          <form
+            className="comment-form"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              if (busy || !body.trim()) return;
+              setBusy(true);
+              setError("");
+              try {
+                await add({ publicationId, body });
+                setBody("");
+              } catch (e) {
+                setError(String(e));
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            <div className="comment-composer-heading">
+              {me && (
+                <BrickAvatar
+                  avatar={me.avatar ?? defaultAvatar(me._id)}
+                  size={30}
+                />
+              )}
+              <label htmlFor="new-comment">Votre commentaire</label>
+            </div>
+            <Textarea
+              id="new-comment"
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              maxLength={1000}
+              aria-describedby="comment-length"
+              rows={3}
+              placeholder="Un détail que vous aimez, une idée pour la suite…"
+              disabled={busy}
+              required
+            />
+            <div className="comment-composer-footer">
+              <span id="comment-length">{body.length} / 1 000</span>
+              <button className="primary-link" disabled={busy || !body.trim()}>
+                {busy ? "Envoi…" : "Publier le commentaire"}
+                <ArrowUpRight size={16} aria-hidden="true" />
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="comments-signin">
+            <p>Votre regard fait aussi partie de la création.</p>
+            <span>
+              Rejoignez la conversation pour partager vos idées avec son auteur.
+            </span>
+            <SignInTo>Se connecter pour commenter</SignInTo>
           </div>
-        </form>
-      ) : (
-        <div className="comments-signin">
-          <SignInTo>Se connecter pour commenter</SignInTo>
+        )}
+        {error && (
+          <p className="challenge-error" role="alert">
+            {error}
+          </p>
+        )}
+        <div className="comments-list">
+          {results.map((comment) => (
+            <Comment
+              key={comment._id}
+              comment={comment}
+              mine={comment.owner === me?._id}
+            />
+          ))}
         </div>
-      )}
-      {error && (
-        <p className="challenge-error" role="alert">
-          {error}
-        </p>
-      )}
-      <div className="comments-list">
-        {results.map((comment) => (
-          <Comment
-            key={comment._id}
-            comment={comment}
-            mine={comment.owner === me?._id}
-          />
-        ))}
+        {!results.length && (
+          <p className="comments-empty" role="status">
+            {status === "LoadingFirstPage"
+              ? "Chargement des commentaires…"
+              : "Tout est encore à dire. Et si vous laissiez le premier mot ?"}
+          </p>
+        )}
+        {status === "CanLoadMore" && (
+          <button className="load-more" onClick={() => loadMore(20)}>
+            Voir les commentaires précédents
+          </button>
+        )}
+        {status === "LoadingMore" && <p role="status">Chargement…</p>}
       </div>
-      {!results.length && (
-        <p className="comments-empty">
-          {status === "LoadingFirstPage"
-            ? "Chargement des commentaires…"
-            : "Aucun commentaire pour le moment. Lancez la discussion."}
-        </p>
-      )}
-      {status === "CanLoadMore" && (
-        <button className="load-more" onClick={() => loadMore(20)}>
-          Voir les commentaires précédents
-        </button>
-      )}
-      {status === "LoadingMore" && <p role="status">Chargement…</p>}
     </section>
   );
 }
@@ -155,7 +170,7 @@ function Comment({
     }
   };
   return (
-    <article className="comment">
+    <article className="comment" data-mine={mine || undefined}>
       <div className="comment-avatar" aria-hidden="true">
         <BrickAvatar
           avatar={comment.avatar ?? defaultAvatar(comment.owner)}
