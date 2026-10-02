@@ -16,7 +16,12 @@ test("récompenses : verrouillage, aperçu, annulation et équipement public", a
   await expect(account).toBeVisible();
   await account.click();
   await page.getByRole("menuitem", { name: "Paramètres", exact: true }).click();
-  const card = page.locator(".avatar-settings-card");
+  const summary = page.locator(".avatar-settings-card");
+  const customize = summary.getByRole("button", {
+    name: "Personnaliser mon avatar",
+  });
+  await customize.click();
+  const card = page.getByRole("dialog", { name: "Un avatar à votre façon." });
   const preview = card.locator(".avatar-settings-preview > .brick-avatar");
   const gold = card.getByRole("button", { name: "Or Débloquée", exact: true });
   await expect(gold).toBeEnabled();
@@ -38,11 +43,12 @@ test("récompenses : verrouillage, aperçu, annulation et équipement public", a
     .click();
   await expect(preview).toHaveAttribute("data-avatar-crown", "gold");
   await expect(preview).toHaveAttribute("data-avatar-ring", "participation-5");
-  await expect(account.locator(".brick-avatar")).toHaveAttribute(
-    "data-avatar-crown",
-    "none",
-  );
-  await card.getByRole("button", { name: "Annuler", exact: true }).click();
+  await expect(
+    page.locator("header .header-avatar .brick-avatar"),
+  ).toHaveAttribute("data-avatar-crown", "none");
+  await card.getByRole("button", { name: "Fermer", exact: true }).click();
+  await expect(card).toBeHidden();
+  await customize.click();
   await expect(preview).toHaveAttribute("data-avatar-crown", "none");
   expect(fixture.avatarSaves).toHaveLength(0);
   await gold.focus();
@@ -51,12 +57,12 @@ test("récompenses : verrouillage, aperçu, annulation et équipement public", a
     .getByRole("button", { name: "Bâtisseur 5 défis · Débloqué", exact: true })
     .click();
   await card
-    .getByRole("button", { name: "Nouvel avatar", exact: true })
+    .getByRole("button", { name: "Nouveau motif", exact: true })
     .click();
   await expect(preview).toHaveAttribute("data-avatar-crown", "gold");
   await expect(preview).toHaveAttribute("data-avatar-ring", "participation-5");
   const save = card.getByRole("button", {
-    name: "Enregistrer l’avatar",
+    name: "Valider les changements",
     exact: true,
   });
   fixture.failAvatarSave(true);
@@ -65,21 +71,19 @@ test("récompenses : verrouillage, aperçu, annulation et équipement public", a
   await expect(preview).toHaveAttribute("data-avatar-crown", "gold");
   fixture.failAvatarSave(false);
   await save.click();
-  await expect(account.locator(".brick-avatar")).toHaveAttribute(
-    "data-avatar-crown",
-    "gold",
-  );
-  await expect(account.locator(".brick-avatar")).toHaveAttribute(
-    "data-avatar-ring",
-    "participation-5",
-  );
+  await expect(
+    page.locator("header .header-avatar .brick-avatar"),
+  ).toHaveAttribute("data-avatar-crown", "gold");
+  await expect(
+    page.locator("header .header-avatar .brick-avatar"),
+  ).toHaveAttribute("data-avatar-ring", "participation-5");
   await expect(save).toBeHidden();
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 1800 });
-    expect(await card.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(
-      true,
-    );
-    await card.screenshot({
+    expect(
+      await summary.evaluate((el) => el.scrollWidth <= el.clientWidth),
+    ).toBe(true);
+    await summary.screenshot({
       path: `/tmp/clik-rewards-${width}-${info.project.name}.png`,
     });
   }
@@ -93,6 +97,7 @@ test("récompenses : verrouillage, aperçu, annulation et équipement public", a
   );
   await account.click();
   await page.getByRole("menuitem", { name: "Paramètres", exact: true }).click();
+  await customize.click();
   await card
     .getByRole("button", { name: "Aucune Sans couronne", exact: true })
     .click();
@@ -100,14 +105,12 @@ test("récompenses : verrouillage, aperçu, annulation et équipement public", a
     .getByRole("button", { name: "Aucun Sans contour", exact: true })
     .click();
   await save.click();
-  await expect(account.locator(".brick-avatar")).toHaveAttribute(
-    "data-avatar-crown",
-    "none",
-  );
-  await expect(account.locator(".brick-avatar")).toHaveAttribute(
-    "data-avatar-ring",
-    "none",
-  );
+  await expect(
+    page.locator("header .header-avatar .brick-avatar"),
+  ).toHaveAttribute("data-avatar-crown", "none");
+  await expect(
+    page.locator("header .header-avatar .brick-avatar"),
+  ).toHaveAttribute("data-avatar-ring", "none");
   expect(errors).toEqual([]);
 });
 

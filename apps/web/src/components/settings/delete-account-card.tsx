@@ -43,15 +43,17 @@ export default function DeleteAccountCard() {
   };
 
   return (
-    <SettingsCard className="border-destructive">
+    <SettingsCard className="settings-danger-card">
       <SettingsCardContent>
         <SettingsCardHeader
-          title="Delete Account"
-          description="Permanently delete your account and all associated data. This action cannot be undone."
+          title="Supprimer mon compte"
+          description="Vous souhaitez quitter Clik ? La suppression de votre compte est définitive."
         />
       </SettingsCardContent>
-      <SettingsCardFooter className="bg-destructive/10 dark:bg-destructive/10">
-        <p className="text-sm text-muted-foreground">Proceed with caution.</p>
+      <SettingsCardFooter className="settings-danger-footer">
+        <p className="text-sm text-muted-foreground">
+          Cette action est irréversible.
+        </p>
         <AlertDialog>
           <AlertDialogTrigger
             render={
@@ -62,23 +64,23 @@ export default function DeleteAccountCard() {
               />
             }
           >
-            Delete Account
+            Supprimer mon compte
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogMedia>
                 <TriangleAlert className="size-5" />
               </AlertDialogMedia>
-              <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+              <AlertDialogTitle>Supprimer votre compte ?</AlertDialogTitle>
               <AlertDialogDescription>
-                This action is permanent and cannot be undone. All your data
-                will be deleted immediately.
+                Vous ne pourrez plus vous connecter à ce compte. Cette action
+                est définitive.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>Annuler</AlertDialogCancel>
               <AlertDialogAction variant="destructive" onClick={handleDelete}>
-                Delete Account
+                Supprimer mon compte
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

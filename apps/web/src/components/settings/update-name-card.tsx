@@ -21,10 +21,11 @@ export default function UpdateNameCard({ name }: { name: string }) {
     defaultValues: { name },
     onSubmit: async ({ value }) => {
       await authClient.updateUser(
-        { name: value.name },
+        { name: value.name.trim() },
         {
           onSuccess: () => {
-            toast.success("Name updated successfully.");
+            toast.success("Nom mis à jour.");
+            form.reset({ name: value.name.trim() });
           },
           onError: (error) => {
             toast.error(error.error.message);
@@ -34,7 +35,11 @@ export default function UpdateNameCard({ name }: { name: string }) {
     },
     validators: {
       onSubmit: z.object({
-        name: z.string().min(2, "Name must be at least 2 characters."),
+        name: z
+          .string()
+          .trim()
+          .min(2, "Votre nom doit contenir au moins 2 caractères.")
+          .max(32, "32 caractères maximum."),
       }),
     },
   });
@@ -50,22 +55,24 @@ export default function UpdateNameCard({ name }: { name: string }) {
       <SettingsCard>
         <SettingsCardContent>
           <SettingsCardHeader
-            title="Your Name"
-            description="This is the name displayed on your profile."
+            title="Votre nom"
+            description="Celui qui accompagne vos créations et vos commentaires."
           />
           <form.Field
             name="name"
             children={(field) => (
               <div className="flex flex-col gap-1">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">Nom public</Label>
                 <Input
-                  placeholder="Name"
-                  autoComplete="off"
+                  placeholder="Votre nom"
+                  id="name"
+                  autoComplete="name"
+                  maxLength={32}
                   required
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  className="w-80 bg-transparent"
+                  className="w-full bg-transparent"
                 />
                 {field.state.meta.errors.map((error) => (
                   <p key={error?.message} className="text-sm text-destructive">
@@ -78,19 +85,24 @@ export default function UpdateNameCard({ name }: { name: string }) {
         </SettingsCardContent>
         <SettingsCardFooter>
           <p className="text-sm text-muted-foreground">
-            Please use 32 characters at maximum.
+            Entre 2 et 32 caractères.
           </p>
           <form.Subscribe>
             {(state) => (
               <Button
                 type="submit"
                 size="sm"
-                disabled={!state.canSubmit || state.isSubmitting}
+                disabled={
+                  !state.isDirty || !state.canSubmit || state.isSubmitting
+                }
               >
                 {state.isSubmitting ? (
-                  <Loader2 className="animate-spin" />
+                  <>
+                    <Loader2 className="animate-spin" aria-hidden="true" />{" "}
+                    Enregistrement…
+                  </>
                 ) : (
-                  "Save"
+                  "Enregistrer"
                 )}
               </Button>
             )}

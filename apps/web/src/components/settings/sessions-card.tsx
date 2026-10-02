@@ -60,7 +60,7 @@ export default function SessionsCard() {
             router.navigate({ to: "/" });
             return;
           }
-          toast.success("Session revoked.");
+          toast.success("Appareil déconnecté.");
           queryClient.invalidateQueries({ queryKey: ["sessions"] });
         },
         onError: (error) => {
@@ -77,7 +77,7 @@ export default function SessionsCard() {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("All other sessions revoked.");
+      toast.success("Les autres appareils ont été déconnectés.");
       queryClient.invalidateQueries({ queryKey: ["sessions"] });
     }
     setRevokingAll(false);
@@ -86,33 +86,35 @@ export default function SessionsCard() {
   function getDeviceIcon(userAgent: string | null | undefined) {
     if (!userAgent) return <Globe className="size-4" />;
     const ua = userAgent.toLowerCase();
-    if (ua.includes("mobile") || ua.includes("android") || ua.includes("iphone")) {
+    if (
+      ua.includes("mobile") ||
+      ua.includes("android") ||
+      ua.includes("iphone")
+    ) {
       return <Smartphone className="size-4" />;
     }
     return <Monitor className="size-4" />;
   }
 
   function getBrowserName(userAgent: string | null | undefined) {
-    if (!userAgent) return "Unknown browser";
+    if (!userAgent) return "Navigateur inconnu";
     const ua = userAgent.toLowerCase();
     if (ua.includes("firefox")) return "Firefox";
     if (ua.includes("edg")) return "Edge";
     if (ua.includes("safari") && !ua.includes("chrome")) return "Safari";
     if (ua.includes("chrome")) return "Chrome";
     if (ua.includes("opera") || ua.includes("opr")) return "Opera";
-    return "Unknown browser";
+    return "Navigateur inconnu";
   }
 
-  const otherSessions = sessions?.filter(
-    (s) => s.id !== currentSessionId,
-  );
+  const otherSessions = sessions?.filter((s) => s.id !== currentSessionId);
 
   return (
     <SettingsCard>
       <SettingsCardContent>
         <SettingsCardHeader
-          title="Active Sessions"
-          description="Manage your active sessions across devices."
+          title="Appareils connectés"
+          description="Retrouvez les navigateurs qui ont accès à votre atelier."
         />
         <div className="flex flex-col gap-2">
           {isLoading ? (
@@ -124,10 +126,7 @@ export default function SessionsCard() {
             sessions.map((session) => {
               const isCurrent = session.id === currentSessionId;
               return (
-                <div
-                  key={session.token}
-                  className="flex items-center justify-between rounded-md border p-3"
-                >
+                <div key={session.token} className="settings-session">
                   <div className="flex items-center gap-3">
                     <div className="text-muted-foreground">
                       {getDeviceIcon(session.userAgent)}
@@ -137,14 +136,14 @@ export default function SessionsCard() {
                         <span>{getBrowserName(session.userAgent)}</span>
                         {isCurrent && (
                           <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[0.65rem] font-medium text-primary">
-                            Current
+                            Cet appareil
                           </span>
                         )}
                       </div>
                       <span className="text-xs text-muted-foreground">
-                        Last active{" "}
+                        Dernière activité :{" "}
                         {new Date(session.updatedAt).toLocaleDateString(
-                          undefined,
+                          "fr-FR",
                           {
                             month: "short",
                             day: "numeric",
@@ -163,6 +162,7 @@ export default function SessionsCard() {
                             variant="ghost"
                             size="icon-xs"
                             className="hover:cursor-pointer text-muted-foreground hover:text-destructive"
+                            aria-label="Se déconnecter de cet appareil"
                             disabled={revokingId === session.token}
                           />
                         }
@@ -179,22 +179,22 @@ export default function SessionsCard() {
                             <LogOut className="size-5" />
                           </AlertDialogMedia>
                           <AlertDialogTitle>
-                            Revoke current session?
+                            Déconnecter cet appareil ?
                           </AlertDialogTitle>
                           <AlertDialogDescription>
-                            You will be logged out immediately and redirected to
-                            the home page.
+                            Vous serez déconnecté et redirigé vers la page
+                            d’accueil.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogCancel>Annuler</AlertDialogCancel>
                           <AlertDialogAction
                             variant="destructive"
                             onClick={() =>
                               revokeSession(session.id, session.token)
                             }
                           >
-                            Log out
+                            Se déconnecter
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -204,6 +204,7 @@ export default function SessionsCard() {
                       variant="ghost"
                       size="icon-xs"
                       className="hover:cursor-pointer text-muted-foreground hover:text-destructive"
+                      aria-label={`Déconnecter ${getBrowserName(session.userAgent)}`}
                       disabled={revokingId === session.token}
                       onClick={() => revokeSession(session.id, session.token)}
                     >
@@ -218,17 +219,19 @@ export default function SessionsCard() {
               );
             })
           ) : (
-            <p className="text-sm text-muted-foreground">No active sessions.</p>
+            <p className="text-sm text-muted-foreground">
+              Aucun appareil à afficher.
+            </p>
           )}
         </div>
       </SettingsCardContent>
       <SettingsCardFooter>
         <p className="text-sm text-muted-foreground">
-          Revoke access from devices you don't recognize.
+          Un appareil inconnu ? Vous pouvez lui retirer l’accès.
         </p>
         <Button
           size="sm"
-          variant="destructive"
+          variant="outline"
           className="hover:cursor-pointer"
           disabled={!otherSessions?.length || revokingAll}
           onClick={revokeOtherSessions}
@@ -236,7 +239,7 @@ export default function SessionsCard() {
           {revokingAll ? (
             <Loader2 className="size-4 animate-spin" />
           ) : (
-            "Revoke all others"
+            "Déconnecter les autres"
           )}
         </Button>
       </SettingsCardFooter>

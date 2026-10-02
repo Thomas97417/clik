@@ -12,7 +12,7 @@ test("avatar : prévisualiser, annuler, réessayer et conserver le choix partout
     name: "Compte de Camille",
     exact: true,
   });
-  const headerAvatar = account.locator(".brick-avatar");
+  const headerAvatar = page.locator("header .header-avatar .brick-avatar");
   await expect(headerAvatar).toBeVisible();
   const original = await headerAvatar.getAttribute("data-avatar-seed");
   const openSettings = async () => {
@@ -24,42 +24,53 @@ test("avatar : prévisualiser, annuler, réessayer et conserver le choix partout
   };
   await openSettings();
   const card = page.locator(".avatar-settings-card");
-  const preview = card.locator(".avatar-settings-preview > .brick-avatar");
-  const shuffle = card.getByRole("button", {
-    name: "Nouvel avatar",
+  const current = card.locator(".brick-avatar");
+  const customize = card.getByRole("button", {
+    name: "Personnaliser mon avatar",
+  });
+  const dialog = page.getByRole("dialog", { name: "Un avatar à votre façon." });
+  const preview = dialog.locator(".avatar-settings-preview > .brick-avatar");
+  const shuffle = dialog.getByRole("button", {
+    name: "Nouveau motif",
     exact: true,
   });
-  const save = card.getByRole("button", {
-    name: "Enregistrer l’avatar",
+  const save = dialog.getByRole("button", {
+    name: "Valider les changements",
     exact: true,
   });
-  await expect(preview).toHaveAttribute("data-avatar-seed", original!);
+  await expect(current).toHaveAttribute("data-avatar-seed", original!);
   await expect(page.locator('input[type="file"]')).toHaveCount(0);
+  await customize.click();
+  await expect(save).toBeDisabled();
   await shuffle.focus();
   await page.keyboard.press("Enter");
   await expect(preview).not.toHaveAttribute("data-avatar-seed", original!);
   const discarded = await preview.getAttribute("data-avatar-seed");
   await expect(headerAvatar).toHaveAttribute("data-avatar-seed", original!);
   expect(fixture.avatarSaves).toHaveLength(0);
-  await card.getByRole("button", { name: "Annuler", exact: true }).click();
+  await dialog.getByRole("button", { name: "Fermer", exact: true }).click();
+  await expect(dialog).toBeHidden();
+  await expect(customize).toBeFocused();
+  await expect(current).toHaveAttribute("data-avatar-seed", original!);
+  await customize.click();
   await expect(preview).toHaveAttribute("data-avatar-seed", original!);
-  await expect(save).toBeHidden();
   await shuffle.click();
   await expect(preview).not.toHaveAttribute("data-avatar-seed", discarded!);
   const chosen = await preview.getAttribute("data-avatar-seed");
   fixture.failAvatarSave(true);
   await save.click();
-  await expect(card.getByRole("alert")).toContainText(
+  await expect(dialog.getByRole("alert")).toContainText(
     "proposition est conservée",
   );
   await expect(preview).toHaveAttribute("data-avatar-seed", chosen!);
   await expect(headerAvatar).toHaveAttribute("data-avatar-seed", original!);
   fixture.failAvatarSave(false);
   await save.click();
+  await expect(dialog).toBeHidden();
   await expect(card.getByRole("status")).toHaveText("Avatar enregistré.");
   await expect(headerAvatar).toHaveAttribute("data-avatar-seed", chosen!);
-  await expect(preview).toHaveAttribute("data-avatar-seed", chosen!);
-  await expect(save).toBeHidden();
+  await expect(current).toHaveAttribute("data-avatar-seed", chosen!);
+
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 1000 });
     await card.scrollIntoViewIfNeeded();
@@ -87,7 +98,7 @@ test("avatar : prévisualiser, annuler, réessayer et conserver le choix partout
   await page.goto("/");
   await expect(headerAvatar).toHaveAttribute("data-avatar-seed", chosen!);
   await openSettings();
-  await expect(preview).toHaveAttribute("data-avatar-seed", chosen!);
+  await expect(current).toHaveAttribute("data-avatar-seed", chosen!);
   expect(fixture.avatarSaves).toHaveLength(2);
   expect(errors).toEqual([]);
 });

@@ -6,13 +6,7 @@ export function SettingsCard({
   ...props
 }: React.ComponentProps<"div">) {
   return (
-    <div
-      className={cn(
-        "flex w-full flex-col items-start rounded-lg border border-border bg-card",
-        className,
-      )}
-      {...props}
-    >
+    <div className={cn("settings-card", className)} {...props}>
       {children}
     </div>
   );
@@ -26,9 +20,7 @@ export function SettingsCardContent({
   className?: string;
 }) {
   return (
-    <div className={cn("flex w-full flex-col gap-4 p-6", className)}>
-      {children}
-    </div>
+    <div className={cn("settings-card-content", className)}>{children}</div>
   );
 }
 
@@ -40,14 +32,7 @@ export function SettingsCardFooter({
   className?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "flex min-h-14 w-full items-center justify-between rounded-b-lg border-t border-border bg-muted px-6",
-        className,
-      )}
-    >
-      {children}
-    </div>
+    <div className={cn("settings-card-footer", className)}>{children}</div>
   );
 }
 
@@ -59,9 +44,9 @@ export function SettingsCardHeader({
   description: string;
 }) {
   return (
-    <div className="flex flex-col gap-1">
-      <h2 className="text-lg font-medium">{title}</h2>
-      <p className="text-sm text-muted-foreground">{description}</p>
+    <div className="settings-card-heading">
+      <h3>{title}</h3>
+      <p>{description}</p>
     </div>
   );
 }

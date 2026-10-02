@@ -125,7 +125,31 @@ export async function creatorsFixture(page: Page, authenticated = false) {
       return route.fallback();
     });
     await page.route("**/api/auth/list-sessions*", (route) =>
-      route.fulfill({ json: [] }),
+      route.fulfill({
+        json: [
+          {
+            id: "test-session",
+            userId: "viewer",
+            token: "test-session",
+            userAgent: "Mozilla/5.0 Chrome/130",
+            updatedAt: new Date(now).toISOString(),
+            expiresAt: new Date(now + 3600000).toISOString(),
+          },
+        ],
+      }),
+    );
+    await page.route("**/api/auth/list-accounts*", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "credential",
+            providerId: "credential",
+            userId: "viewer",
+            createdAt: new Date(now).toISOString(),
+            updatedAt: new Date(now).toISOString(),
+          },
+        ],
+      }),
     );
   }
   const refreshers = new Set<() => void>();

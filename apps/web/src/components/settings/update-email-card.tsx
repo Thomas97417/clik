@@ -35,7 +35,8 @@ export default function UpdateEmailCard({ email }: { email: string }) {
         { newEmail: value.newEmail },
         {
           onSuccess: () => {
-            toast.success("Email updated successfully.");
+            toast.success("Adresse e-mail mise à jour.");
+            form.reset({ newEmail: value.newEmail });
           },
           onError: (error) => {
             toast.error(error.error.message);
@@ -45,7 +46,7 @@ export default function UpdateEmailCard({ email }: { email: string }) {
     },
     validators: {
       onSubmit: z.object({
-        newEmail: z.string().email("Invalid email address"),
+        newEmail: z.string().email("Saisissez une adresse e-mail valide."),
       }),
     },
   });
@@ -60,23 +61,24 @@ export default function UpdateEmailCard({ email }: { email: string }) {
       <SettingsCard>
         <SettingsCardContent>
           <SettingsCardHeader
-            title="Email Address"
-            description="The email address associated with your account."
+            title="Votre adresse e-mail"
+            description="Pour vous connecter et recevoir les messages liés à votre compte."
           />
           <form.Field
             name="newEmail"
             children={(field) => (
               <div className="flex flex-col gap-1">
-                <Label htmlFor="newEmail">Email</Label>
+                <Label htmlFor="newEmail">Adresse e-mail</Label>
                 <Input
                   id="newEmail"
-                  autoComplete="off"
+                  type="email"
+                  autoComplete="email"
                   required
                   disabled={isSocialOnly}
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  className="w-80 bg-transparent"
+                  className="w-full bg-transparent"
                 />
                 {field.state.meta.errors.map((error) => (
                   <p key={error?.message} className="text-sm text-destructive">
@@ -90,8 +92,8 @@ export default function UpdateEmailCard({ email }: { email: string }) {
         <SettingsCardFooter>
           <p className="text-sm text-muted-foreground">
             {isSocialOnly
-              ? "Email is managed by your social login provider."
-              : "Please enter a valid email address."}
+              ? "Cette adresse est gérée par votre connexion Google ou GitHub."
+              : "Cette adresse reste privée."}
           </p>
           <form.Subscribe>
             {(state) => (
@@ -99,13 +101,22 @@ export default function UpdateEmailCard({ email }: { email: string }) {
                 type="submit"
                 size="sm"
                 disabled={
-                  isSocialOnly || !state.canSubmit || state.isSubmitting
+                  isSocialOnly ||
+                  !state.isDirty ||
+                  !state.canSubmit ||
+                  state.isSubmitting
                 }
               >
                 {state.isSubmitting ? (
-                  <Loader2 className="animate-spin size-4" />
+                  <>
+                    <Loader2
+                      className="animate-spin size-4"
+                      aria-hidden="true"
+                    />{" "}
+                    Enregistrement…
+                  </>
                 ) : (
-                  "Save"
+                  "Enregistrer"
                 )}
               </Button>
             )}
