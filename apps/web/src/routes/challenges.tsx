@@ -1,4 +1,11 @@
 import ChallengeRewards from "@/components/challenges/rewards";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
@@ -275,16 +282,34 @@ function Entries({
             pour changer de choix.
           </p>
         </div>
-        <label>
-          Trier{" "}
-          <select
+        <div className="challenge-sort">
+          <label htmlFor="challenge-sort">Trier</label>
+          <Select
+            items={[
+              { value: "recent", label: "Récentes" },
+              { value: "votes", label: "Les plus aimées" },
+            ]}
             value={sort}
-            onChange={(e) => setSort(e.target.value as typeof sort)}
+            onValueChange={(value) => {
+              if (value === "recent" || value === "votes") setSort(value);
+            }}
           >
-            <option value="recent">Récentes</option>
-            <option value="votes">Les plus aimées</option>
-          </select>
-        </label>
+            <SelectTrigger
+              id="challenge-sort"
+              className="challenge-sort-trigger"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent
+              className="challenge-sort-menu"
+              align="end"
+              alignItemWithTrigger={false}
+            >
+              <SelectItem value="recent">Récentes</SelectItem>
+              <SelectItem value="votes">Les plus aimées</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       <ChallengeRewards challenge={challenge} now={now} />
       {!results.length ? (

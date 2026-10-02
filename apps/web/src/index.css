@@ -3873,19 +3873,51 @@ dialog.modal-backdrop::backdrop {
   font-size: 12px;
   line-height: 1.7;
 }
-.challenge-entries-heading label {
+.challenge-sort {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-shrink: 0;
   font-size: 12px;
   color: #71839c;
 }
-.challenge-entries-heading select {
-  padding: 10px;
+.challenge-sort-trigger {
+  width: 160px;
+  min-height: 38px;
+  padding: 8px 11px;
   border: 1px solid #dfe7f2;
   border-radius: 9px;
   background: #fff;
   color: #455f83;
+  cursor: pointer;
+}
+.challenge-sort-trigger:hover,
+.challenge-sort-trigger[data-popup-open] {
+  border-color: #b7caf0;
+  background: #f8faff;
+}
+.challenge-sort-trigger:focus-visible {
+  outline: 2px solid #356ae6;
+  outline-offset: 3px;
+}
+.challenge-sort-menu {
+  padding: 4px;
+  border-radius: 11px;
+  background: #fff;
+  color: #455f83;
+  box-shadow: 0 8px 24px #213d6a14, 0 0 0 1px #dfe7f2;
+}
+.challenge-sort-menu [data-slot="select-item"] {
+  min-height: 36px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.challenge-sort-menu [data-slot="select-item"][data-highlighted] {
+  background: #edf3ff;
+  color: #2458ce;
+}
+.challenge-sort-menu [data-slot="select-item"][data-selected] {
+  color: #2458ce;
 }
 .challenge-entry {
   overflow: hidden;

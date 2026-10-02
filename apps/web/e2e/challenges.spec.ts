@@ -194,6 +194,50 @@ test("stock dans l’éditeur : clic, duplication, suppression et annulation", a
   await expect(page.locator(".piece-card")).toHaveCount(63);
 });
 
+test("tri des participations : souris, clavier et menu mobile", async ({
+  page,
+}, info) => {
+  const { challengeFixture } = await import("./fixtures/challenges");
+  await challengeFixture(page);
+  await page.goto("/challenges");
+  const sort = page.getByRole("combobox", { name: "Trier" });
+  const titles = page.locator(".challenge-entry h3");
+  await expect(sort).toHaveText("Récentes");
+  await expect(titles.first()).toHaveText("Le petit phare");
+  await sort.click();
+  await page.getByRole("option", { name: "Les plus aimées" }).click();
+  await expect(sort).toHaveText("Les plus aimées");
+  await expect(titles.first()).toHaveText("Le robot du jour");
+
+  await sort.focus();
+  await sort.press("Enter");
+  await page.keyboard.press("Home");
+  await page.keyboard.press("Enter");
+  await expect(sort).toHaveText("Récentes");
+  await expect(titles.first()).toHaveText("Le petit phare");
+  await expect(sort).toBeFocused();
+
+  await sort.press("Enter");
+  await page.keyboard.press("End");
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("listbox")).toBeHidden();
+  await expect(sort).toHaveText("Récentes");
+
+  for (const width of [1440, 390, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    await sort.click();
+    const menu = page.getByRole("listbox");
+    await expect(menu).toBeVisible();
+    const bounds = await menu.boundingBox();
+    expect(bounds!.x).toBeGreaterThanOrEqual(0);
+    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width);
+    await page.screenshot({
+      path: `/tmp/clik-challenge-sort-${info.project.name}-${width}.png`,
+    });
+    await page.getByRole("option", { name: "Récentes", exact: true }).click();
+  }
+});
+
 test("participations : trois coups de cœur, changement de vote et commentaires", async ({
   page,
 }, info) => {
@@ -210,8 +254,8 @@ test("participations : trois coups de cœur, changement de vote et commentaires"
   await expect(
     page.getByRole("button", { name: "Participer au défi" }),
   ).toHaveCount(0);
-  await expect(page.getByRole("combobox", { name: "Trier" })).toHaveValue(
-    "votes",
+  await expect(page.getByRole("combobox", { name: "Trier" })).toHaveText(
+    "Les plus aimées",
   );
   await page.getByRole("button", { name: "Aujourd’hui", exact: true }).click();
   await expect(page.locator(".challenge-time")).toContainText("restantes");
