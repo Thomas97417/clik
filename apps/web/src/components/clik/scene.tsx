@@ -40,6 +40,9 @@ import { toast } from "sonner";
 import { CAMERA_GIZMO_MARGIN, Gestures } from "./gestures";
 import { SnapPreview } from "./snap-preview";
 import { GroundGrid } from "./ground-grid";
+import { Minus, Plus, RotateCcw } from "lucide-react";
+
+type ViewActions = { zoom: (direction: number) => void; reset: () => void };
 const material = new MeshStandardMaterial({ roughness: 0.32, metalness: 0.02 });
 function Batch({
   type,
@@ -196,16 +199,19 @@ function Stage({
   scene,
   editable,
   showGrid,
+  onViewControls,
 }: {
   scene: SceneDocument;
   editable: boolean;
   showGrid: boolean;
+  onViewControls?: (actions: ViewActions | null) => void;
 }) {
   const { camera, gl, scene: threeScene } = useThree(),
     controls = useRef<ComponentRef<typeof OrbitControls>>(null),
     s = useEditor(),
     rotation = useRef<ComponentRef<typeof TransformControls>>(null);
   const [gridStep, setGridStep] = useState(1);
+  const [resetView, setResetView] = useState(0);
   // Rotate the original light around Y, keeping its elevation and intensity.
   const lightAngle = ((editable ? s.lightAngle : 0) * Math.PI) / 180;
   const [library, setLibrary] = useState<{
@@ -254,8 +260,8 @@ function Stage({
       camera.updateProjectionMatrix();
     }
   });
-  const frame = s.frame,
-    view = s.view;
+  const frame = editable ? s.frame : 0,
+    view = editable ? s.view : "perspective";
   useEffect(() => {
     const boxes = scene.nodes
       .filter(
@@ -291,16 +297,43 @@ function Stage({
           : view === "right"
             ? new Vector3(1, 0.12, 0)
             : new Vector3(1, 0.9, 1);
+    // Clear any remaining orbit damping before restoring the framing.
+    const orbit = controls.current;
+    const damping = orbit?.enableDamping;
+    if (orbit) {
+      orbit.enableDamping = false;
+      orbit.update();
+    }
     camera.position.copy(
       center.clone().add(direction.normalize().multiplyScalar(size)),
     );
     camera.near = 0.1;
     camera.far = Math.max(1000, size * 4);
     camera.updateProjectionMatrix();
+    if (!editable) camera.up.set(0, 1, 0);
     camera.lookAt(center);
     controls.current?.target.copy(center);
     controls.current?.update();
-  }, [frame, view]);
+    if (orbit) orbit.enableDamping = damping!;
+  }, [frame, view, resetView]);
+  useEffect(() => {
+    if (!onViewControls || editable) return;
+    onViewControls({
+      zoom: (direction) => {
+        const orbit = controls.current;
+        if (!orbit) return;
+        const offset = camera.position.clone().sub(orbit.target);
+        const distance = Math.max(
+          orbit.minDistance,
+          Math.min(orbit.maxDistance, offset.length() / 1.2 ** direction),
+        );
+        camera.position.copy(orbit.target).add(offset.setLength(distance));
+        orbit.update();
+      },
+      reset: () => setResetView((value) => value + 1),
+    });
+    return () => onViewControls(null);
+  }, [camera, editable, onViewControls]);
   return (
     <>
       <color attach="background" args={["#edf1f7"]} />
@@ -356,12 +389,17 @@ function Stage({
       <OrbitControls
         ref={controls}
         makeDefault
-        enabled={!s.gesture && !s.pending}
+        enabled={!editable || (!s.gesture && !s.pending)}
         minDistance={3}
         maxDistance={50000}
         maxPolarAngle={Math.PI * 0.95}
       />
-      <GizmoHelper alignment="bottom-right" margin={CAMERA_GIZMO_MARGIN}>
+      {/* Remounting cancels a pending axis tween that would override the reset. */}
+      <GizmoHelper
+        key={editable ? "editor" : resetView}
+        alignment="bottom-right"
+        margin={CAMERA_GIZMO_MARGIN}
+      >
         <GizmoViewport
           axisColors={["#ed6a65", "#60b58a", "#5c8fe3"]}
           labelColor="white"
@@ -374,11 +412,14 @@ export default function Scene({
   scene,
   editable = false,
   showGrid = true,
+  showViewControls = false,
 }: {
   scene: SceneDocument;
   editable?: boolean;
   showGrid?: boolean;
+  showViewControls?: boolean;
 }) {
+  const [viewActions, setViewActions] = useState<ViewActions | null>(null);
   const liveScene = useEditor((s) => (editable ? s.scene : scene));
   const [supported] = useState(() => {
     try {
@@ -398,13 +439,52 @@ export default function Scene({
       </div>
     );
   return (
-    <Canvas
-      shadows
-      dpr={[1, 1.5]}
-      camera={{ position: [11, 10, 11], fov: 40, near: 0.1, far: 1000 }}
-      gl={{ preserveDrawingBuffer: true, antialias: true }}
-    >
-      <Stage scene={liveScene} editable={editable} showGrid={showGrid} />
-    </Canvas>
+    <>
+      <Canvas
+        shadows
+        dpr={[1, 1.5]}
+        camera={{ position: [11, 10, 11], fov: 40, near: 0.1, far: 1000 }}
+        gl={{ preserveDrawingBuffer: true, antialias: true }}
+      >
+        <Stage
+          scene={liveScene}
+          editable={editable}
+          showGrid={showGrid}
+          onViewControls={showViewControls ? setViewActions : undefined}
+        />
+      </Canvas>
+      {showViewControls && !editable && viewActions && (
+        <div
+          className="creation-preview-controls"
+          role="group"
+          aria-label="Contrôles de la vue 3D"
+        >
+          <button
+            type="button"
+            title="Dézoomer l’aperçu"
+            aria-label="Dézoomer l’aperçu"
+            onClick={() => viewActions.zoom(-1)}
+          >
+            <Minus size={15} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            title="Zoomer l’aperçu"
+            aria-label="Zoomer l’aperçu"
+            onClick={() => viewActions.zoom(1)}
+          >
+            <Plus size={15} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            title="Réinitialiser la vue"
+            aria-label="Réinitialiser la vue"
+            onClick={viewActions.reset}
+          >
+            <RotateCcw size={15} aria-hidden="true" />
+          </button>
+        </div>
+      )}
+    </>
   );
 }

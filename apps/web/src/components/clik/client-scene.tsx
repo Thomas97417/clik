@@ -34,6 +34,7 @@ export default function ClientScene(props: {
   scene: SceneDocument;
   editable?: boolean;
   showGrid?: boolean;
+  showViewControls?: boolean;
 }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);

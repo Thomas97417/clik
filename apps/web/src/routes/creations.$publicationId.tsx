@@ -3,11 +3,7 @@ import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useMemo, useState } from "react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
-import {
-  ArrowRight,
-  GitBranch,
-  MousePointer2,
-} from "lucide-react";
+import { ArrowRight, GitBranch, MousePointer2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import Comments from "@/components/challenges/comments";
@@ -71,7 +67,7 @@ function CreationDetail({
             role="region"
             aria-label={`Aperçu 3D de ${p.title}`}
           >
-            <ClientScene scene={scene} showGrid={false} />
+            <ClientScene scene={scene} showGrid={false} showViewControls />
           </div>
           <p className="creation-view-hint">
             <MousePointer2 size={14} aria-hidden="true" />
