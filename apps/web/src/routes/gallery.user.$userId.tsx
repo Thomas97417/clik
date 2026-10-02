@@ -6,8 +6,12 @@ import { Box } from "lucide-react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import PublicCreationCard from "@/components/clik/public-creation-card";
+import GallerySortSelect, {
+  validateGallerySearch,
+} from "@/components/clik/gallery-sort";
 
 export const Route = createFileRoute("/gallery/user/$userId")({
+  validateSearch: validateGallerySearch,
   component: CreatorPage,
   head: () => ({ meta: [{ title: "Galerie du créateur — Clik" }] }),
   errorComponent: () => (
@@ -25,10 +29,12 @@ function CreatorPage() {
   return <CreatorGallery key={userId} userId={userId} />;
 }
 function CreatorGallery({ userId }: { userId: string }) {
+  const { sort = "recent" } = Route.useSearch();
+  const navigate = Route.useNavigate();
   const creator = useQuery(api.projects.creator, { userId });
   const { results, status, loadMore } = usePaginatedQuery(
     api.projects.gallery,
-    creator ? { ownerId: userId } : "skip",
+    creator ? { ownerId: userId, sort } : "skip",
     { initialNumItems: 12 },
   );
   return (
@@ -63,7 +69,15 @@ function CreatorGallery({ userId }: { userId: string }) {
           </div>
           <div className="collection-meta">
             <span>Créations publiques</span>
-            <span>Les plus récentes</span>
+            <GallerySortSelect
+              value={sort}
+              onValueChange={(value) => {
+                void navigate({
+                  search: { sort: value === "recent" ? undefined : value },
+                  resetScroll: false,
+                });
+              }}
+            />
           </div>
           {status === "LoadingFirstPage" ? (
             <div className="empty-state" role="status">
@@ -96,10 +110,6 @@ function CreatorGallery({ userId }: { userId: string }) {
               Chargement…
             </p>
           )}
-          <p className="reuse-note">
-            Les créations publiques sont réutilisables dans Clik avec
-            attribution.
-          </p>
         </>
       )}
     </main>

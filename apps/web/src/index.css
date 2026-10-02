@@ -2665,6 +2665,11 @@ a.creation-card:hover .card-arrow,
   height: 100%;
   color: #91a3be;
 }
+.creator-page .collection-meta {
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
 .creator-page > .back-link {
   margin-bottom: 32px;
 }

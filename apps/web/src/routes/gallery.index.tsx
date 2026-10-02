@@ -3,32 +3,14 @@ import { usePaginatedQuery } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import { ArrowRight, GitBranch, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import GallerySortSelect, {
+  validateGallerySearch,
+} from "@/components/clik/gallery-sort";
 import PublicCreationCard from "@/components/clik/public-creation-card";
 import GalleryArt from "@/components/clik/gallery-art";
 
-const sortOptions = [
-  { value: "recent", label: "Les plus récentes" },
-  { value: "oldest", label: "Les plus anciennes" },
-  { value: "comments", label: "Les plus commentées" },
-] as const;
-type GallerySort = (typeof sortOptions)[number]["value"];
-
 export const Route = createFileRoute("/gallery/")({
-  validateSearch: (
-    search: Record<string, unknown>,
-  ): { sort?: GallerySort } => ({
-    sort:
-      search.sort === "oldest" || search.sort === "comments"
-        ? search.sort
-        : undefined,
-  }),
+  validateSearch: validateGallerySearch,
   head: () => ({
     meta: [
       { title: "La galerie — Clik" },
@@ -73,43 +55,15 @@ function Gallery() {
             <h2 id="gallery-creations-title">À découvrir</h2>
             <p>Ouvrez une création, laissez un mot, faites-en votre version.</p>
           </div>
-          <div className="collection-sort">
-            <label htmlFor="gallery-sort">Trier par</label>
-            <Select
-              items={sortOptions}
-              value={sort}
-              onValueChange={(value) => {
-                if (
-                  value === "recent" ||
-                  value === "oldest" ||
-                  value === "comments"
-                ) {
-                  void navigate({
-                    search: { sort: value === "recent" ? undefined : value },
-                    resetScroll: false,
-                  });
-                }
-              }}
-            >
-              <SelectTrigger
-                id="gallery-sort"
-                className="collection-sort-trigger"
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent
-                className="collection-sort-menu"
-                align="end"
-                alignItemWithTrigger={false}
-              >
-                {sortOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <GallerySortSelect
+            value={sort}
+            onValueChange={(value) => {
+              void navigate({
+                search: { sort: value === "recent" ? undefined : value },
+                resetScroll: false,
+              });
+            }}
+          />
         </div>
         {status === "LoadingFirstPage" ? (
           <div role="status" aria-label="Chargement des créations">
