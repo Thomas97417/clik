@@ -1,4 +1,5 @@
 import { memo, useMemo } from "react";
+import AvatarFrame from "./avatar-frame";
 import {
   CROWNS,
   RINGS,
@@ -76,35 +77,7 @@ const BrickAvatar = memo(function BrickAvatar({
           </g>
         ))}
       </g>
-      {ring && (
-        <g fill="none" stroke={ring.color}>
-          <rect x="3" y="3" width="94" height="94" rx="14" strokeWidth="4" />
-          {ring.threshold >= 5 && (
-            <path
-              d="M17 9h12M71 9h12M17 91h12M71 91h12"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-          )}
-          {ring.threshold >= 10 && (
-            <path
-              d="M9 22v10M91 22v10M9 68v10M91 68v10"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-          )}
-          {ring.threshold >= 25 && (
-            <path
-              d="m3 50 5-5 5 5-5 5Zm84 0 5-5 5 5-5 5Z"
-              fill={ring.color}
-              strokeWidth="1"
-            />
-          )}
-          {ring.threshold >= 50 && (
-            <path d="m45 92 5-5 5 5-5 5Z" fill={ring.color} strokeWidth="1" />
-          )}
-        </g>
-      )}
+      {ring && <AvatarFrame frame={ring} />}
       {crown && (
         <g data-avatar-decoration="crown">
           <path
