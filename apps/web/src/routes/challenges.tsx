@@ -355,9 +355,10 @@ function Entries({
                   to="/creations/$publicationId"
                   params={{ publicationId: p._id }}
                   hash="comments"
+                  className="challenge-entry-comments"
                   aria-label={`${p.commentCount} commentaires sur ${p.title}`}
                 >
-                  <MessageCircle size={16} />
+                  <MessageCircle size={16} aria-hidden="true" />
                   {p.commentCount}
                 </Link>
               </div>
