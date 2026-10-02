@@ -195,9 +195,11 @@ function Manipulator({
 function Stage({
   scene,
   editable,
+  showGrid,
 }: {
   scene: SceneDocument;
   editable: boolean;
+  showGrid: boolean;
 }) {
   const { camera, gl, scene: threeScene } = useThree(),
     controls = useRef<ComponentRef<typeof OrbitControls>>(null),
@@ -318,7 +320,7 @@ function Stage({
         shadow-camera-bottom={-25}
         shadow-bias={-0.0005}
       />
-      {(!editable || s.showGrid) && <GroundGrid step={gridStep} />}
+      {(editable ? s.showGrid : showGrid) && <GroundGrid step={gridStep} />}
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -0.035, 0]}
@@ -371,9 +373,11 @@ function Stage({
 export default function Scene({
   scene,
   editable = false,
+  showGrid = true,
 }: {
   scene: SceneDocument;
   editable?: boolean;
+  showGrid?: boolean;
 }) {
   const liveScene = useEditor((s) => (editable ? s.scene : scene));
   const [supported] = useState(() => {
@@ -400,7 +404,7 @@ export default function Scene({
       camera={{ position: [11, 10, 11], fov: 40, near: 0.1, far: 1000 }}
       gl={{ preserveDrawingBuffer: true, antialias: true }}
     >
-      <Stage scene={liveScene} editable={editable} />
+      <Stage scene={liveScene} editable={editable} showGrid={showGrid} />
     </Canvas>
   );
 }

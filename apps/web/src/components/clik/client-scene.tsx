@@ -33,6 +33,7 @@ class SceneBoundary extends Component<
 export default function ClientScene(props: {
   scene: SceneDocument;
   editable?: boolean;
+  showGrid?: boolean;
 }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);

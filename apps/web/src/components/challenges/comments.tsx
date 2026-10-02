@@ -1,5 +1,6 @@
 import { defaultAvatar, type AvatarDescriptor } from "@clik/avatars";
 import BrickAvatar from "@/components/ui/brick-avatar";
+import { Textarea } from "@/components/ui/textarea";
 import { useEffect, useState } from "react";
 import {
   useConvexAuth,
@@ -72,20 +73,21 @@ export default function Comments({
           }}
         >
           <label htmlFor="new-comment">Votre commentaire</label>
-          <textarea
+          <Textarea
             id="new-comment"
             value={body}
             onChange={(e) => setBody(e.target.value)}
             maxLength={1000}
+            aria-describedby="comment-length"
             rows={3}
             placeholder="Qu’en pensez-vous ?"
             disabled={busy}
             required
           />
           <div>
-            <span>{body.length} / 1 000</span>
+            <span id="comment-length">{body.length} / 1 000</span>
             <button className="primary-link" disabled={busy || !body.trim()}>
-              <Send size={15} />
+              <Send size={15} aria-hidden="true" />
               {busy ? "Envoi…" : "Publier le commentaire"}
             </button>
           </div>
@@ -188,7 +190,7 @@ function Comment({
             <label htmlFor={`edit-${comment._id}`}>
               Modifier votre commentaire
             </label>
-            <textarea
+            <Textarea
               id={`edit-${comment._id}`}
               autoFocus
               maxLength={1000}

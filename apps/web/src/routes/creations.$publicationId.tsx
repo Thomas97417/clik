@@ -1,9 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
-import { ArrowLeft, Copy } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  GitBranch,
+  MessageCircle,
+  MousePointer2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import Comments from "@/components/challenges/comments";
@@ -14,19 +20,36 @@ export const Route = createFileRoute("/creations/$publicationId")({
   component: Creation,
 });
 function Creation() {
-  const { publicationId } = Route.useParams(),
-    navigate = useNavigate(),
+  const { publicationId } = Route.useParams();
+  return (
+    <CreationDetail
+      key={publicationId}
+      publicationId={publicationId as Id<"publications">}
+    />
+  );
+}
+function CreationDetail({
+  publicationId,
+}: {
+  publicationId: Id<"publications">;
+}) {
+  const navigate = useNavigate(),
     { isAuthenticated } = useConvexAuth();
   const [versionId, setVersionId] = useState<Id<"versions"> | undefined>();
   const p = useQuery(api.projects.creation, {
-      id: publicationId as Id<"publications">,
+      id: publicationId,
       ...(versionId ? { versionId } : {}),
     }),
     remix = useMutation(api.projects.remix),
     [busy, setBusy] = useState(false);
+  const scene = useMemo(() => (p ? JSON.parse(p.scene) : null), [p?.scene]);
   if (p && !p.challenge && versionId !== p._id) setVersionId(p._id);
   if (p === undefined)
-    return <div className="empty-state">Chargement de la création…</div>;
+    return (
+      <div className="empty-state" role="status">
+        Chargement de la création…
+      </div>
+    );
   if (!p)
     return (
       <div className="empty-state">
@@ -42,22 +65,25 @@ function Creation() {
     );
   return (
     <main className="creation-page">
-      <Link to="/gallery" className="back-link">
-        <ArrowLeft size={16} /> La galerie
-      </Link>
       <div className="creation-layout">
-        <div className="public-scene">
-          <ClientScene scene={JSON.parse(p.scene)} />
-          <span>Glissez pour explorer · Pincez ou défilez pour zoomer</span>
+        <div className="creation-preview-panel">
+          <div
+            className="public-scene"
+            role="region"
+            aria-label={`Aperçu 3D de ${p.title}`}
+          >
+            <ClientScene scene={scene} showGrid={false} />
+          </div>
+          <p className="creation-view-hint">
+            <MousePointer2 size={14} aria-hidden="true" />
+            Glissez pour explorer · Pincez ou défilez pour zoomer
+          </p>
         </div>
-        <aside>
-          <span className="eyebrow">
-            {p.challenge ? "Création du défi" : "Création de la communauté"}
-          </span>
+        <aside className="creation-details">
           {p.challenge && (
             <CreationChallenge
               day={p.challenge.day}
-              publicationId={publicationId as Id<"publications">}
+              publicationId={publicationId}
               owner={p.owner}
               count={p.voteCount}
             />
@@ -66,15 +92,25 @@ function Creation() {
           <p className="author">
             par <AuthorLink id={p.owner} name={p.author} avatar={p.avatar} />
           </p>
+          <p className="publication-date">
+            Publiée le{" "}
+            <time dateTime={new Date(p.createdAt).toISOString()}>
+              {new Date(p.createdAt).toLocaleDateString("fr-FR", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </time>
+          </p>
           {p.description && <p className="description">{p.description}</p>}
           {p.origin && (
             <p className="attribution">
-              D’après « {p.origin.title} » de {p.origin.author}.
+              <GitBranch size={16} aria-hidden="true" />
+              <span>
+                D’après « {p.origin.title} » de {p.origin.author}.
+              </span>
             </p>
           )}
-          <p className="publication-date">
-            Publiée le {new Date(p.createdAt).toLocaleDateString("fr-FR")}
-          </p>
           {p.challenge &&
             p.updatedAt &&
             p.submittedAt &&
@@ -84,54 +120,118 @@ function Creation() {
                 Les votes sont conservés.
               </p>
             )}
-          {isAuthenticated ? (
-            <Button
-              disabled={busy}
-              onClick={async () => {
-                setBusy(true);
-                try {
-                  const id = await remix({
-                    id: publicationId as Id<"publications">,
-                    versionId: p._id,
-                  });
-                  await navigate({
-                    to: "/editor/$projectId",
-                    params: { projectId: id },
-                  });
-                } catch (e) {
-                  toast.error(String(e));
-                } finally {
-                  setBusy(false);
+          <div className="creation-fork">
+            <div className="creation-fork-heading">
+              <svg
+                className="creation-fork-art"
+                viewBox="0 0 56 68"
+                fill="none"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path
+                  d="M14 12v44"
+                  stroke="#b4c6e5"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M14 48c0-23 28-8 28-34"
+                  stroke="#356ae6"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+                <rect
+                  x="8"
+                  y="6"
+                  width="12"
+                  height="12"
+                  rx="3"
+                  fill="#dbe6f8"
+                  stroke="#a6badc"
+                  strokeWidth="2"
+                />
+                <rect
+                  x="8"
+                  y="50"
+                  width="12"
+                  height="12"
+                  rx="3"
+                  fill="#dbe6f8"
+                  stroke="#a6badc"
+                  strokeWidth="2"
+                />
+                <rect
+                  x="35"
+                  y="5"
+                  width="14"
+                  height="14"
+                  rx="3"
+                  fill="#356ae6"
+                />
+                <path
+                  d="M39 12h6m-3-3v6"
+                  stroke="white"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div>
+                <h2>Et si vous imaginiez la suite ?</h2>
+                <p>Une nouvelle branche, votre propre version.</p>
+              </div>
+            </div>
+            {isAuthenticated ? (
+              <Button
+                className="creation-fork-button"
+                disabled={busy}
+                onClick={async () => {
+                  setBusy(true);
+                  try {
+                    const id = await remix({
+                      id: publicationId,
+                      versionId: p._id,
+                    });
+                    await navigate({
+                      to: "/editor/$projectId",
+                      params: { projectId: id },
+                    });
+                  } catch (e) {
+                    toast.error(String(e));
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
+              >
+                <GitBranch size={17} aria-hidden="true" />
+                {busy
+                  ? "Création de votre version…"
+                  : "Continuer cette création"}
+                <ArrowRight size={16} aria-hidden="true" />
+              </Button>
+            ) : (
+              <Link
+                to="/sign-in"
+                onClick={() =>
+                  sessionStorage.setItem(
+                    "clik-return-to",
+                    window.location.pathname,
+                  )
                 }
-              }}
-            >
-              <Copy size={16} />
-              {busy ? "Copie en cours…" : "Reprendre cette création"}
-            </Button>
-          ) : (
-            <Link
-              to="/sign-in"
-              onClick={() =>
-                sessionStorage.setItem(
-                  "clik-return-to",
-                  window.location.pathname,
-                )
-              }
-              className="primary-link"
-            >
-              Se connecter pour reprendre
-            </Link>
-          )}
-          <p className="reuse-note">
-            Créez votre propre version. Une copie privée de cette scène sera
-            ajoutée à vos projets, avec son attribution.
-          </p>
+                className="primary-link creation-fork-button"
+              >
+                <GitBranch size={17} aria-hidden="true" /> Se connecter pour
+                continuer
+              </Link>
+            )}
+            <p className="creation-fork-note">
+              Une copie privée rejoint vos créations. L’auteur d’origine reste
+              crédité.
+            </p>
+          </div>
         </aside>
       </div>
-      <Comments
-        publicationId={publicationId as Id<"publications">}
-        count={p.commentCount}
-      />
+      <Comments publicationId={publicationId} count={p.commentCount} />
     </main>
   );
 }

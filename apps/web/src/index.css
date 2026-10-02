@@ -3156,7 +3156,30 @@ a.creation-card:hover .card-arrow,
 .creation-page {
   max-width: 1400px;
   margin: auto;
-  padding: 35px 5%;
+  padding: 35px 5% 64px;
+}
+.creation-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.creation-navigation .back-link {
+  margin: 0;
+}
+.creation-comment-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #71839c;
+  font-size: 12px;
+}
+.creation-comment-link:hover {
+  background: #eaf0fb;
+  color: #356ae6;
 }
 .back-link {
   display: flex;
@@ -3168,9 +3191,13 @@ a.creation-card:hover .card-arrow,
 }
 .creation-layout {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 45px;
-  align-items: center;
+  grid-template-columns: minmax(0, 1.8fr) minmax(300px, 1fr);
+  gap: 36px;
+  align-items: start;
+}
+.creation-preview-panel,
+.creation-details {
+  min-width: 0;
 }
 .public-scene {
   height: 560px;
@@ -3178,19 +3205,29 @@ a.creation-card:hover .card-arrow,
   overflow: hidden;
   border: 1px solid #e2e8f1;
   position: relative;
+  background: #edf1f7;
 }
-.public-scene > span {
-  position: absolute;
-  bottom: 22px;
-  left: 25px;
+.creation-view-hint {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  padding: 14px 8px 0;
   font-size: 11px;
   color: #8190a5;
+  text-align: center;
+  line-height: 1.6;
+}
+.creation-view-hint svg {
+  flex-shrink: 0;
 }
 .creation-layout h1 {
-  font-size: 38px;
+  font-size: clamp(28px, 3vw, 42px);
+  line-height: 1.15;
   font-weight: 800;
   letter-spacing: -1.5px;
-  margin: 20px 0 12px;
+  margin: 6px 0 16px;
+  overflow-wrap: anywhere;
 }
 .author {
   color: #6e84a3;
@@ -3202,13 +3239,17 @@ a.creation-card:hover .card-arrow,
   line-height: 1.9;
   font-size: 15px;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 .publication-date {
   font-size: 12px;
   color: #96a2b5;
-  margin: 25px 0;
+  margin: 12px 0 22px;
 }
 .attribution {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   font-size: 12px;
   line-height: 1.7;
   padding: 12px 15px;
@@ -3216,6 +3257,78 @@ a.creation-card:hover .card-arrow,
   color: #7b8ea8;
   border-radius: 6px;
   margin: 15px 0;
+  overflow-wrap: anywhere;
+}
+.attribution svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.creation-fork {
+  margin-top: 28px;
+  padding: 20px;
+  border: 1px solid #dce6f7;
+  border-radius: 16px;
+  background: #f0f5fd;
+}
+.creation-fork-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.creation-fork-art {
+  width: 48px;
+  height: 60px;
+  flex-shrink: 0;
+}
+.creation-fork-heading h2 {
+  font-size: 17px;
+  font-weight: 750;
+  letter-spacing: -0.4px;
+  line-height: 1.4;
+}
+.creation-fork-heading p {
+  font-size: 12px;
+  color: #71839c;
+  margin-top: 5px;
+  line-height: 1.7;
+}
+.creation-fork-button {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  height: auto;
+  padding: 12px;
+  gap: 8px;
+  border-radius: 10px;
+  background: #356ae6;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: normal;
+  line-height: 1.5;
+}
+.creation-fork-button:hover {
+  background: #2859cd;
+}
+.creation-fork-button svg {
+  flex-shrink: 0;
+}
+.creation-fork-note {
+  margin-top: 12px;
+  color: #7889a3;
+  font-size: 11px;
+  line-height: 1.7;
+}
+@media (min-width: 851px) and (max-width: 1100px) {
+  .creation-layout {
+    gap: 24px;
+    grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr);
+  }
+  .creation-fork {
+    padding: 16px;
+  }
 }
 @media (min-width: 1500px) {
   .editor-body {
@@ -4249,6 +4362,7 @@ dialog.modal-backdrop::backdrop {
   text-decoration: underline;
 }
 .creation-comments {
+  scroll-margin-top: 100px;
   margin-top: 45px;
   padding-top: 35px;
   border-top: 1px solid #e0e8f3;
@@ -4266,10 +4380,19 @@ dialog.modal-backdrop::backdrop {
   color: #25354e;
 }
 .comments-heading span {
+  display: inline-flex;
+  vertical-align: middle;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
   margin-left: 8px;
-  font-size: 15px;
-  color: #8190a8;
-  font-weight: 500;
+  border-radius: 8px;
+  background: #eaf0fb;
+  font-size: 12px;
+  color: #356ae6;
+  font-weight: 600;
 }
 .creation-comments > p {
   margin: 10px 0 22px;
@@ -4296,6 +4419,7 @@ dialog.modal-backdrop::backdrop {
   width: 100%;
   resize: vertical;
   min-height: 90px;
+  max-height: 360px;
   background: #f9fbff;
   border: 1px solid #dce5f2;
   border-radius: 9px;
@@ -4305,6 +4429,7 @@ dialog.modal-backdrop::backdrop {
 }
 .creation-comments textarea:focus-visible {
   outline: 2px solid #356ae6;
+  outline-offset: 2px;
 }
 .comment-form > div {
   display: flex;
