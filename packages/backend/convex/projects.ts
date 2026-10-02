@@ -298,22 +298,31 @@ export const gallery = query({
   args: {
     paginationOpts: paginationOptsValidator,
     ownerId: v.optional(v.string()),
+    sort: v.optional(
+      v.union(v.literal("recent"), v.literal("oldest"), v.literal("comments")),
+    ),
   },
   handler: async (ctx, a) => {
     const publications =
       a.ownerId !== undefined
         ? ctx.db
             .query("publications")
-            .withIndex("by_owner_recent", (q) =>
-              q.eq("owner", a.ownerId!).eq("active", true),
+            .withIndex(
+              a.sort === "comments" ? "by_owner_comments" : "by_owner_recent",
+              (q) => q.eq("owner", a.ownerId!).eq("active", true),
             )
         : ctx.db
             .query("publications")
-            .withIndex("by_recent", (q) => q.eq("active", true));
-    const results = await publications.order("desc").paginate({
-      ...a.paginationOpts,
-      numItems: Math.min(24, a.paginationOpts.numItems),
-    });
+            .withIndex(
+              a.sort === "comments" ? "by_comments" : "by_recent",
+              (q) => q.eq("active", true),
+            );
+    const results = await publications
+      .order(a.sort === "oldest" ? "asc" : "desc")
+      .paginate({
+        ...a.paginationOpts,
+        numItems: Math.min(24, a.paginationOpts.numItems),
+      });
     const avatars = await readAvatars(
       ctx,
       results.page.map((p) => p.owner),

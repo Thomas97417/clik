@@ -129,6 +129,13 @@ export default defineSchema({
   })
     .index("by_recent", ["active", "publishedAt"])
     .index("by_owner_recent", ["owner", "active", "publishedAt"])
+    .index("by_comments", ["active", "commentCount", "publishedAt"])
+    .index("by_owner_comments", [
+      "owner",
+      "active",
+      "commentCount",
+      "publishedAt",
+    ])
     .index("by_project", ["projectId"])
     .index("by_challenge_recent", ["challengeId", "active", "submittedAt"])
     .index("by_challenge_votes", [

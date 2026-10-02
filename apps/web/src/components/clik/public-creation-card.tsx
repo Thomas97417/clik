@@ -1,6 +1,6 @@
 import type { AvatarDescriptor } from "@clik/avatars";
 import { Link } from "@tanstack/react-router";
-import { ArrowUpRight, Box } from "lucide-react";
+import { ArrowUpRight, Box, MessageCircle } from "lucide-react";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import AuthorLink from "./author-link";
 
@@ -14,6 +14,7 @@ export default function PublicCreationCard({
     author: string;
     avatar?: AvatarDescriptor;
     thumbnailUrl: string | null;
+    commentCount?: number;
     challenge?: { day: string } | null;
   };
 }) {
@@ -53,14 +54,25 @@ export default function PublicCreationCard({
           <h2>{creation.title}</h2>
         </div>
       </Link>
-      <p className="public-card-author">
-        par{" "}
-        <AuthorLink
-          id={creation.owner}
-          name={creation.author}
-          avatar={creation.avatar}
-        />
-      </p>
+      <div className="public-card-footer">
+        <p className="public-card-author">
+          par{" "}
+          <AuthorLink
+            id={creation.owner}
+            name={creation.author}
+            avatar={creation.avatar}
+          />
+        </p>
+        <Link
+          {...target}
+          hash="comments"
+          className="public-card-comments"
+          aria-label={`${creation.commentCount ?? 0} commentaire${(creation.commentCount ?? 0) === 1 ? "" : "s"} sur ${creation.title}`}
+        >
+          <MessageCircle size={15} aria-hidden="true" />
+          <span>{creation.commentCount ?? 0}</span>
+        </Link>
+      </div>
     </article>
   );
 }

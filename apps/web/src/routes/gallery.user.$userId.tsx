@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { usePaginatedQuery, useQuery } from "convex/react";
 import BrickAvatar from "@/components/ui/brick-avatar";
 import { defaultAvatar } from "@clik/avatars";
-import { ArrowLeft, Box } from "lucide-react";
+import { Box } from "lucide-react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import PublicCreationCard from "@/components/clik/public-creation-card";
@@ -33,9 +33,6 @@ function CreatorGallery({ userId }: { userId: string }) {
   );
   return (
     <main className="collection-page creator-page">
-      <Link to="/gallery" className="back-link">
-        <ArrowLeft size={16} aria-hidden="true" /> La galerie
-      </Link>
       {creator === undefined ? (
         <div className="empty-state" role="status">
           Chargement du créateur…

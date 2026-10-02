@@ -97,6 +97,50 @@ async function seed() {
 }
 
 describe("Galeries publiques des créateurs", () => {
+  it("trie toute la galerie avant pagination et conserve le filtre auteur", async () => {
+    const { t, ids } = await seed();
+    await t.run(async (ctx) => {
+      await ctx.db.patch(ids[0], { commentCount: 12 });
+      await ctx.db.patch(ids[4], { commentCount: 12 });
+      await ctx.db.patch(ids[18], { commentCount: 8 });
+      await ctx.db.patch(ids[17], { commentCount: 100 }); // Private: always excluded.
+      await ctx.db.patch(ids[19], { commentCount: 0 });
+    });
+    const first = await t.query(api.projects.gallery, {
+      sort: "comments",
+      paginationOpts: { numItems: 2, cursor: null },
+    });
+    expect(first.page.map((p) => p._id)).toEqual([ids[4], ids[0]]);
+    expect(first.page.map((p) => p.commentCount)).toEqual([12, 12]);
+    const rest = await t.query(api.projects.gallery, {
+      sort: "comments",
+      paginationOpts: { numItems: 24, cursor: first.continueCursor },
+    });
+    expect(rest.page[0]._id).toBe(ids[18]);
+    expect(rest.page).toHaveLength(18);
+    expect(rest.isDone).toBe(true);
+    expect(rest.page.some((p) => p._id === ids[17])).toBe(false);
+    expect(rest.page.slice(1).every((p) => p.commentCount === 0)).toBe(true);
+    const owner = await t.query(api.projects.gallery, {
+      sort: "comments",
+      ownerId: "alice",
+      paginationOpts: { numItems: 24, cursor: null },
+    });
+    expect(owner.page).toHaveLength(17);
+    expect(owner.page.every((p) => p.owner === "alice")).toBe(true);
+    expect(owner.page.slice(0, 2).map((p) => p._id)).toEqual([ids[4], ids[0]]);
+    const oldest = await t.query(api.projects.gallery, {
+      sort: "oldest",
+      paginationOpts: { numItems: 2, cursor: null },
+    });
+    expect(oldest.page.map((p) => p._id)).toEqual(ids.slice(0, 2));
+    await t.run((ctx) => ctx.db.patch(ids[18], { commentCount: 20 }));
+    const updated = await t.query(api.projects.gallery, {
+      sort: "comments",
+      paginationOpts: { numItems: 2, cursor: null },
+    });
+    expect(updated.page[0]._id).toBe(ids[18]);
+  });
   it("pagine par auteur les publications actives, défis compris, sans projets privés ni anciennes versions", async () => {
     const { t, ids } = await seed();
     const first = await t.query(api.projects.gallery, {

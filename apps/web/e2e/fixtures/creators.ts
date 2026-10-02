@@ -224,7 +224,14 @@ export async function creatorsFixture(page: Page, authenticated = false) {
               p.active &&
               (args.ownerId === undefined || p.owner === args.ownerId),
           )
-          .sort((a, b) => b.publishedAt - a.publishedAt);
+          .sort((a, b) =>
+            args.sort === "oldest"
+              ? a.publishedAt - b.publishedAt
+              : args.sort === "comments"
+                ? b.commentCount - a.commentCount ||
+                  b.publishedAt - a.publishedAt
+                : b.publishedAt - a.publishedAt,
+          );
         const from = Number(args.paginationOpts.cursor || 0),
           end = from + args.paginationOpts.numItems;
         return {
@@ -361,6 +368,10 @@ export async function creatorsFixture(page: Page, authenticated = false) {
     });
   });
   return {
+    setComments: (id: string, count: number) => {
+      publications.find((p) => p._id === id)!.commentCount = count;
+      refreshers.forEach((refresh) => refresh());
+    },
     avatarSaves,
     setRewards: (count: number, crowns: string[] = []) => {
       rewardCount = count;
