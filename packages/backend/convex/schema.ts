@@ -128,6 +128,11 @@ export default defineSchema({
     origin: v.optional(origin),
   })
     .index("by_recent", ["active", "publishedAt"])
+    .index("by_origin_recent", [
+      "origin.publicationId",
+      "active",
+      "publishedAt",
+    ])
     .index("by_owner_recent", ["owner", "active", "publishedAt"])
     .index("by_comments", ["active", "commentCount", "publishedAt"])
     .index("by_owner_comments", [

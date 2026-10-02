@@ -4,10 +4,8 @@ import { useMemo, useState } from "react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import {
-  ArrowLeft,
   ArrowRight,
   GitBranch,
-  MessageCircle,
   MousePointer2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -16,6 +14,7 @@ import Comments from "@/components/challenges/comments";
 import { CreationChallenge } from "@/components/challenges/shared";
 import AuthorLink from "@/components/clik/author-link";
 import ClientScene from "@/components/clik/client-scene";
+import CreationRemixes from "@/components/clik/creation-remixes";
 export const Route = createFileRoute("/creations/$publicationId")({
   component: Creation,
 });
@@ -231,6 +230,7 @@ function CreationDetail({
           </div>
         </aside>
       </div>
+      <CreationRemixes publicationId={publicationId} />
       <Comments publicationId={publicationId} count={p.commentCount} />
     </main>
   );

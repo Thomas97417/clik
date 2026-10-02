@@ -79,6 +79,7 @@ export async function creatorsFixture(page: Page, authenticated = false) {
     voteCount: 2,
     updatedAt: now,
     submittedAt: now,
+    origin: undefined as { publicationId: string } | undefined,
   }));
   await page.route("https://images.example.test/**", (route) => {
     if (route.request().url().includes("broken"))
@@ -217,11 +218,13 @@ export async function creatorsFixture(page: Page, authenticated = false) {
         const profile = profiles.get(args.userId);
         return profile ? { ...profile, avatar: avatarFor(args.userId) } : null;
       }
-      if (path === "projects:gallery") {
+      if (path === "projects:gallery" || path === "projects:remixes") {
         const rows = publications
           .filter(
             (p) =>
               p.active &&
+              (path !== "projects:remixes" ||
+                p.origin?.publicationId === args.publicationId) &&
               (args.ownerId === undefined || p.owner === args.ownerId),
           )
           .sort((a, b) =>
@@ -368,6 +371,10 @@ export async function creatorsFixture(page: Page, authenticated = false) {
     });
   });
   return {
+    setOrigin: (id: string, publicationId: string) => {
+      publications.find((p) => p._id === id)!.origin = { publicationId };
+      refreshers.forEach((refresh) => refresh());
+    },
     setComments: (id: string, count: number) => {
       publications.find((p) => p._id === id)!.commentCount = count;
       refreshers.forEach((refresh) => refresh());

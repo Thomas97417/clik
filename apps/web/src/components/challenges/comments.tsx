@@ -47,7 +47,7 @@ export default function Comments({
       <div className="comments-heading">
         <MessageCircle size={22} aria-hidden="true" />
         <h2 id="comments-title">
-          Les petits mots<span> {count}</span>
+          Commentaires<span> {count}</span>
         </h2>
       </div>
       <p>

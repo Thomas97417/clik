@@ -10,7 +10,7 @@ import {
   type MutationCtx,
 } from "./_generated/server";
 import { api, internal } from "./_generated/api";
-import type { Id } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 import { authComponent } from "./auth";
 import { readAvatar, readAvatars } from "./lib/avatars";
 import {
@@ -294,6 +294,50 @@ export const withdraw = mutation({
     });
   },
 });
+async function publicCards(ctx: QueryCtx, publications: Doc<"publications">[]) {
+  const avatars = await readAvatars(
+    ctx,
+    publications.map((p) => p.owner),
+  );
+  return Promise.all(
+    publications.map(async (p) => ({
+      _id: p._id,
+      owner: p.owner,
+      title: p.title,
+      author: p.author,
+      avatar: avatars.get(p.owner)!,
+      publishedAt: p.publishedAt,
+      challenge: p.challengeId ? await ctx.db.get(p.challengeId) : null,
+      commentCount: p.commentCount ?? 0,
+      thumbnailUrl: await ctx.storage.getUrl(p.thumbnail),
+    })),
+  );
+}
+
+export const remixes = query({
+  args: {
+    publicationId: v.id("publications"),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, args) => {
+    const source = await ctx.db.get(args.publicationId);
+    if (!source?.active) return { page: [], isDone: true, continueCursor: "" };
+    // Match the source publication across all its versions; private projects
+    // and withdrawn publications never appear in this public list.
+    const results = await ctx.db
+      .query("publications")
+      .withIndex("by_origin_recent", (q) =>
+        q.eq("origin.publicationId", args.publicationId).eq("active", true),
+      )
+      .order("desc")
+      .paginate({
+        ...args.paginationOpts,
+        numItems: Math.min(24, args.paginationOpts.numItems),
+      });
+    return { ...results, page: await publicCards(ctx, results.page) };
+  },
+});
+
 export const gallery = query({
   args: {
     paginationOpts: paginationOptsValidator,
@@ -323,25 +367,9 @@ export const gallery = query({
         ...a.paginationOpts,
         numItems: Math.min(24, a.paginationOpts.numItems),
       });
-    const avatars = await readAvatars(
-      ctx,
-      results.page.map((p) => p.owner),
-    );
     return {
       ...results,
-      page: await Promise.all(
-        results.page.map(async (p) => ({
-          _id: p._id,
-          owner: p.owner,
-          title: p.title,
-          author: p.author,
-          avatar: avatars.get(p.owner)!,
-          publishedAt: p.publishedAt,
-          challenge: p.challengeId ? await ctx.db.get(p.challengeId) : null,
-          commentCount: p.commentCount ?? 0,
-          thumbnailUrl: await ctx.storage.getUrl(p.thumbnail),
-        })),
-      ),
+      page: await publicCards(ctx, results.page),
     };
   },
 });

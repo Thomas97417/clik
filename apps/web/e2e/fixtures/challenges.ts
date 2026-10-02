@@ -129,6 +129,8 @@ export async function challengeFixture(page: Page) {
             isDone: true,
             continueCursor: "",
           };
+        case "projects:remixes":
+          return { page: [], isDone: true, continueCursor: "" };
         case "projects:creation": {
           const e = entries.find((e) => e._id === a.id)!;
           return {

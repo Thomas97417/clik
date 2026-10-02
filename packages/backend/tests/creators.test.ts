@@ -97,6 +97,85 @@ async function seed() {
 }
 
 describe("Galeries publiques des créateurs", () => {
+  it("pagine les reprises publiques directes de toutes les versions, sans exposer les projets privés", async () => {
+    const { t, ids } = await seed();
+    await t.run(async (ctx) => {
+      const first = (await ctx.db.query("versions").first())!;
+      const second = await ctx.db.insert("versions", {
+        publicationId: ids[0],
+        scene: first.scene,
+        title: "Nouvelle version",
+        description: "",
+        author: "alice",
+        thumbnail: first.thumbnail,
+        createdAt: 200,
+      });
+      for (let i = 1; i <= 18; i++) {
+        await ctx.db.patch(ids[i], {
+          origin: {
+            publicationId: ids[0],
+            versionId: i % 2 ? first._id : second,
+            title: first.title,
+            author: "alice",
+          },
+        });
+      }
+      // A descendant belongs to its own source, not to the original's direct list.
+      await ctx.db.patch(ids[20], {
+        origin: {
+          publicationId: ids[1],
+          versionId: second,
+          title: "Autre source",
+          author: "alice",
+        },
+      });
+      await ctx.db.insert("projects", {
+        owner: "bob",
+        title: "Reprise encore privée",
+        scene: first.scene,
+        revision: 0,
+        updatedAt: 300,
+        origin: {
+          publicationId: ids[0],
+          versionId: first._id,
+          title: first.title,
+          author: "alice",
+        },
+      });
+    });
+    const first = await t.query(api.projects.remixes, {
+      publicationId: ids[0],
+      paginationOpts: { numItems: 6, cursor: null },
+    });
+    expect(first.page.map((p) => p._id)).toEqual([
+      ids[18],
+      ...ids.slice(12, 17).reverse(),
+    ]);
+    expect(first.isDone).toBe(false);
+    expect(first.page[1].challenge).not.toBeNull();
+    expect(first.page[0].avatar).toEqual(defaultAvatar("bob"));
+    expect(first.page[0].thumbnailUrl).toBeTruthy();
+    expect(first.page[0]).not.toHaveProperty("scene");
+    const last = await t.query(api.projects.remixes, {
+      publicationId: ids[0],
+      paginationOpts: { numItems: 24, cursor: first.continueCursor },
+    });
+    expect(last.page.map((p) => p._id)).toEqual(ids.slice(1, 12).reverse());
+    expect(last.isDone).toBe(true);
+    await t.run((ctx) => ctx.db.patch(ids[18], { active: false }));
+    const query = () =>
+      t.query(api.projects.remixes, {
+        publicationId: ids[0],
+        paginationOpts: { numItems: 24, cursor: null },
+      });
+    expect((await query()).page).toHaveLength(16);
+    await t.run((ctx) => ctx.db.patch(ids[18], { active: true }));
+    expect((await query()).page).toHaveLength(17);
+    await t.run((ctx) => ctx.db.patch(ids[0], { active: false }));
+    expect((await query()).page).toEqual([]);
+    await t.run((ctx) => ctx.db.delete(ids[0]));
+    expect((await query()).page).toEqual([]);
+  });
   it("trie toute la galerie avant pagination et conserve le filtre auteur", async () => {
     const { t, ids } = await seed();
     await t.run(async (ctx) => {
