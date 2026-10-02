@@ -121,9 +121,40 @@ test("défis : échéance et podium figé avec ex æquo et création retirée", 
   fixture.setRewardPhase("pending");
   await page.goto("/challenges");
   const rewards = page.getByRole("region", { name: "Récompenses du défi" });
+  const toggle = rewards.getByRole("button", {
+    name: /Les règles|Réduire|Voir le podium/,
+  });
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(rewards.locator("time")).toBeVisible();
+  await expect(
+    rewards.getByText(/24 h après la fin des constructions/),
+  ).toBeHidden();
+  await toggle.focus();
+  await page.keyboard.press("Enter");
   await expect(rewards).toContainText("24 h après la fin des constructions");
+  await expect(
+    rewards.getByRole("link", { name: "Personnaliser mon avatar" }),
+  ).toBeVisible();
+  await toggle.click();
   fixture.setRewardPhase("complete");
-  await expect(rewards).toContainText("Résultats définitifs");
+  await expect(rewards).toContainText("Podium définitif");
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(
+    rewards.getByRole("link", { name: "Le phare couronné" }),
+  ).toHaveCount(0);
+  for (const width of [1440, 390, 320]) {
+    await page.setViewportSize({ width, height: 1000 });
+    expect((await rewards.boundingBox())!.height).toBeLessThan(
+      width === 1440 ? 75 : 110,
+    );
+    expect(
+      await rewards.evaluate((el) => el.scrollWidth <= el.clientWidth),
+    ).toBe(true);
+    await rewards.screenshot({
+      path: `/tmp/clik-rewards-compact-${width}-${info.project.name}.png`,
+    });
+  }
+  await toggle.click();
   await expect(rewards.getByText("1er · Or", { exact: true })).toHaveCount(2);
   await expect(rewards.getByText("3e · Bronze", { exact: true })).toBeVisible();
   await expect(
@@ -135,10 +166,19 @@ test("défis : échéance et podium figé avec ex æquo et création retirée", 
   await expect(
     rewards.getByRole("link", { name: "Le phare couronné" }),
   ).toHaveAttribute("href", "/creations/creation-1");
-  for (const width of [1440, 390]) {
-    await page.setViewportSize({ width, height: 1800 });
+  for (const width of [1440, 390, 320]) {
+    await page.setViewportSize({ width, height: 1000 });
+    expect(
+      await rewards.evaluate((el) => el.scrollWidth <= el.clientWidth),
+    ).toBe(true);
     await rewards.screenshot({
       path: `/tmp/clik-podium-${width}-${info.project.name}.png`,
     });
   }
+  await toggle.focus();
+  await page.keyboard.press("Space");
+  await expect(
+    rewards.getByRole("link", { name: "Le phare couronné" }),
+  ).toHaveCount(0);
+  await expect(toggle).toBeFocused();
 });

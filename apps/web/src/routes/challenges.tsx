@@ -25,7 +25,6 @@ import {
   ArrowUpRight,
   Clock3,
   MessageCircle,
-  Trophy,
 } from "lucide-react";
 import AuthorLink from "@/components/clik/author-link";
 import PartPreview from "@/components/clik/part-preview";
@@ -234,14 +233,10 @@ function Challenges() {
               voter et commenter sur mobile.
             </p>
           </section>
-          <ChallengeRewards
-            key={`rewards-${challenge._id}`}
-            challenge={challenge}
-            now={now}
-          />
           <Entries
             key={challenge._id}
             challenge={challenge}
+            now={now}
             open={open}
             choices={data.choices}
           />
@@ -252,10 +247,12 @@ function Challenges() {
 }
 function Entries({
   challenge,
+  now,
   open,
   choices,
 }: {
   challenge: Doc<"challenges">;
+  now: number;
   open: boolean;
   choices: { publicationId: Id<"publications"> }[];
 }) {
@@ -289,6 +286,7 @@ function Entries({
           </select>
         </label>
       </div>
+      <ChallengeRewards challenge={challenge} now={now} />
       {!results.length ? (
         <div className="empty-state">
           {status === "LoadingFirstPage"
