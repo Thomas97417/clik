@@ -2846,6 +2846,18 @@ a.creation-card:hover .card-arrow,
 .project-thumbnail {
   background: radial-gradient(ellipse at 50% 65%, #dfe9f7, #f1f5fb 70%);
 }
+.project-thumbnail .project-challenge-badge {
+  position: absolute;
+  bottom: 16px;
+  left: 14px;
+  max-width: calc(100% - 76px);
+  margin: 0;
+  padding: 6px 9px;
+  border-radius: 6px;
+  background: #f5f0ffed;
+  color: #765aa8;
+  font-weight: 600;
+}
 .project-card:nth-child(3n + 2) .project-thumbnail {
   background: radial-gradient(ellipse at 50% 65%, #e4e6f1, #f6f4fa 70%);
 }
@@ -2984,6 +2996,21 @@ a.creation-card:hover .card-arrow,
 }
 .project-card .card-meta p {
   color: #73829a;
+}
+.project-card .card-meta .project-description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+  margin-top: 8px;
+  margin-bottom: 10px;
+  color: #536581;
+  line-height: 1.6;
+}
+.project-card .card-meta .project-updated {
+  font-size: 11px;
 }
 .project-card .project-origin {
   overflow: hidden;

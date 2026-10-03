@@ -130,6 +130,7 @@ export default function ProjectCard({
   };
   const online = creation.location === "online";
   const published = online && creation.publicationId;
+  const description = online ? creation.description?.trim() : undefined;
   const makePrivate = async () => {
     if (!published || busy) return;
     setBusy(true);
@@ -186,18 +187,23 @@ export default function ProjectCard({
             cacheKey={creation.cacheKey}
             title={creation.title}
           />
+          {creation.challenge && (
+            <span className="challenge-badge project-challenge-badge">
+              Défi du {creation.challenge.day}
+            </span>
+          )}
           <span className="card-arrow" aria-hidden="true">
             <ArrowUpRight size={19} />
           </span>
         </div>
         <div className="card-meta">
-          {creation.challenge && (
-            <span className="challenge-badge">
-              Défi du {creation.challenge.day}
-            </span>
-          )}
           <h2 title={creation.title}>{creation.title}</h2>
-          <p>
+          {description && (
+            <p className="project-description" title={description}>
+              {description}
+            </p>
+          )}
+          <p className="project-updated">
             {creation.updatedAt ? (
               <>
                 Modifiée le{" "}
