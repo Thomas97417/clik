@@ -1451,12 +1451,12 @@ button:focus-visible {
   background: #fff;
 }
 .editor-top {
-  min-height: 82px;
+  min-height: 52px;
   display: flex;
   align-items: center;
-  gap: 18px;
-  padding: 10px 22px;
-  border-bottom: 1px solid #e5e9f0;
+  gap: 16px;
+  padding: 8px 18px;
+  border-bottom: 1px solid #ebeff5;
   flex-shrink: 0;
   background: #fff;
 }
@@ -1466,47 +1466,71 @@ button:focus-visible {
   outline-offset: 3px;
 }
 .editor-project {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   flex: 1;
   min-width: 0;
 }
 .project-title-field {
-  display: block;
-  width: min(100%, 440px);
+  display: inline-grid;
+  grid-template-columns: minmax(0, max-content);
+  flex: 0 1 auto;
+  max-width: 100%;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+.project-title-measure {
+  grid-area: 1 / 1;
+  padding: 5px 2px;
+  border: 1px solid transparent;
+  visibility: hidden;
+  white-space: pre;
+  overflow: hidden;
+  pointer-events: none;
 }
 .project-title {
+  grid-area: 1 / 1;
   width: 100%;
   min-width: 0;
-  height: 38px;
-  padding: 7px 12px;
-  border: 1px solid #dfe5ef;
-  border-radius: 9px;
-  background: #f8fafc;
+  height: 32px;
+  padding: 5px 2px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
   box-shadow: none !important;
-  font-size: 15px !important;
-  font-weight: 650;
+  font: inherit;
   color: #26344c;
   text-overflow: ellipsis;
   cursor: text;
 }
 .project-title:hover:not(:disabled) {
-  border-color: #b8c8e0;
-  background: #fff;
+  border-bottom-color: #c4cddd;
 }
 .project-title:focus-visible {
-  border-color: #356ae6;
-  background: #fff;
-  outline: 2px solid #dce7ff;
-  outline-offset: 1px;
+  border-color: transparent;
+  border-bottom-color: #356ae6;
+  outline: 2px solid #356ae6;
+  outline-offset: 2px;
 }
 .project-metadata {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
-  margin-top: 5px;
-  padding-left: 12px;
-  font-size: 11px;
-  line-height: 18px;
+  flex-shrink: 0;
+  padding-left: 10px;
+  border-left: 1px solid #e9edf4;
+  font-size: 10px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+.project-metadata .assembly-badge {
+  padding: 2px 6px;
+  font-size: 9px;
+  line-height: 14px;
 }
 .project-visibility {
   display: inline-flex;
@@ -1532,30 +1556,22 @@ button:focus-visible {
 .editor-project-actions {
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 14px;
   flex-shrink: 0;
-  padding-left: 22px;
-  border-left: 1px solid #e5e9f0;
+  padding-left: 16px;
+  border-left: 1px solid #e9edf4;
 }
 .save-status {
   display: flex;
-  gap: 9px;
+  gap: 6px;
   align-items: center;
   color: #68788e;
-  font-size: 12px;
+  font-size: 11px;
   max-width: 230px;
   line-height: 1.4;
 }
 .save-status > svg {
   flex-shrink: 0;
-}
-.save-status > div {
-  display: grid;
-  gap: 2px;
-}
-.save-status small {
-  font-size: 10px;
-  color: #68788e;
 }
 .save-status[data-state="saved"] > svg {
   color: #34906c;
@@ -1585,13 +1601,13 @@ button:focus-visible {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-size: 12px;
-  height: 38px;
-  padding: 0 15px;
-  border-radius: 9px;
+  gap: 6px;
+  font-size: 11px;
+  height: 32px;
+  padding: 0 11px;
+  border-radius: 6px;
   white-space: nowrap;
-  box-shadow: 0 2px 4px #356ae615;
+  box-shadow: none;
 }
 .editor-body {
   --library-width: 236px;
@@ -2690,6 +2706,7 @@ a.creation-card:hover .card-arrow,
 }
 .creator-identity h1 {
   overflow-wrap: anywhere;
+  margin-bottom: 0;
 }
 .creator-empty > svg {
   margin: 0 auto 18px;
@@ -3510,12 +3527,8 @@ a.creation-card:hover .card-arrow,
     padding-inline: 16px;
   }
   .editor-project-actions {
-    gap: 14px;
-    padding-left: 16px;
-  }
-  .project-metadata {
-    flex-wrap: wrap;
-    gap: 0 10px;
+    gap: 10px;
+    padding-left: 12px;
   }
   .project-attribution {
     flex-basis: 100%;
@@ -6145,18 +6158,19 @@ dialog.modal-backdrop::backdrop {
 
 /* Project assemblies and their public sources. */
 .editor-top .editor-import-action {
-  height: 40px;
-  padding: 0 12px;
-  gap: 7px;
-  border: 1px solid #dce5f2;
-  border-radius: 9px;
-  background: #f8fafc;
+  height: 32px;
+  padding: 0 9px;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  box-shadow: none;
   color: #536888;
-  font-size: 12px;
+  font-size: 11px;
 }
 .editor-top .editor-import-action:hover:not(:disabled) {
-  background: #eef3fd;
-  border-color: #b9cbed;
+  background: #f3f6fb;
+  border-color: #e5ebf5;
   color: #356ae6;
 }
 .assembly-badge {
@@ -6416,7 +6430,7 @@ dialog.modal-backdrop::backdrop {
     display: none;
   }
   .editor-top .editor-import-action {
-    width: 40px;
+    width: 32px;
     padding: 0;
   }
 }

@@ -60,7 +60,6 @@ export default function PublishDialog({
         >
           <X size={20} />
         </button>
-        <span className="eyebrow">À partager, à réinventer</span>
         <h2 id={headingId}>
           {challenge ? "Votre participation au défi" : "Publier votre création"}
         </h2>

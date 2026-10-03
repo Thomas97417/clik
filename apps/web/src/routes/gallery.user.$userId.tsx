@@ -59,7 +59,6 @@ function CreatorGallery({ userId }: { userId: string }) {
               />
             </div>
             <div className="creator-identity">
-              <span className="eyebrow">Un univers à découvrir</span>
               <h1>
                 {creator.name}
                 <span>.</span>

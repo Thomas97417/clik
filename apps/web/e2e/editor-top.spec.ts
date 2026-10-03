@@ -12,6 +12,13 @@ test("renommer avec Entrée, annuler avec Échap et garder un titre long accessi
       .getByRole("link", { name: "Mes créations", exact: true }),
   ).toHaveCount(0);
   await expect(page.locator(".project-title-field svg")).toHaveCount(0);
+  await title.fill("iiiiiii");
+  const narrowWidth = (await title.boundingBox())!.width;
+  await title.fill("MMMMMMM");
+  await expect
+    .poll(async () => (await title.boundingBox())!.width)
+    .toBeGreaterThan(narrowWidth + 30);
+  await expect(title).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await title.fill("Mon atelier miniature");
   await title.press("Enter");
   await expect(
@@ -38,6 +45,7 @@ test("renommer avec Entrée, annuler avec Échap et garder un titre long accessi
     expect(
       await header.evaluate((el) => el.scrollWidth <= el.clientWidth),
     ).toBe(true);
+    expect((await header.boundingBox())!.height).toBeLessThanOrEqual(56);
     await expect(title).toHaveValue(longTitle);
     await page.screenshot({
       path: `/tmp/clik-editor-top-${width}-${info.project.name}.png`,

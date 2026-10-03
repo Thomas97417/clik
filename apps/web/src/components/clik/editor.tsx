@@ -90,6 +90,52 @@ const safe = (fn: () => unknown) => {
     toast.error(String(e));
   }
 };
+function ProjectTitle({
+  title,
+  disabled,
+  onCommit,
+}: {
+  title: string;
+  disabled: boolean;
+  onCommit: (title: string) => void;
+}) {
+  const [value, setValue] = useState(title);
+  return (
+    <label className="project-title-field">
+      <span className="sr-only">Nom de la création</span>
+      <span className="project-title-measure" aria-hidden="true">
+        {value || "Nom de la création"}
+      </span>
+      <Input
+        className="project-title"
+        aria-label="Nom du projet"
+        title={value}
+        placeholder="Nom de la création"
+        autoComplete="off"
+        value={value}
+        size={1}
+        disabled={disabled}
+        maxLength={100}
+        onChange={(e) => setValue(e.currentTarget.value)}
+        onFocus={(e) => e.currentTarget.select()}
+        onBlur={(e) => {
+          const next = e.currentTarget.value.trim() || "Sans titre";
+          setValue(next);
+          if (next !== title) safe(() => onCommit(next));
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur();
+          if (e.key === "Escape") {
+            e.stopPropagation();
+            e.currentTarget.value = title;
+            setValue(title);
+            e.currentTarget.blur();
+          }
+        }}
+      />
+    </label>
+  );
+}
 function Numeric({
   value,
   onChange,
@@ -558,34 +604,12 @@ export default function Editor({
       <main className="editor">
         <header className="editor-top" aria-label="Projet et sauvegarde">
           <div className="editor-project">
-            <label className="project-title-field">
-              <span className="sr-only">Nom de la création</span>
-              <Input
-                className="project-title"
-                aria-label="Nom du projet"
-                title={s.title}
-                placeholder="Nom de la création"
-                autoComplete="off"
-                key={`${projectId}-${project.ready}-${s.title}`}
-                defaultValue={s.title}
-                disabled={!project.ready || closed || busy}
-                maxLength={100}
-                onFocus={(e) => e.currentTarget.select()}
-                onBlur={(e) => {
-                  const title = e.currentTarget.value.trim() || "Sans titre";
-                  if (title !== s.title) safe(() => s.commit(s.scene, title));
-                  e.currentTarget.value = title;
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") e.currentTarget.blur();
-                  if (e.key === "Escape") {
-                    e.stopPropagation();
-                    e.currentTarget.value = s.title;
-                    e.currentTarget.blur();
-                  }
-                }}
-              />
-            </label>
+            <ProjectTitle
+              key={`${projectId}-${project.ready}-${s.title}`}
+              title={s.title}
+              disabled={!project.ready || closed || busy}
+              onCommit={(title) => s.commit(s.scene, title)}
+            />
             <div className="project-metadata">
               <span
                 className="project-visibility"
@@ -631,7 +655,7 @@ export default function Editor({
               onClick={() => setImporting(true)}
             >
               <Import size={16} aria-hidden="true" />
-              <span>Importer un projet</span>
+              <span>Importer</span>
             </Button>
             <div
               className="save-status"
@@ -639,20 +663,18 @@ export default function Editor({
               role="status"
               aria-live="polite"
               aria-atomic="true"
+              title={
+                saveState === "conflict" || saveState === "error"
+                  ? "Sauvegarde interrompue"
+                  : projectId
+                    ? "Sauvegarde automatique"
+                    : "Sauvegarde sur cet appareil"
+              }
             >
-              <SaveIcon size={18} aria-hidden="true" />
-              <div>
-                <span>
-                  {project.conflict ? "Conflit à résoudre" : project.status}
-                </span>
-                <small>
-                  {saveState === "conflict" || saveState === "error"
-                    ? "Sauvegarde interrompue"
-                    : projectId
-                      ? "Sauvegarde automatique"
-                      : "Sur cet appareil"}
-                </small>
-              </div>
+              <SaveIcon size={14} aria-hidden="true" />
+              <span>
+                {project.conflict ? "Conflit à résoudre" : project.status}
+              </span>
             </div>
             {projectId ? (
               <Button
