@@ -81,6 +81,7 @@ function CreationDetail({
           </div>
         </div>
         <aside className="creation-details">
+          {p.isAssembly && <span className="assembly-badge">Assemblage</span>}
           <h1>{p.title}</h1>
           <p className="author">
             par <AuthorLink id={p.owner} name={p.author} avatar={p.avatar} />
@@ -96,13 +97,39 @@ function CreationDetail({
             </time>
           </p>
           {p.description && <p className="description">{p.description}</p>}
-          {p.origin && (
-            <p className="attribution">
-              <GitBranch size={16} aria-hidden="true" />
-              <span>
-                D’après « {p.origin.title} » de {p.origin.author}.
-              </span>
-            </p>
+          {!!p.sources?.length ? (
+            <div className="creation-source-list">
+              <p>
+                <GitBranch size={15} aria-hidden="true" />
+                {p.isAssembly ? "Sources de l’assemblage" : "À partir de"}
+              </p>
+              <ul>
+                {p.sources.map((source) => (
+                  <li key={source.publicationId}>
+                    {source.available ? (
+                      <Link
+                        to="/creations/$publicationId"
+                        params={{ publicationId: source.publicationId }}
+                      >
+                        « {source.title} »
+                      </Link>
+                    ) : (
+                      <span>« {source.title} »</span>
+                    )}
+                    <span> par {source.author}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            p.origin && (
+              <p className="attribution">
+                <GitBranch size={16} aria-hidden="true" />
+                <span>
+                  D’après « {p.origin.title} » de {p.origin.author}.
+                </span>
+              </p>
+            )
           )}
           {p.challenge &&
             p.updatedAt &&

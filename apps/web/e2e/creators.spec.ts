@@ -38,7 +38,7 @@ test("galerie publique : nom, avatar, pagination, défis et retrait réactif", a
   );
   await expect(page).toHaveURL(/\/gallery\/user\/alice$/);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.locator(".creator-page > .back-link").scrollIntoViewIfNeeded();
+  await page.locator(".creator-heading").scrollIntoViewIfNeeded();
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -115,7 +115,10 @@ test("comptes vides ou introuvables, avatar indisponible et lien vers ma page pu
     page.getByRole("img", { name: "Avatar de Photo indisponible" }),
   ).toBeVisible();
   await expect(page.locator(".creator-avatar img")).toHaveCount(0);
-  await page.locator(".creator-page > .back-link").click();
+  await page
+    .getByRole("navigation")
+    .getByRole("link", { name: "La galerie", exact: true })
+    .click();
   await expect(page).toHaveURL(/\/gallery\/?$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "La galerie.",

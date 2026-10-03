@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState, useId } from "react";
 import { useTreeDrag } from "./use-tree-drag";
 import PublishDialog from "./publish-dialog";
+import ImportProjectDialog from "./import-project-dialog";
+import ProjectSources from "./project-sources";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAction, useMutation } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
@@ -18,6 +20,7 @@ import {
   type SceneNode,
   type PartType,
   type Vec3,
+  projectSources,
 } from "@clik/scene";
 import {
   AlertCircle,
@@ -54,6 +57,7 @@ import {
   Ungroup,
   UnlockKeyhole,
   Upload,
+  Import,
   WifiOff,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -137,6 +141,7 @@ export default function Editor({
     [busy, setBusy] = useState(false),
     [pubTitle, setPubTitle] = useState(""),
     [description, setDescription] = useState("");
+  const [importing, setImporting] = useState(false);
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
     if (!s.challenge) return;
@@ -597,19 +602,37 @@ export default function Editor({
                 )}
                 {projectId ? "Projet privé" : "Création locale"}
               </span>
-              {project.origin && (
-                <Link
-                  className="project-attribution"
-                  to="/creations/$publicationId"
-                  params={{ publicationId: project.origin.publicationId }}
-                  title={`Voir la création originale : « ${project.origin.title} » de ${project.origin.author}`}
-                >
-                  D’après « {project.origin.title} » de {project.origin.author}
-                </Link>
+              {!!s.provenance.imports.length && (
+                <span className="assembly-badge">Assemblage</span>
               )}
+              <ProjectSources sources={projectSources(s.provenance)} />
             </div>
           </div>
           <div className="editor-project-actions">
+            <Button
+              className="editor-import-action"
+              variant="outline"
+              title={
+                s.challenge
+                  ? "L’import est réservé à l’atelier libre"
+                  : "Importer un de vos projets"
+              }
+              disabled={
+                !project.ready ||
+                !!s.challenge ||
+                !!s.gesture ||
+                !!s.pending ||
+                !!s.libraryPointer ||
+                project.conflict ||
+                busy ||
+                publishing
+              }
+              aria-label="Importer un projet"
+              onClick={() => setImporting(true)}
+            >
+              <Import size={16} aria-hidden="true" />
+              <span>Importer un projet</span>
+            </Button>
             <div
               className="save-status"
               data-state={saveState}
@@ -1388,6 +1411,14 @@ export default function Editor({
           busy={busy}
           disabled={closed || (!!stock && !count)}
           challenge={!!project.challenge}
+        />
+      )}
+      {importing && (
+        <ImportProjectDialog
+          projectId={projectId}
+          draftId={draftId}
+          authenticated={project.isAuthenticated}
+          onClose={() => setImporting(false)}
         />
       )}
     </>

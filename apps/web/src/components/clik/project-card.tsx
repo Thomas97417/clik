@@ -11,7 +11,12 @@ import {
 import { useAction, useMutation, useConvexAuth } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
-import { validateScene, type SceneDocument } from "@clik/scene";
+import {
+  validateScene,
+  type SceneDocument,
+  type ProjectProvenance,
+} from "@clik/scene";
+import { creationMetadata } from "@/lib/clik/project-metadata";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -40,6 +45,7 @@ export type CreationItem = {
   updatedAt?: number;
   challenge?: { day: string; closesAt: number } | null;
   origin?: { title: string; author: string };
+  provenance?: ProjectProvenance;
 } & (
   | { location: "local"; draftId?: string; stamp: string }
   | {
@@ -101,6 +107,7 @@ export default function ProjectCard({
               title: snapshot.title,
               scene: JSON.stringify(document),
               localSourceId: snapshot.cacheKey,
+              ...creationMetadata(snapshot.provenance),
             });
       const thumbnail = await upload({ projectId, bytes });
       await publish({
@@ -190,6 +197,11 @@ export default function ProjectCard({
           {creation.challenge && (
             <span className="challenge-badge project-challenge-badge">
               Défi du {creation.challenge.day}
+            </span>
+          )}
+          {!!creation.provenance?.imports.length && (
+            <span className="assembly-badge creation-kind-badge">
+              Assemblage
             </span>
           )}
           <span className="card-arrow" aria-hidden="true">

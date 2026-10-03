@@ -80,6 +80,14 @@ export async function creatorsFixture(page: Page, authenticated = false) {
     updatedAt: now,
     submittedAt: now,
     origin: undefined as { publicationId: string } | undefined,
+    isAssembly: false,
+    sources: [] as {
+      publicationId: string;
+      versionId: string;
+      title: string;
+      author: string;
+      available: boolean;
+    }[],
   }));
   await page.route("https://images.example.test/**", (route) => {
     if (route.request().url().includes("broken"))
@@ -224,7 +232,10 @@ export async function creatorsFixture(page: Page, authenticated = false) {
             (p) =>
               p.active &&
               (path !== "projects:remixes" ||
-                p.origin?.publicationId === args.publicationId) &&
+                p.origin?.publicationId === args.publicationId ||
+                p.sources.some(
+                  (source) => source.publicationId === args.publicationId,
+                )) &&
               (args.ownerId === undefined || p.owner === args.ownerId),
           )
           .sort((a, b) =>
@@ -259,6 +270,12 @@ export async function creatorsFixture(page: Page, authenticated = false) {
                 ...emptyScene(),
                 nodes: [makePart("brick-2x4", "#4079e8")],
               }),
+              sources: p.sources.map((source) => ({
+                ...source,
+                available: !!publications.find(
+                  (p) => p._id === source.publicationId,
+                )?.active,
+              })),
             }
           : null;
       }
@@ -371,6 +388,21 @@ export async function creatorsFixture(page: Page, authenticated = false) {
     });
   });
   return {
+    setAssembly: (id: string, sourceIds: string[]) => {
+      const publication = publications.find((p) => p._id === id)!;
+      publication.isAssembly = true;
+      publication.sources = sourceIds.map((id) => {
+        const source = publications.find((p) => p._id === id)!;
+        return {
+          publicationId: id,
+          versionId: `version-${id}`,
+          title: source.title,
+          author: source.author,
+          available: source.active,
+        };
+      });
+      refreshers.forEach((refresh) => refresh());
+    },
     setOrigin: (id: string, publicationId: string) => {
       publications.find((p) => p._id === id)!.origin = { publicationId };
       refreshers.forEach((refresh) => refresh());

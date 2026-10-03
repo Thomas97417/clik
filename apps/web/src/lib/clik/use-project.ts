@@ -17,6 +17,7 @@ import {
   type Draft,
 } from "./local";
 import { toast } from "sonner";
+import { creationMetadata, importInputs } from "./project-metadata";
 export function useProject(projectId?: string, draftId?: string) {
   const connection = useConvexConnectionState();
   const { isAuthenticated, isLoading } = useConvexAuth(),
@@ -57,6 +58,7 @@ export function useProject(projectId?: string, draftId?: string) {
         revision: revision.current,
         stamp: crypto.randomUUID(),
         dirty,
+        provenance: s.gesture?.provenance ?? s.provenance,
       };
     await writeDraft(key, draft, stamp.current);
     stamp.current = draft.stamp;
@@ -89,6 +91,17 @@ export function useProject(projectId?: string, draftId?: string) {
                 serverOffset: remote.serverNow - Date.now(),
               }
             : null,
+          recover && local.provenance
+            ? local.provenance
+            : {
+                origin: remote?.origin,
+                originReceiptId: remote?.originReceiptId,
+                originSourceProjectId:
+                  remote?.origin && !remote.originReceiptId
+                    ? projectId
+                    : undefined,
+                imports: remote?.imports ?? [],
+              },
         );
         savedSerial.current = local?.dirty && projectId ? -1 : 0;
         setConflict(
@@ -149,6 +162,7 @@ export function useProject(projectId?: string, draftId?: string) {
       revision: 0,
       stamp: crypto.randomUUID(),
       dirty: false,
+      provenance: current.provenance,
     });
     return id;
   };
@@ -173,6 +187,7 @@ export function useProject(projectId?: string, draftId?: string) {
         scene: JSON.stringify(s.scene),
         title: s.title,
         revision: revision.current,
+        imports: importInputs(s.provenance),
       });
       revision.current = rev;
       savedSerial.current = sentSerial;
@@ -248,6 +263,15 @@ export function useProject(projectId?: string, draftId?: string) {
             serverOffset: p.serverNow - Date.now(),
           }
         : null,
+      p
+        ? {
+            origin: p.origin,
+            originReceiptId: p.originReceiptId,
+            originSourceProjectId:
+              p.origin && !p.originReceiptId ? projectId : undefined,
+            imports: p.imports ?? [],
+          }
+        : local?.provenance,
     );
     revision.current = p?.revision ?? 0;
     savedSerial.current = 0;
@@ -269,6 +293,8 @@ export function useProject(projectId?: string, draftId?: string) {
       const id = await create({
         title: projectId ? `${s.title.slice(0, 90)} · copie` : s.title,
         scene: JSON.stringify(s.scene),
+        ...creationMetadata(s.provenance),
+        ...(projectId ? { copyFrom: projectId as Id<"projects"> } : {}),
         ...(!projectId ? { localSourceId: `local:${key}:${sourceStamp}` } : {}),
       });
       if (!projectId) {
@@ -303,7 +329,7 @@ export function useProject(projectId?: string, draftId?: string) {
     isAuthenticated,
     isLoading,
     revision: revision.current,
-    origin: remote?.origin,
+    origin: useEditor.getState().provenance.origin,
     challenge: remote?.challenge,
     publicationId: remote?.publicationId,
   };

@@ -16,6 +16,8 @@ export default function PublicCreationCard({
     thumbnailUrl: string | null;
     commentCount?: number;
     challenge?: { day: string } | null;
+    isAssembly?: boolean;
+    relationship?: "remix" | "assembly";
   };
 }) {
   const target = {
@@ -40,6 +42,13 @@ export default function PublicCreationCard({
             <div className="public-thumbnail-placeholder" aria-hidden="true">
               <Box size={32} />
             </div>
+          )}
+          {(creation.relationship || creation.isAssembly) && (
+            <span className="assembly-badge creation-kind-badge">
+              {creation.isAssembly || creation.relationship === "assembly"
+                ? "Assemblage"
+                : "Reprise"}
+            </span>
           )}
           <span className="card-arrow" aria-hidden="true">
             <ArrowUpRight size={19} />

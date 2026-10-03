@@ -1,4 +1,9 @@
-import { validateScene, type SceneDocument } from "@clik/scene";
+import {
+  validateScene,
+  validateProvenance,
+  type ProjectProvenance,
+  type SceneDocument,
+} from "@clik/scene";
 export type Draft = {
   scene: SceneDocument;
   title: string;
@@ -6,6 +11,7 @@ export type Draft = {
   stamp: string;
   dirty: boolean;
   updatedAt?: number;
+  provenance?: ProjectProvenance;
 };
 const database = () =>
   new Promise<IDBDatabase>((resolve, reject) => {
@@ -21,7 +27,11 @@ export async function readDraft(key: string): Promise<Draft | undefined> {
       const req = db.transaction("drafts").objectStore("drafts").get(key);
       req.onsuccess = () => {
         try {
-          if (req.result) validateScene(req.result.scene);
+          if (req.result) {
+            validateScene(req.result.scene);
+            if (req.result.provenance)
+              validateProvenance(req.result.provenance);
+          }
           resolve(req.result);
         } catch (e) {
           reject(e);

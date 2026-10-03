@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test";
-import { emptyScene, makePart } from "@clik/scene";
+import { emptyScene, makePart, type ProjectImport } from "@clik/scene";
 
 // Transport fixture only: no real account, upload or publication is created.
 export async function projectsFixture(
@@ -25,6 +25,7 @@ export async function projectsFixture(
     updatedAt: Date.now(),
     publicationId: (options.published ? "publication" : null) as string | null,
     challenge: null,
+    imports: [] as ProjectImport[],
   };
   const calls = {
     lists: [] as any[],
@@ -34,6 +35,7 @@ export async function projectsFixture(
     creations: [] as any[],
     saves: [] as any[],
     deletions: [] as any[],
+    preparations: [] as any[],
   };
   const imported = new Map<string, typeof project>();
   const deleted = new Set<string>();
@@ -41,6 +43,15 @@ export async function projectsFixture(
   let failCreate = false;
   let fail = false;
   let failWithdrawal = false;
+  let failImport = false;
+  const sources = [
+    {
+      publicationId: "original",
+      versionId: "original-version",
+      author: "Alice",
+      title: "La maison d’Alice",
+    },
+  ];
   const b64 = (value: unknown) =>
     Buffer.from(JSON.stringify(value)).toString("base64url");
   const token = `${b64({ alg: "RS256" })}.${b64({ sub: "viewer", exp: Math.floor(Date.now() / 1000) + 3600, iat: Math.floor(Date.now() / 1000) })}.signature`;
@@ -71,11 +82,20 @@ export async function projectsFixture(
     const queries = new Map<number, { udfPath: string; args: any[] }>();
     const query = (path: string, args: any) => {
       if (path === "auth:getCurrentUser") return user;
+      if (path === "projects:sourcesAvailable")
+        return args.ids.map((id: string) => ({ id, available: true }));
       if (path === "projects:get") {
         const target =
           args.id === "project"
             ? project
-            : [...imported.values()].find((p) => p._id === args.id);
+            : args.id === "closed-challenge"
+              ? {
+                  ...project,
+                  _id: "closed-challenge",
+                  title: "Un ancien défi",
+                  challenge: { day: "2020-01-01", closesAt: 1 },
+                }
+              : [...imported.values()].find((p) => p._id === args.id);
         return target
           ? { ...target, owner: user._id, serverNow: Date.now() }
           : null;
@@ -149,16 +169,28 @@ export async function projectsFixture(
         const removing = message.udfPath === "projects:remove";
         const creating = message.udfPath === "projects:create";
         const saving = message.udfPath === "projects:save";
-        const failed = removing
-          ? failDelete
-          : creating
-            ? failCreate
-            : saving
-              ? false
-              : withdrawing
-                ? failWithdrawal
-                : fail;
-        let result: string | number = "publication";
+        const preparing = message.udfPath === "projects:prepareImport";
+        const failed = preparing
+          ? failImport
+          : removing
+            ? failDelete
+            : creating
+              ? failCreate
+              : saving
+                ? false
+                : withdrawing
+                  ? failWithdrawal
+                  : fail;
+        let result: any = "publication";
+        if (preparing) {
+          calls.preparations.push(args);
+          result = {
+            title: "Un ancien défi",
+            scene: project.scene,
+            receiptId: "import-receipt",
+            sources,
+          };
+        }
         if (removing) {
           calls.deletions.push(args);
           if (!failed) deleted.add(args.id);
@@ -173,6 +205,10 @@ export async function projectsFixture(
               scene: args.scene,
               revision: 0,
               publicationId: null,
+              imports: (args.imports ?? []).map((item: any) => ({
+                ...item,
+                sources: item.receiptIds.length ? sources : [],
+              })),
             });
           result = "imported";
         }
@@ -186,6 +222,10 @@ export async function projectsFixture(
           target.scene = args.scene;
           target.revision = args.revision + 1;
           target.updatedAt = Date.now();
+          target.imports = (args.imports ?? []).map((item: any) => ({
+            ...item,
+            sources: item.receiptIds.length ? sources : [],
+          }));
           result = target.revision;
         }
         if (withdrawing) {
@@ -210,13 +250,15 @@ export async function projectsFixture(
             requestId: message.requestId,
             success: !failed,
             result: failed
-              ? removing
-                ? "Suppression indisponible, réessayez."
-                : creating
-                  ? "Enregistrement indisponible, réessayez."
-                  : withdrawing
-                    ? "Retrait indisponible, réessayez."
-                    : "Publication indisponible, réessayez."
+              ? preparing
+                ? "Import indisponible, réessayez."
+                : removing
+                  ? "Suppression indisponible, réessayez."
+                  : creating
+                    ? "Enregistrement indisponible, réessayez."
+                    : withdrawing
+                      ? "Retrait indisponible, réessayez."
+                      : "Publication indisponible, réessayez."
               : result,
             ts: ts(),
             logLines: [],
@@ -228,6 +270,9 @@ export async function projectsFixture(
   });
   return {
     calls,
+    failImport: (value: boolean) => {
+      failImport = value;
+    },
     failCreation: (value: boolean) => {
       failCreate = value;
     },

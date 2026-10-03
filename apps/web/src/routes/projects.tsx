@@ -64,6 +64,8 @@ function Projects() {
             location: "local",
             stamp: entry.stamp,
             draftId: entry.key === "guest" ? undefined : entry.key.slice(6),
+            provenance: entry.provenance,
+            origin: entry.provenance?.origin,
           })),
         );
         setLocalError(false);
@@ -87,6 +89,11 @@ function Projects() {
         projectId: p._id,
         location: "online",
         cacheKey: `project:${p._id}:${p.revision}`,
+        provenance: {
+          origin: p.origin,
+          originReceiptId: p.originReceiptId,
+          imports: p.imports ?? [],
+        },
       }))
     : [];
   const creations = [...remote, ...local]

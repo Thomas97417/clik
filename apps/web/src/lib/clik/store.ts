@@ -26,10 +26,19 @@ import {
   COLORS,
   validateChallengeStock,
   type ChallengeStock,
+  importAssembly,
+  emptyProvenance,
+  validateProvenance,
+  type ProjectProvenance,
+  type ProjectImport,
 } from "@clik/scene";
 import { Matrix4, Vector3 } from "three";
 import { moveTreeBranches } from "./tree-order";
-type Snapshot = { scene: SceneDocument; title: string };
+type Snapshot = {
+  scene: SceneDocument;
+  title: string;
+  provenance: ProjectProvenance;
+};
 export type EditorChallenge = {
   stock: ChallengeStock;
   closesAt: number;
@@ -69,8 +78,14 @@ type State = Snapshot & {
     scene: SceneDocument,
     title: string,
     challenge?: EditorChallenge | null,
+    provenance?: ProjectProvenance,
   ) => void;
-  commit: (scene: SceneDocument, title?: string) => void;
+  commit: (
+    scene: SceneDocument,
+    title?: string,
+    provenance?: ProjectProvenance,
+  ) => void;
+  importProject: (scene: SceneDocument, item: ProjectImport) => void;
   select: (id: string, add?: boolean) => void;
   selectAll: () => void;
   add: (type: PartType, position?: Vec3) => void;
@@ -91,11 +106,16 @@ type State = Snapshot & {
   copy: () => void;
   paste: () => void;
 };
-const snapshot = (s: State): Snapshot => ({ scene: s.scene, title: s.title });
+const snapshot = (s: State): Snapshot => ({
+  scene: s.scene,
+  title: s.title,
+  provenance: s.provenance,
+});
 export const useEditor = create<State>((set, get) => ({
   challenge: null,
   scene: emptyScene(),
   title: "Ma première création",
+  provenance: emptyProvenance(),
   selection: [],
   past: [],
   future: [],
@@ -114,11 +134,12 @@ export const useEditor = create<State>((set, get) => ({
   snapPreview: null,
   gestureIds: [],
   clipboard: null,
-  load: (scene, title, challenge = null) =>
+  load: (scene, title, challenge = null, provenance = emptyProvenance()) =>
     set({
       scene: validateScene(scene),
       challenge,
       title,
+      provenance: validateProvenance(provenance),
       selection: [],
       past: [],
       future: [],
@@ -129,19 +150,37 @@ export const useEditor = create<State>((set, get) => ({
       snapPreview: null,
       gestureIds: [],
     }),
-  commit: (scene, title = get().title) => {
+  commit: (scene, title = get().title, provenance = get().provenance) => {
     validateScene(scene);
+    validateProvenance(provenance);
     const s = get();
     checkChallenge(scene, s.challenge);
-    if (JSON.stringify(scene) === JSON.stringify(s.scene) && title === s.title)
+    if (
+      JSON.stringify(scene) === JSON.stringify(s.scene) &&
+      title === s.title &&
+      JSON.stringify(provenance) === JSON.stringify(s.provenance)
+    )
       return;
     set({
       scene,
       title,
+      provenance,
       past: [...s.past.slice(-79), snapshot(s)],
       future: [],
       serial: s.serial + 1,
     });
+  },
+  importProject: (source, item) => {
+    const s = get();
+    if (s.challenge) throw Error("L’import est réservé à l’atelier libre.");
+    if (s.gesture || s.pending || s.libraryPointer)
+      throw Error("Terminez la manipulation avant d’importer.");
+    const result = importAssembly(s.scene, source, item.title);
+    s.commit(result.scene, s.title, {
+      ...s.provenance,
+      imports: [...s.provenance.imports, item],
+    });
+    set({ selection: [result.id], frame: s.frame + 1 });
   },
   select: (id, add = false) =>
     set((s) => ({

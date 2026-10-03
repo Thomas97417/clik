@@ -45,7 +45,7 @@ export default function CreationRemixes({
         </p>
         {status === "LoadingFirstPage" ? (
           <p className="creation-remixes-empty" role="status">
-            Chargement des nouvelles versions…
+            Chargement des reprises et assemblages…
           </p>
         ) : results.length ? (
           <div className="creation-grid">
@@ -58,7 +58,7 @@ export default function CreationRemixes({
             <p>La prochaine version pourrait être la vôtre.</p>
             <span>
               Pour l’instant, cette idée attend sa première nouvelle branche.
-              Les reprises publiées trouveront leur place ici.
+              Les reprises et assemblages publiés trouveront leur place ici.
             </span>
           </div>
         )}

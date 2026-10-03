@@ -19,7 +19,43 @@ export const origin = v.object({
   title: v.string(),
 });
 export const stockItem = v.object({ type: v.string(), quantity: v.number() });
+export const importInput = v.object({
+  id: v.string(),
+  title: v.string(),
+  receiptIds: v.array(v.id("importReceipts")),
+});
+export const projectImport = v.object({
+  id: v.string(),
+  title: v.string(),
+  receiptIds: v.array(v.id("importReceipts")),
+  sources: v.array(origin),
+});
 export default defineSchema({
+  importReceipts: defineTable({
+    owner: v.string(),
+    title: v.string(),
+    sources: v.array(origin),
+    origin: v.optional(origin),
+    createdAt: v.number(),
+  }).index("by_owner", ["owner"]),
+  lineageMigration: defineTable({
+    key: v.literal("v1"),
+    phase: v.union(
+      v.literal("projects"),
+      v.literal("publications"),
+      v.literal("complete"),
+    ),
+    cursor: v.optional(v.string()),
+  }).index("by_key", ["key"]),
+  publicationSources: defineTable({
+    sourceId: v.id("publications"),
+    publicationId: v.id("publications"),
+    kind: v.union(v.literal("remix"), v.literal("assembly")),
+    active: v.boolean(),
+    publishedAt: v.number(),
+  })
+    .index("by_source_recent", ["sourceId", "active", "publishedAt"])
+    .index("by_publication", ["publicationId"]),
   rewardConfig: defineTable({
     key: v.literal("v1"),
     firstDay: v.string(),
@@ -104,6 +140,8 @@ export default defineSchema({
     revision: v.number(),
     updatedAt: v.number(),
     origin: v.optional(origin),
+    originReceiptId: v.optional(v.id("importReceipts")),
+    imports: v.optional(v.array(projectImport)),
   })
     .index("by_owner", ["owner", "updatedAt"])
     .index("by_local_source", ["owner", "localSourceId"])
@@ -128,6 +166,7 @@ export default defineSchema({
     versionId: v.optional(v.id("versions")),
     thumbnail: v.id("_storage"),
     origin: v.optional(origin),
+    imports: v.optional(v.array(projectImport)),
   })
     .index("by_recent", ["active", "publishedAt"])
     .index("by_origin_recent", [
@@ -166,6 +205,7 @@ export default defineSchema({
     thumbnail: v.id("_storage"),
     createdAt: v.number(),
     origin: v.optional(origin),
+    imports: v.optional(v.array(projectImport)),
   }),
   thumbnails: defineTable({
     owner: v.string(),

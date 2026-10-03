@@ -8,4 +8,10 @@ crons.daily(
   {},
 );
 crons.interval("challenge rewards", { minutes: 5 }, internal.rewards.tick, {});
+crons.interval(
+  "project lineage migration",
+  { minutes: 1 },
+  internal.projects.migrateLineage,
+  {},
+);
 export default crons;

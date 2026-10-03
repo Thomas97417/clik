@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { emptyScene } from "@clik/scene";
+import { emptyScene, makePart } from "@clik/scene";
 import { useEditor } from "../src/lib/clik/store";
 const mocks = vi.hoisted(() => ({
   save: vi.fn(),
@@ -146,6 +146,7 @@ it.each([undefined, "my-creation"])(
     expect(mocks.create).toHaveBeenCalledWith({
       title: "Mon idée",
       scene: JSON.stringify(emptyScene()),
+      imports: [],
       localSourceId: `local:${key}:draft`,
     });
     expect(mocks.drafts.has(key)).toBe(false);
@@ -240,4 +241,61 @@ it("préserve une modification faite par un autre onglet pendant le transfert", 
     await result.current.copy();
   });
   expect(mocks.drafts.get("guest").title).toBe("Version plus récente");
+});
+
+it("sauvegarde les sources d’un import local et les transmet lors du passage en ligne", async () => {
+  mocks.drafts.set("guest:assembly", {
+    scene: emptyScene(),
+    title: "Assemblage",
+    revision: 0,
+    stamp: "original",
+    dirty: false,
+  });
+  const { result } = renderHook(() => useProject(undefined, "assembly"));
+  await waitFor(() => expect(result.current.ready).toBe(true));
+  const item = {
+    id: "import-1",
+    title: "Maison",
+    receiptIds: ["receipt"],
+    sources: [
+      {
+        publicationId: "source",
+        versionId: "version",
+        title: "Maison",
+        author: "Alice",
+      },
+    ],
+  };
+  act(() =>
+    useEditor
+      .getState()
+      .importProject(
+        { ...emptyScene(), nodes: [makePart("brick-2x2", "#4079e8")] },
+        item,
+      ),
+  );
+  await waitFor(() =>
+    expect(mocks.drafts.get("guest:assembly").provenance.imports).toEqual([
+      item,
+    ]),
+  );
+  act(() => useEditor.getState().undo());
+  await waitFor(() =>
+    expect(mocks.drafts.get("guest:assembly").provenance.imports).toEqual([]),
+  );
+  act(() => useEditor.getState().redo());
+  await waitFor(() =>
+    expect(mocks.drafts.get("guest:assembly").provenance.imports).toEqual([
+      item,
+    ]),
+  );
+  await act(async () => {
+    await result.current.copy();
+  });
+  expect(mocks.create).toHaveBeenCalledWith(
+    expect.objectContaining({
+      imports: [{ id: "import-1", title: "Maison", receiptIds: ["receipt"] }],
+    }),
+  );
+  expect(mocks.drafts.has("guest:assembly")).toBe(false);
 });

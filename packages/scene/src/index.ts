@@ -1,4 +1,5 @@
 import { z } from "zod";
+export * from "./provenance";
 import { Box3, Matrix4, Quaternion, Vector3, Euler } from "three";
 import {
   placementBody,
@@ -522,6 +523,69 @@ export function duplicate(
     scene: placeInFreeSpace(combined, copyIds, into),
     ids: copyIds,
   };
+}
+
+/** Insert a complete, independent assembly near the current construction. */
+export function importAssembly(
+  into: SceneDocument,
+  source: SceneDocument,
+  title: string,
+) {
+  source = validateScene(source);
+  const parts = source.nodes.filter((n): n is Part => n.kind === "part");
+  if (!parts.length)
+    throw Error("Ce projet ne contient aucune pièce à importer.");
+  if (into.nodes.length + source.nodes.length + 1 > 1000)
+    throw Error(
+      "Limite de 1 000 éléments atteinte. L’import n’a pas été ajouté.",
+    );
+  if (into.nodes.filter((n) => n.kind === "part").length + parts.length > 500)
+    throw Error("Limite de 500 pièces atteinte. L’import n’a pas été ajouté.");
+  const bounds = new Box3();
+  for (const part of parts) bounds.union(partBounds(source, part));
+  const center = bounds.getCenter(new Vector3());
+  const target = new Box3();
+  for (const node of into.nodes)
+    if (node.kind === "part") target.union(partBounds(into, node));
+  const targetCenter = target.isEmpty()
+    ? new Vector3()
+    : target.getCenter(new Vector3());
+  const groupId = crypto.randomUUID();
+  const ids = new Map(source.nodes.map((n) => [n.id, crypto.randomUUID()]));
+  const names = new Set(
+    into.nodes.filter((n) => n.kind === "group").map((n) => n.name),
+  );
+  const base = title.trim().slice(0, 100) || "Projet importé";
+  let name = base;
+  for (let i = 2; names.has(name); i++) {
+    const suffix = ` (${i})`;
+    name = `${base.slice(0, 100 - suffix.length)}${suffix}`;
+  }
+  const container: SceneNode = {
+    id: groupId,
+    kind: "group",
+    name,
+    parentId: null,
+    position: [
+      Math.round(targetCenter.x - center.x),
+      -bounds.min.y,
+      Math.round(targetCenter.z - center.z),
+    ],
+    rotation: [0, 0, 0],
+    hidden: false,
+    locked: false,
+  };
+  if (container.position.some((coordinate) => Math.abs(coordinate) > 10000))
+    throw Error(
+      "Le projet importé ne peut pas être placé dans les limites de la scène.",
+    );
+  const nodes = source.nodes.map((node) => ({
+    ...structuredClone(node),
+    id: ids.get(node.id)!,
+    parentId: node.parentId ? ids.get(node.parentId)! : groupId,
+  }));
+  const combined = { ...into, nodes: [...into.nodes, container, ...nodes] };
+  return { scene: placeInFreeSpace(combined, [groupId], into), id: groupId };
 }
 export function applyDelta(
   scene: SceneDocument,
