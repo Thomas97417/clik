@@ -37,7 +37,6 @@ function RouteComponent() {
     <main className="settings-page">
       <header className="settings-heading">
         <div>
-          <span className="settings-kicker">Paramètres</span>
           <h1>
             Votre espace,
             <br />

@@ -10,7 +10,12 @@ import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import { emptyScene, type ChallengeStock } from "@clik/scene";
 import { useEditor } from "./store";
-import { readDraft, writeDraft, type Draft } from "./local";
+import {
+  readDraft,
+  writeDraft,
+  removeLocalCreation,
+  type Draft,
+} from "./local";
 import { toast } from "sonner";
 export function useProject(projectId?: string, draftId?: string) {
   const connection = useConvexConnectionState();
@@ -40,8 +45,11 @@ export function useProject(projectId?: string, draftId?: string) {
     busy = useRef(false),
     loaded = useRef(""),
     channel = useRef<BroadcastChannel | null>(null),
-    savedSerial = useRef(0);
+    savedSerial = useRef(0),
+    transferred = useRef(false);
   const backup = async (dirty: boolean) => {
+    // Queued effects from the old editor must not recreate a transferred draft.
+    if (transferred.current) return;
     const s = useEditor.getState(),
       draft: Draft = {
         scene: s.gesture?.scene ?? s.scene,
@@ -67,23 +75,21 @@ export function useProject(projectId?: string, draftId?: string) {
           : (remote?.revision ?? 0);
         stamp.current = local?.stamp ?? "";
         const recover = local && (!projectId || local.dirty);
-        useEditor
-          .getState()
-          .load(
-            recover
-              ? local.scene
-              : remote
-                ? JSON.parse(remote.scene)
-                : emptyScene(),
-            recover ? local.title : (remote?.title ?? "Ma première création"),
-            remote?.challenge
-              ? {
-                  stock: remote.challenge.stock as ChallengeStock,
-                  closesAt: remote.challenge.closesAt,
-                  serverOffset: remote.serverNow - Date.now(),
-                }
-              : null,
-          );
+        useEditor.getState().load(
+          recover
+            ? local.scene
+            : remote
+              ? JSON.parse(remote.scene)
+              : emptyScene(),
+          recover ? local.title : (remote?.title ?? "Ma première création"),
+          remote?.challenge
+            ? {
+                stock: remote.challenge.stock as ChallengeStock,
+                closesAt: remote.challenge.closesAt,
+                serverOffset: remote.serverNow - Date.now(),
+              }
+            : null,
+        );
         savedSerial.current = local?.dirty && projectId ? -1 : 0;
         setConflict(
           !!(local?.dirty && remote && local.revision !== remote.revision),
@@ -232,19 +238,17 @@ export function useProject(projectId?: string, draftId?: string) {
           id: projectId as Id<"projects">,
         })
       : null;
-    useEditor
-      .getState()
-      .load(
-        p ? JSON.parse(p.scene) : (local?.scene ?? emptyScene()),
-        p?.title ?? local?.title ?? "Ma création",
-        p?.challenge
-          ? {
-              stock: p.challenge.stock as ChallengeStock,
-              closesAt: p.challenge.closesAt,
-              serverOffset: p.serverNow - Date.now(),
-            }
-          : null,
-      );
+    useEditor.getState().load(
+      p ? JSON.parse(p.scene) : (local?.scene ?? emptyScene()),
+      p?.title ?? local?.title ?? "Ma création",
+      p?.challenge
+        ? {
+            stock: p.challenge.stock as ChallengeStock,
+            closesAt: p.challenge.closesAt,
+            serverOffset: p.serverNow - Date.now(),
+          }
+        : null,
+    );
     revision.current = p?.revision ?? 0;
     savedSerial.current = 0;
     setConflict(false);
@@ -252,12 +256,41 @@ export function useProject(projectId?: string, draftId?: string) {
     setStatus("Enregistré");
   };
   const copy = async () => {
-    await queue.current.catch(() => {});
-    const s = useEditor.getState();
-    return create({
-      title: `${s.title.slice(0, 90)}${projectId ? " · copie" : ""}`,
-      scene: JSON.stringify(s.scene),
-    });
+    if (busy.current)
+      throw Error("Enregistrement en cours, réessayez dans un instant.");
+    if (useEditor.getState().gesture)
+      throw Error("Terminez la manipulation avant de conserver le projet.");
+    busy.current = true;
+    try {
+      await queue.current.catch(() => {});
+      if (!projectId && !stamp.current) await backup(false);
+      const s = useEditor.getState(),
+        sourceStamp = stamp.current;
+      const id = await create({
+        title: projectId ? `${s.title.slice(0, 90)} · copie` : s.title,
+        scene: JSON.stringify(s.scene),
+        ...(!projectId ? { localSourceId: `local:${key}:${sourceStamp}` } : {}),
+      });
+      if (!projectId) {
+        try {
+          await queue.current;
+          // Preserve unsent edits if the scene changed during the request.
+          if (useEditor.getState().serial !== s.serial)
+            throw Error("La création a changé pendant l’enregistrement.");
+          transferred.current = true;
+          await removeLocalCreation(key, sourceStamp);
+          channel.current?.postMessage("transferred");
+        } catch {
+          transferred.current = false;
+          toast.info(
+            "Le projet est enregistré en ligne. La copie locale a été conservée car elle a changé ou n’a pas pu être retirée.",
+          );
+        }
+      }
+      return id;
+    } finally {
+      busy.current = false;
+    }
   };
   return {
     ready,

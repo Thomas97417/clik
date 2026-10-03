@@ -191,6 +191,7 @@ export default function Editor({
       !project.ready ||
       closed ||
       publishing ||
+      busy ||
       inspectorCollapsed ||
       !!s.gesture,
     collapsed: collapsedGroups,
@@ -257,6 +258,7 @@ export default function Editor({
     const key = (e: KeyboardEvent) => {
       if (
         publishing ||
+        busy ||
         e.defaultPrevented ||
         e.isComposing ||
         document.querySelector(
@@ -351,7 +353,7 @@ export default function Editor({
     };
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
-  }, [publishing, project.ready, closed]);
+  }, [publishing, busy, project.ready, closed]);
   const selected = s.scene.nodes.find((n) => n.id === s.selection[0]);
   const selectionRoots = roots(s.scene, s.selection);
   const selectionParents = new Set(
@@ -386,8 +388,14 @@ export default function Editor({
             ? CloudCheck
             : HardDrive;
   const preserve = async () => {
-    const id = await project.copy();
-    await navigate({ to: "/editor/$projectId", params: { projectId: id } });
+    if (busy) return;
+    setBusy(true);
+    try {
+      const id = await project.copy();
+      await navigate({ to: "/editor/$projectId", params: { projectId: id } });
+    } finally {
+      setBusy(false);
+    }
   };
   const doPublish = async () => {
     if (!projectId || busy) return;
@@ -555,7 +563,7 @@ export default function Editor({
                 autoComplete="off"
                 key={`${projectId}-${project.ready}-${s.title}`}
                 defaultValue={s.title}
-                disabled={!project.ready || closed}
+                disabled={!project.ready || closed || busy}
                 maxLength={100}
                 onFocus={(e) => e.currentTarget.select()}
                 onBlur={(e) => {
@@ -644,10 +652,19 @@ export default function Editor({
             ) : project.isAuthenticated ? (
               <Button
                 className="editor-primary-action"
-                disabled={!project.ready || !!s.gesture}
+                disabled={!project.ready || !!s.gesture || busy}
                 onClick={() => safe(preserve)}
               >
-                <CloudUpload size={16} aria-hidden="true" /> Conserver le projet
+                {busy ? (
+                  <LoaderCircle
+                    size={16}
+                    aria-hidden="true"
+                    className="animate-spin"
+                  />
+                ) : (
+                  <CloudUpload size={16} aria-hidden="true" />
+                )}
+                {busy ? "Enregistrement…" : "Conserver le projet"}
               </Button>
             ) : (
               <Link
@@ -678,7 +695,7 @@ export default function Editor({
                 : `Clôture dans ${Math.max(0, Math.floor((project.challenge.closesAt - now - (s.challenge?.serverOffset ?? 0)) / 3600000))} h ${Math.max(0, Math.floor((project.challenge.closesAt - now - (s.challenge?.serverOffset ?? 0)) / 60000) % 60)} min`}
             </span>
             {closed && (
-              <button onClick={() => safe(preserve)}>
+              <button disabled={busy} onClick={() => safe(preserve)}>
                 Continuer dans une copie libre
               </button>
             )}
@@ -687,11 +704,15 @@ export default function Editor({
         {project.conflict && (
           <div className="conflict" role="alert">
             Cette création a changé dans un autre onglet.{" "}
-            <Button variant="outline" onClick={() => safe(project.reload)}>
+            <Button
+              variant="outline"
+              disabled={busy}
+              onClick={() => safe(project.reload)}
+            >
               Recharger
             </Button>
             {project.isAuthenticated ? (
-              <Button onClick={() => safe(preserve)}>
+              <Button disabled={busy} onClick={() => safe(preserve)}>
                 Sauvegarder une copie
               </Button>
             ) : (
@@ -710,6 +731,7 @@ export default function Editor({
         )}
         <div
           className="editor-body"
+          inert={busy && !publishing}
           data-library-collapsed={libraryCollapsed}
           data-inspector-collapsed={inspectorCollapsed}
         >

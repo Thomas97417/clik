@@ -104,6 +104,8 @@ export const create = mutation({
   },
   handler: async (ctx, a) => {
     const u = await user(ctx);
+    const projectTitle = title(a.title),
+      document = scene(a.scene);
     if (a.localSourceId !== undefined) {
       if (!a.localSourceId || a.localSourceId.length > 240)
         throw new ConvexError("Identifiant local invalide.");
@@ -114,13 +116,19 @@ export const create = mutation({
           q.eq("owner", u._id).eq("localSourceId", a.localSourceId),
         )
         .unique();
-      if (existing) return existing._id;
+      if (existing) {
+        if (existing.title !== projectTitle || existing.scene !== document)
+          throw new ConvexError(
+            "Le projet en ligne a été modifié. Votre version locale a été conservée.",
+          );
+        return existing._id;
+      }
     }
     return ctx.db.insert("projects", {
       owner: u._id,
       localSourceId: a.localSourceId,
-      title: title(a.title),
-      scene: scene(a.scene),
+      title: projectTitle,
+      scene: document,
       revision: 0,
       updatedAt: Date.now(),
     });

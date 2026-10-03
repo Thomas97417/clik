@@ -85,6 +85,18 @@ describe("Projets privés et versions publiques", () => {
         localSourceId: "local:guest:new",
       }),
     ).not.toBe(id);
+    await alice.mutation(api.projects.save, {
+      id,
+      title: "Version en ligne modifiée",
+      scene,
+      revision: 0,
+    });
+    await expect(alice.mutation(api.projects.create, args)).rejects.toThrow(
+      "version locale a été conservée",
+    );
+    expect((await alice.query(api.projects.get, { id })).title).toBe(
+      "Version en ligne modifiée",
+    );
   });
   it("supprime uniquement sa création, retire sa publication et préserve les reprises", async () => {
     const { alice, bob, t } = setup();

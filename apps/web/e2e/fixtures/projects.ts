@@ -32,11 +32,13 @@ export async function projectsFixture(
     publications: [] as any[],
     withdrawals: [] as any[],
     creations: [] as any[],
+    saves: [] as any[],
     deletions: [] as any[],
   };
   const imported = new Map<string, typeof project>();
   const deleted = new Set<string>();
   let failDelete = false;
+  let failCreate = false;
   let fail = false;
   let failWithdrawal = false;
   const b64 = (value: unknown) =>
@@ -67,8 +69,17 @@ export async function projectsFixture(
     };
     let version = { querySet: 0, identity: 0, ts: ts() };
     const queries = new Map<number, { udfPath: string; args: any[] }>();
-    const query = (path: string) => {
+    const query = (path: string, args: any) => {
       if (path === "auth:getCurrentUser") return user;
+      if (path === "projects:get") {
+        const target =
+          args.id === "project"
+            ? project
+            : [...imported.values()].find((p) => p._id === args.id);
+        return target
+          ? { ...target, owner: user._id, serverNow: Date.now() }
+          : null;
+      }
       if (path === "projects:list")
         return {
           page: [
@@ -98,7 +109,7 @@ export async function projectsFixture(
           modifications: [...queries].map(([queryId, q]) => ({
             type: "QueryUpdated",
             queryId,
-            value: query(q.udfPath),
+            value: query(q.udfPath, q.args[0]),
             logLines: [],
             journal: null,
           })),
@@ -137,21 +148,24 @@ export async function projectsFixture(
         const withdrawing = message.udfPath === "projects:withdraw";
         const removing = message.udfPath === "projects:remove";
         const creating = message.udfPath === "projects:create";
+        const saving = message.udfPath === "projects:save";
         const failed = removing
           ? failDelete
           : creating
-            ? false
-            : withdrawing
-              ? failWithdrawal
-              : fail;
-        let result = "publication";
+            ? failCreate
+            : saving
+              ? false
+              : withdrawing
+                ? failWithdrawal
+                : fail;
+        let result: string | number = "publication";
         if (removing) {
           calls.deletions.push(args);
           if (!failed) deleted.add(args.id);
         }
         if (creating) {
           calls.creations.push(args);
-          if (!imported.has(args.localSourceId))
+          if (!failed && !imported.has(args.localSourceId))
             imported.set(args.localSourceId, {
               ...project,
               _id: "imported",
@@ -161,6 +175,18 @@ export async function projectsFixture(
               publicationId: null,
             });
           result = "imported";
+        }
+        if (saving) {
+          calls.saves.push(args);
+          const target =
+            args.id === "project"
+              ? project
+              : [...imported.values()].find((p) => p._id === args.id)!;
+          target.title = args.title;
+          target.scene = args.scene;
+          target.revision = args.revision + 1;
+          target.updatedAt = Date.now();
+          result = target.revision;
         }
         if (withdrawing) {
           calls.withdrawals.push(args);
@@ -186,9 +212,11 @@ export async function projectsFixture(
             result: failed
               ? removing
                 ? "Suppression indisponible, réessayez."
-                : withdrawing
-                  ? "Retrait indisponible, réessayez."
-                  : "Publication indisponible, réessayez."
+                : creating
+                  ? "Enregistrement indisponible, réessayez."
+                  : withdrawing
+                    ? "Retrait indisponible, réessayez."
+                    : "Publication indisponible, réessayez."
               : result,
             ts: ts(),
             logLines: [],
@@ -200,6 +228,9 @@ export async function projectsFixture(
   });
   return {
     calls,
+    failCreation: (value: boolean) => {
+      failCreate = value;
+    },
     failDelete: (value: boolean) => {
       failDelete = value;
     },
