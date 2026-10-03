@@ -2821,6 +2821,14 @@ a.creation-card:hover .card-arrow,
   color: #78869c;
   font-size: 12px;
 }
+.projects-toolbar-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin-left: auto;
+}
 .project-card {
   position: relative;
   display: flex;
@@ -3184,6 +3192,24 @@ a.creation-card:hover .card-arrow,
   }
   .projects-toolbar {
     gap: 12px;
+  }
+  .projects-toolbar-controls {
+    width: 100%;
+    gap: 10px;
+  }
+  .projects-toolbar-controls .collection-sort {
+    margin-left: auto;
+  }
+  .projects-toolbar-controls .collection-sort > label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .projects-toolbar-controls .collection-sort-trigger {
+    width: 174px;
   }
 }
 .creation-page {

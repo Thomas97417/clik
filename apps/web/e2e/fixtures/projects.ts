@@ -27,6 +27,7 @@ export async function projectsFixture(
     challenge: null,
   };
   const calls = {
+    lists: [] as any[],
     uploads: [] as any[],
     publications: [] as any[],
     withdrawals: [] as any[],
@@ -109,8 +110,10 @@ export async function projectsFixture(
       const message = JSON.parse(String(raw));
       if (message.type === "ModifyQuerySet") {
         for (const mod of message.modifications) {
-          if (mod.type === "Add") queries.set(mod.queryId, mod);
-          else queries.delete(mod.queryId);
+          if (mod.type === "Add") {
+            queries.set(mod.queryId, mod);
+            if (mod.udfPath === "projects:list") calls.lists.push(mod.args[0]);
+          } else queries.delete(mod.queryId);
         }
         transition({ ...version, querySet: message.newVersion });
       } else if (message.type === "Authenticate")

@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { emptyScene, makePart, type PartType, type Vec3 } from "@clik/scene";
+import { projectsFixture } from "./fixtures/projects";
 
 function models() {
   const part = (
@@ -214,4 +215,105 @@ test("une création locale propose la connexion avant de publier", async ({
   await expect(
     page.getByRole("heading", { name: "La maison solaire", exact: true }),
   ).toBeVisible();
+});
+
+test("tri des créations locales, filtres conservés, clavier et menu mobile", async ({
+  page,
+}, info) => {
+  await seed(page);
+  const cards = page.locator(".project-card h2");
+  const sort = page.getByRole("combobox", { name: "Trier par" });
+  await expect(sort).toHaveText("Les plus récentes");
+  await expect(cards).toHaveText([
+    "La maison solaire",
+    "Le pont des couleurs",
+    "La tour des nuages",
+  ]);
+  const localFilter = page.getByRole("button", {
+    name: "Sur cet appareil",
+    exact: true,
+  });
+  await localFilter.click();
+  await sort.focus();
+  await sort.press("Enter");
+  await expect(page.getByRole("listbox")).toBeVisible();
+  await page.keyboard.press("End");
+  await expect(
+    page.getByRole("option", { name: "Les plus anciennes" }),
+  ).toHaveAttribute("data-highlighted", "");
+  await page.keyboard.press("Enter");
+  await expect(sort).toHaveText("Les plus anciennes");
+  await expect(page).toHaveURL(/sort=oldest/);
+  await expect(cards).toHaveText([
+    "La tour des nuages",
+    "Le pont des couleurs",
+    "La maison solaire",
+  ]);
+  await expect(localFilter).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "En ligne", exact: true }).click();
+  await expect(cards).toHaveCount(0);
+  await expect(sort).toHaveText("Les plus anciennes");
+  await page.getByRole("button", { name: "Toutes", exact: true }).click();
+  await expect(cards.first()).toHaveText("La tour des nuages");
+  await page.reload();
+  await expect(sort).toHaveText("Les plus anciennes");
+  await expect(cards.first()).toHaveText("La tour des nuages");
+  for (const width of [1440, 900, 390, 320]) {
+    await page.setViewportSize({ width, height: 950 });
+    await expect
+      .poll(() =>
+        page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+      )
+      .toBe(true);
+    await sort.click();
+    const menu = page.getByRole("listbox");
+    await expect(menu).toBeVisible();
+    const bounds = (await menu.boundingBox())!;
+    expect(bounds.x).toBeGreaterThanOrEqual(0);
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(width);
+    if (width === 1440 || width === 390)
+      await page.screenshot({
+        path: `/tmp/clik-project-sort-${info.project.name}-${width}.png`,
+      });
+    await page.keyboard.press("Escape");
+    await expect(menu).toHaveCount(0);
+  }
+  await sort.click();
+  await page.getByRole("option", { name: "Les plus récentes" }).click();
+  await expect(page).toHaveURL(/\/projects$/);
+  await expect(cards.first()).toHaveText("La maison solaire");
+});
+
+test("le tri combine les créations locales et en ligne et transmet l’ordre au serveur", async ({
+  page,
+}) => {
+  await seed(page);
+  const fixture = await projectsFixture(page);
+  await page.reload();
+  const cards = page.locator(".project-card h2");
+  await expect(cards).toHaveCount(5);
+  await expect(cards.first()).toHaveText("Un ancien défi");
+  const sort = page.getByRole("combobox", { name: "Trier par" });
+  await sort.click();
+  await page.getByRole("option", { name: "Les plus anciennes" }).click();
+  await expect(cards).toHaveText([
+    "La tour des nuages",
+    "Le pont des couleurs",
+    "La maison solaire",
+    "Un ancien défi",
+    "Le phare bleu",
+  ]);
+  await expect
+    .poll(() => fixture.calls.lists.some((args) => args.sort === "oldest"))
+    .toBe(true);
+  await page.getByRole("button", { name: "En ligne", exact: true }).click();
+  await expect(cards).toHaveText(["Un ancien défi", "Le phare bleu"]);
+  await sort.click();
+  await page.getByRole("option", { name: "Les plus récentes" }).click();
+  await expect(
+    page.getByRole("button", { name: "En ligne", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect
+    .poll(() => fixture.calls.lists.some((args) => args.sort === "recent"))
+    .toBe(true);
 });

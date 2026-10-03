@@ -41,14 +41,17 @@ function scene(value: string) {
   return JSON.stringify(validateScene(JSON.parse(value)));
 }
 export const list = query({
-  args: { paginationOpts: paginationOptsValidator },
+  args: {
+    paginationOpts: paginationOptsValidator,
+    sort: v.optional(v.union(v.literal("recent"), v.literal("oldest"))),
+  },
   handler: async (ctx, a) => {
     const u = await user(ctx);
     // 12 × 512 KiB stays comfortably below the transaction read limit.
     const result = await ctx.db
       .query("projects")
       .withIndex("by_owner", (q) => q.eq("owner", u._id))
-      .order("desc")
+      .order(a.sort === "oldest" ? "asc" : "desc")
       .paginate({
         ...a.paginationOpts,
         numItems: Math.min(12, a.paginationOpts.numItems),

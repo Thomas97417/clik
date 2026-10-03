@@ -11,15 +11,33 @@ import {
   Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { listLocalCreations } from "@/lib/clik/local";
 import ProjectCard, { type CreationItem } from "@/components/clik/project-card";
 
-export const Route = createFileRoute("/projects")({ component: Projects });
+const sortOptions = [
+  { value: "recent", label: "Les plus récentes" },
+  { value: "oldest", label: "Les plus anciennes" },
+] as const;
+
+export const Route = createFileRoute("/projects")({
+  validateSearch: (search: Record<string, unknown>): { sort?: "oldest" } => ({
+    sort: search.sort === "oldest" ? "oldest" : undefined,
+  }),
+  component: Projects,
+});
 function Projects() {
+  const { sort = "recent" } = Route.useSearch();
   const { isAuthenticated, isLoading } = useConvexAuth();
   const { results, status, loadMore } = usePaginatedQuery(
     api.projects.list,
-    isAuthenticated ? {} : "skip",
+    isAuthenticated ? { sort } : "skip",
     { initialNumItems: 12 },
   );
   const navigate = useNavigate();
@@ -70,9 +88,15 @@ function Projects() {
         cacheKey: `project:${p._id}:${p.revision}`,
       }))
     : [];
-  const creations = [...remote, ...local].filter(
-    (p) => location === "all" || location === p.location,
-  );
+  const creations = [...remote, ...local]
+    .filter((p) => location === "all" || location === p.location)
+    .sort((a, b) => {
+      const difference = (a.updatedAt ?? 0) - (b.updatedAt ?? 0);
+      return (
+        (sort === "oldest" ? difference : -difference) ||
+        a.id.localeCompare(b.id)
+      );
+    });
   const loading =
     (location !== "online" && localLoading) ||
     (location !== "local" &&
@@ -140,11 +164,46 @@ function Projects() {
             </button>
           ))}
         </div>
-        <span className="projects-count" aria-live="polite">
-          {loading
-            ? "Chargement…"
-            : `${creations.length} création${creations.length === 1 ? "" : "s"} affichée${creations.length === 1 ? "" : "s"}`}
-        </span>
+        <div className="projects-toolbar-controls">
+          <span className="projects-count" aria-live="polite">
+            {loading
+              ? "Chargement…"
+              : `${creations.length} création${creations.length === 1 ? "" : "s"} affichée${creations.length === 1 ? "" : "s"}`}
+          </span>
+          <div className="collection-sort">
+            <label htmlFor="projects-sort">Trier par</label>
+            <Select
+              items={sortOptions}
+              value={sort}
+              onValueChange={(value) => {
+                if (value !== "recent" && value !== "oldest") return;
+                void navigate({
+                  to: "/projects",
+                  search: { sort: value === "oldest" ? value : undefined },
+                  resetScroll: false,
+                });
+              }}
+            >
+              <SelectTrigger
+                id="projects-sort"
+                className="collection-sort-trigger"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent
+                className="collection-sort-menu"
+                align="end"
+                alignItemWithTrigger={false}
+              >
+                {sortOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
       {localError && location !== "online" && (
         <div className="projects-local-error" role="alert">

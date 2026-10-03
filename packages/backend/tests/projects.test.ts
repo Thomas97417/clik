@@ -30,6 +30,49 @@ const scene = JSON.stringify(
   validateScene({ ...emptyScene(), nodes: [makePart("brick-2x2", "#4079e8")] }),
 );
 describe("Projets privés et versions publiques", () => {
+  it("trie toute la collection par modification avant de paginer, en conservant la confidentialité", async () => {
+    const { alice, bob, t } = setup();
+    const ids = [];
+    for (let i = 0; i < 15; i++) {
+      const id = await alice.mutation(api.projects.create, {
+        title: `Création ${i}`,
+        scene,
+      });
+      await t.run((ctx) => ctx.db.patch(id, { updatedAt: 1000 + i }));
+      ids.push(id);
+    }
+    const other = await bob.mutation(api.projects.create, {
+      title: "Autre compte",
+      scene,
+    });
+    await t.run((ctx) => ctx.db.patch(other, { updatedAt: 0 }));
+    const paginationOpts = { numItems: 12, cursor: null };
+    const recent = await alice.query(api.projects.list, { paginationOpts });
+    expect(recent.page.map((p) => p._id)).toEqual(ids.slice(3).reverse());
+    const oldest = await alice.query(api.projects.list, {
+      paginationOpts,
+      sort: "oldest",
+    });
+    expect(oldest.page.map((p) => p._id)).toEqual(ids.slice(0, 12));
+    expect(oldest.isDone).toBe(false);
+    const rest = await alice.query(api.projects.list, {
+      sort: "oldest",
+      paginationOpts: { numItems: 12, cursor: oldest.continueCursor },
+    });
+    expect(rest.page.map((p) => p._id)).toEqual(ids.slice(12));
+    expect(rest.isDone).toBe(true);
+    await alice.mutation(api.projects.save, {
+      id: ids[0]!,
+      title: "Modifiée",
+      scene,
+      revision: 0,
+    });
+    const updated = await alice.query(api.projects.list, {
+      paginationOpts,
+      sort: "recent",
+    });
+    expect(updated.page[0]._id).toBe(ids[0]);
+  });
   it("importe une version locale une seule fois, par propriétaire", async () => {
     const { alice, bob } = setup();
     const args = { title: "Locale", scene, localSourceId: "local:guest:stamp" };

@@ -39,14 +39,6 @@ function ModelCard({
         <path d="m56 20 22 12-22 12-22-12Z" fill={top} />
         <path d="M49 29v4a7 4 0 0 0 14 0v-4Z" fill={right} />
         <ellipse cx="56" cy="29" rx="7" ry="4" fill={top} stroke="#ffffff55" />
-        {variant && (
-          <g transform="translate(26 18) scale(.65)">
-            <path d="m34 32 22 12v24L34 56Z" fill="#8f80cd" />
-            <path d="m56 44 22-12v24L56 68Z" fill="#7262b0" />
-            <path d="m56 20 22 12-22 12-22-12Z" fill="#c3b7ed" />
-            <ellipse cx="56" cy="29" rx="7" ry="4" fill="#d3c9f5" />
-          </g>
-        )}
       </g>
       <path
         d="M13 87h44m-44 6h27"
