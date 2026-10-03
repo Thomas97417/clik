@@ -6180,6 +6180,11 @@ dialog.modal-backdrop::backdrop {
   z-index: 2;
   pointer-events: none;
 }
+.project-card .creation-kind-badge {
+  top: 14px;
+  right: 14px;
+  left: auto;
+}
 .public-creation-card .thumbnail {
   position: relative;
 }
