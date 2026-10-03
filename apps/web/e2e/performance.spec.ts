@@ -1,3 +1,4 @@
+import { selectCameraView } from "./camera-view";
 import { test, expect } from "@playwright/test";
 import { writeFile } from "node:fs/promises";
 test("500 pièces : déplacement avec aperçu à 30 images par seconde", async ({
@@ -52,7 +53,7 @@ test("500 pièces : déplacement avec aperçu à 30 images par seconde", async (
   );
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
   await page.locator(".tree-name").nth(250).click();
-  await page.getByLabel("Vue de la caméra").selectOption("top");
+  await selectCameraView(page, "top");
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
   await expect(page.locator(".tree-row.selected")).toHaveCount(1);
   const canvas = page.locator("canvas").first(),

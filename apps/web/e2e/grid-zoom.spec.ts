@@ -1,3 +1,4 @@
+import { selectCameraView } from "./camera-view";
 import { test, expect } from "@playwright/test";
 
 test("la grille reste visible à chaque image pendant des allers-retours de zoom", async ({
@@ -10,7 +11,7 @@ test("la grille reste visible à chaque image pendant des allers-retours de zoom
   const box = (await canvas.boundingBox())!;
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   for (const view of ["perspective", "front", "top"]) {
-    await page.getByLabel("Vue de la caméra").selectOption(view);
+    await selectCameraView(page, view);
     await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     const recording = page.evaluate(async () => {

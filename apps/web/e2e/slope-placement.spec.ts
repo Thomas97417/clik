@@ -1,3 +1,4 @@
+import { selectCameraView } from "./camera-view";
 import { dragLibrary } from "./drag-library";
 import { test, expect } from "@playwright/test";
 
@@ -9,7 +10,7 @@ for (const snap of [true, false]) {
     await page
       .getByRole("button", { name: "Pente 3 × 2", exact: true })
       .click();
-    await page.getByLabel("Vue de la caméra").selectOption("top");
+    await selectCameraView(page, "top");
     await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
     if (!snap)
       await page
@@ -48,7 +49,7 @@ for (const snap of [true, false]) {
     expect(Number(await height.inputValue())).toBeGreaterThanOrEqual(
       roof - 0.002,
     );
-    await page.getByLabel("Vue de la caméra").selectOption("perspective");
+    await selectCameraView(page, "perspective");
     await page.screenshot({
       path: `/tmp/clik-ramp-placement-${snap}-${info.project.name}.png`,
     });

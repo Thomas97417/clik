@@ -1997,8 +1997,10 @@ button:focus-visible {
 }
 .view-select {
   margin-left: auto;
+  max-width: 100%;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   flex-wrap: wrap;
   gap: 8px;
   pointer-events: none;
@@ -2009,36 +2011,140 @@ button:focus-visible {
 .scene-light-control {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 7px 9px;
-  border: 1px solid #dde5ef;
-  border-radius: 6px;
+  height: 38px;
+  gap: 8px;
+  padding: 0 8px 0 6px;
+  border: 1px solid #dce5f0;
+  border-radius: 8px;
   background: #fffffff0;
   color: #64758d;
-  font-size: 12px;
+  box-shadow: 0 2px 8px #53668108;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.scene-light-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: #fff4df;
+  color: #aa7523;
 }
 .scene-light-control input {
-  width: 90px;
-  accent-color: #356ae6;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 108px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
   cursor: pointer;
+}
+.scene-light-control input::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    #d5a251 0%,
+    #d5a251 var(--light-progress),
+    #dfe6f0 var(--light-progress),
+    #dfe6f0 100%
+  );
+}
+.scene-light-control input::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: #dfe6f0;
+}
+.scene-light-control input::-moz-range-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: #d5a251;
+}
+.scene-light-control input::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  border: 2px solid #cc9238;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px #81582525;
+}
+.scene-light-control input::-moz-range-thumb {
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #cc9238;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px #81582525;
+}
+.scene-light-control input:hover::-webkit-slider-thumb,
+.scene-light-control input:active::-webkit-slider-thumb {
+  background: #fff8e9;
+  box-shadow: 0 0 0 3px #d5a25120;
+}
+.scene-light-control input:hover::-moz-range-thumb,
+.scene-light-control input:active::-moz-range-thumb {
+  background: #fff8e9;
+  box-shadow: 0 0 0 3px #d5a25120;
 }
 .scene-light-control input:focus-visible {
   outline: 2px solid #356ae6;
   outline-offset: 3px;
-  border-radius: 3px;
+  border-radius: 6px;
 }
 .scene-light-angle {
-  width: 32px;
-  text-align: right;
+  min-width: 36px;
+  padding: 2px 4px;
+  border: 1px solid #e8eef6;
+  border-radius: 5px;
+  background: #f3f6fa;
+  color: #65758d;
+  font-size: 10px;
+  text-align: center;
   font-variant-numeric: tabular-nums;
 }
-.view-select select {
+.view-select .scene-view-trigger {
+  height: 38px;
+  width: 132px;
+  padding: 0 10px;
   font-size: 12px;
-  background: #ffffffc9;
-  border: 1px solid #dde5ef;
-  border-radius: 6px;
-  padding: 7px;
+  background: #fffffff0;
+  border: 1px solid #dce5f0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #53668108;
   color: #64758d;
+}
+.scene-view-trigger:hover,
+.scene-view-trigger[aria-expanded="true"] {
+  background: #fff;
+  border-color: #b9cbed;
+  color: #356ae6;
+}
+.scene-view-menu {
+  min-width: 152px;
+  padding: 5px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 24px #33476b24;
+}
+.scene-view-menu [data-slot="select-item"] {
+  min-height: 32px;
+  padding: 7px 30px 7px 10px;
+  border-radius: 6px;
+  color: #536580;
+  font-size: 12px;
+  cursor: pointer;
+}
+.scene-view-menu [data-slot="select-item"][data-highlighted],
+.scene-view-menu [data-slot="select-item"][data-selected] {
+  background: #eef3ff;
+  color: #356ae6;
 }
 .viewport-bottom {
   position: absolute;
@@ -3585,8 +3691,7 @@ a.creation-card:hover .card-arrow,
 .properties select,
 .properties input,
 .transform-fields input,
-.scene-toolbar button span,
-.view-select select {
+.scene-toolbar button span {
   font-size: 14px !important;
 }
 .property-hint,

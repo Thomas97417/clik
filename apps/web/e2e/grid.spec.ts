@@ -1,3 +1,4 @@
+import { selectCameraView } from "./camera-view";
 import { test, expect, type Page } from "@playwright/test";
 
 const coordinates = (page: Page) =>
@@ -44,7 +45,7 @@ test("grille lisible au zoom maximal, au-dessus et en dessous du plan", async ({
   await page.goto("/editor");
   const canvas = page.locator("canvas").first();
   await expect(canvas).toHaveAttribute("data-rendered", "0");
-  await page.getByLabel("Vue de la caméra").selectOption("top");
+  await selectCameraView(page, "top");
   const box = (await canvas.boundingBox())!;
   const x = box.x + box.width / 2,
     y = box.y + box.height / 2;
@@ -74,7 +75,7 @@ test("pièce impaire : ajout, déplacement et quart de tour occupent des cases e
   await page.goto("/editor");
   await page.getByRole("button", { name: "Brique 1 × 2", exact: true }).click();
   expect(await coordinates(page)).toEqual([0, 0, 0.5]);
-  await page.getByLabel("Vue de la caméra").selectOption("top");
+  await selectCameraView(page, "top");
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
   const canvas = page.locator("canvas").first();
   await expect(canvas).toHaveAttribute("data-rendered", "1");

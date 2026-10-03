@@ -64,6 +64,14 @@ import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { CSSProperties } from "react";
 import { useEditor } from "@/lib/clik/store";
 import { useProject } from "@/lib/clik/use-project";
 import ClientScene from "./client-scene";
@@ -82,6 +90,12 @@ const pieceCategories = [
   { name: "Angles", prefix: "corner" },
   { name: "Arches", prefix: "arch" },
 ];
+const cameraViews = [
+  { value: "perspective", label: "Perspective" },
+  { value: "top", label: "Dessus" },
+  { value: "front", label: "Face" },
+  { value: "right", label: "Droite" },
+] as const;
 const safe = (fn: () => unknown) => {
   try {
     const value = fn();
@@ -1105,22 +1119,43 @@ export default function Editor({
                 </span>
               )}
               <div className="view-select">
-                <select
-                  aria-label="Vue de la caméra"
+                <Select
+                  items={cameraViews}
                   value={s.view}
-                  onChange={(e) =>
-                    useEditor.setState({
-                      view: e.target.value as typeof s.view,
-                    })
-                  }
+                  onValueChange={(view) => {
+                    if (
+                      view === "perspective" ||
+                      view === "top" ||
+                      view === "front" ||
+                      view === "right"
+                    )
+                      useEditor.setState({ view });
+                  }}
                 >
-                  <option value="perspective">Perspective</option>
-                  <option value="top">Dessus</option>
-                  <option value="front">Face</option>
-                  <option value="right">Droite</option>
-                </select>
+                  <SelectTrigger
+                    className="scene-view-trigger"
+                    aria-label="Vue de la caméra"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent
+                    className="scene-view-menu"
+                    side="top"
+                    align="end"
+                    sideOffset={8}
+                    alignItemWithTrigger={false}
+                  >
+                    {cameraViews.map((view) => (
+                      <SelectItem key={view.value} value={view.value}>
+                        {view.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <label className="scene-light-control">
-                  <Sun size={16} aria-hidden="true" />
+                  <span className="scene-light-icon" aria-hidden="true">
+                    <Sun size={15} />
+                  </span>
                   <span>Éclairage</span>
                   <input
                     type="range"
@@ -1131,13 +1166,18 @@ export default function Editor({
                     max={360}
                     step={5}
                     value={s.lightAngle}
+                    style={
+                      {
+                        "--light-progress": `${(s.lightAngle / 360) * 100}%`,
+                      } as CSSProperties
+                    }
                     onChange={(e) =>
                       useEditor.setState({ lightAngle: Number(e.target.value) })
                     }
                   />
-                  <span className="scene-light-angle" aria-hidden="true">
+                  <output className="scene-light-angle" aria-hidden="true">
                     {s.lightAngle}°
-                  </span>
+                  </output>
                 </label>
               </div>
             </div>

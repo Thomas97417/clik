@@ -1,3 +1,4 @@
+import { selectCameraView } from "./camera-view";
 import { test, expect, type Page } from "@playwright/test";
 
 async function pixels(page: Page) {
@@ -70,7 +71,7 @@ test("le curseur éclaire l’autre côté sans déplacer la pièce, y compris a
   await page.getByRole("button", { name: "Brique 2 × 2", exact: true }).click();
   await page.getByRole("button", { name: "Rouge", exact: true }).click();
   await page.getByRole("button", { name: "Grille", exact: true }).click();
-  await page.getByLabel("Vue de la caméra").selectOption("front");
+  await selectCameraView(page, "front");
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
   await expect.poll(async () => (await pixels(page)).red).toBeGreaterThan(100);
   const before = (await pixels(page)).brightness;

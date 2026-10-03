@@ -1,3 +1,4 @@
+import { selectCameraView } from "./camera-view";
 import { test, expect } from "@playwright/test";
 import { dragLibrary } from "./drag-library";
 
@@ -41,7 +42,7 @@ test("une rotation pendant la prise évite la pièce voisine et reste annulable"
     await input.fill(value);
     await input.press("Tab");
   }
-  await page.getByLabel("Vue de la caméra").selectOption("top");
+  await selectCameraView(page, "top");
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
   const canvas = page.locator("canvas").first();
   const box = (await canvas.boundingBox())!;
@@ -73,7 +74,7 @@ for (const snap of [true, false]) {
     await page
       .getByRole("button", { name: "Brique 2 × 2", exact: true })
       .click();
-    await page.getByLabel("Vue de la caméra").selectOption("top");
+    await selectCameraView(page, "top");
     await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
     if (!snap)
       await page

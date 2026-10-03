@@ -1,3 +1,4 @@
+import { selectCameraView } from "./camera-view";
 import { test, expect } from "@playwright/test";
 
 test("panneaux indépendants, scène agrandie et état conservé à la réouverture", async ({
@@ -64,7 +65,7 @@ test("panneaux indépendants, scène agrandie et état conservé à la réouvert
     path: `/tmp/clik-panels-folded-${info.project.name}.png`,
   });
   // The same scene stays interactive after resizing, while both panels are hidden.
-  await page.getByLabel("Vue de la caméra").selectOption("top");
+  await selectCameraView(page, "top");
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
   const box = (await canvas.boundingBox())!;
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);

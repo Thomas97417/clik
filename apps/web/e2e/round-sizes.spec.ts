@@ -1,3 +1,4 @@
+import { selectCameraView } from "./camera-view";
 import { test, expect } from "@playwright/test";
 import { dragLibrary } from "./drag-library";
 
@@ -19,7 +20,7 @@ for (const [size, sockets] of [
         exact: true,
       })
       .click();
-    await page.getByLabel("Vue de la caméra").selectOption("top");
+    await selectCameraView(page, "top");
     await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
     const box = (await canvas.boundingBox())!;
     await dragLibrary(
@@ -42,7 +43,7 @@ for (const [size, sockets] of [
     await expect(page.getByLabel("rotation Y", { exact: true })).toHaveValue(
       "90",
     );
-    await page.getByLabel("Vue de la caméra").selectOption("perspective");
+    await selectCameraView(page, "perspective");
     await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
     await page.screenshot({
       path: `/tmp/clik-round-stack-${size}-${info.project.name}.png`,

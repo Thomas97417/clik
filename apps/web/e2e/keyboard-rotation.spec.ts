@@ -1,3 +1,4 @@
+import { selectCameraView } from "./camera-view";
 import { test, expect } from "@playwright/test";
 import { dragLibrary } from "./drag-library";
 
@@ -39,7 +40,7 @@ for (const library of [false, true]) {
       await page
         .getByRole("button", { name: "Brique 2 × 2", exact: true })
         .click();
-      await page.getByLabel("Vue de la caméra").selectOption("top");
+      await selectCameraView(page, "top");
       await page
         .getByRole("button", { name: "Cadrer la sélection (F)" })
         .click();

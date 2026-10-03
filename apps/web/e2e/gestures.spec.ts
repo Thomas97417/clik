@@ -1,10 +1,11 @@
+import { selectCameraView } from "./camera-view";
 import { dragLibrary } from "./drag-library";
 import { test, expect, type Page } from "@playwright/test";
 
 async function setup(page: Page) {
   await page.goto("/editor");
   await page.locator('.piece-card[aria-label="Brique 2 × 2"]').click();
-  await page.getByLabel("Vue de la caméra").selectOption("top");
+  await selectCameraView(page, "top");
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
   const canvas = page.locator("canvas").first();
   await expect(canvas).toHaveAttribute("data-rendered", "1");

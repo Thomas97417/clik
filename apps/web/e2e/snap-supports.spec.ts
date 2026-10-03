@@ -1,3 +1,4 @@
+import { selectCameraView } from "./camera-view";
 import { dragLibrary } from "./drag-library";
 import { test, expect } from "@playwright/test";
 
@@ -17,7 +18,7 @@ test("une pièce pont éclaire les huit plots de ses deux supports", async ({
     .locator(".tree-name")
     .first()
     .click({ modifiers: ["Shift"] });
-  await page.getByLabel("Vue de la caméra").selectOption("top");
+  await selectCameraView(page, "top");
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
   const canvas = page.locator("canvas").first();
   await expect(canvas).toHaveAttribute("data-rendered", "2");

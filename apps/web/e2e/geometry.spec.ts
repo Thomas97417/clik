@@ -1,3 +1,4 @@
+import { selectCameraView } from "./camera-view";
 import { dragLibrary } from "./drag-library";
 import { test, expect, type Page } from "@playwright/test";
 
@@ -30,7 +31,7 @@ test("dessous creux des briques, plaques et pentes", async ({ page }, info) => {
     .locator(".tree-name")
     .nth(1)
     .click({ modifiers: ["Shift"] });
-  await page.getByLabel("Vue de la caméra").selectOption("top");
+  await selectCameraView(page, "top");
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
   await expect(canvas).toHaveAttribute("data-rendered", "3");
   const frames = Number(await canvas.getAttribute("data-frames"));
@@ -48,7 +49,7 @@ test("emboîtement brique, plaque et brique aux hauteurs de contact", async ({
 }, info) => {
   await page.goto("/editor");
   await page.getByRole("button", { name: "Brique 2 × 2", exact: true }).click();
-  await page.getByLabel("Vue de la caméra").selectOption("top");
+  await selectCameraView(page, "top");
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
   const canvas = page.locator("canvas").first();
   await expect(canvas).toHaveAttribute("data-rendered", "1");
@@ -70,7 +71,7 @@ test("emboîtement brique, plaque et brique aux hauteurs de contact", async ({
     await page.getByRole("button", { name: color, exact: true }).click();
     await expect(page.locator(".overlap")).toHaveCount(0);
   }
-  await page.getByLabel("Vue de la caméra").selectOption("front");
+  await selectCameraView(page, "front");
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
   await expect(canvas).toHaveAttribute("data-rendered", "3");
   const frames = Number(await canvas.getAttribute("data-frames"));

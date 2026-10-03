@@ -1,3 +1,4 @@
+import { selectCameraView } from "./camera-view";
 import { test, expect } from "@playwright/test";
 
 test("horizon sans moiré pendant l’inertie de la caméra", async ({
@@ -6,7 +7,7 @@ test("horizon sans moiré pendant l’inertie de la caméra", async ({
   await page.goto("/editor");
   const canvas = page.locator("canvas").first();
   await expect(canvas).toHaveAttribute("data-rendered", "0");
-  await page.getByLabel("Vue de la caméra").selectOption("front");
+  await selectCameraView(page, "front");
   const ready = Number(await canvas.getAttribute("data-frames"));
   await expect
     .poll(async () => Number(await canvas.getAttribute("data-frames")))

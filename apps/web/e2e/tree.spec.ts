@@ -1,3 +1,4 @@
+import { selectCameraView } from "./camera-view";
 import { test, expect, type Page } from "@playwright/test";
 
 const row = (page: Page, name: string) =>
@@ -267,7 +268,7 @@ test("sélection dans la scène : ouverture des groupes parents", async ({
 }) => {
   await setup(page);
   await row(page, "Brique 2 × 2").locator(".tree-name").click();
-  await page.getByLabel("Vue de la caméra").selectOption("top");
+  await selectCameraView(page, "top");
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
   await page.getByRole("button", { name: "Tout replier", exact: true }).click();
   const canvas = page.locator("canvas").first(),

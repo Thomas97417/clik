@@ -48,7 +48,9 @@ test("les champs, les contrôles et les modificateurs gardent leurs flèches", a
   await expect(position("Y")).toHaveValue("0");
   await page.getByLabel("Vue de la caméra").focus();
   await page.keyboard.press("ArrowDown");
+  await expect(page.getByRole("listbox")).toBeVisible();
   await expect(position("Z")).toHaveValue("0");
+  await page.keyboard.press("Escape");
   await page.locator(".tree-name").click();
   await page.keyboard.press("Control+ArrowRight");
   await page.keyboard.press("Alt+ArrowUp");

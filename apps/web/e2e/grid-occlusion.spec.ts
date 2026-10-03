@@ -1,3 +1,4 @@
+import { selectCameraView } from "./camera-view";
 import { test, expect } from "@playwright/test";
 
 test("une pièce opaque masque la grille pendant le zoom sous plusieurs angles", async ({
@@ -14,7 +15,7 @@ test("une pièce opaque masque la grille pendant le zoom sous plusieurs angles",
   const x = box.x + box.width / 2,
     y = box.y + box.height / 2;
   for (const view of ["top", "perspective", "front"]) {
-    await page.getByLabel("Vue de la caméra").selectOption(view);
+    await selectCameraView(page, view);
     await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
     const ready = Number(await canvas.getAttribute("data-frames"));
     await expect

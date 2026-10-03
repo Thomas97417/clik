@@ -1,3 +1,4 @@
+import { selectCameraView } from "./camera-view";
 import { test, expect, type Page } from "@playwright/test";
 import { Box3, PerspectiveCamera, Vector3 } from "three";
 import { dragLibrary } from "./drag-library";
@@ -40,7 +41,7 @@ async function prepare(page: Page, existing: boolean) {
     );
     useEditor.setState({ snap: true, selection: [] });
   }, existing);
-  await page.getByLabel("Vue de la caméra").selectOption("front");
+  await selectCameraView(page, "front");
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
   const frame = Number(await canvas.getAttribute("data-frames"));
   await expect

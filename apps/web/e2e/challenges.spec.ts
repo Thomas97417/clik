@@ -1,3 +1,4 @@
+import { selectCameraView } from "./camera-view";
 import { test, expect } from "@playwright/test";
 
 test("participer : créer, proposer et mettre à jour la même création", async ({
@@ -49,7 +50,7 @@ test("participer : créer, proposer et mettre à jour la même création", async
   await page.locator(".creation-challenge").getByRole("link").click();
   await page.getByRole("button", { name: "Reprendre ma création" }).click();
   await page.getByRole("button", { name: "Grille", exact: true }).click();
-  await page.getByLabel("Vue de la caméra").selectOption("top");
+  await selectCameraView(page, "top");
   await page.getByLabel("Angle de l’éclairage").press("End");
   await page.getByLabel("Angle de l’éclairage").press("ArrowLeft");
   await expect(page.locator("canvas").first()).toHaveAttribute(
