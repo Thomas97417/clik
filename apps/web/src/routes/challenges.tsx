@@ -165,7 +165,6 @@ function Challenges() {
           <section className="challenge-kit" aria-label="Le lot du défi">
             <div className="challenge-kit-heading">
               <div>
-                <span className="eyebrow">Votre terrain de jeu</span>
                 <h2>Les pièces du jour</h2>
                 <p>Utilisez tout ou partie du lot. Les couleurs sont libres.</p>
               </div>
