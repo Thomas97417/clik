@@ -7,6 +7,7 @@ import {
   Box,
   Cloud,
   HardDrive,
+  LoaderCircle,
   LockKeyhole,
   Plus,
 } from "lucide-react";
@@ -274,16 +275,31 @@ function Projects() {
       {isAuthenticated &&
         location !== "local" &&
         (status === "CanLoadMore" || status === "LoadingMore") && (
-          <Button
-            className="load-more"
-            variant="outline"
-            disabled={status === "LoadingMore"}
-            onClick={() => loadMore(12)}
-          >
-            {status === "LoadingMore"
-              ? "Chargement…"
-              : "Voir plus de créations"}
-          </Button>
+          <div className="projects-pagination">
+            <Button
+              className="projects-load-more"
+              variant="outline"
+              disabled={status === "LoadingMore"}
+              aria-busy={status === "LoadingMore"}
+              onClick={() => loadMore(12)}
+            >
+              <span className="projects-load-more-icon" aria-hidden="true">
+                {status === "LoadingMore" ? (
+                  <LoaderCircle
+                    className="animate-spin motion-reduce:animate-none"
+                    size={16}
+                  />
+                ) : (
+                  <Plus size={16} />
+                )}
+              </span>
+              <span aria-live="polite" aria-atomic="true">
+                {status === "LoadingMore"
+                  ? "Chargement…"
+                  : "Voir plus de créations"}
+              </span>
+            </Button>
+          </div>
         )}
       <p className="projects-footnote">
         <LockKeyhole size={14} aria-hidden="true" /> Vos créations restent
