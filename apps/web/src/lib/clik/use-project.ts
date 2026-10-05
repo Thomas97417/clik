@@ -18,6 +18,7 @@ import {
 } from "./local";
 import { toast } from "sonner";
 import { creationMetadata, importInputs } from "./project-metadata";
+import { rememberLocalDraft } from "./last-local-draft";
 export function useProject(projectId?: string, draftId?: string) {
   const connection = useConvexConnectionState();
   const { isAuthenticated, isLoading } = useConvexAuth(),
@@ -107,6 +108,7 @@ export function useProject(projectId?: string, draftId?: string) {
         setConflict(
           !!(local?.dirty && remote && local.revision !== remote.revision),
         );
+        if (!projectId) rememberLocalDraft(draftId ?? "");
         setReady(true);
         setStatus(navigator.onLine ? "Enregistré" : "Hors ligne");
       })
@@ -118,7 +120,7 @@ export function useProject(projectId?: string, draftId?: string) {
       alive = false;
       loaded.current = "";
     };
-  }, [key, !!remote, !!me]);
+  }, [key, !!(projectId && remote), !!(projectId && me)]);
   useEffect(() => {
     const on = () => {
         setRetry((n) => n + 1);

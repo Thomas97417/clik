@@ -3,6 +3,10 @@ import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { emptyScene, makePart } from "@clik/scene";
 import { useEditor } from "../src/lib/clik/store";
+import {
+  getLastLocalDraftId,
+  rememberLocalDraft,
+} from "../src/lib/clik/last-local-draft";
 const mocks = vi.hoisted(() => ({
   save: vi.fn(),
   create: vi.fn(),
@@ -15,6 +19,7 @@ const mocks = vi.hoisted(() => ({
     revision: 3,
   },
   authenticated: true,
+  userLoading: false,
   writeError: undefined as Error | undefined,
 }));
 vi.mock("convex/react", () => ({
@@ -28,7 +33,9 @@ vi.mock("convex/react", () => ({
     args === "skip"
       ? undefined
       : String((ref as any)[Symbol.for("functionName")]).includes("auth:")
-        ? mocks.user
+        ? mocks.userLoading
+          ? undefined
+          : mocks.user
         : mocks.remote,
   useMutation: (ref: any) =>
     String(ref[Symbol.for("functionName")]).includes("create")
@@ -46,6 +53,7 @@ vi.mock("../src/lib/clik/local", () => ({
 vi.mock("sonner", () => ({ toast: { error: vi.fn(), info: vi.fn() } }));
 import { useProject } from "../src/lib/clik/use-project";
 beforeEach(() => {
+  localStorage.clear();
   mocks.drafts.clear();
   mocks.save.mockReset().mockResolvedValue(4);
   mocks.create.mockReset().mockResolvedValue("new-project");
@@ -57,6 +65,7 @@ beforeEach(() => {
       mocks.drafts.delete(key);
     });
   mocks.authenticated = true;
+  mocks.userLoading = false;
   mocks.writeError = undefined;
   Object.defineProperty(navigator, "onLine", {
     value: true,
@@ -74,9 +83,58 @@ beforeEach(() => {
 });
 afterEach(() => {
   cleanup();
+  vi.restoreAllMocks();
   vi.useRealTimers();
   vi.unstubAllGlobals();
 });
+it("reprend le dernier atelier local sans le remplacer par une sauvegarde de compte", async () => {
+  const local = renderHook(() => useProject(undefined, "last-work"));
+  await waitFor(() => expect(local.result.current.ready).toBe(true));
+  expect(getLastLocalDraftId()).toBe("last-work");
+  local.unmount();
+  const remote = renderHook(() => useProject("project"));
+  await waitFor(() => expect(remote.result.current.ready).toBe(true));
+  expect(getLastLocalDraftId()).toBe("last-work");
+});
+
+it("permet de reprendre explicitement la création locale initiale", async () => {
+  rememberLocalDraft("last-work");
+  const { result } = renderHook(() => useProject());
+  await waitFor(() => expect(result.current.ready).toBe(true));
+  expect(getLastLocalDraftId()).toBe("");
+});
+
+it("continue à sauvegarder la scène quand le stockage des préférences est bloqué", async () => {
+  vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+    throw Error("Préférences bloquées");
+  });
+  const { result } = renderHook(() => useProject(undefined, "last-work"));
+  await waitFor(() => expect(result.current.ready).toBe(true));
+  await act(async () => {
+    useEditor.getState().add("brick-2x4");
+    await result.current.flush();
+  });
+  expect(mocks.drafts.get("guest:last-work").scene.nodes).toHaveLength(1);
+});
+
+it("ne recharge pas la scène locale quand le profil du compte finit de charger", async () => {
+  mocks.userLoading = true;
+  const { result, rerender } = renderHook(() =>
+    useProject(undefined, "last-work"),
+  );
+  await waitFor(() => expect(result.current.ready).toBe(true));
+  await act(async () => {
+    useEditor.getState().add("brick-2x4");
+    mocks.userLoading = false;
+    rerender();
+  });
+  expect(useEditor.getState().scene.nodes).toHaveLength(1);
+  await act(async () => {
+    await result.current.flush();
+  });
+  expect(mocks.drafts.get("guest:last-work").scene.nodes).toHaveLength(1);
+});
+
 it("enregistre les dernières pièces et le titre local avant de quitter l’atelier", async () => {
   const { result } = renderHook(() => useProject());
   await waitFor(() => expect(result.current.ready).toBe(true));

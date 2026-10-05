@@ -5,11 +5,11 @@ for (const draft of [undefined, "my-workshop"]) {
     page,
     context,
   }) => {
-    const originalUrl = draft ? `/editor?draft=${draft}` : "/editor";
-    await page.goto(originalUrl);
+    await page.goto(draft ? `/editor?draft=${draft}` : "/editor");
     await page
       .getByRole("button", { name: "Brique 2 × 4", exact: true })
       .click();
+    const originalUrl = page.url();
     await page.getByLabel("Nom du projet").fill("Ma construction conservée");
     if (draft) await context.setOffline(true);
     await page

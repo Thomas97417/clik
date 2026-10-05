@@ -181,7 +181,7 @@ export default function ProjectCard({
         to: "/editor/$projectId" as const,
         params: { projectId: creation.projectId },
       }
-    : { to: "/editor" as const, search: { draft: creation.draftId } };
+    : { to: "/editor" as const, search: { draft: creation.draftId ?? "" } };
   const VisibilityIcon = published ? Globe2 : online ? LockKeyhole : HardDrive;
   const publicationClosed =
     !published &&

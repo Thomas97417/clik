@@ -192,7 +192,7 @@ test("sans WebGL, les créations restent accessibles", async ({ page }) => {
   ).toHaveCount(3);
   await expect(
     page.getByRole("link", { name: "Ouvrir La maison solaire", exact: true }),
-  ).toHaveAttribute("href", "/editor");
+  ).toHaveAttribute("href", "/editor?draft=");
 });
 
 test("une création locale propose la connexion avant de publier", async ({

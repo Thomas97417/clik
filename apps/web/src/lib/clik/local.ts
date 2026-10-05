@@ -4,6 +4,7 @@ import {
   type ProjectProvenance,
   type SceneDocument,
 } from "@clik/scene";
+import { forgetLocalDraft } from "./last-local-draft";
 export type Draft = {
   scene: SceneDocument;
   title: string;
@@ -133,6 +134,7 @@ export async function removeLocalCreation(key: string, expectedStamp: string) {
           ),
         );
     });
+    forgetLocalDraft(key === "guest" ? "" : key.slice(6));
   } finally {
     db.close();
   }
