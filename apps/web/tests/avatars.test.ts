@@ -4,6 +4,8 @@ import {
   AVATAR_PART_HEIGHT,
   assembleAvatar,
   avatarExposedStuds,
+  avatarBottomSockets,
+  avatarPartArea,
   avatarSignature,
   defaultAvatar,
   generateAvatar,
@@ -95,10 +97,26 @@ describe("Assemblage des avatars", () => {
   it("emboîte des pièces variées sans flottement ni chevauchement sur 1000 variantes", () => {
     const kinds = new Set<AvatarPart["kind"]>();
     const widths = new Set<number>();
+    const archOpenings = new Set<string>();
+    const archWidths = new Set<number>();
+    const slopeWidths = new Set<number>();
+    let combined = 0;
+    let lowerSlopes = 0;
     for (let i = 0; i < 1000; i++) {
       const descriptor = defaultAvatar(`assembly-${i}`);
       const model = assembleAvatar(descriptor);
       const { parts, primary, accent } = model;
+      if (
+        parts.some((p) => p.kind === "arch") &&
+        parts.some((p) => p.kind === "slope")
+      )
+        combined++;
+      if (
+        parts.some(
+          (p) => p.kind === "slope" && parts.some((other) => other.y > p.y),
+        )
+      )
+        lowerSlopes++;
       expect(assembleAvatar({ ...descriptor, crown: "gold" })).toEqual(model);
       expect(primary).toBe(generateAvatar(descriptor).primary);
       expect(accent).toBe(generateAvatar(descriptor).accent);
@@ -107,10 +125,18 @@ describe("Assemblage des avatars", () => {
       ]);
       const occupied = new Set<string>();
       let accented = 0;
+      let area = 0;
       for (const part of parts) {
         kinds.add(part.kind);
         widths.add(part.width);
+        if (part.kind === "arch") {
+          archWidths.add(part.width);
+          archOpenings.add(part.opening ?? "round");
+        }
+        if (part.kind === "slope") slopeWidths.add(part.width);
         const height = AVATAR_PART_HEIGHT[part.kind];
+        area += avatarPartArea(part);
+        if (part.color === accent) accented += avatarPartArea(part);
         expect([primary, accent]).toContain(part.color);
         expect(part.x).toBeGreaterThanOrEqual(0);
         expect(part.x + part.width).toBeLessThanOrEqual(6);
@@ -124,11 +150,13 @@ describe("Assemblage des avatars", () => {
           ...(part.kind === "slope" ? { rise: -part.rise } : {}),
         });
         for (let x = part.x; x < part.x + part.width; x++) {
-          if (part.y > 0) {
+          if (part.y > 0 && avatarBottomSockets(part).includes(x - part.x)) {
             expect(
               parts.some(
                 (support) =>
-                  (support.kind === "brick" || support.kind === "plate") &&
+                  (support.kind === "brick" ||
+                    support.kind === "plate" ||
+                    support.kind === "arch") &&
                   support.y + AVATAR_PART_HEIGHT[support.kind] === part.y &&
                   support.x <= x &&
                   support.x + support.width > x,
@@ -139,15 +167,63 @@ describe("Assemblage des avatars", () => {
             const cell = `${x},${y}`;
             expect(occupied.has(cell)).toBe(false);
             occupied.add(cell);
-            if (part.color === accent) accented++;
           }
         }
       }
       expect(accented).toBeGreaterThan(0);
-      expect(accented / occupied.size).toBeLessThanOrEqual(1 / 3);
+      expect(accented / area).toBeLessThanOrEqual(1 / 3 + 1e-10);
     }
-    expect([...kinds].sort()).toEqual(["brick", "plate", "slope", "tile"]);
+    expect([...kinds].sort()).toEqual([
+      "arch",
+      "brick",
+      "plate",
+      "slope",
+      "tile",
+    ]);
     expect([...widths].sort((a, b) => a - b)).toEqual([1, 2, 3, 4, 6]);
+    expect([...archOpenings].sort()).toEqual(["pointed", "round"]);
+    expect([...archWidths].sort()).toEqual([4, 6]);
+    expect([...slopeWidths].sort()).toEqual([1, 2, 3]);
+    expect(combined).toBeGreaterThan(0);
+    expect(lowerSlopes).toBeGreaterThan(0);
+  });
+
+  it("ne masque les plots sous une arche qu’au niveau de ses pieds", () => {
+    const base: AvatarPart = {
+      kind: "plate",
+      x: 0,
+      y: 0,
+      width: 6,
+      color: "blue",
+    };
+    for (const width of [4, 6] as const) {
+      const arch: AvatarPart = {
+        kind: "arch",
+        x: (6 - width) / 2,
+        y: 1,
+        width,
+        color: "blue",
+      };
+      const roof: AvatarPart = {
+        kind: "tile",
+        x: 2,
+        y: 7,
+        width: 2,
+        color: "blue",
+      };
+      const parts = [base, arch, roof];
+      expect(avatarBottomSockets(arch)).toEqual([0, width - 1]);
+      expect(avatarExposedStuds(base, parts)).toEqual(
+        width === 4 ? [0, 2, 3, 5] : [1, 2, 3, 4],
+      );
+      expect(avatarExposedStuds(arch, parts)).toEqual(
+        width === 4 ? [0, 3] : [0, 1, 4, 5],
+      );
+      expect(avatarPartArea(arch)).toBeLessThan(
+        width * AVATAR_PART_HEIGHT.arch,
+      );
+      expect(avatarPartArea(arch)).toBeGreaterThan(2 * AVATAR_PART_HEIGHT.arch);
+    }
   });
 
   it("masque les plots recouverts, y compris sous les tuiles et les pentes", () => {

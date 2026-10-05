@@ -44,6 +44,12 @@ export const AVATAR_PART_HEIGHT = {
   plate: 1,
   tile: 1,
   slope: 3,
+  arch: 6,
+} as const;
+export const AVATAR_ARCH_PROFILE = {
+  legWidth: 1,
+  springHeight: 2,
+  rise: 3,
 } as const;
 export type AvatarPart = {
   x: number;
@@ -51,7 +57,11 @@ export type AvatarPart = {
   y: number;
   width: 1 | 2 | 3 | 4 | 6;
   color: string;
-} & ({ kind: "brick" | "plate" | "tile" } | { kind: "slope"; rise: -1 | 1 });
+} & (
+  | { kind: "brick" | "plate" | "tile" }
+  | { kind: "slope"; rise: -1 | 1 }
+  | { kind: "arch"; width: 4 | 6; opening?: "round" | "pointed" }
+);
 export const AVATAR_COLORS = [
   "#5787eb",
   "#f3b18e",
@@ -161,7 +171,7 @@ const partitions = {
 
 /**
  * The v1 identity and palette stay stable; this is its assembled presentation.
- * Every brick rests on a flat supporting piece and connecting plates bind rows.
+ * Flat supporting pieces bind rows; arches connect only through their two feet.
  */
 export function assembleAvatar(avatar: AvatarDescriptor) {
   const { primary, accent, background } = generateAvatar(avatar);
@@ -171,12 +181,8 @@ export function assembleAvatar(avatar: AvatarDescriptor) {
   const parts: AvatarPart[] = [
     { kind: "plate", x: 0, y: 0, width: 6, color: accent },
   ];
-  let y = 1;
-  const lower = choose([4, 6] as const);
-  const middle = choose(lower === 6 ? ([4, 6] as const) : ([2, 4] as const));
-  const upper = choose(middle === 2 ? ([2] as const) : ([2, 4] as const));
-  const widths = [lower, middle, upper];
-  for (const [row, width] of widths.entries()) {
+  type Span = 2 | 4 | 6;
+  const row = (width: Span, y: number) => {
     let x = (6 - width) / 2;
     for (const length of choose<readonly AvatarPart["width"][]>(
       partitions[width],
@@ -184,41 +190,160 @@ export function assembleAvatar(avatar: AvatarDescriptor) {
       parts.push({ kind: "brick", x, y, width: length, color: primary });
       x += length;
     }
-    y += AVATAR_PART_HEIGHT.brick;
-    if (row < 2) {
-      parts.push({
-        kind: "plate",
-        x: (6 - width) / 2,
+    return y + AVATAR_PART_HEIGHT.brick;
+  };
+  const plate = (width: Span, y: number) => {
+    parts.push({ kind: "plate", x: (6 - width) / 2, y, width, color: primary });
+    return y + AVATAR_PART_HEIGHT.plate;
+  };
+  const arch = (width: 4 | 6, y: number) => {
+    parts.push({
+      kind: "arch",
+      x: (6 - width) / 2,
+      y,
+      width,
+      color: primary,
+      opening: choose(["round", "pointed"] as const),
+    });
+    return y + AVATAR_PART_HEIGHT.arch;
+  };
+  const slopes = (span: Span, y: number, inward: boolean) => {
+    const width = (span / 2) as 1 | 2 | 3;
+    const x = (6 - span) / 2;
+    const rise = inward ? 1 : -1;
+    parts.push(
+      { kind: "slope", x, y, width, rise, color: primary },
+      {
+        kind: "slope",
+        x: x + width,
         y,
         width,
+        rise: rise === 1 ? -1 : 1,
         color: primary,
-      });
-      y += AVATAR_PART_HEIGHT.plate;
-    }
-  }
-  const cap = choose(["studs", "tiles", "slopes", "terrace"] as const);
-  const x = (6 - upper) / 2;
-  if (cap === "slopes") {
-    const width = upper === 4 ? 2 : 1;
-    parts.push(
-      { kind: "slope", x, y, width, rise: 1, color: primary },
-      { kind: "slope", x: x + width, y, width, rise: -1, color: primary },
+      },
     );
-  } else if (cap === "tiles") {
-    for (let offset = 0; offset < upper; offset += 2)
-      parts.push({ kind: "tile", x: x + offset, y, width: 2, color: primary });
-  } else if (cap === "terrace") {
-    parts.push({ kind: "tile", x: 2, y, width: 2, color: primary });
+  };
+  const finish = (span: Span, y: number) => {
+    const cap = choose(
+      y <= 12
+        ? (["studs", "tiles", "roof", "valley", "terrace", "turrets"] as const)
+        : (["studs", "tiles", "terrace"] as const),
+    );
+    const x = (6 - span) / 2;
+    if (cap === "roof" || cap === "valley") slopes(span, y, cap === "roof");
+    else if (cap === "tiles") {
+      for (let offset = 0; offset < span; offset += 2)
+        parts.push({
+          kind: "tile",
+          x: x + offset,
+          y,
+          width: 2,
+          color: primary,
+        });
+    } else if (cap === "terrace") {
+      parts.push({ kind: "tile", x: 2, y, width: 2, color: primary });
+    } else if (cap === "turrets") {
+      parts.push(
+        { kind: "brick", x, y, width: 1, color: primary },
+        { kind: "brick", x: x + span - 1, y, width: 1, color: primary },
+      );
+    }
+  };
+  const shape = choose([
+    "steps",
+    "portal",
+    "bridge",
+    "arcade",
+    "wings",
+    "gate",
+  ] as const);
+  if (shape === "steps") {
+    const lower = choose([4, 6] as const);
+    const middle = choose(lower === 6 ? ([4, 6] as const) : ([2, 4] as const));
+    const upper = choose(middle === 2 ? ([2] as const) : ([2, 4] as const));
+    let y = plate(lower, row(lower, 1));
+    y = plate(middle, row(middle, y));
+    finish(upper, row(upper, y));
+  } else if (shape === "portal") {
+    const width = choose([4, 6] as const);
+    const pedestal = random() < 0.5;
+    let y = pedestal ? plate(6, row(6, 1)) : 1;
+    y = plate(width, arch(width, y));
+    if (pedestal) finish(width, y);
+    else {
+      const upper = choose(
+        width === 6 ? ([2, 4, 6] as const) : ([2, 4] as const),
+      );
+      finish(upper, row(upper, y));
+    }
+  } else if (shape === "bridge") {
+    const width = choose([4, 6] as const);
+    const leg = width === 6 ? choose([1, 2] as const) : 1;
+    const x = (6 - width) / 2;
+    const tall = random() < 0.5;
+    let y = 1;
+    for (let floor = 0; floor < (tall ? 2 : 1); floor++) {
+      parts.push(
+        { kind: "brick", x, y, width: leg, color: primary },
+        { kind: "brick", x: x + width - leg, y, width: leg, color: primary },
+      );
+      y += AVATAR_PART_HEIGHT.brick;
+    }
+    y = plate(width, arch(width, y));
+    if (!tall && random() < 0.5) {
+      const upper = choose([2, 4] as const);
+      finish(upper, row(upper, y));
+    } else finish(width, y);
+  } else if (shape === "arcade") {
+    const width = choose([4, 6] as const);
+    const y = plate(width, arch(width, 1));
+    finish(4, arch(4, y));
+  } else if (shape === "wings") {
+    const y = plate(6, row(6, 1));
+    const inward = random() < 0.5;
+    parts.push(
+      {
+        kind: "slope",
+        x: 0,
+        y,
+        width: 2,
+        rise: inward ? 1 : -1,
+        color: primary,
+      },
+      {
+        kind: "slope",
+        x: 4,
+        y,
+        width: 2,
+        rise: inward ? -1 : 1,
+        color: primary,
+      },
+    );
+    finish(2, row(2, plate(2, row(2, y))));
+  } else {
+    const inward = random() < 0.5;
+    for (const x of [0, 5]) {
+      parts.push(
+        { kind: "brick", x, y: 1, width: 1, color: primary },
+        { kind: "plate", x, y: 4, width: 1, color: primary },
+        {
+          kind: "slope",
+          x,
+          y: 5,
+          width: 1,
+          rise: (x === 0) === inward ? 1 : -1,
+          color: primary,
+        },
+      );
+    }
+    const y = plate(4, arch(4, 1));
+    const upper = choose([2, 4] as const);
+    finish(upper, row(upper, y));
   }
 
-  // Colour whole mirrored pieces, with at most a third of the solid volume accented.
+  // Colour whole mirrored pieces, with at most a third of the silhouette accented.
   let budget =
-    parts.reduce(
-      (sum, part) => sum + part.width * AVATAR_PART_HEIGHT[part.kind],
-      0,
-    ) /
-      3 -
-    6;
+    parts.reduce((sum, part) => sum + avatarPartArea(part), 0) / 3 - 6;
   const groups: AvatarPart[][] = [];
   for (const part of parts.slice(1)) {
     if (part.x > (6 - part.width) / 2) continue;
@@ -235,18 +360,39 @@ export function assembleAvatar(avatar: AvatarDescriptor) {
   while (groups.length) {
     const index = Math.floor(random() * groups.length);
     const group = groups.splice(index, 1)[0];
-    const volume = group.reduce(
-      (sum, part) => sum + part.width * AVATAR_PART_HEIGHT[part.kind],
-      0,
-    );
-    if (volume > budget) continue;
+    const area = group.reduce((sum, part) => sum + avatarPartArea(part), 0);
+    if (area > budget) continue;
     group.forEach((part) => {
       part.color = accent;
     });
-    budget -= volume;
+    budget -= area;
     if (random() < 0.65) break;
   }
+  // Paint lower and leftmost pieces first so adjacent pieces hide internal faces.
+  parts.sort((a, b) => a.y - b.y || a.x - b.x);
   return { parts, primary, accent, background };
+}
+
+/** Front silhouette area, excluding arch openings and the missing slope corner. */
+export function avatarPartArea(part: AvatarPart) {
+  if (part.kind === "arch") {
+    const { legWidth, springHeight, rise } = AVATAR_ARCH_PROFILE;
+    // A half-ellipse or two quadratic curves meeting at the pointed apex.
+    const curveArea = part.opening === "pointed" ? 2 / 3 : Math.PI / 4;
+    return (
+      part.width * AVATAR_PART_HEIGHT.arch -
+      (part.width - 2 * legWidth) * (springHeight + curveArea * rise)
+    );
+  }
+  if (part.kind === "slope")
+    return (part.width * (AVATAR_PART_HEIGHT.slope + 1)) / 2;
+  return part.width * AVATAR_PART_HEIGHT[part.kind];
+}
+
+/** Arches have sockets beneath their feet, never across their opening. */
+export function avatarBottomSockets(part: AvatarPart) {
+  if (part.kind === "arch") return [0, part.width - 1];
+  return Array.from({ length: part.width }, (_, index) => index);
 }
 
 /** Only unoccupied studs are visible; slopes and tiles have a smooth top. */
@@ -260,7 +406,11 @@ export function avatarExposedStuds(
     (index) => {
       const x = part.x + index + 0.5;
       return !parts.some(
-        (other) => other.y === top && other.x < x && other.x + other.width > x,
+        (other) =>
+          other.y === top &&
+          avatarBottomSockets(other).some(
+            (socket) => other.x + socket + 0.5 === x,
+          ),
       );
     },
   );

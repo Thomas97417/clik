@@ -4,6 +4,7 @@ import {
   CROWNS,
   RINGS,
   AVATAR_PART_HEIGHT,
+  AVATAR_ARCH_PROFILE,
   assembleAvatar,
   avatarExposedStuds,
   type AvatarDescriptor,
@@ -35,11 +36,47 @@ function AvatarPiece({
     bottom - (part.kind === "slope" && part.rise === -1 ? PLATE : height);
   const topFace = `M${x} ${left}L${x + width} ${right}l${DEPTH_X} ${-DEPTH_Y}L${x + DEPTH_X} ${left - DEPTH_Y}Z`;
   const sideFace = `M${x + width} ${right}l${DEPTH_X} ${-DEPTH_Y}V${bottom - DEPTH_Y}l${-DEPTH_X} ${DEPTH_Y}Z`;
+  const opening =
+    part.kind === "arch"
+      ? {
+          left: x + AVATAR_ARCH_PROFILE.legWidth * STUD,
+          right: x + width - AVATAR_ARCH_PROFILE.legWidth * STUD,
+          spring: bottom - AVATAR_ARCH_PROFILE.springHeight * PLATE,
+          rx: (width - 2 * AVATAR_ARCH_PROFILE.legWidth * STUD) / 2,
+          ry: AVATAR_ARCH_PROFILE.rise * PLATE,
+        }
+      : null;
+  const archCurve = (fromLeft: boolean, dx = 0, dy = 0) => {
+    if (!opening) return "";
+    const start = (fromLeft ? opening.left : opening.right) + dx;
+    const end = (fromLeft ? opening.right : opening.left) + dx;
+    const spring = opening.spring + dy;
+    if (part.kind === "arch" && part.opening === "pointed") {
+      const middle = (start + end) / 2;
+      return `Q${start} ${spring - opening.ry / 2} ${middle} ${spring - opening.ry}Q${end} ${spring - opening.ry / 2} ${end} ${spring}`;
+    }
+    return `A${opening.rx} ${opening.ry} 0 0 ${fromLeft ? 1 : 0} ${end} ${spring}`;
+  };
+  const frontFace = opening
+    ? `M${x} ${left}H${x + width}V${bottom}H${opening.right}V${opening.spring}${archCurve(false)}V${bottom}H${x}Z`
+    : `M${x} ${left}L${x + width} ${right}V${bottom}H${x}Z`;
+  const innerFace = opening
+    ? `M${opening.left} ${bottom}V${opening.spring}${archCurve(true)}l${DEPTH_X} ${-DEPTH_Y}${archCurve(false, DEPTH_X, -DEPTH_Y)}V${bottom - DEPTH_Y}Z`
+    : undefined;
+  const bottomEdge = opening
+    ? `M${x + 0.4} ${bottom - 0.4}H${opening.left - 0.4}M${opening.right + 0.4} ${bottom - 0.4}H${x + width - 0.4}`
+    : `M${x + 0.4} ${bottom - 0.4}H${x + width - 0.4}`;
   return (
     <g fill={part.color}>
       <path d={sideFace} />
       <path d={sideFace} fill="#142747" opacity=".2" />
-      <path d={`M${x} ${left}L${x + width} ${right}V${bottom}H${x}Z`} />
+      {innerFace && (
+        <>
+          <path d={innerFace} />
+          <path d={innerFace} fill="#142747" opacity=".24" />
+        </>
+      )}
+      <path d={frontFace} />
       <path d={topFace} />
       <path d={topFace} fill="#fff" opacity=".28" />
       <path
@@ -50,7 +87,7 @@ function AvatarPiece({
         strokeWidth=".55"
       />
       <path
-        d={`M${x + 0.4} ${bottom - 0.4}H${x + width - 0.4}`}
+        d={bottomEdge}
         fill="none"
         stroke="#142747"
         strokeOpacity=".18"
