@@ -154,6 +154,8 @@ test("parcours mobile, clavier et démarrage sur une page blanche", async ({
 });
 
 test("sans WebGL, la découverte reste accessible", async ({ page }) => {
+  const { creatorsFixture } = await import("./fixtures/creators");
+  await creatorsFixture(page);
   await page.addInitScript(() => {
     const original = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function (
@@ -168,7 +170,7 @@ test("sans WebGL, la découverte reste accessible", async ({ page }) => {
   });
   await page.goto("/");
   await expect(
-    page.getByText("Aperçu indisponible", { exact: true }),
+    page.getByRole("img", { name: "Aperçu de La petite maison", exact: true }),
   ).toBeVisible();
   await page
     .locator(".home-buttons")

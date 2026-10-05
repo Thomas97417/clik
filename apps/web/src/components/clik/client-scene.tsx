@@ -35,19 +35,31 @@ export default function ClientScene(props: {
   editable?: boolean;
   showGrid?: boolean;
   showViewControls?: boolean;
+  poster?: string | null;
+  title?: string;
 }) {
+  const placeholder = props.poster ? (
+    <img
+      className="public-scene-poster"
+      src={props.poster}
+      alt={`Aperçu de ${props.title || "la création"}`}
+      width={640}
+      height={480}
+      fetchPriority="high"
+    />
+  ) : (
+    <div className="empty-state">Ouverture de la scène…</div>
+  );
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   return (
     <SceneBoundary>
       {mounted ? (
-        <Suspense
-          fallback={<div className="empty-state">Ouverture de la scène…</div>}
-        >
+        <Suspense fallback={placeholder}>
           <Scene {...props} />
         </Suspense>
       ) : (
-        <div className="empty-state">Ouverture de la scène…</div>
+        placeholder
       )}
     </SceneBoundary>
   );

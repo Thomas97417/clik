@@ -107,7 +107,7 @@ test("comptes vides ou introuvables, avatar indisponible et lien vers ma page pu
   for (const id of ["missing", "invalid-id"]) {
     await page.goto(`/gallery/user/${id}`);
     await expect(
-      page.getByRole("heading", { name: "Utilisateur introuvable." }),
+      page.getByRole("heading", { name: "Page introuvable" }),
     ).toBeVisible();
   }
   await page.goto("/gallery/user/broken");

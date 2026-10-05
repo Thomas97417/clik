@@ -1,3 +1,4 @@
+import { seo } from "@/lib/seo/meta";
 import SettingsArt from "@/components/settings/settings-art";
 import { createFileRoute, redirect, Link } from "@tanstack/react-router";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -11,15 +12,13 @@ import EmailCard from "@/components/settings/update-email-card";
 import UpdateNameCard from "@/components/settings/update-name-card";
 
 export const Route = createFileRoute("/settings")({
-  head: () => ({
-    meta: [
-      { title: "Paramètres — Clik" },
-      {
-        name: "description",
-        content: "Gérez votre avatar, votre compte et vos préférences Clik.",
-      },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "Paramètres du compte",
+      text: "Personnalisez votre avatar et votre compte Clik.",
+      path: "/settings",
+      noindex: true,
+    }),
   beforeLoad: async ({ context }) => {
     if (!context.isAuthenticated) {
       throw redirect({ to: "/sign-in" });

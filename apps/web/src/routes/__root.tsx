@@ -1,3 +1,5 @@
+import { seo } from "@/lib/seo/meta";
+import SiteAnalytics from "@/components/site-analytics";
 import type { ConvexQueryClient } from "@convex-dev/react-query";
 import type { QueryClient } from "@tanstack/react-query";
 
@@ -11,6 +13,8 @@ import {
 } from "@tanstack/react-router";
 
 import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeaders } from "@tanstack/react-start/server";
+import { getSessionCookie } from "better-auth/cookies";
 
 import { Toaster } from "@/components/ui/sonner";
 import { authClient } from "@/lib/auth-client";
@@ -21,16 +25,14 @@ import ErrorBoundary from "../components/error-boundary";
 import NotFound from "../components/not-found";
 import appCss from "../index.css?url";
 import { ThemeProvider } from "@/components/theme-provider";
-import { PostHogProvider } from "posthog-js/react";
 
 const getAuth = createServerFn({ method: "GET" }).handler(async () => {
+  // Anonymous visitors and crawlers need no round trip to the authentication service.
+  const headers = getRequestHeaders();
+  if (!getSessionCookie(headers) && !headers.get("authorization"))
+    return undefined;
   return await getToken();
 });
-
-const options = {
-  api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
-  defaults: "2026-01-30",
-} as const;
 
 export interface RouterAppContext {
   queryClient: QueryClient;
@@ -47,11 +49,26 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
         name: "viewport",
         content: "width=device-width, initial-scale=1",
       },
-      {
-        title: "Clik — Atelier de construction 3D",
-      },
+      ...seo({
+        title: "Atelier de construction 3D",
+        text: "Créez, assemblez et partagez vos constructions en briques 3D avec Clik.",
+        path: "/",
+        noindex: true,
+      }).meta,
     ],
     links: [
+      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "32x32",
+        href: "/favicon-32.png",
+      },
+      {
+        rel: "apple-touch-icon",
+        sizes: "180x180",
+        href: "/apple-touch-icon.png",
+      },
       {
         rel: "stylesheet",
         href: appCss,
@@ -99,28 +116,24 @@ function RootDocument() {
           <HeadContent />
         </head>
         <body>
-          <PostHogProvider
-            apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY}
-            options={options}
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            forcedTheme="light"
+            disableTransitionOnChange
+            storageKey="vite-ui-theme"
           >
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="light"
-              forcedTheme="light"
-              disableTransitionOnChange
-              storageKey="vite-ui-theme"
-            >
-              <div className="grid h-svh grid-rows-[auto_1fr]">
-                <Header />
-                <div className="page-scroll overflow-y-auto">
-                  <Outlet />
-                </div>
+            <div className="grid h-svh grid-rows-[auto_1fr]">
+              <Header />
+              <div className="page-scroll overflow-y-auto">
+                <Outlet />
               </div>
-              <Toaster richColors />
+            </div>
+            <Toaster richColors />
+            <SiteAnalytics />
 
-              <Scripts />
-            </ThemeProvider>
-          </PostHogProvider>
+            <Scripts />
+          </ThemeProvider>
         </body>
       </html>
     </ConvexBetterAuthProvider>

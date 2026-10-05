@@ -7,7 +7,7 @@ import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import { toast } from "sonner";
 export function useServerNow(serverNow?: number) {
   const [offset, setOffset] = useState(0),
-    [now, setNow] = useState(Date.now());
+    [now, setNow] = useState(serverNow ?? Date.now());
   useEffect(() => {
     if (serverNow !== undefined) {
       setOffset(serverNow - Date.now());

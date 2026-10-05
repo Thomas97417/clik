@@ -1,3 +1,4 @@
+import { seo } from "@/lib/seo/meta";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import {
@@ -22,15 +23,13 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
-  head: () => ({
-    meta: [
-      { title: "Dashboard — Toma Stack" },
-      {
-        name: "description",
-        content: "Your personal dashboard overview.",
-      },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "Votre espace personnel",
+      text: "Retrouvez votre compte et vos créations Clik.",
+      path: "/dashboard",
+      noindex: true,
+    }),
   beforeLoad: async ({ context }) => {
     if (!context.isAuthenticated) {
       throw redirect({ to: "/" });
@@ -127,7 +126,7 @@ function RouteComponent() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link to="/upload">
+            <Link to="/editor">
               <Button
                 variant="outline"
                 size="sm"

@@ -1,5 +1,8 @@
+import { usePublicPagination } from "@/lib/clik/use-public-pagination";
+import type { PublicData } from "@/lib/seo/public-data";
 import { useId, useState } from "react";
-import { usePaginatedQuery } from "convex/react";
+import { useHydrated } from "@tanstack/react-router";
+
 import { ChevronDown, Plus } from "lucide-react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
@@ -9,15 +12,20 @@ import CommunityArt from "./community-art";
 
 export default function CreationRemixes({
   publicationId,
+  initial,
 }: {
   publicationId: Id<"publications">;
+  initial?: PublicData["creation"]["remixes"];
 }) {
   const [expanded, setExpanded] = useState(true);
+  const hydrated = useHydrated();
   const id = useId();
-  const { results, status, loadMore } = usePaginatedQuery(
+  const { results, status, loadMore } = usePublicPagination(
     api.projects.remixes,
     { publicationId },
-    { initialNumItems: 6 },
+    initial,
+    undefined,
+    6,
   );
   return (
     <section className="creation-remixes" aria-labelledby={`${id}-title`}>
@@ -25,6 +33,7 @@ export default function CreationRemixes({
         <button
           className="creation-remixes-toggle"
           type="button"
+          disabled={!hydrated}
           aria-expanded={expanded}
           aria-controls={`${id}-content`}
           onClick={() => setExpanded((value) => !value)}
@@ -66,7 +75,7 @@ export default function CreationRemixes({
           <Button
             className="creation-remixes-more"
             variant="outline"
-            disabled={status === "LoadingMore"}
+            disabled={!hydrated || status === "LoadingMore"}
             onClick={() => loadMore(6)}
           >
             <Plus size={15} aria-hidden="true" />

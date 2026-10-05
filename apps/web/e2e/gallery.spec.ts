@@ -44,6 +44,7 @@ test("galerie : tri paginé, commentaires, clavier et retour à la liste", async
 
   await sort.focus();
   await sort.press("Enter");
+  await expect(page.getByRole("listbox")).toBeVisible();
   await page.keyboard.press("Home");
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Enter");

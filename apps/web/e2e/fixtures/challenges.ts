@@ -1,3 +1,4 @@
+import { publicHttpFixture } from "./public-http";
 import type { Page } from "@playwright/test";
 import {
   challengeDay,
@@ -85,6 +86,75 @@ export async function challengeFixture(page: Page) {
   await page.route("**/api/auth/convex/token*", (route) =>
     route.fulfill({ json: { token } }),
   );
+  function query(path: string, a: any) {
+    switch (path) {
+      case "auth:getCurrentUser":
+        return user;
+      case "challenges:day":
+        return {
+          challenge: {
+            ...challenge,
+            _id: `challenge-${a.day ?? today}`,
+            day: a.day ?? today,
+            opensAt: challengeStart(a.day ?? today),
+            closesAt: challengeStart(a.day ?? today) + 86400000,
+          },
+          today,
+          firstDay: challengeDay(start - 2 * 86400000),
+          serverNow: Date.now(),
+          choices,
+          projectId: started ? project._id : null,
+        };
+      case "projects:get":
+        return {
+          ...project,
+          challenge,
+          publicationId,
+          serverNow: Date.now(),
+        };
+      case "challenges:entries":
+        return {
+          page:
+            a.sort === "votes"
+              ? [...entries].sort((a, b) => b.voteCount - a.voteCount)
+              : entries,
+          isDone: true,
+          continueCursor: "",
+        };
+      case "projects:remixes":
+        return { page: [], isDone: true, continueCursor: "" };
+      case "projects:creation": {
+        const e = entries.find((e) => e._id === a.id)!;
+        return {
+          ...e,
+          _id: `version-${e._id}-${project.revision}`,
+          publicationId: e._id,
+          createdAt: start,
+          submittedAt: start,
+          challenge,
+          description: "Une construction pour le défi du jour.",
+          scene:
+            e.owner === user._id
+              ? project.scene
+              : JSON.stringify({
+                  ...emptyScene(),
+                  nodes: [makePart("brick-2x4", "#4079e8")],
+                }),
+          commentCount: comments.filter((c) => c.publicationId === e._id)
+            .length,
+        };
+      }
+      case "comments:list":
+        return {
+          page: comments.filter((c) => c.publicationId === a.publicationId),
+          isDone: true,
+          continueCursor: "",
+        };
+      default:
+        return null;
+    }
+  }
+  await publicHttpFixture(query);
   await page.routeWebSocket(/\/api\/.*\/sync/, (ws) => {
     let seq = 0;
     const ts = () => {
@@ -94,74 +164,6 @@ export async function challengeFixture(page: Page) {
     };
     let version = { querySet: 0, identity: 0, ts: ts() };
     const queries = new Map<number, { udfPath: string; args: any[] }>();
-    function query(path: string, a: any) {
-      switch (path) {
-        case "auth:getCurrentUser":
-          return user;
-        case "challenges:day":
-          return {
-            challenge: {
-              ...challenge,
-              _id: `challenge-${a.day ?? today}`,
-              day: a.day ?? today,
-              opensAt: challengeStart(a.day ?? today),
-              closesAt: challengeStart(a.day ?? today) + 86400000,
-            },
-            today,
-            firstDay: challengeDay(start - 2 * 86400000),
-            serverNow: Date.now(),
-            choices,
-            projectId: started ? project._id : null,
-          };
-        case "projects:get":
-          return {
-            ...project,
-            challenge,
-            publicationId,
-            serverNow: Date.now(),
-          };
-        case "challenges:entries":
-          return {
-            page:
-              a.sort === "votes"
-                ? [...entries].sort((a, b) => b.voteCount - a.voteCount)
-                : entries,
-            isDone: true,
-            continueCursor: "",
-          };
-        case "projects:remixes":
-          return { page: [], isDone: true, continueCursor: "" };
-        case "projects:creation": {
-          const e = entries.find((e) => e._id === a.id)!;
-          return {
-            ...e,
-            _id: `version-${e._id}-${project.revision}`,
-            publicationId: e._id,
-            createdAt: start,
-            submittedAt: start,
-            challenge,
-            description: "Une construction pour le défi du jour.",
-            scene:
-              e.owner === user._id
-                ? project.scene
-                : JSON.stringify({
-                    ...emptyScene(),
-                    nodes: [makePart("brick-2x4", "#4079e8")],
-                  }),
-            commentCount: comments.filter((c) => c.publicationId === e._id)
-              .length,
-          };
-        }
-        case "comments:list":
-          return {
-            page: comments.filter((c) => c.publicationId === a.publicationId),
-            isDone: true,
-            continueCursor: "",
-          };
-        default:
-          return null;
-      }
-    }
     function transition(next = version) {
       seq++;
       const endVersion = { ...next, ts: ts() };

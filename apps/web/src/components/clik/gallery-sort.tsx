@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { useHydrated } from "@tanstack/react-router";
 import {
   Select,
   SelectContent,
@@ -16,8 +17,15 @@ type GallerySort = (typeof options)[number]["value"];
 
 export function validateGallerySearch(search: Record<string, unknown>): {
   sort?: GallerySort;
+  cursor?: string;
 } {
   return {
+    cursor:
+      (typeof search.cursor === "string" ||
+        typeof search.cursor === "number") &&
+      String(search.cursor).length <= 8192
+        ? String(search.cursor)
+        : undefined,
     sort:
       search.sort === "oldest" || search.sort === "comments"
         ? search.sort
@@ -33,10 +41,12 @@ export default function GallerySortSelect({
   onValueChange: (value: GallerySort) => void;
 }) {
   const id = useId();
+  const hydrated = useHydrated();
   return (
     <div className="collection-sort">
       <label htmlFor={id}>Trier par</label>
       <Select
+        disabled={!hydrated}
         items={options}
         value={value}
         onValueChange={(next) => {

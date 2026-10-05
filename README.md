@@ -192,3 +192,104 @@ clik/
 
 - [Convex et Better Auth avec TanStack Start](https://labs.convex.dev/better-auth/framework-guides/tanstack-start)
 - [Variables d’environnement Convex](https://docs.convex.dev/production/environment-variables)
+
+## Référencement et production
+
+Les pages publiques sont rendues côté serveur : accueil, galerie, profils ayant des
+publications, créations publiques et archives des défis. Titres, descriptions,
+URL canoniques, Open Graph, Twitter Cards et JSON-LD sont générés par route. Les
+espaces personnels, l’atelier et les pages d’authentification restent en `noindex`.
+Les publications retirées et les identifiants inconnus renvoient une vraie 404.
+
+Configurer ces variables **au moment du build** :
+
+```dotenv
+VITE_SITE_URL=https://clik.io
+VITE_SEO_INDEXABLE=true
+```
+
+`VITE_SITE_URL` est obligatoire en production. Adapter cette valeur si le domaine
+final change. En développement, et tant que `VITE_SEO_INDEXABLE` n’est pas
+explicitement `true`, le site reste en `noindex` et `robots.txt` interdit le crawl.
+Garder `false` pour les aperçus de déploiement et la préproduction.
+
+Le serveur TanStack Start doit être déployé avec les fichiers `dist/client` : un
+hébergement qui sert uniquement une SPA statique ne suffit plus. Le point d’entrée
+est `apps/web/src/server.ts`. Il exclut les erreurs de l’indexation et interdit la
+mise en cache partagée du HTML pouvant contenir une session. Configurer HTTPS, la
+compression et le cache long des assets hachés sur la plateforme choisie. Les
+requêtes GET/HEAD sur l’hôte canonique en HTTP ou sa variante `www` sont redirigées
+vers l’origine configurée ; conserver également cette redirection au niveau CDN.
+
+Déployer les nouvelles fonctions Convex (`projects.sitemapPage`,
+`challenges.sitemapPage`, `challenges.publicNeighbors`) **avant le frontend**.
+Aucune migration de schéma n’est nécessaire. Le serveur lit Convex anonymement
+pour les données publiques : les projets privés et les brouillons ne sont jamais
+utilisés pour le référencement. Les interactions authentifiées conservent leurs
+abonnements temps réel.
+
+- `/robots.txt` annonce `/sitemap.xml` sur la production indexable.
+- `/sitemap.xml` indexe des fichiers `/sitemaps/0.xml`, etc., de 10 000 URL au plus.
+- Les données sont lues par lots de 250, avec un cache serveur de cinq minutes.
+  Une publication retirée disparaît du sitemap au prochain renouvellement ; son
+  URL répond immédiatement 404. Les erreurs backend ne produisent pas de sitemap
+  vide : le serveur répond 503 et invite à réessayer.
+- Les tris partagent l’URL canonique de leur collection ; les pages à curseur sont
+  `noindex, follow` et possèdent de vrais liens de pagination.
+- Les archives de défis disposent de liens précédent/suivant et d’une URL par date.
+
+Après mise en ligne, vérifier le domaine dans Google Search Console et soumettre
+`https://clik.io/sitemap.xml`. Inspecter une création, un profil et un défi archivé,
+puis valider leurs données structurées. Ces opérations nécessitent l’accès au
+DNS et à Search Console et ne sont pas effectuées par le code.
+
+### Performances et vérifications SEO
+
+Les modèles de l’accueil possèdent des images statiques dans `public/models` ;
+leur manipulation 3D démarre lorsqu’ils approchent de la zone visible. Les créations
+publiques affichent leur miniature pendant le chargement du canvas. L’image de
+partage par défaut est `public/og/clik.png` (1200 × 630).
+
+Si PostHog est configuré, les événements `web_vital` mesurent LCP, INP et CLS en
+production. Les routes sont normalisées, sans identifiants de projets ni paramètres
+d’URL. Suivre le 75e percentile mobile et bureau : LCP ≤ 2,5 s, INP ≤ 200 ms,
+CLS ≤ 0,1. Les mesures locales ne remplacent pas les données réelles de production.
+
+Les tests navigateur publics emploient un backend HTTP de test sur le port 3219
+pour les loaders SSR et des WebSockets simulés pour les interactions. Lancer un
+serveur dédié (sans aucun utilisateur ni publication créés à distance) :
+
+```bash
+cd apps/web
+CLIK_VITE_CACHE_DIR=node_modules/.vite-e2e VITE_CONVEX_URL=http://127.0.0.1:3219 VITE_SITE_URL=https://clik.io bun run dev --host 127.0.0.1 --port 3001 --strictPort
+# Dans un autre terminal :
+bun run test:e2e seo.spec.ts gallery.spec.ts creators.spec.ts challenges.spec.ts remixes.spec.ts creation-view-controls.spec.ts
+```
+
+Les assertions couvrent le HTML sans JavaScript, les métadonnées après navigation,
+les URL canoniques, les 404, l’exclusion des données privées, les sitemaps et les
+interactions publiques sur Chromium, Firefox et WebKit.
+
+PostHog est chargé après le chargement initial, pendant un créneau libre du
+navigateur, et uniquement en production. Le moteur de rendu Three est séparé des
+modules mathématiques utilisés par les pages publiques. Les paramètres `VITE_*`
+font partie de la clé du cache de build Turbo, pour éviter de réutiliser les
+métadonnées d’un autre environnement.
+
+Pour régénérer les visuels de référencement et les aperçus des modèles, depuis
+`apps/web` (la seconde commande requiert le serveur Vite local) :
+
+```bash
+bun scripts/generate-seo-assets.mjs
+bun scripts/generate-model-posters.mjs
+```
+
+Références : [SEO JavaScript et rendu serveur](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics),
+[validation des sitemaps](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap).
+
+Audit local du build de production : **SEO 100/100**, accessibilité 96/100,
+performance mobile 76/100. Le JavaScript initial transféré passe de 518 Ko à
+287 Ko (environ −45 %). Le LCP mobile simulé reste autour de 3,5 s : il faut
+continuer à surveiller le coût du rendu/hydratation sur les appareils réels, sans
+assimiler le score SEO à un score de performance. Les mesures détaillées et leurs
+conditions figurent dans [le rapport Lighthouse](apps/web/reports/seo-audit.json).

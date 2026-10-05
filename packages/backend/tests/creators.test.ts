@@ -302,3 +302,23 @@ describe("Galeries publiques des créateurs", () => {
     ).rejects.toThrow("Service unavailable");
   });
 });
+
+it("le sitemap ne révèle que des publications actives et des identités publiques existantes", async () => {
+  const { t } = await seed();
+  const result = await t.query(api.projects.sitemapPage, { cursor: null });
+  expect(result.page.length).toBeGreaterThan(0);
+  for (const item of result.page) {
+    expect(Object.keys(item).sort()).toEqual(["id", "modified"]);
+    expect(
+      await t.run(async (ctx) => (await ctx.db.get(item.id))?.active),
+    ).toBe(true);
+  }
+  expect(result.owners.every((owner) => accounts.has(owner))).toBe(true);
+});
+
+it("une URL de publication mal formée ne produit pas une erreur backend", async () => {
+  const { t } = await seed();
+  expect(
+    await t.query(api.projects.creation, { id: "invalid-publication" }),
+  ).toBeNull();
+});

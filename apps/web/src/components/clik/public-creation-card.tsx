@@ -37,6 +37,9 @@ export default function PublicCreationCard({
               src={creation.thumbnailUrl}
               alt={creation.title}
               loading="lazy"
+              decoding="async"
+              width={640}
+              height={480}
             />
           ) : (
             <div className="public-thumbnail-placeholder" aria-hidden="true">

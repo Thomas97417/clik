@@ -1,3 +1,4 @@
+import { publicHttpFixture } from "./public-http";
 import {
   CROWNS,
   RINGS,
@@ -162,6 +163,150 @@ export async function creatorsFixture(page: Page, authenticated = false) {
     );
   }
   const refreshers = new Set<() => void>();
+  const query = (path: string, args: any) => {
+    if (path === "rewards:mine")
+      return authenticated
+        ? {
+            count: rewardCount,
+            rewards: rewardKeys.map((key) => ({
+              key,
+              earnedAt: now,
+              day: CROWNS.some((c) => c.id === key) ? day : undefined,
+            })),
+          }
+        : null;
+    if (path === "rewards:podium")
+      return {
+        page: [
+          {
+            _id: "award-1",
+            rank: 1,
+            score: 7,
+            publicationId: "creation-1",
+            title: "Le phare couronné",
+            owner: "alice",
+            author: "Alice",
+            avatar: avatarFor("alice"),
+          },
+          {
+            _id: "award-2",
+            rank: 1,
+            score: 7,
+            publicationId: null,
+            title: "Création retirée",
+            owner: null,
+            author: null,
+            avatar: null,
+          },
+          {
+            _id: "award-3",
+            rank: 3,
+            score: 4,
+            publicationId: "creation-2",
+            title: "Le pont de bronze",
+            owner: "bob",
+            author: "Bob",
+            avatar: avatarFor("bob"),
+          },
+        ],
+        isDone: true,
+        continueCursor: "",
+      };
+    if (path === "auth:getCurrentUser")
+      return authenticated ? { ...user, avatar: avatarFor(user._id) } : null;
+    if (path === "projects:creator") {
+      const profile = profiles.get(args.userId);
+      return profile ? { ...profile, avatar: avatarFor(args.userId) } : null;
+    }
+    if (path === "projects:gallery" || path === "projects:remixes") {
+      const rows = publications
+        .filter(
+          (p) =>
+            p.active &&
+            (path !== "projects:remixes" ||
+              p.origin?.publicationId === args.publicationId ||
+              p.sources.some(
+                (source) => source.publicationId === args.publicationId,
+              )) &&
+            (args.ownerId === undefined || p.owner === args.ownerId),
+        )
+        .sort((a, b) =>
+          args.sort === "oldest"
+            ? a.publishedAt - b.publishedAt
+            : args.sort === "comments"
+              ? b.commentCount - a.commentCount || b.publishedAt - a.publishedAt
+              : b.publishedAt - a.publishedAt,
+        );
+      const from = Number(args.paginationOpts.cursor || 0),
+        end = from + args.paginationOpts.numItems;
+      return {
+        page: rows
+          .slice(from, end)
+          .map((p) => ({ ...p, avatar: avatarFor(p.owner) })),
+        isDone: end >= rows.length,
+        continueCursor: String(Math.min(end, rows.length)),
+      };
+    }
+    if (path === "projects:creation") {
+      const p = publications.find((p) => p._id === args.id && p.active);
+      return p
+        ? {
+            ...p,
+            avatar: avatarFor(p.owner),
+            _id: `version-${p._id}`,
+            publicationId: p._id,
+            createdAt: p.publishedAt,
+            description: "Une construction imaginée pour partager des idées.",
+            scene: JSON.stringify({
+              ...emptyScene(),
+              nodes: [makePart("brick-2x4", "#4079e8")],
+            }),
+            sources: p.sources.map((source) => ({
+              ...source,
+              available: !!publications.find(
+                (p) => p._id === source.publicationId,
+              )?.active,
+            })),
+          }
+        : null;
+    }
+    if (path === "comments:list")
+      return {
+        page: [
+          {
+            _id: "comment",
+            _creationTime: now,
+            publicationId: args.publicationId,
+            owner: "bob",
+            author: "Bob",
+            avatar: avatarFor("bob"),
+            body: "Une très belle idée !",
+            createdAt: now,
+          },
+        ],
+        isDone: true,
+        continueCursor: "",
+      };
+    if (path === "challenges:day")
+      return {
+        challenge: args.day && args.day !== day ? null : challenge,
+        today: day,
+        firstDay: day,
+        serverNow: now,
+        choices: [],
+        projectId: null,
+      };
+    if (path === "challenges:entries")
+      return {
+        page: publications
+          .filter((p) => p.active && p.challenge)
+          .map((p) => ({ ...p, avatar: avatarFor(p.owner) })),
+        isDone: true,
+        continueCursor: "",
+      };
+    return null;
+  };
+  await publicHttpFixture(query);
   await page.routeWebSocket(/\/api\/.*\/sync/, (ws) => {
     let seq = 0;
     const ts = () => {
@@ -171,150 +316,6 @@ export async function creatorsFixture(page: Page, authenticated = false) {
     };
     let version = { querySet: 0, identity: 0, ts: ts() };
     const queries = new Map<number, { udfPath: string; args: any[] }>();
-    const query = (path: string, args: any) => {
-      if (path === "rewards:mine")
-        return authenticated
-          ? {
-              count: rewardCount,
-              rewards: rewardKeys.map((key) => ({
-                key,
-                earnedAt: now,
-                day: CROWNS.some((c) => c.id === key) ? day : undefined,
-              })),
-            }
-          : null;
-      if (path === "rewards:podium")
-        return {
-          page: [
-            {
-              _id: "award-1",
-              rank: 1,
-              score: 7,
-              publicationId: "creation-1",
-              title: "Le phare couronné",
-              owner: "alice",
-              author: "Alice",
-              avatar: avatarFor("alice"),
-            },
-            {
-              _id: "award-2",
-              rank: 1,
-              score: 7,
-              publicationId: null,
-              title: "Création retirée",
-              owner: null,
-              author: null,
-              avatar: null,
-            },
-            {
-              _id: "award-3",
-              rank: 3,
-              score: 4,
-              publicationId: "creation-2",
-              title: "Le pont de bronze",
-              owner: "bob",
-              author: "Bob",
-              avatar: avatarFor("bob"),
-            },
-          ],
-          isDone: true,
-          continueCursor: "",
-        };
-      if (path === "auth:getCurrentUser")
-        return authenticated ? { ...user, avatar: avatarFor(user._id) } : null;
-      if (path === "projects:creator") {
-        const profile = profiles.get(args.userId);
-        return profile ? { ...profile, avatar: avatarFor(args.userId) } : null;
-      }
-      if (path === "projects:gallery" || path === "projects:remixes") {
-        const rows = publications
-          .filter(
-            (p) =>
-              p.active &&
-              (path !== "projects:remixes" ||
-                p.origin?.publicationId === args.publicationId ||
-                p.sources.some(
-                  (source) => source.publicationId === args.publicationId,
-                )) &&
-              (args.ownerId === undefined || p.owner === args.ownerId),
-          )
-          .sort((a, b) =>
-            args.sort === "oldest"
-              ? a.publishedAt - b.publishedAt
-              : args.sort === "comments"
-                ? b.commentCount - a.commentCount ||
-                  b.publishedAt - a.publishedAt
-                : b.publishedAt - a.publishedAt,
-          );
-        const from = Number(args.paginationOpts.cursor || 0),
-          end = from + args.paginationOpts.numItems;
-        return {
-          page: rows
-            .slice(from, end)
-            .map((p) => ({ ...p, avatar: avatarFor(p.owner) })),
-          isDone: end >= rows.length,
-          continueCursor: String(Math.min(end, rows.length)),
-        };
-      }
-      if (path === "projects:creation") {
-        const p = publications.find((p) => p._id === args.id && p.active);
-        return p
-          ? {
-              ...p,
-              avatar: avatarFor(p.owner),
-              _id: `version-${p._id}`,
-              publicationId: p._id,
-              createdAt: p.publishedAt,
-              description: "Une construction imaginée pour partager des idées.",
-              scene: JSON.stringify({
-                ...emptyScene(),
-                nodes: [makePart("brick-2x4", "#4079e8")],
-              }),
-              sources: p.sources.map((source) => ({
-                ...source,
-                available: !!publications.find(
-                  (p) => p._id === source.publicationId,
-                )?.active,
-              })),
-            }
-          : null;
-      }
-      if (path === "comments:list")
-        return {
-          page: [
-            {
-              _id: "comment",
-              _creationTime: now,
-              publicationId: args.publicationId,
-              owner: "bob",
-              author: "Bob",
-              avatar: avatarFor("bob"),
-              body: "Une très belle idée !",
-              createdAt: now,
-            },
-          ],
-          isDone: true,
-          continueCursor: "",
-        };
-      if (path === "challenges:day")
-        return {
-          challenge,
-          today: day,
-          firstDay: day,
-          serverNow: now,
-          choices: [],
-          projectId: null,
-        };
-      if (path === "challenges:entries")
-        return {
-          page: publications
-            .filter((p) => p.active && p.challenge)
-            .map((p) => ({ ...p, avatar: avatarFor(p.owner) })),
-          isDone: true,
-          continueCursor: "",
-        };
-      return null;
-    };
     function transition(next = version) {
       seq++;
       const endVersion = { ...next, ts: ts() };

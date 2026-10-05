@@ -1,4 +1,11 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { loadPublic } from "@/lib/seo/public-data";
+import { seo, absolute, breadcrumbs } from "@/lib/seo/meta";
+import {
+  createFileRoute,
+  Link,
+  useNavigate,
+  notFound,
+} from "@tanstack/react-router";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useMemo, useState } from "react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
@@ -12,6 +19,55 @@ import AuthorLink from "@/components/clik/author-link";
 import ClientScene from "@/components/clik/client-scene";
 import CreationRemixes from "@/components/clik/creation-remixes";
 export const Route = createFileRoute("/creations/$publicationId")({
+  loader: async ({ params }) => {
+    const data = await loadPublic({
+      kind: "creation",
+      id: params.publicationId,
+    });
+    if (!data.creation) throw notFound();
+    return data;
+  },
+  head: ({ loaderData, params }) => {
+    const p = loaderData?.creation,
+      path = `/creations/${encodeURIComponent(params.publicationId)}`;
+    return seo({
+      title: p?.title || "Création indisponible",
+      text:
+        p?.description ||
+        `${p?.title || "Une création"}, une construction en briques 3D par ${p?.author || "la communauté Clik"}. Explorez-la et créez votre propre version.`,
+      path,
+      image: p?.thumbnailUrl,
+      imageWidth: 640,
+      imageHeight: 480,
+      noindex: !p,
+      schema: p
+        ? [
+            {
+              "@context": "https://schema.org",
+              "@type": "CreativeWork",
+              name: p.title,
+              description: p.description,
+              url: absolute(path),
+              image: p.thumbnailUrl,
+              datePublished: new Date(p.createdAt).toISOString(),
+              ...(p.updatedAt
+                ? { dateModified: new Date(p.updatedAt).toISOString() }
+                : {}),
+              author: {
+                "@type": "Person",
+                name: p.author,
+                url: absolute(`/gallery/user/${encodeURIComponent(p.owner)}`),
+              },
+              inLanguage: "fr",
+            },
+            breadcrumbs([
+              { name: "La galerie", path: "/gallery" },
+              { name: p.title, path },
+            ]),
+          ]
+        : undefined,
+    });
+  },
   component: Creation,
 });
 function Creation() {
@@ -31,12 +87,14 @@ function CreationDetail({
   const navigate = useNavigate(),
     { isAuthenticated } = useConvexAuth();
   const [versionId, setVersionId] = useState<Id<"versions"> | undefined>();
-  const p = useQuery(api.projects.creation, {
+  const initial = Route.useLoaderData();
+  const live = useQuery(api.projects.creation, {
       id: publicationId,
       ...(versionId ? { versionId } : {}),
     }),
     remix = useMutation(api.projects.remix),
     [busy, setBusy] = useState(false);
+  const p = live === undefined ? initial.creation : live;
   const scene = useMemo(() => (p ? JSON.parse(p.scene) : null), [p?.scene]);
   if (p && !p.challenge && versionId !== p._id) setVersionId(p._id);
   if (p === undefined)
@@ -67,7 +125,13 @@ function CreationDetail({
             role="region"
             aria-label={`Aperçu 3D de ${p.title}`}
           >
-            <ClientScene scene={scene} showGrid={false} showViewControls />
+            <ClientScene
+              scene={scene}
+              showGrid={false}
+              showViewControls
+              poster={p.thumbnailUrl}
+              title={p.title}
+            />
             <p className="creation-view-hint">
               <MousePointer2 size={14} aria-hidden="true" />
               <span>
@@ -259,8 +323,15 @@ function CreationDetail({
           count={p.voteCount}
         />
       )}
-      <CreationRemixes publicationId={publicationId} />
-      <Comments publicationId={publicationId} count={p.commentCount} />
+      <CreationRemixes
+        initial={initial.remixes}
+        publicationId={publicationId}
+      />
+      <Comments
+        initial={initial.comments}
+        publicationId={publicationId}
+        count={p.commentCount}
+      />
     </main>
   );
 }

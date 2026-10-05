@@ -1,4 +1,12 @@
+import { loadPublic, type PublicData } from "@/lib/seo/public-data";
+import { seo, collection } from "@/lib/seo/meta";
+import {
+  usePublicPagination,
+  continuationHref,
+} from "@/lib/clik/use-public-pagination";
+import PublicMore from "@/components/clik/public-more";
 import ChallengeRewards from "@/components/challenges/rewards";
+import { useHydrated } from "@tanstack/react-router";
 import {
   Select,
   SelectContent,
@@ -6,14 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import {
-  useConvexAuth,
-  useMutation,
-  usePaginatedQuery,
-  useQuery,
-} from "convex/react";
+  createFileRoute,
+  Link,
+  useNavigate,
+  notFound,
+} from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type {
   Doc,
@@ -42,32 +50,70 @@ import {
   VoteButton,
 } from "@/components/challenges/shared";
 export const Route = createFileRoute("/challenges")({
-  validateSearch: (search: Record<string, unknown>): { date?: string } => {
-    if (typeof search.date !== "string") return {};
-    try {
-      challengeStart(search.date);
-      return { date: search.date };
-    } catch {
-      return {};
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { date?: string; cursor?: string; sort?: "recent" | "votes" } => {
+    let date: string | undefined;
+    if (typeof search.date === "string") {
+      try {
+        challengeStart(search.date);
+        date = search.date;
+      } catch {
+        /* Invalid dates use today's page. */
+      }
     }
+    return {
+      date,
+      cursor:
+        (typeof search.cursor === "string" ||
+          typeof search.cursor === "number") &&
+        String(search.cursor).length <= 8192
+          ? String(search.cursor)
+          : undefined,
+      sort:
+        search.sort === "votes" || search.sort === "recent"
+          ? search.sort
+          : undefined,
+    };
   },
-  head: () => ({
-    meta: [
-      { title: "Le défi du jour — Clik" },
-      {
-        name: "description",
-        content:
-          "100 pièces, 24 heures, votre imagination. Participez aux défis Clik et découvrez les créations de la communauté.",
-      },
-    ],
-  }),
+  loaderDeps: ({ search }) => search,
+  loader: async ({ deps }) => {
+    const result = await loadPublic({
+      kind: "challenge",
+      day: deps.date,
+      cursor: deps.cursor,
+      sort: deps.sort,
+    });
+    if (deps.date && deps.date !== result.data.today && !result.data.challenge)
+      throw notFound();
+    return result;
+  },
+  head: ({ loaderData, match }) => {
+    const date = match.search.date;
+    const archive = date && date !== loaderData?.data.today;
+    const path = archive ? `/challenges?date=${date}` : "/challenges";
+    const title = archive
+      ? `Défi de construction du ${date}`
+      : "Le défi du jour : construisez en briques 3D";
+    return seo({
+      title,
+      text: archive
+        ? `Découvrez les créations du défi Clik du ${date}. Explorez les constructions, votez pour vos préférées et partagez vos idées.`
+        : "100 pièces, 24 heures, votre imagination. Participez au défi de construction en briques 3D du jour et découvrez les créations de la communauté Clik.",
+      path,
+      noindex: !!match.search.cursor || !loaderData,
+      schema: collection(title, path),
+    });
+  },
   component: Challenges,
 });
 function Challenges() {
   const { date } = Route.useSearch(),
     navigate = useNavigate();
-  const [today, setToday] = useState(challengeDay());
-  const data = useQuery(api.challenges.day, { day: date ?? today });
+  const initial = Route.useLoaderData();
+  const [today, setToday] = useState(initial.data.today);
+  const liveData = useQuery(api.challenges.day, { day: date ?? today });
+  const data = liveData === undefined ? initial.data : liveData;
   const now = useServerNow(data?.serverNow);
   const ensure = useMutation(api.challenges.ensureToday),
     start = useMutation(api.challenges.start);
@@ -93,10 +139,28 @@ function Challenges() {
   const remaining = challenge ? Math.max(0, challenge.closesAt - now) : 0;
   return (
     <main className="collection-page challenges-page">
+      <nav className="challenge-archive-links" aria-label="Archives des défis">
+        {initial.previous && (
+          <Link to="/challenges" search={{ date: initial.previous }}>
+            Défi du {initial.previous}
+          </Link>
+        )}
+        {date && date !== today && (
+          <Link to="/challenges" search={{}}>
+            Le défi du jour
+          </Link>
+        )}
+        {initial.next && (
+          <Link to="/challenges" search={{ date: initial.next }}>
+            Défi du {initial.next}
+          </Link>
+        )}
+      </nav>
       <div className="page-heading">
         <div>
           <h1>
-            Le défi du jour<span>.</span>
+            {date && date !== today ? `Le défi du ${date}` : "Le défi du jour"}
+            <span>.</span>
           </h1>
           <p>
             100 pièces à votre disposition. 24 heures pour en faire votre idée.
@@ -245,6 +309,7 @@ function Challenges() {
             now={now}
             open={open}
             choices={data.choices}
+            initial={initial}
           />
         </>
       )}
@@ -256,20 +321,23 @@ function Entries({
   now,
   open,
   choices,
+  initial,
 }: {
   challenge: Doc<"challenges">;
   now: number;
   open: boolean;
   choices: { publicationId: Id<"publications"> }[];
+  initial: PublicData["challenge"];
 }) {
-  const [sort, setSort] = useState<"recent" | "votes">(
-    open ? "recent" : "votes",
-  );
-  useEffect(() => setSort(open ? "recent" : "votes"), [open]);
-  const { results, status, loadMore } = usePaginatedQuery(
+  const search = Route.useSearch();
+  const hydrated = useHydrated();
+  const navigate = Route.useNavigate();
+  const sort = search.sort ?? (open ? "recent" : "votes");
+  const { results, status, loadMore, nextCursor } = usePublicPagination(
     api.challenges.entries,
     { challengeId: challenge._id, sort },
-    { initialNumItems: 12 },
+    initial.sort === sort ? initial.entries : undefined,
+    search.cursor,
   );
   return (
     <section className="challenge-entries" aria-labelledby="entries-title">
@@ -284,13 +352,18 @@ function Entries({
         <div className="challenge-sort">
           <label htmlFor="challenge-sort">Trier</label>
           <Select
+            disabled={!hydrated}
             items={[
               { value: "recent", label: "Récentes" },
               { value: "votes", label: "Les plus aimées" },
             ]}
             value={sort}
             onValueChange={(value) => {
-              if (value === "recent" || value === "votes") setSort(value);
+              if (value === "recent" || value === "votes")
+                void navigate({
+                  search: { date: search.date, sort: value },
+                  resetScroll: false,
+                });
             }}
           >
             <SelectTrigger
@@ -366,9 +439,17 @@ function Entries({
         </div>
       )}
       {status === "CanLoadMore" && (
-        <button className="load-more" onClick={() => loadMore(12)}>
+        <PublicMore
+          className="load-more"
+          href={continuationHref("/challenges", nextCursor, {
+            date: challenge.day,
+            sort,
+          })}
+          loading={false}
+          onMore={() => loadMore(12)}
+        >
           Voir plus de créations
-        </button>
+        </PublicMore>
       )}
       {status === "LoadingMore" && <p role="status">Chargement…</p>}
     </section>

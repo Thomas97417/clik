@@ -713,9 +713,11 @@ export const creator = query({
   },
 });
 export const creation = query({
-  args: { id: v.id("publications"), versionId: v.optional(v.id("versions")) },
+  args: { id: v.string(), versionId: v.optional(v.id("versions")) },
   handler: async (ctx, a) => {
-    const p = await ctx.db.get(a.id);
+    const id = ctx.db.normalizeId("publications", a.id);
+    if (!id) return null;
+    const p = await ctx.db.get(id);
     if (!p?.active) return null;
     const version = await ctx.db.get(a.versionId ?? p.versionId!);
     if (!version || version.publicationId !== p._id) return null;
@@ -840,5 +842,43 @@ export const migrateLineage = internalMutation({
     }
     await ctx.scheduler.runAfter(0, internal.projects.migrateLineage, {});
     return false;
+  },
+});
+
+/** Sitemap metadata only; never read project drafts or full version scenes. */
+export const sitemapPage = query({
+  args: { cursor: v.union(v.string(), v.null()) },
+  handler: async (ctx, { cursor }) => {
+    const result = await ctx.db
+      .query("publications")
+      .withIndex("by_recent", (q) => q.eq("active", true))
+      .order("asc")
+      .paginate({ cursor, numItems: 250 });
+    const owners = [...new Set(result.page.map((p) => p.owner))];
+    const available = await Promise.all(
+      owners.map(async (owner) => {
+        try {
+          return (await authComponent.getAnyUserById(ctx, owner))
+            ? owner
+            : null;
+        } catch (error) {
+          if (
+            /invalid.*(?:id|document)|(?:id|document).*invalid/i.test(
+              String(error),
+            )
+          )
+            return null;
+          throw error;
+        }
+      }),
+    );
+    return {
+      ...result,
+      page: result.page.map((p) => ({
+        id: p._id,
+        modified: p.updatedAt ?? p.publishedAt,
+      })),
+      owners: available.filter((owner): owner is string => owner !== null),
+    };
   },
 });

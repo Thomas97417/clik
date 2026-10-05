@@ -5,8 +5,21 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-  resolve: { dedupe: ["three", "react", "react-dom"] },
-  plugins: [tsconfigPaths(), tailwindcss(), tanstackStart(), viteReact()],
+  cacheDir: process.env.CLIK_VITE_CACHE_DIR,
+  // Three's source modules let Rollup keep the renderer out of pages that only use its math.
+  resolve: {
+    alias: [{ find: /^three$/, replacement: "three/src/Three.js" }],
+    dedupe: ["three", "react", "react-dom"],
+  },
+  plugins: [
+    tsconfigPaths(),
+    tailwindcss(),
+    tanstackStart({
+      server: { entry: "server.ts" },
+      router: { quoteStyle: "double", semicolons: true },
+    }),
+    viteReact(),
+  ],
   server: {
     port: 3001,
   },

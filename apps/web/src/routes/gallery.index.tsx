@@ -1,8 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { usePaginatedQuery } from "convex/react";
+import { loadPublic } from "@/lib/seo/public-data";
+import { seo, collection } from "@/lib/seo/meta";
+import {
+  usePublicPagination,
+  continuationHref,
+} from "@/lib/clik/use-public-pagination";
+import PublicMore from "@/components/clik/public-more";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import { ArrowRight, GitBranch, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import GallerySortSelect, {
   validateGallerySearch,
 } from "@/components/clik/gallery-sort";
@@ -11,25 +16,26 @@ import GalleryArt from "@/components/clik/gallery-art";
 
 export const Route = createFileRoute("/gallery/")({
   validateSearch: validateGallerySearch,
-  head: () => ({
-    meta: [
-      { title: "La galerie — Clik" },
-      {
-        name: "description",
-        content:
-          "Explorez les constructions de la communauté Clik, partagez vos impressions et créez votre propre version.",
-      },
-    ],
-  }),
+  loaderDeps: ({ search }) => search,
+  loader: ({ deps }) => loadPublic({ kind: "gallery", ...deps }),
+  head: ({ match, loaderData }) =>
+    seo({
+      title: "La galerie de constructions 3D",
+      text: "Explorez les créations en briques 3D de la communauté Clik. Découvrez leurs auteurs et construisez votre propre version dans l’atelier en ligne.",
+      path: "/gallery",
+      noindex: !!match.search.cursor || !loaderData,
+      schema: collection("La galerie", "/gallery"),
+    }),
   component: Gallery,
 });
 function Gallery() {
-  const { sort = "recent" } = Route.useSearch();
+  const { sort = "recent", cursor } = Route.useSearch();
   const navigate = Route.useNavigate();
-  const { results, status, loadMore } = usePaginatedQuery(
+  const { results, status, loadMore, nextCursor } = usePublicPagination(
     api.projects.gallery,
     { sort },
-    { initialNumItems: 12 },
+    Route.useLoaderData(),
+    cursor,
   );
   return (
     <main className="collection-page gallery-page">
@@ -100,16 +106,16 @@ function Gallery() {
               affichée{results.length === 1 ? "" : "s"}
             </p>
             {(status === "CanLoadMore" || status === "LoadingMore") && (
-              <Button
-                variant="outline"
-                disabled={status === "LoadingMore"}
-                onClick={() => loadMore(12)}
+              <PublicMore
+                href={continuationHref("/gallery", nextCursor, { sort })}
+                loading={status === "LoadingMore"}
+                onMore={() => loadMore(12)}
               >
                 {status === "LoadingMore"
                   ? "Chargement…"
                   : "Voir plus de créations"}
                 <Plus size={15} aria-hidden="true" />
-              </Button>
+              </PublicMore>
             )}
           </div>
         )}

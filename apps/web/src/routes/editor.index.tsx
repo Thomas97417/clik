@@ -1,3 +1,4 @@
+import { seo } from "@/lib/seo/meta";
 import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import Editor from "@/components/clik/editor";
@@ -8,6 +9,13 @@ import {
 } from "@/lib/clik/last-local-draft";
 import { listLocalCreations } from "@/lib/clik/local";
 export const Route = createFileRoute("/editor/")({
+  head: () =>
+    seo({
+      title: "Votre atelier de construction 3D",
+      text: "Assemblez et personnalisez vos créations dans votre atelier Clik.",
+      path: "/editor",
+      noindex: true,
+    }),
   validateSearch: (s: Record<string, unknown>): { draft?: string } => ({
     draft: isLocalDraftId(s.draft) ? s.draft : undefined,
   }),

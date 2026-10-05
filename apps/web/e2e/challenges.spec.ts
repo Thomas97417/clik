@@ -77,11 +77,14 @@ test("défi du jour : lot commun, calendrier UTC et navigation mobile", async ({
 }, info) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("/challenges?date=2020-01-01");
+  const { creatorsFixture } = await import("./fixtures/creators");
+  await creatorsFixture(page);
+  const response = await page.goto("/challenges?date=2020-01-01");
+  expect(response?.status()).toBe(404);
   await expect(
-    page.getByRole("heading", { name: "Aucun défi à cette date." }),
+    page.getByRole("heading", { name: "Page introuvable" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Aujourd’hui", exact: true }).click();
+  await page.goto("/challenges");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "Le défi du jour.",
   );
@@ -116,7 +119,11 @@ test("défi du jour : lot commun, calendrier UTC et navigation mobile", async ({
       ),
     ).toBe(true);
     await expect(
-      page.getByRole("navigation").getByRole("link", { name: "Les défis" }),
+      width <= 680
+        ? page.getByRole("button", { name: "Explorer les rubriques" })
+        : page
+            .getByRole("navigation", { name: "Navigation principale" })
+            .getByRole("link", { name: "Les défis" }),
     ).toBeInViewport();
   }
   await page.screenshot({
@@ -212,6 +219,7 @@ test("tri des participations : souris, clavier et menu mobile", async ({
 
   await sort.focus();
   await sort.press("Enter");
+  await expect(page.getByRole("listbox")).toBeVisible();
   await page.keyboard.press("Home");
   await page.keyboard.press("Enter");
   await expect(sort).toHaveText("Récentes");
@@ -219,6 +227,7 @@ test("tri des participations : souris, clavier et menu mobile", async ({
   await expect(sort).toBeFocused();
 
   await sort.press("Enter");
+  await expect(page.getByRole("listbox")).toBeVisible();
   await page.keyboard.press("End");
   await page.keyboard.press("Escape");
   await expect(page.getByRole("listbox")).toBeHidden();
@@ -258,7 +267,7 @@ test("participations : trois coups de cœur, changement de vote et commentaires"
   await expect(page.getByRole("combobox", { name: "Trier" })).toHaveText(
     "Les plus aimées",
   );
-  await page.getByRole("button", { name: "Aujourd’hui", exact: true }).click();
+  await page.goto("/challenges");
   await expect(page.locator(".challenge-time")).toContainText("restantes");
   const cards = page.locator(".challenge-entry");
   await expect(cards).toHaveCount(4);

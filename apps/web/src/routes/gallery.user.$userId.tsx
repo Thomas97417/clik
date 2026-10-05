@@ -1,10 +1,16 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { usePaginatedQuery, useQuery } from "convex/react";
+import { loadPublic } from "@/lib/seo/public-data";
+import { seo, absolute, breadcrumbs } from "@/lib/seo/meta";
+import {
+  usePublicPagination,
+  continuationHref,
+} from "@/lib/clik/use-public-pagination";
+import PublicMore from "@/components/clik/public-more";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useQuery } from "convex/react";
 import BrickAvatar from "@/components/ui/brick-avatar";
 import { defaultAvatar } from "@clik/avatars";
 import { Box } from "lucide-react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
-import { Button } from "@/components/ui/button";
 import PublicCreationCard from "@/components/clik/public-creation-card";
 import GallerySortSelect, {
   validateGallerySearch,
@@ -12,8 +18,39 @@ import GallerySortSelect, {
 
 export const Route = createFileRoute("/gallery/user/$userId")({
   validateSearch: validateGallerySearch,
+  loaderDeps: ({ search }) => search,
+  loader: async ({ params, deps }) => {
+    const data = await loadPublic({
+      kind: "creator",
+      userId: params.userId,
+      ...deps,
+    });
+    if (!data.creator) throw notFound();
+    return data;
+  },
   component: CreatorPage,
-  head: () => ({ meta: [{ title: "Galerie du créateur — Clik" }] }),
+  head: ({ loaderData, params, match }) => {
+    const name = loaderData?.creator?.name || "Créateur introuvable",
+      path = `/gallery/user/${encodeURIComponent(params.userId)}`;
+    return seo({
+      title: `Les créations de ${name}`,
+      text: `Découvrez les constructions en briques 3D de ${name} sur Clik. Explorez ses créations publiques et imaginez votre propre version.`,
+      path,
+      noindex: !loaderData?.gallery.page.length || !!match.search.cursor,
+      schema: [
+        {
+          "@context": "https://schema.org",
+          "@type": "ProfilePage",
+          url: absolute(path),
+          mainEntity: { "@type": "Person", name, url: absolute(path) },
+        },
+        breadcrumbs([
+          { name: "La galerie", path: "/gallery" },
+          { name, path },
+        ]),
+      ],
+    });
+  },
   errorComponent: () => (
     <main className="collection-page empty-state">
       <h1>Cette galerie n’a pas pu être chargée.</h1>
@@ -29,13 +66,16 @@ function CreatorPage() {
   return <CreatorGallery key={userId} userId={userId} />;
 }
 function CreatorGallery({ userId }: { userId: string }) {
-  const { sort = "recent" } = Route.useSearch();
+  const { sort = "recent", cursor } = Route.useSearch();
   const navigate = Route.useNavigate();
-  const creator = useQuery(api.projects.creator, { userId });
-  const { results, status, loadMore } = usePaginatedQuery(
+  const initial = Route.useLoaderData();
+  const liveCreator = useQuery(api.projects.creator, { userId });
+  const creator = liveCreator === undefined ? initial.creator : liveCreator;
+  const { results, status, loadMore, nextCursor } = usePublicPagination(
     api.projects.gallery,
     creator ? { ownerId: userId, sort } : "skip",
-    { initialNumItems: 12 },
+    initial.gallery,
+    cursor,
   );
   return (
     <main className="collection-page creator-page">
@@ -96,13 +136,18 @@ function CreatorGallery({ userId }: { userId: string }) {
             </div>
           )}
           {status === "CanLoadMore" && (
-            <Button
-              variant="outline"
+            <PublicMore
               className="load-more"
-              onClick={() => loadMore(12)}
+              href={continuationHref(
+                `/gallery/user/${encodeURIComponent(userId)}`,
+                nextCursor,
+                { sort },
+              )}
+              loading={false}
+              onMore={() => loadMore(12)}
             >
               Voir plus de créations
-            </Button>
+            </PublicMore>
           )}
           {status === "LoadingMore" && (
             <p className="load-more" role="status">

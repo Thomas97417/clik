@@ -252,3 +252,33 @@ export const vote = mutation({
     });
   },
 });
+
+/** Public archive navigation; does not disclose any participation or votes. */
+export const publicNeighbors = query({
+  args: { day: v.string() },
+  handler: async (ctx, { day }) => {
+    const [previous, next] = await Promise.all([
+      ctx.db
+        .query("challenges")
+        .withIndex("by_day", (q) => q.lt("day", day))
+        .order("desc")
+        .first(),
+      ctx.db
+        .query("challenges")
+        .withIndex("by_day", (q) => q.gt("day", day).lte("day", challengeDay()))
+        .first(),
+    ]);
+    return { previous: previous?.day ?? null, next: next?.day ?? null };
+  },
+});
+
+export const sitemapPage = query({
+  args: { cursor: v.union(v.string(), v.null()) },
+  handler: async (ctx, { cursor }) => {
+    const result = await ctx.db
+      .query("challenges")
+      .withIndex("by_day", (q) => q.lte("day", challengeDay()))
+      .paginate({ cursor, numItems: 250 });
+    return { ...result, page: result.page.map((c) => ({ day: c.day })) };
+  },
+});

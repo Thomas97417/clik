@@ -1,0 +1,42 @@
+{
+  "tool": "Lighthouse",
+  "version": "13.5.0",
+  "measuredAt": "2026-10-05T22:00:24.952Z",
+  "route": "/",
+  "canonicalOrigin": "https://clik.io",
+  "environment": "Build de production servi localement avec compression gzip ; simulation mobile Lighthouse. Une seule mesure, sans tests navigateur concurrents. Ce ne sont pas des mesures terrain.",
+  "scores": {
+    "performance": 76,
+    "accessibility": 96,
+    "seo": 100
+  },
+  "metrics": {
+    "first-contentful-paint": {
+      "value": 3019.8124,
+      "unit": "millisecond"
+    },
+    "largest-contentful-paint": {
+      "value": 3469.8124,
+      "unit": "millisecond"
+    },
+    "total-blocking-time": {
+      "value": 403.49999999999955,
+      "unit": "millisecond"
+    },
+    "cumulative-layout-shift": {
+      "value": 0.000927429295484991,
+      "unit": "unitless"
+    },
+    "speed-index": {
+      "value": 3019.8124,
+      "unit": "millisecond"
+    }
+  },
+  "initialJavaScriptTransfer": {
+    "beforeSplittingBytes": 518318,
+    "afterSplittingBytes": 287146,
+    "reductionPercent": 44.6
+  },
+  "scope": "Score SEO audité sur l’accueil. Les routes publiques dynamiques et les espaces privés sont vérifiés séparément par les tests HTTP et navigateur. INP doit être suivi dans les données de production.",
+  "remainingPerformanceWork": "Le rendu et l’hydratation React restent coûteux en simulation mobile. Vérifier les résultats sur l’hébergement définitif, puis prioriser le travail client selon les Web Vitals réels."
+}

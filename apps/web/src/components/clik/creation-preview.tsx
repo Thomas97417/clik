@@ -9,12 +9,14 @@ export default function CreationPreview({
   title,
   interactive = false,
   initialZoom = 1,
+  poster,
 }: {
   scene: SceneDocument | string;
   cacheKey: string;
   title: string;
   interactive?: boolean;
   initialZoom?: number;
+  poster?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const surface = useRef<HTMLDivElement>(null);
@@ -42,7 +44,7 @@ export default function CreationPreview({
     return () => observer.disconnect();
   }, []);
   useEffect(() => {
-    if (!visible) return;
+    if (!visible || poster) return;
     let active = true;
     import("@/lib/clik/thumbnail")
       .then(async ({ creationThumbnail }) => {
@@ -59,11 +61,15 @@ export default function CreationPreview({
     return () => {
       active = false;
     };
-  }, [visible, scene, cacheKey]);
-  const current = preview?.key === cacheKey ? preview : undefined;
+  }, [visible, scene, cacheKey, poster]);
+  const current = poster
+    ? { key: cacheKey, url: poster }
+    : preview?.key === cacheKey
+      ? preview
+      : undefined;
   useEffect(() => {
     setInteractiveReady(false);
-    if (!interactive || !current?.url) return;
+    if (!interactive || !visible || !current?.url) return;
     let active = true;
     import("@/lib/clik/preview-controls")
       .then(({ attachPreviewControls }) => {
@@ -84,7 +90,7 @@ export default function CreationPreview({
       controls.current?.dispose();
       controls.current = undefined;
     };
-  }, [interactive, current?.url, scene, cacheKey, initialZoom]);
+  }, [interactive, visible, current?.url, scene, cacheKey, initialZoom]);
   return (
     <div ref={ref} className="creation-preview" aria-busy={!current}>
       {current?.url ? (
@@ -99,6 +105,10 @@ export default function CreationPreview({
           >
             <img
               src={current.url}
+              width={640}
+              height={480}
+              decoding="async"
+              fetchPriority={poster ? "high" : undefined}
               alt={`Aperçu de ${title}`}
               draggable={false}
               style={

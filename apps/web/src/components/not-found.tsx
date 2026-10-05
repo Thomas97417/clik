@@ -9,15 +9,20 @@ export default function NotFound() {
           404
         </span>
         <h1 className="text-foreground text-xl font-semibold">
-          Page not found
+          Page introuvable
         </h1>
         <p className="text-muted-foreground max-w-sm text-sm">
-          The page you're looking for doesn't exist or has been moved.
+          Cette page n’existe pas ou n’est plus disponible.
         </p>
       </div>
-      <Link to="/">
-        <Button variant="outline" size="lg">Go back home</Button>
-      </Link>
+      <Button
+        variant="outline"
+        size="lg"
+        nativeButton={false}
+        render={<Link to="/" />}
+      >
+        Retour à l’accueil
+      </Button>
     </div>
   );
 }

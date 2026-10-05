@@ -1,3 +1,4 @@
+import { seo, absolute } from "@/lib/seo/meta";
 import { useMemo, useRef, useState, type CSSProperties } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
@@ -29,16 +30,32 @@ import {
 } from "@/lib/clik/starter-models";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Clik — Faites place à vos idées" },
-      {
-        name: "description",
-        content:
-          "Votre atelier de construction 3D, directement dans le navigateur. Assemblez des briques, personnalisez un modèle et partagez vos créations.",
-      },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "Construction en briques 3D en ligne",
+      text: "Créez en briques 3D directement dans votre navigateur avec Clik. Assemblez vos idées, relevez les défis du jour et partagez vos constructions.",
+      path: "/",
+      schema: [
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "@id": absolute("/#website"),
+          name: "Clik",
+          url: absolute("/"),
+          inLanguage: "fr",
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: "Clik",
+          url: absolute("/"),
+          applicationCategory: "DesignApplication",
+          operatingSystem: "Web",
+          browserRequirements: "Navigateur compatible WebGL 2",
+          description: "Atelier de construction en briques 3D en ligne.",
+        },
+      ],
+    }),
   component: Home,
 });
 const modelIcons = [House, TowerControl, Castle];
@@ -88,8 +105,8 @@ function Home() {
             <br /> <em>idée.</em>
           </h1>
           <p>
-            Une maison, un phare, tout un château. Donnez forme à ce que vous
-            avez en tête, brique après brique.
+            Un atelier de construction en briques 3D, dans votre navigateur.
+            Donnez forme à ce que vous avez en tête, brique après brique.
           </p>
           <div className="home-buttons home-desktop-actions">
             <button
@@ -151,6 +168,9 @@ function Home() {
                 initialZoom={model.id === "house" ? 1 : 1.2}
                 scene={scene}
                 cacheKey={`starter-v3:${model.id}:${color}`}
+                poster={
+                  color === model.color ? `/models/${model.id}.png` : undefined
+                }
                 title={model.name}
               />
             </div>

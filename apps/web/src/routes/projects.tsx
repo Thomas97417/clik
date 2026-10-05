@@ -1,3 +1,4 @@
+import { seo } from "@/lib/seo/meta";
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useConvexAuth, usePaginatedQuery } from "convex/react";
@@ -29,6 +30,13 @@ const sortOptions = [
 ] as const;
 
 export const Route = createFileRoute("/projects")({
+  head: () =>
+    seo({
+      title: "Mes créations",
+      text: "Retrouvez et organisez vos créations Clik.",
+      path: "/projects",
+      noindex: true,
+    }),
   validateSearch: (search: Record<string, unknown>): { sort?: "oldest" } => ({
     sort: search.sort === "oldest" ? "oldest" : undefined,
   }),

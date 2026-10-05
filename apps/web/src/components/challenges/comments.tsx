@@ -1,13 +1,10 @@
+import { usePublicPagination } from "@/lib/clik/use-public-pagination";
+import type { PublicData } from "@/lib/seo/public-data";
 import { defaultAvatar, type AvatarDescriptor } from "@clik/avatars";
 import BrickAvatar from "@/components/ui/brick-avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { useEffect, useState } from "react";
-import {
-  useConvexAuth,
-  useMutation,
-  usePaginatedQuery,
-  useQuery,
-} from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type {
   Doc,
@@ -19,9 +16,11 @@ import AuthorLink from "@/components/clik/author-link";
 import CommunityArt from "@/components/clik/community-art";
 export default function Comments({
   publicationId,
+  initial,
   count,
 }: {
   publicationId: Id<"publications">;
+  initial?: PublicData["creation"]["comments"];
   count: number;
 }) {
   useEffect(() => {
@@ -30,10 +29,12 @@ export default function Comments({
   }, [publicationId]);
   const { isAuthenticated } = useConvexAuth(),
     me = useQuery(api.auth.getCurrentUser, isAuthenticated ? {} : "skip");
-  const { results, status, loadMore } = usePaginatedQuery(
+  const { results, status, loadMore } = usePublicPagination(
     api.comments.list,
     { publicationId },
-    { initialNumItems: 20 },
+    initial,
+    undefined,
+    20,
   );
   const add = useMutation(api.comments.add),
     [body, setBody] = useState(""),

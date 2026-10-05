@@ -1,17 +1,15 @@
+import { seo } from "@/lib/seo/meta";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import SignInForm from "@/components/sign-in-form";
 
 export const Route = createFileRoute("/(auth)/sign-in")({
-  head: () => ({
-    meta: [
-      { title: "Connexion — Clik" },
-      {
-        name: "description",
-        content:
-          "Retrouvez votre atelier et vos créations. Connectez-vous à votre compte Clik.",
-      },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "Connexion",
+      text: "Connectez-vous à Clik pour retrouver vos créations.",
+      path: "/sign-in",
+      noindex: true,
+    }),
   beforeLoad: async ({ context }) => {
     if (context.isAuthenticated) {
       throw redirect({ to: "/editor" });

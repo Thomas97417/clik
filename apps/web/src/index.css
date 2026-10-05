@@ -6829,3 +6829,23 @@ dialog.modal-backdrop::backdrop {
     padding: 0;
   }
 }
+
+.public-scene-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #edf1f7;
+}
+.challenge-archive-links {
+  display: flex;
+  justify-content: flex-end;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  font-size: 12px;
+  color: #65758d;
+}
+.challenge-archive-links a:hover {
+  color: #356ae6;
+  text-decoration: underline;
+}

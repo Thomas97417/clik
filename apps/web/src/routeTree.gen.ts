@@ -8,350 +8,430 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as ProjectsRouteImport } from './routes/projects'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as ChallengesRouteImport } from './routes/challenges'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as GalleryIndexRouteImport } from './routes/gallery.index'
-import { Route as EditorIndexRouteImport } from './routes/editor.index'
-import { Route as EditorProjectIdRouteImport } from './routes/editor.$projectId'
-import { Route as CreationsPublicationIdRouteImport } from './routes/creations.$publicationId'
-import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
-import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
-import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
-import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-password'
-import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
-import { Route as GalleryUserUserIdRouteImport } from './routes/gallery.user.$userId'
-import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as rootRouteImport } from "./routes/__root";
+import { Route as SitemapDotxmlRouteImport } from "./routes/sitemap[.]xml";
+import { Route as SettingsRouteImport } from "./routes/settings";
+import { Route as RobotsDottxtRouteImport } from "./routes/robots[.]txt";
+import { Route as ProjectsRouteImport } from "./routes/projects";
+import { Route as DashboardRouteImport } from "./routes/dashboard";
+import { Route as ChallengesRouteImport } from "./routes/challenges";
+import { Route as IndexRouteImport } from "./routes/index";
+import { Route as GalleryIndexRouteImport } from "./routes/gallery.index";
+import { Route as EditorIndexRouteImport } from "./routes/editor.index";
+import { Route as SitemapsPartRouteImport } from "./routes/sitemaps.$part";
+import { Route as EditorProjectIdRouteImport } from "./routes/editor.$projectId";
+import { Route as CreationsPublicationIdRouteImport } from "./routes/creations.$publicationId";
+import { Route as ApiPublicRouteImport } from "./routes/api/public";
+import { Route as authVerifyEmailRouteImport } from "./routes/(auth)/verify-email";
+import { Route as authSignUpRouteImport } from "./routes/(auth)/sign-up";
+import { Route as authSignInRouteImport } from "./routes/(auth)/sign-in";
+import { Route as authResetPasswordRouteImport } from "./routes/(auth)/reset-password";
+import { Route as authForgotPasswordRouteImport } from "./routes/(auth)/forgot-password";
+import { Route as GalleryUserUserIdRouteImport } from "./routes/gallery.user.$userId";
+import { Route as ApiAuthSplatRouteImport } from "./routes/api/auth/$";
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: "/sitemap.xml",
+  path: "/sitemap.xml",
+  getParentRoute: () => rootRouteImport,
+} as any);
 const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+  id: "/settings",
+  path: "/settings",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: "/robots.txt",
+  path: "/robots.txt",
+  getParentRoute: () => rootRouteImport,
+} as any);
 const ProjectsRoute = ProjectsRouteImport.update({
-  id: '/projects',
-  path: '/projects',
+  id: "/projects",
+  path: "/projects",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+  id: "/dashboard",
+  path: "/dashboard",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ChallengesRoute = ChallengesRouteImport.update({
-  id: '/challenges',
-  path: '/challenges',
+  id: "/challenges",
+  path: "/challenges",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const GalleryIndexRoute = GalleryIndexRouteImport.update({
-  id: '/gallery/',
-  path: '/gallery/',
+  id: "/gallery/",
+  path: "/gallery/",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const EditorIndexRoute = EditorIndexRouteImport.update({
-  id: '/editor/',
-  path: '/editor/',
+  id: "/editor/",
+  path: "/editor/",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
+const SitemapsPartRoute = SitemapsPartRouteImport.update({
+  id: "/sitemaps/$part",
+  path: "/sitemaps/$part",
+  getParentRoute: () => rootRouteImport,
+} as any);
 const EditorProjectIdRoute = EditorProjectIdRouteImport.update({
-  id: '/editor/$projectId',
-  path: '/editor/$projectId',
+  id: "/editor/$projectId",
+  path: "/editor/$projectId",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const CreationsPublicationIdRoute = CreationsPublicationIdRouteImport.update({
-  id: '/creations/$publicationId',
-  path: '/creations/$publicationId',
+  id: "/creations/$publicationId",
+  path: "/creations/$publicationId",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
+const ApiPublicRoute = ApiPublicRouteImport.update({
+  id: "/api/public",
+  path: "/api/public",
+  getParentRoute: () => rootRouteImport,
+} as any);
 const authVerifyEmailRoute = authVerifyEmailRouteImport.update({
-  id: '/(auth)/verify-email',
-  path: '/verify-email',
+  id: "/(auth)/verify-email",
+  path: "/verify-email",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const authSignUpRoute = authSignUpRouteImport.update({
-  id: '/(auth)/sign-up',
-  path: '/sign-up',
+  id: "/(auth)/sign-up",
+  path: "/sign-up",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const authSignInRoute = authSignInRouteImport.update({
-  id: '/(auth)/sign-in',
-  path: '/sign-in',
+  id: "/(auth)/sign-in",
+  path: "/sign-in",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const authResetPasswordRoute = authResetPasswordRouteImport.update({
-  id: '/(auth)/reset-password',
-  path: '/reset-password',
+  id: "/(auth)/reset-password",
+  path: "/reset-password",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
-  id: '/(auth)/forgot-password',
-  path: '/forgot-password',
+  id: "/(auth)/forgot-password",
+  path: "/forgot-password",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const GalleryUserUserIdRoute = GalleryUserUserIdRouteImport.update({
-  id: '/gallery/user/$userId',
-  path: '/gallery/user/$userId',
+  id: "/gallery/user/$userId",
+  path: "/gallery/user/$userId",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
-  id: '/api/auth/$',
-  path: '/api/auth/$',
+  id: "/api/auth/$",
+  path: "/api/auth/$",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/challenges': typeof ChallengesRoute
-  '/dashboard': typeof DashboardRoute
-  '/projects': typeof ProjectsRoute
-  '/settings': typeof SettingsRoute
-  '/forgot-password': typeof authForgotPasswordRoute
-  '/reset-password': typeof authResetPasswordRoute
-  '/sign-in': typeof authSignInRoute
-  '/sign-up': typeof authSignUpRoute
-  '/verify-email': typeof authVerifyEmailRoute
-  '/creations/$publicationId': typeof CreationsPublicationIdRoute
-  '/editor/$projectId': typeof EditorProjectIdRoute
-  '/editor/': typeof EditorIndexRoute
-  '/gallery/': typeof GalleryIndexRoute
-  '/api/auth/$': typeof ApiAuthSplatRoute
-  '/gallery/user/$userId': typeof GalleryUserUserIdRoute
+  "/": typeof IndexRoute;
+  "/challenges": typeof ChallengesRoute;
+  "/dashboard": typeof DashboardRoute;
+  "/projects": typeof ProjectsRoute;
+  "/robots.txt": typeof RobotsDottxtRoute;
+  "/settings": typeof SettingsRoute;
+  "/sitemap.xml": typeof SitemapDotxmlRoute;
+  "/forgot-password": typeof authForgotPasswordRoute;
+  "/reset-password": typeof authResetPasswordRoute;
+  "/sign-in": typeof authSignInRoute;
+  "/sign-up": typeof authSignUpRoute;
+  "/verify-email": typeof authVerifyEmailRoute;
+  "/api/public": typeof ApiPublicRoute;
+  "/creations/$publicationId": typeof CreationsPublicationIdRoute;
+  "/editor/$projectId": typeof EditorProjectIdRoute;
+  "/sitemaps/$part": typeof SitemapsPartRoute;
+  "/editor/": typeof EditorIndexRoute;
+  "/gallery/": typeof GalleryIndexRoute;
+  "/api/auth/$": typeof ApiAuthSplatRoute;
+  "/gallery/user/$userId": typeof GalleryUserUserIdRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/challenges': typeof ChallengesRoute
-  '/dashboard': typeof DashboardRoute
-  '/projects': typeof ProjectsRoute
-  '/settings': typeof SettingsRoute
-  '/forgot-password': typeof authForgotPasswordRoute
-  '/reset-password': typeof authResetPasswordRoute
-  '/sign-in': typeof authSignInRoute
-  '/sign-up': typeof authSignUpRoute
-  '/verify-email': typeof authVerifyEmailRoute
-  '/creations/$publicationId': typeof CreationsPublicationIdRoute
-  '/editor/$projectId': typeof EditorProjectIdRoute
-  '/editor': typeof EditorIndexRoute
-  '/gallery': typeof GalleryIndexRoute
-  '/api/auth/$': typeof ApiAuthSplatRoute
-  '/gallery/user/$userId': typeof GalleryUserUserIdRoute
+  "/": typeof IndexRoute;
+  "/challenges": typeof ChallengesRoute;
+  "/dashboard": typeof DashboardRoute;
+  "/projects": typeof ProjectsRoute;
+  "/robots.txt": typeof RobotsDottxtRoute;
+  "/settings": typeof SettingsRoute;
+  "/sitemap.xml": typeof SitemapDotxmlRoute;
+  "/forgot-password": typeof authForgotPasswordRoute;
+  "/reset-password": typeof authResetPasswordRoute;
+  "/sign-in": typeof authSignInRoute;
+  "/sign-up": typeof authSignUpRoute;
+  "/verify-email": typeof authVerifyEmailRoute;
+  "/api/public": typeof ApiPublicRoute;
+  "/creations/$publicationId": typeof CreationsPublicationIdRoute;
+  "/editor/$projectId": typeof EditorProjectIdRoute;
+  "/sitemaps/$part": typeof SitemapsPartRoute;
+  "/editor": typeof EditorIndexRoute;
+  "/gallery": typeof GalleryIndexRoute;
+  "/api/auth/$": typeof ApiAuthSplatRoute;
+  "/gallery/user/$userId": typeof GalleryUserUserIdRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/challenges': typeof ChallengesRoute
-  '/dashboard': typeof DashboardRoute
-  '/projects': typeof ProjectsRoute
-  '/settings': typeof SettingsRoute
-  '/(auth)/forgot-password': typeof authForgotPasswordRoute
-  '/(auth)/reset-password': typeof authResetPasswordRoute
-  '/(auth)/sign-in': typeof authSignInRoute
-  '/(auth)/sign-up': typeof authSignUpRoute
-  '/(auth)/verify-email': typeof authVerifyEmailRoute
-  '/creations/$publicationId': typeof CreationsPublicationIdRoute
-  '/editor/$projectId': typeof EditorProjectIdRoute
-  '/editor/': typeof EditorIndexRoute
-  '/gallery/': typeof GalleryIndexRoute
-  '/api/auth/$': typeof ApiAuthSplatRoute
-  '/gallery/user/$userId': typeof GalleryUserUserIdRoute
+  __root__: typeof rootRouteImport;
+  "/": typeof IndexRoute;
+  "/challenges": typeof ChallengesRoute;
+  "/dashboard": typeof DashboardRoute;
+  "/projects": typeof ProjectsRoute;
+  "/robots.txt": typeof RobotsDottxtRoute;
+  "/settings": typeof SettingsRoute;
+  "/sitemap.xml": typeof SitemapDotxmlRoute;
+  "/(auth)/forgot-password": typeof authForgotPasswordRoute;
+  "/(auth)/reset-password": typeof authResetPasswordRoute;
+  "/(auth)/sign-in": typeof authSignInRoute;
+  "/(auth)/sign-up": typeof authSignUpRoute;
+  "/(auth)/verify-email": typeof authVerifyEmailRoute;
+  "/api/public": typeof ApiPublicRoute;
+  "/creations/$publicationId": typeof CreationsPublicationIdRoute;
+  "/editor/$projectId": typeof EditorProjectIdRoute;
+  "/sitemaps/$part": typeof SitemapsPartRoute;
+  "/editor/": typeof EditorIndexRoute;
+  "/gallery/": typeof GalleryIndexRoute;
+  "/api/auth/$": typeof ApiAuthSplatRoute;
+  "/gallery/user/$userId": typeof GalleryUserUserIdRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
+  fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
-    | '/'
-    | '/challenges'
-    | '/dashboard'
-    | '/projects'
-    | '/settings'
-    | '/forgot-password'
-    | '/reset-password'
-    | '/sign-in'
-    | '/sign-up'
-    | '/verify-email'
-    | '/creations/$publicationId'
-    | '/editor/$projectId'
-    | '/editor/'
-    | '/gallery/'
-    | '/api/auth/$'
-    | '/gallery/user/$userId'
-  fileRoutesByTo: FileRoutesByTo
+    | "/"
+    | "/challenges"
+    | "/dashboard"
+    | "/projects"
+    | "/robots.txt"
+    | "/settings"
+    | "/sitemap.xml"
+    | "/forgot-password"
+    | "/reset-password"
+    | "/sign-in"
+    | "/sign-up"
+    | "/verify-email"
+    | "/api/public"
+    | "/creations/$publicationId"
+    | "/editor/$projectId"
+    | "/sitemaps/$part"
+    | "/editor/"
+    | "/gallery/"
+    | "/api/auth/$"
+    | "/gallery/user/$userId";
+  fileRoutesByTo: FileRoutesByTo;
   to:
-    | '/'
-    | '/challenges'
-    | '/dashboard'
-    | '/projects'
-    | '/settings'
-    | '/forgot-password'
-    | '/reset-password'
-    | '/sign-in'
-    | '/sign-up'
-    | '/verify-email'
-    | '/creations/$publicationId'
-    | '/editor/$projectId'
-    | '/editor'
-    | '/gallery'
-    | '/api/auth/$'
-    | '/gallery/user/$userId'
+    | "/"
+    | "/challenges"
+    | "/dashboard"
+    | "/projects"
+    | "/robots.txt"
+    | "/settings"
+    | "/sitemap.xml"
+    | "/forgot-password"
+    | "/reset-password"
+    | "/sign-in"
+    | "/sign-up"
+    | "/verify-email"
+    | "/api/public"
+    | "/creations/$publicationId"
+    | "/editor/$projectId"
+    | "/sitemaps/$part"
+    | "/editor"
+    | "/gallery"
+    | "/api/auth/$"
+    | "/gallery/user/$userId";
   id:
-    | '__root__'
-    | '/'
-    | '/challenges'
-    | '/dashboard'
-    | '/projects'
-    | '/settings'
-    | '/(auth)/forgot-password'
-    | '/(auth)/reset-password'
-    | '/(auth)/sign-in'
-    | '/(auth)/sign-up'
-    | '/(auth)/verify-email'
-    | '/creations/$publicationId'
-    | '/editor/$projectId'
-    | '/editor/'
-    | '/gallery/'
-    | '/api/auth/$'
-    | '/gallery/user/$userId'
-  fileRoutesById: FileRoutesById
+    | "__root__"
+    | "/"
+    | "/challenges"
+    | "/dashboard"
+    | "/projects"
+    | "/robots.txt"
+    | "/settings"
+    | "/sitemap.xml"
+    | "/(auth)/forgot-password"
+    | "/(auth)/reset-password"
+    | "/(auth)/sign-in"
+    | "/(auth)/sign-up"
+    | "/(auth)/verify-email"
+    | "/api/public"
+    | "/creations/$publicationId"
+    | "/editor/$projectId"
+    | "/sitemaps/$part"
+    | "/editor/"
+    | "/gallery/"
+    | "/api/auth/$"
+    | "/gallery/user/$userId";
+  fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  ChallengesRoute: typeof ChallengesRoute
-  DashboardRoute: typeof DashboardRoute
-  ProjectsRoute: typeof ProjectsRoute
-  SettingsRoute: typeof SettingsRoute
-  authForgotPasswordRoute: typeof authForgotPasswordRoute
-  authResetPasswordRoute: typeof authResetPasswordRoute
-  authSignInRoute: typeof authSignInRoute
-  authSignUpRoute: typeof authSignUpRoute
-  authVerifyEmailRoute: typeof authVerifyEmailRoute
-  CreationsPublicationIdRoute: typeof CreationsPublicationIdRoute
-  EditorProjectIdRoute: typeof EditorProjectIdRoute
-  EditorIndexRoute: typeof EditorIndexRoute
-  GalleryIndexRoute: typeof GalleryIndexRoute
-  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
-  GalleryUserUserIdRoute: typeof GalleryUserUserIdRoute
+  IndexRoute: typeof IndexRoute;
+  ChallengesRoute: typeof ChallengesRoute;
+  DashboardRoute: typeof DashboardRoute;
+  ProjectsRoute: typeof ProjectsRoute;
+  RobotsDottxtRoute: typeof RobotsDottxtRoute;
+  SettingsRoute: typeof SettingsRoute;
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute;
+  authForgotPasswordRoute: typeof authForgotPasswordRoute;
+  authResetPasswordRoute: typeof authResetPasswordRoute;
+  authSignInRoute: typeof authSignInRoute;
+  authSignUpRoute: typeof authSignUpRoute;
+  authVerifyEmailRoute: typeof authVerifyEmailRoute;
+  ApiPublicRoute: typeof ApiPublicRoute;
+  CreationsPublicationIdRoute: typeof CreationsPublicationIdRoute;
+  EditorProjectIdRoute: typeof EditorProjectIdRoute;
+  SitemapsPartRoute: typeof SitemapsPartRoute;
+  EditorIndexRoute: typeof EditorIndexRoute;
+  GalleryIndexRoute: typeof GalleryIndexRoute;
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute;
+  GalleryUserUserIdRoute: typeof GalleryUserUserIdRoute;
 }
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/projects': {
-      id: '/projects'
-      path: '/projects'
-      fullPath: '/projects'
-      preLoaderRoute: typeof ProjectsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/challenges': {
-      id: '/challenges'
-      path: '/challenges'
-      fullPath: '/challenges'
-      preLoaderRoute: typeof ChallengesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/gallery/': {
-      id: '/gallery/'
-      path: '/gallery'
-      fullPath: '/gallery/'
-      preLoaderRoute: typeof GalleryIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/editor/': {
-      id: '/editor/'
-      path: '/editor'
-      fullPath: '/editor/'
-      preLoaderRoute: typeof EditorIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/editor/$projectId': {
-      id: '/editor/$projectId'
-      path: '/editor/$projectId'
-      fullPath: '/editor/$projectId'
-      preLoaderRoute: typeof EditorProjectIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/creations/$publicationId': {
-      id: '/creations/$publicationId'
-      path: '/creations/$publicationId'
-      fullPath: '/creations/$publicationId'
-      preLoaderRoute: typeof CreationsPublicationIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(auth)/verify-email': {
-      id: '/(auth)/verify-email'
-      path: '/verify-email'
-      fullPath: '/verify-email'
-      preLoaderRoute: typeof authVerifyEmailRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(auth)/sign-up': {
-      id: '/(auth)/sign-up'
-      path: '/sign-up'
-      fullPath: '/sign-up'
-      preLoaderRoute: typeof authSignUpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(auth)/sign-in': {
-      id: '/(auth)/sign-in'
-      path: '/sign-in'
-      fullPath: '/sign-in'
-      preLoaderRoute: typeof authSignInRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(auth)/reset-password': {
-      id: '/(auth)/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof authResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(auth)/forgot-password': {
-      id: '/(auth)/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof authForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/gallery/user/$userId': {
-      id: '/gallery/user/$userId'
-      path: '/gallery/user/$userId'
-      fullPath: '/gallery/user/$userId'
-      preLoaderRoute: typeof GalleryUserUserIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/$': {
-      id: '/api/auth/$'
-      path: '/api/auth/$'
-      fullPath: '/api/auth/$'
-      preLoaderRoute: typeof ApiAuthSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+    "/sitemap.xml": {
+      id: "/sitemap.xml";
+      path: "/sitemap.xml";
+      fullPath: "/sitemap.xml";
+      preLoaderRoute: typeof SitemapDotxmlRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/settings": {
+      id: "/settings";
+      path: "/settings";
+      fullPath: "/settings";
+      preLoaderRoute: typeof SettingsRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/robots.txt": {
+      id: "/robots.txt";
+      path: "/robots.txt";
+      fullPath: "/robots.txt";
+      preLoaderRoute: typeof RobotsDottxtRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/projects": {
+      id: "/projects";
+      path: "/projects";
+      fullPath: "/projects";
+      preLoaderRoute: typeof ProjectsRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/dashboard": {
+      id: "/dashboard";
+      path: "/dashboard";
+      fullPath: "/dashboard";
+      preLoaderRoute: typeof DashboardRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/challenges": {
+      id: "/challenges";
+      path: "/challenges";
+      fullPath: "/challenges";
+      preLoaderRoute: typeof ChallengesRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/": {
+      id: "/";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/gallery/": {
+      id: "/gallery/";
+      path: "/gallery";
+      fullPath: "/gallery/";
+      preLoaderRoute: typeof GalleryIndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/editor/": {
+      id: "/editor/";
+      path: "/editor";
+      fullPath: "/editor/";
+      preLoaderRoute: typeof EditorIndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/sitemaps/$part": {
+      id: "/sitemaps/$part";
+      path: "/sitemaps/$part";
+      fullPath: "/sitemaps/$part";
+      preLoaderRoute: typeof SitemapsPartRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/editor/$projectId": {
+      id: "/editor/$projectId";
+      path: "/editor/$projectId";
+      fullPath: "/editor/$projectId";
+      preLoaderRoute: typeof EditorProjectIdRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/creations/$publicationId": {
+      id: "/creations/$publicationId";
+      path: "/creations/$publicationId";
+      fullPath: "/creations/$publicationId";
+      preLoaderRoute: typeof CreationsPublicationIdRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/api/public": {
+      id: "/api/public";
+      path: "/api/public";
+      fullPath: "/api/public";
+      preLoaderRoute: typeof ApiPublicRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/(auth)/verify-email": {
+      id: "/(auth)/verify-email";
+      path: "/verify-email";
+      fullPath: "/verify-email";
+      preLoaderRoute: typeof authVerifyEmailRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/(auth)/sign-up": {
+      id: "/(auth)/sign-up";
+      path: "/sign-up";
+      fullPath: "/sign-up";
+      preLoaderRoute: typeof authSignUpRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/(auth)/sign-in": {
+      id: "/(auth)/sign-in";
+      path: "/sign-in";
+      fullPath: "/sign-in";
+      preLoaderRoute: typeof authSignInRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/(auth)/reset-password": {
+      id: "/(auth)/reset-password";
+      path: "/reset-password";
+      fullPath: "/reset-password";
+      preLoaderRoute: typeof authResetPasswordRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/(auth)/forgot-password": {
+      id: "/(auth)/forgot-password";
+      path: "/forgot-password";
+      fullPath: "/forgot-password";
+      preLoaderRoute: typeof authForgotPasswordRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/gallery/user/$userId": {
+      id: "/gallery/user/$userId";
+      path: "/gallery/user/$userId";
+      fullPath: "/gallery/user/$userId";
+      preLoaderRoute: typeof GalleryUserUserIdRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/api/auth/$": {
+      id: "/api/auth/$";
+      path: "/api/auth/$";
+      fullPath: "/api/auth/$";
+      preLoaderRoute: typeof ApiAuthSplatRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
   }
 }
 
@@ -360,28 +440,32 @@ const rootRouteChildren: RootRouteChildren = {
   ChallengesRoute: ChallengesRoute,
   DashboardRoute: DashboardRoute,
   ProjectsRoute: ProjectsRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
   SettingsRoute: SettingsRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   authForgotPasswordRoute: authForgotPasswordRoute,
   authResetPasswordRoute: authResetPasswordRoute,
   authSignInRoute: authSignInRoute,
   authSignUpRoute: authSignUpRoute,
   authVerifyEmailRoute: authVerifyEmailRoute,
+  ApiPublicRoute: ApiPublicRoute,
   CreationsPublicationIdRoute: CreationsPublicationIdRoute,
   EditorProjectIdRoute: EditorProjectIdRoute,
+  SitemapsPartRoute: SitemapsPartRoute,
   EditorIndexRoute: EditorIndexRoute,
   GalleryIndexRoute: GalleryIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   GalleryUserUserIdRoute: GalleryUserUserIdRoute,
-}
+};
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+  ._addFileTypes<FileRouteTypes>();
 
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
+import type { getRouter } from "./router.tsx";
+import type { createStart } from "@tanstack/react-start";
+declare module "@tanstack/react-start" {
   interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
+    ssr: true;
+    router: Awaited<ReturnType<typeof getRouter>>;
   }
 }

@@ -1,3 +1,4 @@
+import { publicHttpFixture } from "./public-http";
 import type { Page } from "@playwright/test";
 import { emptyScene, makePart, type ProjectImport } from "@clik/scene";
 
@@ -86,6 +87,56 @@ export async function projectsFixture(
   await page.route("**/api/auth/convex/token*", (route) =>
     route.fulfill({ json: { token } }),
   );
+  const query = (path: string, args: any) => {
+    if (path === "auth:getCurrentUser") return user;
+    if (path === "projects:sourcesAvailable")
+      return args.ids.map((id: string) => ({ id, available: true }));
+    if (path === "projects:get") {
+      const target =
+        args.id === "project"
+          ? project
+          : args.id === "closed-challenge"
+            ? {
+                ...project,
+                _id: "closed-challenge",
+                title: "Un ancien défi",
+                challenge: { day: "2020-01-01", closesAt: 1 },
+              }
+            : [...imported.values()].find((p) => p._id === args.id);
+      return target
+        ? { ...target, owner: user._id, serverNow: Date.now() }
+        : null;
+    }
+    if (path === "projects:list") {
+      const rows = [
+        ...privateProjects,
+        ...imported.values(),
+        project,
+        {
+          ...project,
+          _id: "closed-challenge",
+          title: "Un ancien défi",
+          publicationId: null,
+          challenge: { day: "2020-01-01", closesAt: 1 },
+        },
+      ]
+        .filter((p) => !deleted.has(p._id))
+        .sort((a, b) =>
+          args.sort === "oldest"
+            ? a.updatedAt - b.updatedAt
+            : b.updatedAt - a.updatedAt,
+        );
+      const start = Number(args.paginationOpts.cursor ?? 0);
+      const end = start + Math.min(12, args.paginationOpts.numItems);
+      return {
+        page: rows.slice(start, end),
+        isDone: end >= rows.length,
+        continueCursor: end >= rows.length ? "" : String(end),
+      };
+    }
+    return null;
+  };
+  await publicHttpFixture(query);
   await page.routeWebSocket(/\/api\/.*\/sync/, (ws) => {
     let seq = 0;
     const ts = () => {
@@ -95,55 +146,6 @@ export async function projectsFixture(
     };
     let version = { querySet: 0, identity: 0, ts: ts() };
     const queries = new Map<number, { udfPath: string; args: any[] }>();
-    const query = (path: string, args: any) => {
-      if (path === "auth:getCurrentUser") return user;
-      if (path === "projects:sourcesAvailable")
-        return args.ids.map((id: string) => ({ id, available: true }));
-      if (path === "projects:get") {
-        const target =
-          args.id === "project"
-            ? project
-            : args.id === "closed-challenge"
-              ? {
-                  ...project,
-                  _id: "closed-challenge",
-                  title: "Un ancien défi",
-                  challenge: { day: "2020-01-01", closesAt: 1 },
-                }
-              : [...imported.values()].find((p) => p._id === args.id);
-        return target
-          ? { ...target, owner: user._id, serverNow: Date.now() }
-          : null;
-      }
-      if (path === "projects:list") {
-        const rows = [
-          ...privateProjects,
-          ...imported.values(),
-          project,
-          {
-            ...project,
-            _id: "closed-challenge",
-            title: "Un ancien défi",
-            publicationId: null,
-            challenge: { day: "2020-01-01", closesAt: 1 },
-          },
-        ]
-          .filter((p) => !deleted.has(p._id))
-          .sort((a, b) =>
-            args.sort === "oldest"
-              ? a.updatedAt - b.updatedAt
-              : b.updatedAt - a.updatedAt,
-          );
-        const start = Number(args.paginationOpts.cursor ?? 0);
-        const end = start + Math.min(12, args.paginationOpts.numItems);
-        return {
-          page: rows.slice(start, end),
-          isDone: end >= rows.length,
-          continueCursor: end >= rows.length ? "" : String(end),
-        };
-      }
-      return null;
-    };
     const transition = (next = version) => {
       seq++;
       const endVersion = { ...next, ts: ts() };
