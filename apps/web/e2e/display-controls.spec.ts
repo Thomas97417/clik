@@ -34,6 +34,61 @@ async function pixels(page: Page) {
     });
 }
 
+test("l’éclairage uniforme éclaire les côtés et restaure la lumière orientable sans modifier la construction", async ({
+  page,
+}, info) => {
+  await page.goto("/editor");
+  const toggle = page.getByRole("button", {
+    name: "Éclairage uniforme",
+    exact: true,
+  });
+  const slider = page.getByRole("slider", { name: "Angle de l’éclairage" });
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  await expect(slider).toBeEnabled();
+  await page.getByRole("button", { name: "Brique 2 × 2", exact: true }).click();
+  await page.getByRole("button", { name: "Rouge", exact: true }).click();
+  await page.getByRole("button", { name: "Grille", exact: true }).click();
+  await selectCameraView(page, "front");
+  await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
+  await slider.fill("180");
+  await expect.poll(async () => (await pixels(page)).red).toBeGreaterThan(100);
+  // Wait for camera damping before comparing the same face across lighting modes.
+  await page.waitForTimeout(500);
+  const directional = (await pixels(page)).brightness;
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-pressed", "true");
+  await expect(slider).toBeDisabled();
+  await expect
+    .poll(async () => (await pixels(page)).brightness - directional)
+    .toBeGreaterThan(5);
+  const uniform = (await pixels(page)).brightness;
+  await selectCameraView(page, "right");
+  await expect
+    .poll(async () => Math.abs((await pixels(page)).brightness - uniform))
+    .toBeLessThan(8);
+  await selectCameraView(page, "perspective");
+  await page.screenshot({
+    path: `/tmp/clik-uniform-lighting-${info.project.name}.png`,
+  });
+  await selectCameraView(page, "front");
+  await toggle.focus();
+  await toggle.press("Space");
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  await expect(slider).toBeEnabled();
+  await expect(slider).toHaveValue("180");
+  await expect
+    .poll(async () => Math.abs((await pixels(page)).brightness - directional))
+    .toBeLessThan(2);
+  for (const axis of ["X", "Y", "Z"])
+    await expect(
+      page.getByLabel(`position ${axis}`, { exact: true }),
+    ).toHaveValue("0");
+  await page
+    .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
+    .click();
+  await expect.poll(async () => (await pixels(page)).red).toBe(0);
+});
+
 test("masquer la grille conserve l’aimantation et l’historique des pièces", async ({
   page,
 }) => {

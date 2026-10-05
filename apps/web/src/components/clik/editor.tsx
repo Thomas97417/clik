@@ -1186,16 +1186,40 @@ export default function Editor({
                     ))}
                   </SelectContent>
                 </Select>
-                <label className="scene-light-control">
-                  <span className="scene-light-icon" aria-hidden="true">
-                    <Sun size={15} />
-                  </span>
-                  <span>Éclairage</span>
+                <div
+                  className="scene-light-control"
+                  role="group"
+                  aria-label="Éclairage"
+                >
+                  <button
+                    type="button"
+                    className="scene-light-icon"
+                    aria-label="Éclairage uniforme"
+                    aria-pressed={s.uniformLighting}
+                    title={
+                      s.uniformLighting
+                        ? "Revenir à la lumière orientable"
+                        : "Éclairer les pièces de tous les côtés"
+                    }
+                    onClick={() =>
+                      useEditor.setState({
+                        uniformLighting: !s.uniformLighting,
+                      })
+                    }
+                  >
+                    <Sun size={15} aria-hidden="true" />
+                  </button>
+                  <span>{s.uniformLighting ? "Uniforme" : "Éclairage"}</span>
                   <input
                     type="range"
                     aria-label="Angle de l’éclairage"
                     aria-valuetext={`${s.lightAngle} degrés`}
-                    title="Tourner la lumière autour de la construction"
+                    title={
+                      s.uniformLighting
+                        ? "Réactivez la lumière orientable pour régler son angle"
+                        : "Tourner la lumière autour de la construction"
+                    }
+                    disabled={s.uniformLighting}
                     min={0}
                     max={360}
                     step={5}
@@ -1210,9 +1234,9 @@ export default function Editor({
                     }
                   />
                   <output className="scene-light-angle" aria-hidden="true">
-                    {s.lightAngle}°
+                    {s.uniformLighting ? "—" : `${s.lightAngle}°`}
                   </output>
-                </label>
+                </div>
               </div>
             </div>
           </section>

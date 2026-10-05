@@ -2030,9 +2030,32 @@ button:focus-visible {
   place-items: center;
   width: 26px;
   height: 26px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 1px solid transparent;
   border-radius: 6px;
   background: #fff4df;
   color: #aa7523;
+  cursor: pointer;
+  transition:
+    background 150ms,
+    border-color 150ms;
+}
+.scene-light-icon:hover {
+  background: #ffe8ba;
+}
+.scene-light-icon[aria-pressed="true"] {
+  background: #ffdf9b;
+  border-color: #cc9238;
+  color: #80530d;
+}
+.scene-light-icon:focus-visible {
+  outline: 2px solid #356ae6;
+  outline-offset: 3px;
+}
+.scene-light-control input:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 .scene-light-control input {
   appearance: none;

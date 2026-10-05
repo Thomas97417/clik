@@ -214,6 +214,7 @@ function Stage({
   const [resetView, setResetView] = useState(0);
   // Rotate the original light around Y, keeping its elevation and intensity.
   const lightAngle = ((editable ? s.lightAngle : 0) * Math.PI) / 180;
+  const uniformLighting = editable && s.uniformLighting;
   const [library, setLibrary] = useState<{
     preview: SelectionPreview | null;
     free: Part | null;
@@ -337,32 +338,48 @@ function Stage({
   return (
     <>
       <color attach="background" args={["#edf1f7"]} />
-      <ambientLight intensity={1.6} />
-      <directionalLight
-        position={[
-          10 * Math.cos(lightAngle) - 8 * Math.sin(lightAngle),
-          16,
-          10 * Math.sin(lightAngle) + 8 * Math.cos(lightAngle),
-        ]}
-        intensity={2.3}
-        castShadow
-        shadow-mapSize={[2048, 2048]}
-        shadow-camera-left={-25}
-        shadow-camera-right={25}
-        shadow-camera-top={25}
-        shadow-camera-bottom={-25}
-        shadow-bias={-0.0005}
-      />
+      {/* Fill shadowed faces from every direction while keeping the key light's relief. */}
+      <ambientLight intensity={editable ? 2.6 : 1.6} />
+      {uniformLighting ? (
+        // Shadow-free fill on all six sides, including underneath. Slightly
+        // different strengths per axis keep edges and curved studs readable.
+        <>
+          <directionalLight position={[10, 0, 0]} intensity={0.45} />
+          <directionalLight position={[-10, 0, 0]} intensity={0.45} />
+          <directionalLight position={[0, 10, 0]} intensity={1.2} />
+          <directionalLight position={[0, -10, 0]} intensity={1.2} />
+          <directionalLight position={[0, 0, 10]} intensity={0.75} />
+          <directionalLight position={[0, 0, -10]} intensity={0.75} />
+        </>
+      ) : (
+        <directionalLight
+          position={[
+            10 * Math.cos(lightAngle) - 8 * Math.sin(lightAngle),
+            16,
+            10 * Math.sin(lightAngle) + 8 * Math.cos(lightAngle),
+          ]}
+          intensity={2.3}
+          castShadow
+          shadow-mapSize={[2048, 2048]}
+          shadow-camera-left={-25}
+          shadow-camera-right={25}
+          shadow-camera-top={25}
+          shadow-camera-bottom={-25}
+          shadow-bias={-0.0005}
+        />
+      )}
       {(editable ? s.showGrid : showGrid) && <GroundGrid step={gridStep} />}
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -0.035, 0]}
-        renderOrder={-1}
-        receiveShadow
-      >
-        <planeGeometry args={[200, 200]} />
-        <shadowMaterial opacity={0.13} depthWrite={false} />
-      </mesh>
+      {!uniformLighting && (
+        <mesh
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[0, -0.035, 0]}
+          renderOrder={-1}
+          receiveShadow
+        >
+          <planeGeometry args={[200, 200]} />
+          <shadowMaterial opacity={0.13} depthWrite={false} />
+        </mesh>
+      )}
       {(Object.keys(CATALOG) as PartType[]).map((type) => (
         <Batch key={type} type={type} scene={scene} editable={editable} />
       ))}
