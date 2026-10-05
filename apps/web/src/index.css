@@ -2015,124 +2015,140 @@ button:focus-visible {
   display: flex;
   align-items: center;
   height: 38px;
-  gap: 8px;
-  padding: 0 8px 0 6px;
+  gap: 10px;
+  padding: 3px 8px 3px 3px;
   border: 1px solid #dce5f0;
   border-radius: 8px;
   background: #fffffff0;
   color: #64758d;
   box-shadow: 0 2px 8px #53668108;
-  font-size: 11px;
   white-space: nowrap;
 }
 .scene-light-icon {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 30px;
   flex-shrink: 0;
-  padding: 0;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  background: #fff4df;
-  color: #aa7523;
+  padding: 0 10px;
+  border: 1px solid #dce6fc;
+  border-radius: 5px;
+  background: #edf2ff;
+  color: #356ae6;
+  font-size: 11px;
+  font-weight: 600;
   cursor: pointer;
   transition:
     background 150ms,
+    color 150ms,
     border-color 150ms;
 }
 .scene-light-icon:hover {
-  background: #ffe8ba;
+  background: #dfe9ff;
+  border-color: #b8ccfc;
 }
 .scene-light-icon[aria-pressed="true"] {
-  background: #ffdf9b;
-  border-color: #cc9238;
-  color: #80530d;
+  background: #356ae6;
+  border-color: #356ae6;
+  color: #fff;
+}
+.scene-light-icon[aria-pressed="true"]:hover {
+  background: #2858c9;
+  border-color: #2858c9;
 }
 .scene-light-icon:focus-visible {
   outline: 2px solid #356ae6;
   outline-offset: 3px;
 }
-.scene-light-control input:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
+.scene-light-direction {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-left: 10px;
+  border-left: 1px solid #e6ebf3;
 }
 .scene-light-control input {
   appearance: none;
   -webkit-appearance: none;
-  width: 108px;
-  height: 24px;
+  width: 92px;
+  height: 26px;
   margin: 0;
   padding: 0;
-  background: transparent;
-  cursor: pointer;
+  border: 0;
+  border-radius: 0;
+  /* Small graduations mark the light's rotation, rather than a volume level. */
+  background: repeating-linear-gradient(
+    to right,
+    #cad4e3 0 1px,
+    transparent 1px 25%
+  );
+  background-size: calc(100% - 1px) 3px;
+  background-repeat: no-repeat;
+  background-position: center bottom 2px;
+  cursor: ew-resize;
 }
 .scene-light-control input::-webkit-slider-runnable-track {
-  height: 4px;
-  border-radius: 999px;
+  height: 2px;
+  border-radius: 1px;
   background: linear-gradient(
     to right,
-    #d5a251 0%,
-    #d5a251 var(--light-progress),
-    #dfe6f0 var(--light-progress),
-    #dfe6f0 100%
+    #356ae6 var(--light-progress),
+    #dce3ef var(--light-progress)
   );
 }
 .scene-light-control input::-moz-range-track {
-  height: 4px;
-  border-radius: 999px;
-  background: #dfe6f0;
+  height: 2px;
+  border-radius: 1px;
+  background: #dce3ef;
 }
 .scene-light-control input::-moz-range-progress {
-  height: 4px;
-  border-radius: 999px;
-  background: #d5a251;
+  height: 2px;
+  background: #356ae6;
 }
 .scene-light-control input::-webkit-slider-thumb {
   appearance: none;
   -webkit-appearance: none;
   box-sizing: border-box;
-  width: 14px;
+  width: 9px;
   height: 14px;
-  margin-top: -5px;
-  border: 2px solid #cc9238;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 3px #81582525;
+  margin-top: -6px;
+  border: 2px solid #fff;
+  border-radius: 3px;
+  background: #356ae6;
+  box-shadow: 0 0 0 1px #b9cbed;
 }
 .scene-light-control input::-moz-range-thumb {
   box-sizing: border-box;
-  width: 14px;
+  width: 9px;
   height: 14px;
-  border: 2px solid #cc9238;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 3px #81582525;
+  border: 2px solid #fff;
+  border-radius: 3px;
+  background: #356ae6;
+  box-shadow: 0 0 0 1px #b9cbed;
 }
-.scene-light-control input:hover::-webkit-slider-thumb,
-.scene-light-control input:active::-webkit-slider-thumb {
-  background: #fff8e9;
-  box-shadow: 0 0 0 3px #d5a25120;
+.scene-light-control input:enabled:hover::-webkit-slider-thumb {
+  box-shadow: 0 0 0 1px #356ae6;
 }
-.scene-light-control input:hover::-moz-range-thumb,
-.scene-light-control input:active::-moz-range-thumb {
-  background: #fff8e9;
-  box-shadow: 0 0 0 3px #d5a25120;
+.scene-light-control input:enabled:hover::-moz-range-thumb {
+  box-shadow: 0 0 0 1px #356ae6;
 }
 .scene-light-control input:focus-visible {
   outline: 2px solid #356ae6;
   outline-offset: 3px;
-  border-radius: 6px;
+  border-radius: 3px;
+}
+.scene-light-direction[data-disabled="true"] {
+  opacity: 0.35;
+}
+.scene-light-control input:disabled {
+  cursor: not-allowed;
 }
 .scene-light-angle {
-  min-width: 36px;
-  padding: 2px 4px;
-  border: 1px solid #e8eef6;
-  border-radius: 5px;
-  background: #f3f6fa;
-  color: #65758d;
+  min-width: 31px;
+  color: #64758d;
   font-size: 10px;
-  text-align: center;
+  text-align: right;
   font-variant-numeric: tabular-nums;
 }
 .view-select .scene-view-trigger {

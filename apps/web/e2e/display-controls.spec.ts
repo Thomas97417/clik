@@ -39,7 +39,7 @@ test("l’éclairage uniforme éclaire les côtés et restaure la lumière orien
 }, info) => {
   await page.goto("/editor");
   const toggle = page.getByRole("button", {
-    name: "Éclairage uniforme",
+    name: "Tout éclairer",
     exact: true,
   });
   const slider = page.getByRole("slider", { name: "Angle de l’éclairage" });

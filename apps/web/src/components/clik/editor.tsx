@@ -1194,7 +1194,7 @@ export default function Editor({
                   <button
                     type="button"
                     className="scene-light-icon"
-                    aria-label="Éclairage uniforme"
+                    aria-label="Tout éclairer"
                     aria-pressed={s.uniformLighting}
                     title={
                       s.uniformLighting
@@ -1207,35 +1207,42 @@ export default function Editor({
                       })
                     }
                   >
-                    <Sun size={15} aria-hidden="true" />
+                    <Sun size={16} aria-hidden="true" />
+                    <span>Tout éclairer</span>
                   </button>
-                  <span>{s.uniformLighting ? "Uniforme" : "Éclairage"}</span>
-                  <input
-                    type="range"
-                    aria-label="Angle de l’éclairage"
-                    aria-valuetext={`${s.lightAngle} degrés`}
-                    title={
-                      s.uniformLighting
-                        ? "Réactivez la lumière orientable pour régler son angle"
-                        : "Tourner la lumière autour de la construction"
-                    }
-                    disabled={s.uniformLighting}
-                    min={0}
-                    max={360}
-                    step={5}
-                    value={s.lightAngle}
-                    style={
-                      {
-                        "--light-progress": `${(s.lightAngle / 360) * 100}%`,
-                      } as CSSProperties
-                    }
-                    onChange={(e) =>
-                      useEditor.setState({ lightAngle: Number(e.target.value) })
-                    }
-                  />
-                  <output className="scene-light-angle" aria-hidden="true">
-                    {s.uniformLighting ? "—" : `${s.lightAngle}°`}
-                  </output>
+                  <div
+                    className="scene-light-direction"
+                    data-disabled={s.uniformLighting}
+                  >
+                    <input
+                      type="range"
+                      aria-label="Angle de l’éclairage"
+                      aria-valuetext={`${s.lightAngle} degrés`}
+                      title={
+                        s.uniformLighting
+                          ? "Réactivez la lumière orientable pour régler son angle"
+                          : "Tourner la lumière autour de la construction"
+                      }
+                      disabled={s.uniformLighting}
+                      min={0}
+                      max={360}
+                      step={5}
+                      value={s.lightAngle}
+                      style={
+                        {
+                          "--light-progress": `${(s.lightAngle / 360) * 100}%`,
+                        } as CSSProperties
+                      }
+                      onChange={(e) =>
+                        useEditor.setState({
+                          lightAngle: Number(e.target.value),
+                        })
+                      }
+                    />
+                    <output className="scene-light-angle" aria-hidden="true">
+                      {s.uniformLighting ? "—" : `${s.lightAngle}°`}
+                    </output>
+                  </div>
                 </div>
               </div>
             </div>
