@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useConvex, useMutation } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
@@ -12,10 +12,12 @@ import {
 import {
   Cloud,
   HardDrive,
-  Layers,
   LoaderCircle,
   Plus,
   Check,
+  Search,
+  X,
+  ArrowDownToLine,
 } from "lucide-react";
 import {
   Dialog,
@@ -38,6 +40,11 @@ type Choice = {
   location: "local" | "online";
   updatedAt?: number;
 };
+const locationFilters = [
+  { value: "all", label: "Toutes" },
+  { value: "local", label: "Sur cet appareil" },
+  { value: "online", label: "En ligne" },
+] as const;
 export default function ImportProjectDialog({
   projectId,
   draftId,
@@ -62,6 +69,8 @@ export default function ImportProjectDialog({
   const [localError, setLocalError] = useState(false);
   const [retry, setRetry] = useState(0);
   const [selected, setSelected] = useState<Choice>();
+  const [search, setSearch] = useState("");
+  const [location, setLocation] = useState<"all" | Choice["location"]>("all");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const mounted = useRef(true);
@@ -112,6 +121,7 @@ export default function ImportProjectDialog({
   useEffect(() => {
     if (authenticated) void loadRemote(null);
     else {
+      setLocation("all");
       remoteRequest.current++;
       setRemote([]);
       setRemoteLoading(false);
@@ -144,21 +154,56 @@ export default function ImportProjectDialog({
       ? `guest:${draftId}`
       : "guest"
     : undefined;
-  const choices: Choice[] = [
-    ...remote.filter((p) => p.id !== projectId),
-    ...local
-      .filter((p) => p.key !== currentKey)
-      .map((p) => ({
-        id: p.key,
-        title: p.title,
-        scene: p.scene,
-        location: "local" as const,
-        updatedAt: p.updatedAt,
-        cacheKey: `local:${p.key}:${p.stamp}`,
-      })),
-  ].sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
+  const choices = useMemo(
+    () =>
+      [
+        ...remote.filter((p) => p.id !== projectId),
+        ...local
+          .filter((p) => p.key !== currentKey)
+          .map((p) => ({
+            id: p.key,
+            title: p.title,
+            scene: p.scene,
+            location: "local" as const,
+            updatedAt: p.updatedAt,
+            cacheKey: `local:${p.key}:${p.stamp}`,
+          })),
+      ]
+        .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))
+        .map((choice) => {
+          try {
+            const scene = validateScene(
+              typeof choice.scene === "string"
+                ? JSON.parse(choice.scene)
+                : choice.scene,
+            );
+            return {
+              ...choice,
+              partCount: scene.nodes.filter((node) => node.kind === "part")
+                .length,
+              invalid: false,
+            };
+          } catch {
+            return { ...choice, partCount: 0, invalid: true };
+          }
+        }),
+    [remote, local, projectId, currentKey],
+  );
+  const normalize = (value: string) =>
+    value
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLocaleLowerCase("fr");
+  const query = normalize(search.trim());
+  const visibleChoices = choices.filter(
+    (choice) =>
+      (location === "all" || choice.location === location) &&
+      normalize(choice.title).includes(query),
+  );
+  const selection = choices.find((choice) => choice.id === selected?.id);
+  const isLoading = loading || remoteLoading;
   const doImport = async () => {
-    if (!selected || busy) return;
+    if (!selected || !selection?.partCount || busy) return;
     setBusy(true);
     setError("");
     const destination = useEditor.getState().scene;
@@ -223,130 +268,226 @@ export default function ImportProjectDialog({
     >
       <DialogContent className="project-import-dialog" showCloseButton={!busy}>
         <DialogHeader>
-          <span className="project-import-symbol" aria-hidden="true">
-            <Layers size={24} />
-          </span>
-          <DialogTitle>Une création dans votre construction</DialogTitle>
+          <DialogTitle>Importer une création</DialogTitle>
           <DialogDescription>
-            Choisissez un projet. Une copie rejoint la scène dans son propre
-            groupe, avec ses sources.
+            Retrouvez vos projets et assemblez-les ici. La copie sera placée
+            dans un nouveau groupe, à un emplacement libre.
           </DialogDescription>
         </DialogHeader>
-        {localError && (
-          <div className="project-import-error" role="alert">
-            Les projets de cet appareil n’ont pas pu être chargés.{" "}
-            <button onClick={() => setRetry((n) => n + 1)}>Réessayer</button>
-          </div>
-        )}
-        {remoteError && (
-          <div className="project-import-error" role="alert">
-            {remoteError}{" "}
-            <button
-              disabled={remoteLoading}
-              onClick={() => void loadRemote(cursor)}
+        <div className="project-import-browser">
+          <div className="project-import-tools">
+            <label className="project-import-search">
+              <Search size={16} aria-hidden="true" />
+              <input
+                type="search"
+                aria-label="Rechercher parmi les projets chargés"
+                placeholder="Rechercher une création…"
+                value={search}
+                disabled={busy}
+                onChange={(event) => setSearch(event.target.value)}
+              />
+              {search && (
+                <button
+                  type="button"
+                  aria-label="Effacer la recherche"
+                  disabled={busy}
+                  onClick={() => setSearch("")}
+                >
+                  <X size={14} aria-hidden="true" />
+                </button>
+              )}
+            </label>
+            <div
+              className="project-import-filters"
+              role="group"
+              aria-label="Emplacement des projets"
             >
-              Réessayer
-            </button>
+              {locationFilters
+                .filter((filter) => authenticated || filter.value !== "online")
+                .map((filter) => (
+                  <button
+                    key={filter.value}
+                    type="button"
+                    aria-pressed={location === filter.value}
+                    disabled={busy}
+                    onClick={() => setLocation(filter.value)}
+                  >
+                    {filter.label}
+                  </button>
+                ))}
+            </div>
           </div>
-        )}
-        <div
-          className="project-import-list"
-          aria-label="Projets à importer"
-          aria-busy={loading || remoteLoading}
-        >
-          {choices.map((choice) => {
-            let partCount = 0;
-            try {
-              partCount = validateScene(
-                typeof choice.scene === "string"
-                  ? JSON.parse(choice.scene)
-                  : choice.scene,
-              ).nodes.filter((n) => n.kind === "part").length;
-            } catch {
-              /* Corrupt local projects cannot be imported. */
-            }
-            const checked = selected?.id === choice.id;
-            return (
+          {localError && (
+            <div className="project-import-error" role="alert">
+              Les projets de cet appareil n’ont pas pu être chargés.{" "}
               <button
-                key={choice.id}
-                type="button"
-                className="project-import-choice"
-                disabled={busy || !partCount}
-                aria-pressed={checked}
-                aria-label={`Choisir ${choice.title}${!partCount ? " — sans pièces" : ""}`}
-                onClick={() => {
-                  setSelected(choice);
-                  setError("");
-                }}
+                disabled={busy || loading}
+                onClick={() => setRetry((n) => n + 1)}
               >
-                <div className="project-import-thumbnail">
-                  <CreationPreview
-                    scene={choice.scene}
-                    cacheKey={choice.cacheKey}
-                    title={choice.title}
-                  />
-                </div>
-                <span className="project-import-copy">
-                  <strong>{choice.title}</strong>
-                  <small>
-                    {choice.location === "online" ? (
-                      <Cloud size={13} />
-                    ) : (
-                      <HardDrive size={13} />
-                    )}
-                    {choice.location === "online"
-                      ? "En ligne"
-                      : "Sur cet appareil"}{" "}
-                    · {partCount} pièce{partCount === 1 ? "" : "s"}
-                  </small>
-                </span>
-                <span className="project-import-check" aria-hidden="true">
-                  {checked && <Check size={16} />}
-                </span>
+                Réessayer
               </button>
-            );
-          })}
-          {(loading || remoteLoading) && (
-            <p role="status">Chargement de vos projets…</p>
+            </div>
           )}
-          {!loading &&
-            !remoteLoading &&
-            !remoteError &&
-            !localError &&
-            !choices.length && (
-              <p>
-                Vos autres projets apparaîtront ici. Créez-en un dans « Mes
-                créations » pour l’importer.
+          {remoteError && (
+            <div className="project-import-error" role="alert">
+              {remoteError}{" "}
+              <button
+                disabled={busy || remoteLoading}
+                onClick={() => void loadRemote(cursor)}
+              >
+                Réessayer
+              </button>
+            </div>
+          )}
+          <div className="project-import-results">
+            <span role="status">
+              {visibleChoices.length} création
+              {visibleChoices.length === 1 ? "" : "s"}
+            </span>
+            {authenticated && !done && location !== "local" && (
+              <span>Parmi les projets chargés</span>
+            )}
+          </div>
+          <div
+            className="project-import-scroll"
+            aria-label="Projets à importer"
+            aria-busy={isLoading}
+          >
+            <div className="project-import-list">
+              {visibleChoices.map((choice) => {
+                const checked = selected?.id === choice.id;
+                return (
+                  <button
+                    key={choice.id}
+                    type="button"
+                    className="project-import-choice"
+                    disabled={busy || !choice.partCount}
+                    aria-pressed={checked}
+                    aria-label={`Choisir ${choice.title}${choice.invalid ? " — indisponible" : !choice.partCount ? " — sans pièces" : ""}`}
+                    onClick={() => {
+                      setSelected(choice);
+                      setError("");
+                    }}
+                  >
+                    <div className="project-import-thumbnail">
+                      <CreationPreview
+                        scene={choice.scene}
+                        cacheKey={choice.cacheKey}
+                        title={choice.title}
+                      />
+                      <span className="project-import-check" aria-hidden="true">
+                        {checked && <Check size={14} />}
+                      </span>
+                    </div>
+                    <span className="project-import-copy">
+                      <strong title={choice.title}>{choice.title}</strong>
+                      <span className="project-import-meta">
+                        <span>
+                          {choice.location === "online" ? (
+                            <Cloud size={12} aria-hidden="true" />
+                          ) : (
+                            <HardDrive size={12} aria-hidden="true" />
+                          )}
+                          {choice.location === "online"
+                            ? "En ligne"
+                            : "Sur cet appareil"}
+                        </span>
+                        <span>
+                          {choice.invalid
+                            ? "Indisponible"
+                            : `${choice.partCount} pièce${choice.partCount === 1 ? "" : "s"}`}
+                        </span>
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            {isLoading && (
+              <p className="project-import-loading" role="status">
+                <LoaderCircle
+                  size={16}
+                  className="animate-spin"
+                  aria-hidden="true"
+                />
+                Chargement de vos projets…
               </p>
             )}
-          {authenticated && !done && !remoteError && (
-            <Button
-              variant="outline"
-              disabled={busy || remoteLoading}
-              onClick={() => void loadRemote(cursor)}
-            >
-              <Plus size={15} />
-              Voir plus de projets
-            </Button>
-          )}
-        </div>
-        {error && (
-          <p className="project-import-error" role="alert">
-            {error}
-          </p>
-        )}
-        <DialogFooter>
-          <Button variant="outline" disabled={busy} onClick={onClose}>
-            Annuler
-          </Button>
-          <Button disabled={!selected || busy} onClick={() => void doImport()}>
-            {busy ? (
-              <LoaderCircle className="animate-spin" size={16} />
-            ) : (
-              <Plus size={16} />
+            {!isLoading && !visibleChoices.length && (
+              <div className="project-import-empty">
+                <strong>
+                  {choices.length
+                    ? "Aucune création trouvée"
+                    : "Pas encore d’autre création"}
+                </strong>
+                <p>
+                  {choices.length
+                    ? "Essayez un autre nom ou un autre emplacement."
+                    : localError || remoteError
+                      ? "Réessayez de charger vos projets pour les retrouver ici."
+                      : "Vos autres créations apparaîtront ici, prêtes à rejoindre votre construction."}
+                </p>
+                {(search || location !== "all") && (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => {
+                      setSearch("");
+                      setLocation("all");
+                    }}
+                  >
+                    Afficher toutes les créations
+                  </button>
+                )}
+              </div>
             )}
-            {busy ? "Import…" : "Importer le projet"}
-          </Button>
+            {authenticated && !done && !remoteError && location !== "local" && (
+              <Button
+                className="project-import-more"
+                variant="ghost"
+                disabled={busy || remoteLoading}
+                onClick={() => void loadRemote(cursor)}
+              >
+                <Plus size={15} aria-hidden="true" />
+                Voir plus de projets
+              </Button>
+            )}
+          </div>
+        </div>
+        <DialogFooter>
+          {error && (
+            <p className="project-import-error" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="project-import-summary" role="status">
+            <strong>{selection?.title || "Choisissez une création"}</strong>
+            <span>
+              {selection
+                ? `${selection.partCount} pièce${selection.partCount === 1 ? "" : "s"} · Sources conservées`
+                : "Votre projet d’origine reste intact."}
+            </span>
+          </div>
+          <div className="project-import-actions">
+            <Button variant="ghost" disabled={busy} onClick={onClose}>
+              Annuler
+            </Button>
+            <Button
+              disabled={!selection?.partCount || busy}
+              onClick={() => void doImport()}
+            >
+              {busy ? (
+                <LoaderCircle
+                  className="animate-spin"
+                  size={16}
+                  aria-hidden="true"
+                />
+              ) : (
+                <ArrowDownToLine size={16} aria-hidden="true" />
+              )}
+              {busy ? "Import en cours…" : "Importer le projet"}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

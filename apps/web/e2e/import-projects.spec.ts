@@ -88,6 +88,29 @@ test("import local : choix au clavier, groupe libre, annulation, sauvegarde et r
     name: "Choisir Maison de poche",
     exact: true,
   });
+  const search = dialog.getByRole("searchbox", {
+    name: "Rechercher parmi les projets chargés",
+  });
+  await dialog
+    .getByRole("button", { name: "Sur cet appareil", exact: true })
+    .click();
+  await expect(
+    dialog.getByRole("button", { name: "Choisir Un ancien défi", exact: true }),
+  ).toHaveCount(0);
+  await search.fill("MÁISON");
+  await expect(choice).toBeVisible();
+  await expect(
+    dialog.getByRole("button", { name: /Choisir Projet vide/ }),
+  ).toHaveCount(0);
+  await search.fill("aucun résultat");
+  await expect(dialog).toContainText("Aucune création trouvée");
+  await dialog
+    .getByRole("button", { name: "Afficher toutes les créations" })
+    .click();
+  await expect(search).toHaveValue("");
+  await expect(
+    dialog.getByRole("button", { name: "Toutes", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
   await choice.focus();
   await choice.press("Space");
   await expect(choice).toHaveAttribute("aria-pressed", "true");
@@ -103,6 +126,19 @@ test("import local : choix au clavier, groupe libre, annulation, sauvegarde et r
   expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(600);
   await page.screenshot({
     path: `/tmp/clik-project-import-compact-${info.project.name}.png`,
+  });
+  await page.setViewportSize({ width: 390, height: 700 });
+  await expect(
+    dialog.getByRole("button", { name: "Importer le projet", exact: true }),
+  ).toBeInViewport();
+  expect(
+    await dialog.evaluate(
+      (element) => element.scrollWidth <= element.clientWidth,
+    ),
+  ).toBe(true);
+  await expect(choice).toHaveAttribute("aria-pressed", "true");
+  await page.screenshot({
+    path: `/tmp/clik-project-import-mobile-${info.project.name}.png`,
   });
   await page.setViewportSize({ width: 1440, height: 1000 });
   await dialog
