@@ -317,3 +317,72 @@ test("le tri combine les créations locales et en ligne et transmet l’ordre au
     .poll(() => fixture.calls.lists.some((args) => args.sort === "recent"))
     .toBe(true);
 });
+
+test("le filtre galerie retrouve les publications après les pages privées et suit leur retrait", async ({
+  page,
+}, info) => {
+  const fixture = await projectsFixture(page, {
+    published: true,
+    privateCount: 25,
+  });
+  await page.goto("/projects");
+  const cards = page.locator(".project-card h2");
+  const gallery = page.getByRole("button", {
+    name: "Dans la galerie",
+    exact: true,
+  });
+  await expect(cards).toHaveCount(12);
+  await expect(cards).not.toContainText(["Le phare bleu"]);
+  await gallery.click();
+  await expect(gallery).toHaveAttribute("aria-pressed", "true");
+  await expect(cards).toHaveText(["Le phare bleu"]);
+  await expect(page.locator(".projects-count")).toHaveText(
+    "1 création affichée",
+  );
+  expect(
+    fixture.calls.lists.some((args) => args.paginationOpts.cursor !== null),
+  ).toBe(true);
+  const sort = page.getByRole("combobox", { name: "Trier par" });
+  await sort.click();
+  await page.getByRole("option", { name: "Les plus anciennes" }).click();
+  await expect(sort).toHaveText("Les plus anciennes");
+  await expect(page).toHaveURL(/sort=oldest/);
+  await expect(gallery).toHaveAttribute("aria-pressed", "true");
+  await expect(cards).toHaveText(["Le phare bleu"]);
+  await expect(page.locator(".projects-load-more")).toHaveCount(0);
+  for (const width of [1440, 390, 320]) {
+    await page.setViewportSize({ width, height: 950 });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await expect(gallery).toBeInViewport();
+    await page
+      .locator(".projects-toolbar")
+      .screenshot({
+        path: `/tmp/clik-projects-gallery-filter-${width}-${info.project.name}.png`,
+      });
+  }
+  await page
+    .getByRole("button", {
+      name: "Visibilité de Le phare bleu : Version publiée",
+    })
+    .click();
+  await page
+    .getByRole("menuitem", { name: "Passer en privé", exact: true })
+    .click();
+  await expect(cards).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", {
+      name: "Aucune création publiée pour le moment.",
+    }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Voir mes créations", exact: true })
+    .click();
+  await expect(cards).toHaveCount(27);
+  await expect(
+    page.getByRole("button", { name: "Toutes", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+});

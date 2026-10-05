@@ -6,6 +6,7 @@ import {
   ArrowRight,
   Box,
   Cloud,
+  Globe2,
   HardDrive,
   LoaderCircle,
   LockKeyhole,
@@ -35,6 +36,10 @@ export const Route = createFileRoute("/projects")({
 });
 function Projects() {
   const { sort = "recent" } = Route.useSearch();
+  const [filter, setFilter] = useState<
+    "all" | "online" | "local" | "published"
+  >("all");
+  const [publishedTarget, setPublishedTarget] = useState({ sort, count: 12 });
   const { isAuthenticated, isLoading } = useConvexAuth();
   const { results, status, loadMore } = usePaginatedQuery(
     api.projects.list,
@@ -42,7 +47,6 @@ function Projects() {
     { initialNumItems: 12 },
   );
   const navigate = useNavigate();
-  const [location, setLocation] = useState<"all" | "online" | "local">("all");
   const [local, setLocal] = useState<CreationItem[]>([]);
   const [localLoading, setLocalLoading] = useState(true);
   const [localError, setLocalError] = useState(false);
@@ -97,7 +101,11 @@ function Projects() {
       }))
     : [];
   const creations = [...remote, ...local]
-    .filter((p) => location === "all" || location === p.location)
+    .filter((p) =>
+      filter === "published"
+        ? p.location === "online" && !!p.publicationId
+        : filter === "all" || filter === p.location,
+    )
     .sort((a, b) => {
       const difference = (a.updatedAt ?? 0) - (b.updatedAt ?? 0);
       return (
@@ -105,10 +113,24 @@ function Projects() {
         a.id.localeCompare(b.id)
       );
     });
+  const targetCount =
+    publishedTarget.sort === sort ? publishedTarget.count : 12;
+  const loadingPublished =
+    filter === "published" &&
+    isAuthenticated &&
+    creations.length < targetCount &&
+    (status === "CanLoadMore" || status === "LoadingMore");
+  useEffect(() => {
+    if (loadingPublished && status === "CanLoadMore") loadMore(12);
+  }, [loadingPublished, status, loadMore]);
+  const includesLocal = filter === "all" || filter === "local";
   const loading =
-    (location !== "online" && localLoading) ||
-    (location !== "local" &&
-      (isLoading || (isAuthenticated && status === "LoadingFirstPage")));
+    (includesLocal && localLoading) ||
+    (filter !== "local" &&
+      (isLoading || (isAuthenticated && status === "LoadingFirstPage"))) ||
+    (loadingPublished && creations.length === 0);
+  const accountRequired =
+    (filter === "online" || filter === "published") && !isAuthenticated;
   const newCreation = () =>
     void navigate({ to: "/editor", search: { draft: crypto.randomUUID() } });
   return (
@@ -153,19 +175,20 @@ function Projects() {
         <div
           className="project-filters"
           role="group"
-          aria-label="Emplacement des créations"
+          aria-label="Filtrer les créations"
         >
           {(
             [
               ["all", "Toutes", null],
               ["online", "En ligne", Cloud],
               ["local", "Sur cet appareil", HardDrive],
+              ["published", "Dans la galerie", Globe2],
             ] as const
           ).map(([value, label, Icon]) => (
             <button
               key={value}
-              aria-pressed={location === value}
-              onClick={() => setLocation(value)}
+              aria-pressed={filter === value}
+              onClick={() => setFilter(value)}
             >
               {Icon && <Icon size={15} aria-hidden="true" />}
               {label}
@@ -213,7 +236,7 @@ function Projects() {
           </div>
         </div>
       </div>
-      {localError && location !== "online" && (
+      {localError && includesLocal && (
         <div className="projects-local-error" role="alert">
           Les créations de cet appareil n’ont pas pu être chargées.{" "}
           <button onClick={() => setRetry((n) => n + 1)}>Réessayer</button>
@@ -246,23 +269,37 @@ function Projects() {
       ) : (
         <div className="projects-empty">
           <span className="projects-empty-icon">
-            {location === "online" ? <Cloud size={32} /> : <Box size={32} />}
+            {filter === "published" ? (
+              <Globe2 size={32} />
+            ) : filter === "online" ? (
+              <Cloud size={32} />
+            ) : (
+              <Box size={32} />
+            )}
           </span>
           <h2>
-            {location === "online"
+            {filter === "published"
               ? isAuthenticated
-                ? "Votre collection en ligne commence ici."
-                : "Retrouvez votre collection en ligne."
-              : "Une place pour votre prochaine idée."}
+                ? "Aucune création publiée pour le moment."
+                : "Retrouvez vos créations dans la galerie."
+              : filter === "online"
+                ? isAuthenticated
+                  ? "Votre collection en ligne commence ici."
+                  : "Retrouvez votre collection en ligne."
+                : "Une place pour votre prochaine idée."}
           </h2>
           <p>
-            {location === "online"
+            {filter === "published"
               ? isAuthenticated
-                ? "Dans l’atelier, choisissez « Conserver le projet » pour l’ajouter à votre collection."
-                : "Connectez-vous pour voir les créations enregistrées sur votre compte."
-              : "Petite expérience ou grande construction : toutes vos créations ont leur place ici."}
+                ? "Publiez une création depuis son menu pour la retrouver ici et la partager."
+                : "Connectez-vous pour voir les créations que vous avez partagées dans la galerie."
+              : filter === "online"
+                ? isAuthenticated
+                  ? "Dans l’atelier, choisissez « Conserver le projet » pour l’ajouter à votre collection."
+                  : "Connectez-vous pour voir les créations enregistrées sur votre compte."
+                : "Petite expérience ou grande construction : toutes vos créations ont leur place ici."}
           </p>
-          {location === "online" && !isAuthenticated ? (
+          {accountRequired ? (
             <Link
               to="/sign-in"
               className="primary-link"
@@ -272,6 +309,10 @@ function Projects() {
             >
               Se connecter
             </Link>
+          ) : filter === "published" ? (
+            <Button className="primary-link" onClick={() => setFilter("all")}>
+              Voir mes créations
+            </Button>
           ) : (
             <Button className="primary-link" onClick={newCreation}>
               <Plus size={16} /> Créer dans l’atelier
@@ -280,18 +321,25 @@ function Projects() {
         </div>
       )}
       {isAuthenticated &&
-        location !== "local" &&
+        filter !== "local" &&
         (status === "CanLoadMore" || status === "LoadingMore") && (
           <div className="projects-pagination">
             <Button
               className="projects-load-more"
               variant="outline"
-              disabled={status === "LoadingMore"}
-              aria-busy={status === "LoadingMore"}
-              onClick={() => loadMore(12)}
+              disabled={status === "LoadingMore" || loadingPublished}
+              aria-busy={status === "LoadingMore" || loadingPublished}
+              onClick={() => {
+                if (filter === "published") {
+                  setPublishedTarget({
+                    sort,
+                    count: Math.max(creations.length, targetCount) + 12,
+                  });
+                } else loadMore(12);
+              }}
             >
               <span className="projects-load-more-icon" aria-hidden="true">
-                {status === "LoadingMore" ? (
+                {status === "LoadingMore" || loadingPublished ? (
                   <LoaderCircle
                     className="animate-spin motion-reduce:animate-none"
                     size={16}
@@ -301,7 +349,7 @@ function Projects() {
                 )}
               </span>
               <span aria-live="polite" aria-atomic="true">
-                {status === "LoadingMore"
+                {status === "LoadingMore" || loadingPublished
                   ? "Chargement…"
                   : "Voir plus de créations"}
               </span>

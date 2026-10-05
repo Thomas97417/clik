@@ -4,7 +4,12 @@ import { emptyScene, makePart, type ProjectImport } from "@clik/scene";
 // Transport fixture only: no real account, upload or publication is created.
 export async function projectsFixture(
   page: Page,
-  options: { published?: boolean; userName?: string; userEmail?: string } = {},
+  options: {
+    published?: boolean;
+    userName?: string;
+    userEmail?: string;
+    privateCount?: number;
+  } = {},
 ) {
   const user = {
     _id: "viewer",
@@ -38,6 +43,16 @@ export async function projectsFixture(
     preparations: [] as any[],
   };
   const imported = new Map<string, typeof project>();
+  const privateProjects = Array.from(
+    { length: options.privateCount ?? 0 },
+    (_, i) => ({
+      ...project,
+      _id: `private-${i}`,
+      title: `Création privée ${i + 1}`,
+      publicationId: null,
+      updatedAt: project.updatedAt + 1000 + i,
+    }),
+  );
   const deleted = new Set<string>();
   let failDelete = false;
   let failCreate = false;
@@ -100,22 +115,33 @@ export async function projectsFixture(
           ? { ...target, owner: user._id, serverNow: Date.now() }
           : null;
       }
-      if (path === "projects:list")
+      if (path === "projects:list") {
+        const rows = [
+          ...privateProjects,
+          ...imported.values(),
+          project,
+          {
+            ...project,
+            _id: "closed-challenge",
+            title: "Un ancien défi",
+            publicationId: null,
+            challenge: { day: "2020-01-01", closesAt: 1 },
+          },
+        ]
+          .filter((p) => !deleted.has(p._id))
+          .sort((a, b) =>
+            args.sort === "oldest"
+              ? a.updatedAt - b.updatedAt
+              : b.updatedAt - a.updatedAt,
+          );
+        const start = Number(args.paginationOpts.cursor ?? 0);
+        const end = start + Math.min(12, args.paginationOpts.numItems);
         return {
-          page: [
-            ...imported.values(),
-            project,
-            {
-              ...project,
-              _id: "closed-challenge",
-              title: "Un ancien défi",
-              publicationId: null,
-              challenge: { day: "2020-01-01", closesAt: 1 },
-            },
-          ].filter((p) => !deleted.has(p._id)),
-          isDone: true,
-          continueCursor: "",
+          page: rows.slice(start, end),
+          isDone: end >= rows.length,
+          continueCursor: end >= rows.length ? "" : String(end),
         };
+      }
       return null;
     };
     const transition = (next = version) => {
