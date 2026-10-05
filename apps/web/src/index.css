@@ -286,24 +286,36 @@ button:focus-visible {
   --nav-fill: #edf3ff;
   --nav-hover: #dfeaff;
   --nav-ink: #3b609c;
+  --nav-active: #356ae6;
+  --nav-active-hover: #285bd3;
+  --nav-active-ink: #fff;
   --nav-tilt: -1.5deg;
 }
 [data-nav-tone="peach"] {
   --nav-fill: #fff0e5;
   --nav-hover: #ffe4d1;
   --nav-ink: #895b3b;
+  --nav-active: #ffd1ad;
+  --nav-active-hover: #ffc394;
+  --nav-active-ink: #824321;
   --nav-tilt: 1.5deg;
 }
 [data-nav-tone="lilac"] {
   --nav-fill: #f1edfb;
   --nav-hover: #e7def8;
   --nav-ink: #725899;
+  --nav-active: #d7c5f5;
+  --nav-active-hover: #ccb5f0;
+  --nav-active-ink: #65429b;
   --nav-tilt: -1deg;
 }
 [data-nav-tone="mint"] {
   --nav-fill: #eaf5ef;
   --nav-hover: #d9ede2;
   --nav-ink: #437660;
+  --nav-active: #bce6d2;
+  --nav-active-hover: #a8dcc3;
+  --nav-active-ink: #225e48;
   --nav-tilt: 1.5deg;
 }
 .header-nav-links {
@@ -356,13 +368,13 @@ button:focus-visible {
   background: var(--nav-hover);
 }
 .header-nav-links a.active {
-  color: #fff;
+  color: var(--nav-active-ink);
 }
 .header-nav-links a.active::before {
-  background: #356ae6;
+  background: var(--nav-active);
 }
 .header-nav-links a.active:hover::before {
-  background: #285bd3;
+  background: var(--nav-active-hover);
 }
 .header-nav-short,
 .header-nav-trigger {
@@ -535,18 +547,18 @@ button:focus-visible {
   color: var(--nav-ink);
 }
 .header-nav-menu [aria-current="page"] {
-  color: #356ae6;
-  background: #f5f8ff;
+  color: var(--nav-ink);
+  background: var(--nav-fill);
 }
 .header-nav-menu [aria-current="page"]::before {
-  background: #356ae6;
+  background: var(--nav-active);
 }
 .header-nav-dot {
   width: 5px;
   height: 5px;
   margin-left: auto;
   border-radius: 50%;
-  background: #356ae6;
+  background: currentColor;
 }
 @media (max-width: 1100px) {
   .site-header {
@@ -603,6 +615,16 @@ button:focus-visible {
   .header-nav-trigger:hover::before,
   .header-nav-trigger[aria-expanded="true"]::before {
     background: var(--nav-hover);
+  }
+  .header-nav-trigger[data-active="true"] {
+    color: var(--nav-active-ink);
+  }
+  .header-nav-trigger[data-active="true"]::before {
+    background: var(--nav-active);
+  }
+  .header-nav-trigger[data-active="true"]:hover::before,
+  .header-nav-trigger[data-active="true"][aria-expanded="true"]::before {
+    background: var(--nav-active-hover);
   }
   .header-nav-trigger svg {
     color: currentColor;

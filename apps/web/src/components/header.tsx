@@ -69,6 +69,7 @@ export default function Header() {
               className="header-nav-trigger"
               aria-label="Explorer les rubriques"
               data-nav-tone={current?.tone || "blue"}
+              data-active={!!current}
             >
               <span>{current?.short || "Explorer"}</span>
               <ChevronDown size={14} aria-hidden="true" />
