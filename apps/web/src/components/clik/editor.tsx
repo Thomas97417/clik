@@ -121,7 +121,7 @@ function ProjectTitle({
       <span className="project-title-measure" aria-hidden="true">
         {value || "Nom de la création"}
       </span>
-      <Input
+      <input
         className="project-title"
         aria-label="Nom du projet"
         title={value}
@@ -132,7 +132,6 @@ function ProjectTitle({
         disabled={disabled}
         maxLength={100}
         onChange={(e) => setValue(e.currentTarget.value)}
-        onFocus={(e) => e.currentTarget.select()}
         onBlur={(e) => {
           const next = e.currentTarget.value.trim() || "Sans titre";
           setValue(next);
