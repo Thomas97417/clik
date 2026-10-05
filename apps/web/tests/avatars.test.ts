@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
   AVATAR_COLORS,
+  AVATAR_PART_HEIGHT,
+  assembleAvatar,
+  avatarExposedStuds,
   avatarSignature,
   defaultAvatar,
   generateAvatar,
   isAvatarSeed,
   nextAvatar,
+  type AvatarPart,
 } from "@clik/avatars";
 
 describe("Avatars Clik v1", () => {
@@ -84,5 +88,81 @@ describe("Avatars Clik v1", () => {
       "x".repeat(1000),
     ])
       expect(isAvatarSeed(invalid)).toBe(false);
+  });
+});
+
+describe("Assemblage des avatars", () => {
+  it("emboîte des pièces variées sans flottement ni chevauchement sur 1000 variantes", () => {
+    const kinds = new Set<AvatarPart["kind"]>();
+    const widths = new Set<number>();
+    for (let i = 0; i < 1000; i++) {
+      const descriptor = defaultAvatar(`assembly-${i}`);
+      const model = assembleAvatar(descriptor);
+      const { parts, primary, accent } = model;
+      expect(assembleAvatar({ ...descriptor, crown: "gold" })).toEqual(model);
+      expect(primary).toBe(generateAvatar(descriptor).primary);
+      expect(accent).toBe(generateAvatar(descriptor).accent);
+      expect(parts.filter((part) => part.y === 0)).toEqual([
+        { kind: "plate", x: 0, y: 0, width: 6, color: accent },
+      ]);
+      const occupied = new Set<string>();
+      let accented = 0;
+      for (const part of parts) {
+        kinds.add(part.kind);
+        widths.add(part.width);
+        const height = AVATAR_PART_HEIGHT[part.kind];
+        expect([primary, accent]).toContain(part.color);
+        expect(part.x).toBeGreaterThanOrEqual(0);
+        expect(part.x + part.width).toBeLessThanOrEqual(6);
+        expect(Number.isInteger(part.x)).toBe(true);
+        expect(Number.isInteger(part.y)).toBe(true);
+        expect(part.y).toBeGreaterThanOrEqual(0);
+        expect(part.y + height).toBeLessThanOrEqual(15);
+        expect(parts).toContainEqual({
+          ...part,
+          x: 6 - part.x - part.width,
+          ...(part.kind === "slope" ? { rise: -part.rise } : {}),
+        });
+        for (let x = part.x; x < part.x + part.width; x++) {
+          if (part.y > 0) {
+            expect(
+              parts.some(
+                (support) =>
+                  (support.kind === "brick" || support.kind === "plate") &&
+                  support.y + AVATAR_PART_HEIGHT[support.kind] === part.y &&
+                  support.x <= x &&
+                  support.x + support.width > x,
+              ),
+            ).toBe(true);
+          }
+          for (let y = part.y; y < part.y + height; y++) {
+            const cell = `${x},${y}`;
+            expect(occupied.has(cell)).toBe(false);
+            occupied.add(cell);
+            if (part.color === accent) accented++;
+          }
+        }
+      }
+      expect(accented).toBeGreaterThan(0);
+      expect(accented / occupied.size).toBeLessThanOrEqual(1 / 3);
+    }
+    expect([...kinds].sort()).toEqual(["brick", "plate", "slope", "tile"]);
+    expect([...widths].sort((a, b) => a - b)).toEqual([1, 2, 3, 4, 6]);
+  });
+
+  it("masque les plots recouverts, y compris sous les tuiles et les pentes", () => {
+    const parts: AvatarPart[] = [
+      { kind: "plate", x: 0, y: 0, width: 6, color: "blue" },
+      { kind: "brick", x: 1, y: 1, width: 4, color: "blue" },
+      { kind: "tile", x: 1, y: 4, width: 2, color: "blue" },
+      { kind: "slope", x: 3, y: 4, width: 1, rise: 1, color: "blue" },
+    ];
+    expect(avatarExposedStuds(parts[0], parts)).toEqual([0, 5]);
+    expect(avatarExposedStuds(parts[1], parts)).toEqual([3]);
+    expect(avatarExposedStuds(parts[2], parts)).toEqual([]);
+    expect(avatarExposedStuds(parts[3], parts)).toEqual([]);
+    expect(avatarExposedStuds(parts[1], [parts[0], parts[1]])).toEqual([
+      0, 1, 2, 3,
+    ]);
   });
 });

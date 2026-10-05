@@ -3,9 +3,84 @@ import AvatarFrame from "./avatar-frame";
 import {
   CROWNS,
   RINGS,
-  generateAvatar,
+  AVATAR_PART_HEIGHT,
+  assembleAvatar,
+  avatarExposedStuds,
   type AvatarDescriptor,
+  type AvatarPart,
 } from "@clik/avatars";
+
+const STUD = 10.8;
+const PLATE = 4.32;
+const DEPTH_X = 3;
+const DEPTH_Y = 3.2;
+const ORIGIN_X = (100 - 6 * STUD - DEPTH_X) / 2;
+
+function AvatarPiece({
+  part,
+  studs,
+  base,
+}: {
+  part: AvatarPart;
+  studs: number[];
+  base: number;
+}) {
+  const x = ORIGIN_X + part.x * STUD;
+  const width = part.width * STUD;
+  const bottom = base - part.y * PLATE;
+  const height = AVATAR_PART_HEIGHT[part.kind] * PLATE;
+  const left =
+    bottom - (part.kind === "slope" && part.rise === 1 ? PLATE : height);
+  const right =
+    bottom - (part.kind === "slope" && part.rise === -1 ? PLATE : height);
+  const topFace = `M${x} ${left}L${x + width} ${right}l${DEPTH_X} ${-DEPTH_Y}L${x + DEPTH_X} ${left - DEPTH_Y}Z`;
+  const sideFace = `M${x + width} ${right}l${DEPTH_X} ${-DEPTH_Y}V${bottom - DEPTH_Y}l${-DEPTH_X} ${DEPTH_Y}Z`;
+  return (
+    <g fill={part.color}>
+      <path d={sideFace} />
+      <path d={sideFace} fill="#142747" opacity=".2" />
+      <path d={`M${x} ${left}L${x + width} ${right}V${bottom}H${x}Z`} />
+      <path d={topFace} />
+      <path d={topFace} fill="#fff" opacity=".28" />
+      <path
+        d={`M${x + width - 0.3} ${right + 0.5}V${bottom - 0.5}`}
+        fill="none"
+        stroke="#142747"
+        strokeOpacity=".16"
+        strokeWidth=".55"
+      />
+      <path
+        d={`M${x + 0.4} ${bottom - 0.4}H${x + width - 0.4}`}
+        fill="none"
+        stroke="#142747"
+        strokeOpacity=".18"
+        strokeWidth=".65"
+      />
+      <path
+        d={`M${x + 0.4} ${left + 0.3}L${x + width - 0.4} ${right + 0.3}`}
+        fill="none"
+        stroke="#fff"
+        strokeOpacity=".42"
+        strokeWidth=".55"
+      />
+      {studs.map((index) => (
+        <g
+          key={index}
+          transform={`translate(${x + (index + 0.5) * STUD + DEPTH_X / 2} ${left - DEPTH_Y / 2 - 1.8})`}
+        >
+          <path d="M-2.6 0v1.8a2.6 1.1 0 0 0 5.2 0V0Z" />
+          <path
+            d="M-2.6 0v1.8a2.6 1.1 0 0 0 5.2 0V0Z"
+            fill="#142747"
+            opacity=".14"
+          />
+          <ellipse rx="2.6" ry="1.1" />
+          <ellipse rx="2.6" ry="1.1" fill="#fff" opacity=".4" />
+        </g>
+      ))}
+    </g>
+  );
+}
 
 /** Decorative beside a name; give label when this is the only identity shown. */
 const BrickAvatar = memo(function BrickAvatar({
@@ -17,10 +92,20 @@ const BrickAvatar = memo(function BrickAvatar({
   size?: number;
   label?: string;
 }) {
-  const model = useMemo(
-    () => generateAvatar(avatar),
-    [avatar.seed, avatar.version],
-  );
+  const model = useMemo(() => {
+    const assembled = assembleAvatar(avatar);
+    const height = Math.max(
+      ...assembled.parts.map((part) => part.y + AVATAR_PART_HEIGHT[part.kind]),
+    );
+    return {
+      ...assembled,
+      base: 50 + (height * PLATE + DEPTH_Y + 2) / 2,
+      pieces: assembled.parts.map((part) => ({
+        part,
+        studs: avatarExposedStuds(part, assembled.parts),
+      })),
+    };
+  }, [avatar.seed, avatar.version]);
   const crown = CROWNS.find((c) => c.id === avatar.crown);
   const ring = RINGS.find((r) => r.id === avatar.ring);
   return (
@@ -40,41 +125,21 @@ const BrickAvatar = memo(function BrickAvatar({
     >
       <rect width="100" height="100" rx="16" fill={model.background} />
       <g transform={crown ? "translate(10 21) scale(.8)" : undefined}>
-        {model.bricks.map(({ x, y, width, color }) => (
-          <g
-            key={`${x}-${y}`}
-            transform={`translate(${15 + x * 14} ${14 + y * 14})`}
-          >
-            <rect
-              y="3"
-              width={width * 14 - 1}
-              height="11"
-              rx="1.3"
-              fill={color}
-            />
-            <path
-              d={`M1 12h${width * 14 - 3}v1H1Z`}
-              fill="#142747"
-              opacity=".16"
-            />
-            <path
-              d={`M1 3h${width * 14 - 3}`}
-              stroke="#fff"
-              strokeOpacity=".55"
-            />
-            {Array.from({ length: width }, (_, i) => (
-              <g key={i} transform={`translate(${6.5 + i * 14} 0)`}>
-                <path d="M-3 1.8v1.6a3 1.4 0 0 0 6 0V1.8Z" fill={color} />
-                <path
-                  d="M-3 1.8v1.6a3 1.4 0 0 0 6 0V1.8Z"
-                  fill="#142747"
-                  opacity=".12"
-                />
-                <ellipse cy="1.8" rx="3" ry="1.4" fill={color} />
-                <ellipse cy="1.8" rx="3" ry="1.4" fill="#fff" opacity=".3" />
-              </g>
-            ))}
-          </g>
+        <ellipse
+          cx="50"
+          cy={model.base + 1.5}
+          rx="32"
+          ry="2.2"
+          fill="#142747"
+          opacity=".08"
+        />
+        {model.pieces.map(({ part, studs }) => (
+          <AvatarPiece
+            key={`${part.x}-${part.y}`}
+            part={part}
+            studs={studs}
+            base={model.base}
+          />
         ))}
       </g>
       {ring && <AvatarFrame frame={ring} />}
