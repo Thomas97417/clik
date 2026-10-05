@@ -1,5 +1,49 @@
 import { test, expect } from "@playwright/test";
 
+for (const draft of [undefined, "my-workshop"]) {
+  test(`nouvelle création depuis ${draft ?? "l’atelier"} : sauvegarde et scènes indépendantes`, async ({
+    page,
+    context,
+  }) => {
+    const originalUrl = draft ? `/editor?draft=${draft}` : "/editor";
+    await page.goto(originalUrl);
+    await page
+      .getByRole("button", { name: "Brique 2 × 4", exact: true })
+      .click();
+    await page.getByLabel("Nom du projet").fill("Ma construction conservée");
+    if (draft) await context.setOffline(true);
+    await page
+      .getByRole("button", { name: "Nouvelle création", exact: true })
+      .click();
+    await expect(page).toHaveURL(/\/editor\/?\?draft=[a-f0-9-]{36}$/);
+    const nextUrl = page.url();
+    expect(new URL(nextUrl).searchParams.get("draft")).not.toBe(draft);
+    await expect(page.getByLabel("Nom du projet")).toHaveValue(
+      "Ma première création",
+    );
+    await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+    await expect(
+      page.getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true }),
+    ).toBeDisabled();
+    if (draft) await context.setOffline(false);
+    await page
+      .getByRole("button", { name: "Brique 1 × 1", exact: true })
+      .click();
+    await expect(
+      page.getByLabel("Projet et sauvegarde").getByRole("status"),
+    ).toContainText("Enregistré");
+    await page.goto(originalUrl);
+    await expect(page.getByLabel("Nom du projet")).toHaveValue(
+      "Ma construction conservée",
+    );
+    await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
+    await expect(page.locator(".tree-name")).toContainText("Brique 2 × 4");
+    await page.goto(nextUrl);
+    await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
+    await expect(page.locator(".tree-name")).toContainText("Brique 1 × 1");
+  });
+}
+
 test("renommer avec Entrée, annuler avec Échap et garder un titre long accessible", async ({
   page,
 }, info) => {

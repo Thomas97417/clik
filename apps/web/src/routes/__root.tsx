@@ -60,7 +60,19 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
   }),
 
   component: RootDocument,
-  beforeLoad: async (ctx) => {
+  beforeLoad: async (
+    ctx,
+  ): Promise<{ isAuthenticated: boolean; token: string | undefined }> => {
+    // Local drafts can change without rechecking the session over the network.
+    if (
+      typeof navigator !== "undefined" &&
+      !navigator.onLine &&
+      /^\/editor\/?$/.test(ctx.location.pathname)
+    ) {
+      const token = ctx.matches.find((match) => match.routeId === "__root__")
+        ?.context.token;
+      return { isAuthenticated: !!token, token };
+    }
     const token = await getAuth();
     if (token) {
       ctx.context.convexQueryClient.serverHttpClient?.setAuth(token);

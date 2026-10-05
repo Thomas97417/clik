@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
     revision: 3,
   },
   authenticated: true,
+  writeError: undefined as Error | undefined,
 }));
 vi.mock("convex/react", () => ({
   useConvex: () => ({ query: async () => mocks.remote }),
@@ -37,6 +38,7 @@ vi.mock("convex/react", () => ({
 vi.mock("../src/lib/clik/local", () => ({
   readDraft: async (key: string) => mocks.drafts.get(key),
   writeDraft: async (key: string, draft: unknown) => {
+    if (mocks.writeError) throw mocks.writeError;
     mocks.drafts.set(key, draft);
   },
   removeLocalCreation: (key: string, stamp: string) => mocks.remove(key, stamp),
@@ -55,6 +57,7 @@ beforeEach(() => {
       mocks.drafts.delete(key);
     });
   mocks.authenticated = true;
+  mocks.writeError = undefined;
   Object.defineProperty(navigator, "onLine", {
     value: true,
     configurable: true,
@@ -74,6 +77,57 @@ afterEach(() => {
   vi.useRealTimers();
   vi.unstubAllGlobals();
 });
+it("enregistre les dernières pièces et le titre local avant de quitter l’atelier", async () => {
+  const { result } = renderHook(() => useProject());
+  await waitFor(() => expect(result.current.ready).toBe(true));
+  await act(async () => {
+    const editor = useEditor.getState();
+    editor.add("brick-2x4");
+    editor.commit(useEditor.getState().scene, "Une nouvelle idée");
+    await result.current.flush();
+  });
+  expect(mocks.drafts.get("guest")).toMatchObject({
+    title: "Une nouvelle idée",
+    dirty: false,
+    scene: { nodes: [expect.objectContaining({ type: "brick-2x4" })] },
+  });
+  expect(mocks.save).not.toHaveBeenCalled();
+});
+
+it("signale un échec de sauvegarde locale et permet de réessayer", async () => {
+  const { result } = renderHook(() => useProject());
+  await waitFor(() => expect(result.current.ready).toBe(true));
+  mocks.writeError = Error("Stockage indisponible");
+  await act(async () => {
+    await expect(result.current.flush()).rejects.toThrow("indisponible");
+  });
+  expect(result.current.status).toBe("Sauvegarde locale indisponible");
+  mocks.writeError = undefined;
+  await act(async () => {
+    await result.current.flush();
+  });
+  expect(mocks.drafts.get("guest")).toBeDefined();
+  expect(result.current.status).toBe("Enregistré");
+});
+
+it("refuse de quitter la version locale en conflit sans écraser l’autre onglet", async () => {
+  mocks.drafts.set("guest", {
+    title: "Original",
+    scene: emptyScene(),
+    stamp: "original",
+    revision: 0,
+    dirty: false,
+  });
+  const { result } = renderHook(() => useProject());
+  await waitFor(() => expect(result.current.ready).toBe(true));
+  mocks.writeError = Error("LOCAL_CONFLICT");
+  await act(async () => {
+    await expect(result.current.flush()).rejects.toThrow("LOCAL_CONFLICT");
+  });
+  expect(result.current.conflict).toBe(true);
+  expect(mocks.drafts.get("guest").stamp).toBe("original");
+});
+
 it("conserve les changements hors ligne et les envoie à la reconnexion", async () => {
   const { result } = renderHook(() => useProject("project"));
   await waitFor(() => expect(result.current.ready).toBe(true));

@@ -11,5 +11,14 @@ export const Route = createFileRoute("/editor/")({
 });
 function Page() {
   const { draft } = Route.useSearch();
-  return <Editor key={draft ?? "guest"} draftId={draft} />;
+  const navigate = Route.useNavigate();
+  return (
+    <Editor
+      key={draft ?? "guest"}
+      draftId={draft}
+      onNewCreation={() =>
+        navigate({ to: "/editor", search: { draft: crypto.randomUUID() } })
+      }
+    />
+  );
 }

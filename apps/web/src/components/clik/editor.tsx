@@ -48,6 +48,7 @@ import {
   PanelLeftOpen,
   PanelRightClose,
   PanelRightOpen,
+  Plus,
   Redo2,
   Rotate3D,
   Scan,
@@ -181,9 +182,11 @@ function Numeric({
 export default function Editor({
   projectId,
   draftId,
+  onNewCreation,
 }: {
   projectId?: string;
   draftId?: string;
+  onNewCreation?: () => Promise<void>;
 }) {
   // The canvas subscribes to live transforms. Keep the tree and inspector stable
   // during a gesture so a 500-part document does not rebuild its UI each frame.
@@ -462,6 +465,16 @@ export default function Editor({
       setBusy(false);
     }
   };
+  const startCreation = async () => {
+    if (!onNewCreation || busy) return;
+    setBusy(true);
+    try {
+      await project.flush();
+      await onNewCreation();
+    } finally {
+      setBusy(false);
+    }
+  };
   const doPublish = async () => {
     if (!projectId || busy) return;
     setBusy(true);
@@ -647,6 +660,27 @@ export default function Editor({
             </div>
           </div>
           <div className="editor-project-actions">
+            {onNewCreation && (
+              <Button
+                className="editor-new-action"
+                variant="outline"
+                aria-label="Nouvelle création"
+                title="Démarrer une nouvelle création"
+                disabled={
+                  !project.ready ||
+                  !!s.gesture ||
+                  !!s.pending ||
+                  !!s.libraryPointer ||
+                  project.conflict ||
+                  busy ||
+                  publishing
+                }
+                onClick={() => safe(startCreation)}
+              >
+                <Plus size={16} aria-hidden="true" />
+                <span>Nouvelle création</span>
+              </Button>
+            )}
             <Button
               className="editor-import-action"
               variant="outline"

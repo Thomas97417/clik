@@ -169,10 +169,30 @@ export function useProject(projectId?: string, draftId?: string) {
   const flush = async () => {
     if (!ready || conflict || gesture)
       throw Error("Résolvez le conflit ou terminez la manipulation.");
+    if (!projectId) {
+      setStatus("Enregistrement");
+      queue.current = queue.current
+        .catch(() => {})
+        .then(async () => {
+          const current = useEditor.getState();
+          if (current.gesture)
+            throw Error("Terminez la manipulation avant de sauvegarder.");
+          await backup(false);
+          savedSerial.current = current.serial;
+        });
+      try {
+        await queue.current;
+        setStatus(navigator.onLine ? "Enregistré" : "Hors ligne");
+        return revision.current;
+      } catch (error) {
+        if (String(error).includes("LOCAL_CONFLICT")) setConflict(true);
+        setStatus("Sauvegarde locale indisponible");
+        throw error;
+      }
+    }
     await queue.current;
     if (useEditor.getState().gesture)
       throw Error("Terminez la manipulation avant de publier.");
-    if (!projectId) return revision.current;
     if (!navigator.onLine)
       throw Error("Hors ligne : votre création reste sur cet appareil.");
     if (busy.current)

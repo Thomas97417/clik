@@ -6279,7 +6279,8 @@ dialog.modal-backdrop::backdrop {
 }
 
 /* Project assemblies and their public sources. */
-.editor-top .editor-import-action {
+.editor-top .editor-import-action,
+.editor-top .editor-new-action {
   height: 32px;
   padding: 0 9px;
   gap: 6px;
@@ -6290,7 +6291,8 @@ dialog.modal-backdrop::backdrop {
   color: #536888;
   font-size: 11px;
 }
-.editor-top .editor-import-action:hover:not(:disabled) {
+.editor-top .editor-import-action:hover:not(:disabled),
+.editor-top .editor-new-action:hover:not(:disabled) {
   background: #f3f6fb;
   border-color: #e5ebf5;
   color: #356ae6;
@@ -6548,10 +6550,12 @@ dialog.modal-backdrop::backdrop {
   text-underline-offset: 3px;
 }
 @media (max-width: 1100px) {
-  .editor-top .editor-import-action span {
+  .editor-top .editor-import-action span,
+  .editor-top .editor-new-action span {
     display: none;
   }
-  .editor-top .editor-import-action {
+  .editor-top .editor-import-action,
+  .editor-top .editor-new-action {
     width: 32px;
     padding: 0;
   }
