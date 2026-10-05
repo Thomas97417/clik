@@ -215,6 +215,9 @@ body {
   font-family: var(--font-sans);
   font-size: 16px;
 }
+.page-scroll {
+  scrollbar-gutter: stable;
+}
 button,
 a,
 input,
