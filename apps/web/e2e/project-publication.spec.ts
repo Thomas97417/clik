@@ -18,9 +18,7 @@ test("Privée ouvre un menu puis la modale préremplie, sans ouvrir l’éditeur
     page.getByRole("menuitem", { name: "Publier", exact: true }),
   ).toBeVisible();
   await expect(page).toHaveURL(/\/projects$/);
-  await expect(
-    page.getByRole("menuitem", { name: "Publier", exact: true }).locator("svg"),
-  ).toHaveCount(0);
+  await page.getByRole("menuitem", { name: "Publier", exact: true }).hover();
   await page.screenshot({
     path: `/tmp/clik-project-visibility-${info.project.name}.png`,
   });
@@ -40,7 +38,17 @@ test("Privée ouvre un menu puis la modale préremplie, sans ouvrir l’éditeur
   await expect(trigger).toBeFocused();
   expect(calls.uploads).toHaveLength(0);
   expect(calls.publications).toHaveLength(0);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await trigger.scrollIntoViewIfNeeded();
   await trigger.press("Enter");
+  const menu = page.getByRole("menu");
+  await expect(menu).toBeInViewport();
+  const menuBox = (await menu.boundingBox())!;
+  expect(menuBox.x).toBeGreaterThanOrEqual(0);
+  expect(menuBox.x + menuBox.width).toBeLessThanOrEqual(390);
+  await page.screenshot({
+    path: `/tmp/clik-project-visibility-mobile-${info.project.name}.png`,
+  });
   await page
     .getByRole("menuitem", { name: "Publier", exact: true })
     .press("Enter");
@@ -89,12 +97,15 @@ test("Version publiée permet de repasser en privé depuis un menu compact", asy
     exact: true,
   });
   await expect(action).toBeVisible();
-  await expect(action.locator("svg")).toHaveCount(0);
-  const triggerBox = (await published.boundingBox())!;
   const menuBox = (await page
     .locator(".project-visibility-menu")
     .boundingBox())!;
-  expect(menuBox.width).toBeLessThanOrEqual(triggerBox.width + 2);
+  expect(menuBox.width).toBeLessThanOrEqual(240);
+  await page.getByRole("menuitem", { name: "Supprimer", exact: true }).hover();
+  await page.screenshot({
+    path: `/tmp/clik-project-delete-menu-${info.project.name}.png`,
+  });
+  await action.hover();
   await page.screenshot({
     path: `/tmp/clik-project-private-menu-${info.project.name}.png`,
   });

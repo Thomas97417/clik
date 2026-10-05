@@ -7,6 +7,8 @@ import {
   HardDrive,
   LockKeyhole,
   ChevronDown,
+  LogIn,
+  Trash2,
 } from "lucide-react";
 import { useAction, useMutation, useConvexAuth } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
@@ -181,6 +183,16 @@ export default function ProjectCard({
       }
     : { to: "/editor" as const, search: { draft: creation.draftId } };
   const VisibilityIcon = published ? Globe2 : online ? LockKeyhole : HardDrive;
+  const publicationClosed =
+    !published &&
+    !!creation.challenge &&
+    Date.now() >= creation.challenge.closesAt;
+  const PublicationIcon =
+    published || publicationClosed
+      ? LockKeyhole
+      : isAuthenticated
+        ? Globe2
+        : LogIn;
   return (
     <article className="creation-card project-card">
       <Link
@@ -255,17 +267,12 @@ export default function ProjectCard({
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="start"
+          sideOffset={6}
           className="project-visibility-menu"
           finalFocus={publication || deleting ? false : undefined}
         >
           <DropdownMenuItem
-            disabled={
-              busy ||
-              isLoading ||
-              (!published &&
-                !!creation.challenge &&
-                Date.now() >= creation.challenge.closesAt)
-            }
+            disabled={busy || isLoading || publicationClosed}
             onClick={() => {
               if (published) void makePrivate();
               else if (!isAuthenticated) {
@@ -283,9 +290,10 @@ export default function ProjectCard({
                 });
             }}
           >
+            <PublicationIcon size={12} aria-hidden="true" />
             {published
               ? "Passer en privé"
-              : creation.challenge && Date.now() >= creation.challenge.closesAt
+              : publicationClosed
                 ? "Défi terminé"
                 : !isAuthenticated
                   ? "Se connecter pour publier"
@@ -300,6 +308,7 @@ export default function ProjectCard({
               setDeleting(true);
             }}
           >
+            <Trash2 size={12} aria-hidden="true" />
             Supprimer
           </DropdownMenuItem>
         </DropdownMenuContent>
