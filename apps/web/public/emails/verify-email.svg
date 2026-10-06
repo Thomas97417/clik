@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180" fill="none" role="img" aria-labelledby="title description">
+  <title id="title">Une dernière brique pour rejoindre Clik</title>
+  <desc id="description">Une carte de création en briques bleues et pêche, accompagnée d’une coche de confirmation.</desc>
+  <ellipse cx="160" cy="96" rx="119" ry="70" fill="#fff" fill-opacity=".45" />
+  <ellipse cx="163" cy="156" rx="77" ry="9" fill="#cfdef4" fill-opacity=".6" />
+  <g stroke="#c3d4f0" stroke-linecap="round">
+    <path d="M41 122h8m-4-4v8M258 29h8m-4-4v8" />
+    <circle cx="82" cy="27" r="2" fill="#c3d4f0" stroke="none" />
+    <circle cx="274" cy="143" r="2" fill="#c3d4f0" stroke="none" />
+  </g>
+  <path d="M74 116c0-44 29-81 76-88m83 58c15 9 25 25 25 45" stroke="#c3d4f0" stroke-width="1.5" stroke-dasharray="3 6" stroke-linecap="round" />
+    <g transform="translate(61 75) rotate(-12) scale(0.68)" stroke-linejoin="round">
+    <path d="M-18 0 0 10v20l-18-10Z" fill="#f3b18e" />
+    <path d="m0 10 18-10v20L0 30Z" fill="#d88c6d" />
+    <path d="m0-10 18 10L0 10-18 0Z" fill="#ffd5bb" />
+    <path d="M-6-4v4a6 3 0 0 0 12 0v-4Z" fill="#d88c6d" />
+    <ellipse cy="-4" rx="6" ry="3" fill="#ffd5bb" stroke="#fff" stroke-opacity=".45" />
+    <path d="m-18 0 18 10L18 0M0 10v20" fill="none" stroke="#fff" stroke-opacity=".2" />
+  </g>
+    <g transform="translate(258 59) rotate(10) scale(0.7)" stroke-linejoin="round">
+    <path d="M-18 0 0 10v20l-18-10Z" fill="#a9c6f4" />
+    <path d="m0 10 18-10v20L0 30Z" fill="#84a9e0" />
+    <path d="m0-10 18 10L0 10-18 0Z" fill="#d7e7ff" />
+    <path d="M-6-4v4a6 3 0 0 0 12 0v-4Z" fill="#84a9e0" />
+    <ellipse cy="-4" rx="6" ry="3" fill="#d7e7ff" stroke="#fff" stroke-opacity=".45" />
+    <path d="m-18 0 18 10L18 0M0 10v20" fill="none" stroke="#fff" stroke-opacity=".2" />
+  </g>
+    <g transform="rotate(-7 160 93)">
+      <rect x="99" y="27" width="122" height="131" rx="14" fill="#dce6f7" />
+      <rect x="99" y="21" width="122" height="131" rx="14" fill="#fff" stroke="#d5e1f4" />
+      <rect x="107" y="29" width="106" height="91" rx="9" fill="#edf3fd" />
+      <ellipse cx="160" cy="107" rx="33" ry="6" fill="#dce6f7" />
+      <g transform="translate(149 62) rotate(0) scale(1.4)" stroke-linejoin="round">
+    <path d="M-18 0 0 10v20l-18-10Z" fill="#5787eb" />
+    <path d="m0 10 18-10v20L0 30Z" fill="#3866c7" />
+    <path d="m0-10 18 10L0 10-18 0Z" fill="#8cb2ff" />
+    <path d="M-6-4v4a6 3 0 0 0 12 0v-4Z" fill="#3866c7" />
+    <ellipse cy="-4" rx="6" ry="3" fill="#8cb2ff" stroke="#fff" stroke-opacity=".45" />
+    <path d="m-18 0 18 10L18 0M0 10v20" fill="none" stroke="#fff" stroke-opacity=".2" />
+  </g>
+      <g transform="translate(182 85) rotate(0) scale(0.8)" stroke-linejoin="round">
+    <path d="M-18 0 0 10v20l-18-10Z" fill="#f3b18e" />
+    <path d="m0 10 18-10v20L0 30Z" fill="#d88c6d" />
+    <path d="m0-10 18 10L0 10-18 0Z" fill="#ffd5bb" />
+    <path d="M-6-4v4a6 3 0 0 0 12 0v-4Z" fill="#d88c6d" />
+    <ellipse cy="-4" rx="6" ry="3" fill="#ffd5bb" stroke="#fff" stroke-opacity=".45" />
+    <path d="m-18 0 18 10L18 0M0 10v20" fill="none" stroke="#fff" stroke-opacity=".2" />
+  </g>
+      <path d="M113 131h47m-47 9h29" stroke="#b4c7e6" stroke-width="3" stroke-linecap="round" />
+    </g>
+    <circle cx="218" cy="134" r="23" fill="#e7f3ec" stroke="#fff" stroke-width="5" />
+    <path d="m208 134 7 7 13-14" stroke="#65a181" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="m258 103 3 6 6 3-6 3-3 6-3-6-6-3 6-3Z" fill="#e6c4a2" />
+</svg>
