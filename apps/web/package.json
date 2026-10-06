@@ -52,6 +52,7 @@
     "@clik/avatars": "workspace:*"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.62.5",
     "@my-better-t-app/config": "workspace:*",
     "@playwright/test": "^1.63.0",
     "@tanstack/react-router-devtools": "^1.141.1",
@@ -66,6 +67,7 @@
     "typescript": "catalog:",
     "vite": "^7.0.2",
     "vitest": "^5.0.2",
-    "web-vitals": "^5.0.3"
+    "web-vitals": "^5.0.3",
+    "wrangler": "^4.147.0"
   }
 }
