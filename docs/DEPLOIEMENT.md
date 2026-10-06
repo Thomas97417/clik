@@ -286,18 +286,73 @@ Clik lit ces variables via Vite pendant la compilation. Les modifier nécessite 
 
 Les `VITE_*` sont intégrées au code du frontend. Les secrets Resend, Better Auth et OAuth sont utilisés par Convex et restent configurés sur son déploiement. [Variables et modes Vite](https://vite.dev/guide/env-and-mode)
 
-## 8. Mettre à jour les connexions Google et GitHub
+## 8. Configurer les connexions Google et GitHub
 
-Après le passage de `.workers.dev` à `clik.build`, ajuster les applications OAuth :
+Les deux fournisseurs et les boutons de connexion sont déjà configurés dans le code. Il reste à créer les applications OAuth chez Google et GitHub, puis à enregistrer leurs identifiants et secrets dans Convex Production.
 
-| Fournisseur | Réglage                                   | Valeur                                        |
-| ----------- | ----------------------------------------- | --------------------------------------------- |
-| Google      | Authorized JavaScript origins, si utilisé | `https://clik.build`                          |
-| Google      | Authorized redirect URIs                  | `https://clik.build/api/auth/callback/google` |
-| GitHub      | Homepage URL                              | `https://clik.build`                          |
-| GitHub      | Authorization callback URL                | `https://clik.build/api/auth/callback/github` |
+Les callbacks passent par le frontend Clik, qui relaie les requêtes vers Convex. Avec `BETTER_AUTH_URL=https://clik.build`, Better Auth construit les URL de retour ci-dessous. [Google avec Better Auth](https://better-auth.com/docs/authentication/google), [GitHub avec Better Auth](https://better-auth.com/docs/authentication/github)
 
-Les callbacks passent par le frontend Clik. Les identifiants et secrets correspondants sont enregistrés sur Convex Production. [Google avec Better Auth](https://better-auth.com/docs/authentication/google), [GitHub avec Better Auth](https://better-auth.com/docs/authentication/github)
+### Google
+
+1. Ouvrir la [console Google Cloud](https://console.cloud.google.com/) et créer ou sélectionner le projet **Clik**.
+2. Ouvrir **Google Auth Platform → Branding**, puis **Get started** si la configuration initiale n’a pas encore été faite.
+3. Renseigner **App name : Clik**, choisir une adresse de support que l’on peut réellement consulter, sélectionner l’audience **External**, puis renseigner une adresse de contact développeur. Terminer la création. Si le formulaire demande un domaine autorisé, indiquer `clik.build` ; pour l’URL d’accueil, utiliser `https://clik.build`. [Configuration du consentement Google](https://developers.google.com/workspace/guides/configure-oauth-consent), [Paramètres de Branding](https://support.google.com/cloud/answer/15549049?hl=en)
+4. Dans **Data Access → Add or remove scopes**, sélectionner les trois autorisations utilisées par la connexion Clik :
+
+   | Scope                                              | Données utilisées |
+   | -------------------------------------------------- | ----------------- |
+   | `openid`                                           | Identité Google   |
+   | `https://www.googleapis.com/auth/userinfo.email`   | Adresse email     |
+   | `https://www.googleapis.com/auth/userinfo.profile` | Profil            |
+
+   Le fournisseur Google installé dans le projet demande ces autorisations par défaut (`openid`, `email`, `profile`). Enregistrer la sélection.
+
+5. Dans **Clients → Create client**, choisir **Web application**, avec le nom **Clik production**, puis renseigner :
+
+   | Champ                         | Valeur                                        |
+   | ----------------------------- | --------------------------------------------- |
+   | Authorized JavaScript origins | `https://clik.build`                          |
+   | Authorized redirect URIs      | `https://clik.build/api/auth/callback/google` |
+
+6. Cliquer sur **Create** et conserver immédiatement le **Client ID** et le **Client secret** pour les enregistrer dans Convex. Google affiche le secret au moment de sa création. [Création du client OAuth Google](https://developers.google.com/identity/protocols/oauth2/web-server#creatingcred)
+7. Pour la mise en production publique, ouvrir **Audience → Publish app**, afin d’obtenir le statut **In production**. La connexion actuelle utilise uniquement les autorisations d’identité, d’email et de profil : Google prévoit une exception permettant aussi cette connexion en mode **Testing** sans inscription des utilisateurs dans la liste de test. La publication et la vérification du nom/logo sont deux réglages distincts. [Audience et publication Google](https://support.google.com/cloud/answer/15549945?hl=en), [Vérification du Branding](https://support.google.com/cloud/answer/15549049?hl=en)
+
+### GitHub
+
+1. Ouvrir [GitHub → Settings → Developer settings → OAuth Apps](https://github.com/settings/developers).
+2. Cliquer sur **New OAuth App** ou **Register a new application**.
+3. Renseigner :
+
+   | Champ                      | Valeur                                        |
+   | -------------------------- | --------------------------------------------- |
+   | Application name           | `Clik`                                        |
+   | Homepage URL               | `https://clik.build`                          |
+   | Authorization callback URL | `https://clik.build/api/auth/callback/github` |
+
+4. Laisser **Enable Device Flow** désactivé. Si l’option **Expire user access tokens** est affichée, conserver sa valeur activée : le fournisseur GitHub installé dans Clik prend en charge le renouvellement des jetons.
+5. Cliquer sur **Register application**. [Création d’une application OAuth GitHub](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app)
+6. Copier le **Client ID**, puis cliquer sur **Generate a new client secret** et conserver le secret pour Convex. [Accès aux identifiants et secrets GitHub](https://docs.github.com/en/rest/authentication/authenticating-to-the-rest-api)
+
+Le fournisseur GitHub du projet demande déjà les autorisations `read:user` et `user:email` nécessaires à la connexion.
+
+### Enregistrer les valeurs dans Convex
+
+Dans le tableau de bord Convex, sélectionner le déploiement **Production**, puis ouvrir **Settings → Environment Variables** :
+
+| Variable               | Valeur                         |
+| ---------------------- | ------------------------------ |
+| `GOOGLE_CLIENT_ID`     | Client ID créé dans Google     |
+| `GOOGLE_CLIENT_SECRET` | Client secret créé dans Google |
+| `GITHUB_CLIENT_ID`     | Client ID créé dans GitHub     |
+| `GITHUB_CLIENT_SECRET` | Client secret créé dans GitHub |
+| `SITE_URL`             | `https://clik.build`           |
+| `BETTER_AUTH_URL`      | `https://clik.build`           |
+
+Ces variables sont lues par le backend Convex dans `packages/backend/convex/auth.ts`. Saisir les valeurs sans guillemets dans le tableau de bord, puis les enregistrer.
+
+Tester les deux boutons depuis [la page de connexion](https://clik.build/sign-in), idéalement dans une fenêtre privée. Chaque connexion doit revenir sur Clik avec une session ouverte.
+
+Si Google affiche `redirect_uri_mismatch`, comparer l’URL demandée avec **Authorized redirect URIs** : domaine, protocole et chemin doivent correspondre exactement, y compris l’absence de slash final. Vérifier aussi `BETTER_AUTH_URL` sur Convex Production. [Correspondance des URL de retour Google](https://developers.google.com/identity/protocols/oauth2/web-server#redirect-uri-mismatch)
 
 ## 9. Publier et redéployer
 
