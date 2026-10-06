@@ -157,24 +157,7 @@ export default function AuthLayout({
             <p>{description}</p>
           </div>
           {children}
-          <nav
-            className="auth-legal-links"
-            aria-label="Informations sur vos données et vos droits"
-          >
-            <Link to="/privacy">Confidentialité</Link>
-            <span aria-hidden="true">·</span>
-            <Link to="/terms">Conditions d’utilisation</Link>
-          </nav>
         </section>
-      </div>
-      <div className="auth-page-footer">
-        <Link to="/">
-          <ArrowLeft size={15} aria-hidden="true" /> Retour à l’accueil
-        </Link>
-        <span>
-          Juste envie d’essayer ?{" "}
-          <Link to="/editor">Ouvrir l’atelier sans compte</Link>
-        </span>
       </div>
     </main>
   );
