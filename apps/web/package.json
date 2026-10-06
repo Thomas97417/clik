@@ -5,6 +5,9 @@
   "scripts": {
     "build": "vite build",
     "serve": "vite preview",
+    "preview": "vite preview",
+    "deploy": "bun run build && wrangler deploy",
+    "cf-typegen": "wrangler types",
     "dev": "vite dev",
     "test": "vitest run",
     "test:e2e": "playwright test",
