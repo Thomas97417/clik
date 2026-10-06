@@ -4,6 +4,8 @@ Application TypeScript avec React, TanStack Start et Convex.
 
 L’atelier 3D et la galerie Clik sont documentés dans [le guide V1](docs/CLIK.md), avec les résultats dans [le rapport de validation](docs/VALIDATION.md).
 
+Le déploiement sur Convex, Cloudflare Workers et Resend est décrit dans [le guide de déploiement](docs/DEPLOIEMENT.md).
+
 Le boilerplate inclut l’authentification Better Auth, la vérification d’email et la réinitialisation du mot de passe via Resend, les connexions Google et GitHub, le stockage de fichiers avec Cloudflare R2 et les analytics PostHog. L’interface utilise Tailwind CSS et shadcn/ui ; le monorepo utilise Bun et Turborepo.
 
 ## Prérequis
@@ -204,7 +206,7 @@ Les publications retirées et les identifiants inconnus renvoient une vraie 404.
 Configurer ces variables **au moment du build** :
 
 ```dotenv
-VITE_SITE_URL=https://clik.io
+VITE_SITE_URL=https://clik.build
 VITE_SEO_INDEXABLE=true
 ```
 
