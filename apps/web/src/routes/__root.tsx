@@ -1,5 +1,7 @@
 import { seo } from "@/lib/seo/meta";
 import SiteAnalytics from "@/components/site-analytics";
+import SiteFooter from "@/components/site-footer";
+import { AnalyticsConsentBanner } from "@/components/analytics-preferences";
 import type { ConvexQueryClient } from "@convex-dev/react-query";
 import type { QueryClient } from "@tanstack/react-query";
 
@@ -127,10 +129,12 @@ function RootDocument() {
               <Header />
               <div className="page-scroll overflow-y-auto">
                 <Outlet />
+                <SiteFooter />
               </div>
             </div>
             <Toaster richColors />
             <SiteAnalytics />
+            <AnalyticsConsentBanner />
 
             <Scripts />
           </ThemeProvider>

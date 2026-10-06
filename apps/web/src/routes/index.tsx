@@ -370,13 +370,6 @@ function Home() {
           </span>
         </Link>
       </section>
-      <footer className="home-footer">
-        <Link to="/" aria-label="Clik, accueil">
-          clik<span>.</span>
-        </Link>
-        <p>Un espace pour construire. Juste pour le plaisir.</p>
-        <span>À vous de jouer.</span>
-      </footer>
     </main>
   );
 }

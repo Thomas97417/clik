@@ -9,10 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from "./routes/__root";
+import { Route as TermsRouteImport } from "./routes/terms";
 import { Route as SitemapDotxmlRouteImport } from "./routes/sitemap[.]xml";
 import { Route as SettingsRouteImport } from "./routes/settings";
 import { Route as RobotsDottxtRouteImport } from "./routes/robots[.]txt";
 import { Route as ProjectsRouteImport } from "./routes/projects";
+import { Route as PrivacyRouteImport } from "./routes/privacy";
 import { Route as DashboardRouteImport } from "./routes/dashboard";
 import { Route as ChallengesRouteImport } from "./routes/challenges";
 import { Route as IndexRouteImport } from "./routes/index";
@@ -30,6 +32,11 @@ import { Route as authForgotPasswordRouteImport } from "./routes/(auth)/forgot-p
 import { Route as GalleryUserUserIdRouteImport } from "./routes/gallery.user.$userId";
 import { Route as ApiAuthSplatRouteImport } from "./routes/api/auth/$";
 
+const TermsRoute = TermsRouteImport.update({
+  id: "/terms",
+  path: "/terms",
+  getParentRoute: () => rootRouteImport,
+} as any);
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: "/sitemap.xml",
   path: "/sitemap.xml",
@@ -48,6 +55,11 @@ const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
 const ProjectsRoute = ProjectsRouteImport.update({
   id: "/projects",
   path: "/projects",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: "/privacy",
+  path: "/privacy",
   getParentRoute: () => rootRouteImport,
 } as any);
 const DashboardRoute = DashboardRouteImport.update({
@@ -135,10 +147,12 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/challenges": typeof ChallengesRoute;
   "/dashboard": typeof DashboardRoute;
+  "/privacy": typeof PrivacyRoute;
   "/projects": typeof ProjectsRoute;
   "/robots.txt": typeof RobotsDottxtRoute;
   "/settings": typeof SettingsRoute;
   "/sitemap.xml": typeof SitemapDotxmlRoute;
+  "/terms": typeof TermsRoute;
   "/forgot-password": typeof authForgotPasswordRoute;
   "/reset-password": typeof authResetPasswordRoute;
   "/sign-in": typeof authSignInRoute;
@@ -157,10 +171,12 @@ export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/challenges": typeof ChallengesRoute;
   "/dashboard": typeof DashboardRoute;
+  "/privacy": typeof PrivacyRoute;
   "/projects": typeof ProjectsRoute;
   "/robots.txt": typeof RobotsDottxtRoute;
   "/settings": typeof SettingsRoute;
   "/sitemap.xml": typeof SitemapDotxmlRoute;
+  "/terms": typeof TermsRoute;
   "/forgot-password": typeof authForgotPasswordRoute;
   "/reset-password": typeof authResetPasswordRoute;
   "/sign-in": typeof authSignInRoute;
@@ -180,10 +196,12 @@ export interface FileRoutesById {
   "/": typeof IndexRoute;
   "/challenges": typeof ChallengesRoute;
   "/dashboard": typeof DashboardRoute;
+  "/privacy": typeof PrivacyRoute;
   "/projects": typeof ProjectsRoute;
   "/robots.txt": typeof RobotsDottxtRoute;
   "/settings": typeof SettingsRoute;
   "/sitemap.xml": typeof SitemapDotxmlRoute;
+  "/terms": typeof TermsRoute;
   "/(auth)/forgot-password": typeof authForgotPasswordRoute;
   "/(auth)/reset-password": typeof authResetPasswordRoute;
   "/(auth)/sign-in": typeof authSignInRoute;
@@ -204,10 +222,12 @@ export interface FileRouteTypes {
     | "/"
     | "/challenges"
     | "/dashboard"
+    | "/privacy"
     | "/projects"
     | "/robots.txt"
     | "/settings"
     | "/sitemap.xml"
+    | "/terms"
     | "/forgot-password"
     | "/reset-password"
     | "/sign-in"
@@ -226,10 +246,12 @@ export interface FileRouteTypes {
     | "/"
     | "/challenges"
     | "/dashboard"
+    | "/privacy"
     | "/projects"
     | "/robots.txt"
     | "/settings"
     | "/sitemap.xml"
+    | "/terms"
     | "/forgot-password"
     | "/reset-password"
     | "/sign-in"
@@ -248,10 +270,12 @@ export interface FileRouteTypes {
     | "/"
     | "/challenges"
     | "/dashboard"
+    | "/privacy"
     | "/projects"
     | "/robots.txt"
     | "/settings"
     | "/sitemap.xml"
+    | "/terms"
     | "/(auth)/forgot-password"
     | "/(auth)/reset-password"
     | "/(auth)/sign-in"
@@ -271,10 +295,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   ChallengesRoute: typeof ChallengesRoute;
   DashboardRoute: typeof DashboardRoute;
+  PrivacyRoute: typeof PrivacyRoute;
   ProjectsRoute: typeof ProjectsRoute;
   RobotsDottxtRoute: typeof RobotsDottxtRoute;
   SettingsRoute: typeof SettingsRoute;
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute;
+  TermsRoute: typeof TermsRoute;
   authForgotPasswordRoute: typeof authForgotPasswordRoute;
   authResetPasswordRoute: typeof authResetPasswordRoute;
   authSignInRoute: typeof authSignInRoute;
@@ -292,6 +318,13 @@ export interface RootRouteChildren {
 
 declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
+    "/terms": {
+      id: "/terms";
+      path: "/terms";
+      fullPath: "/terms";
+      preLoaderRoute: typeof TermsRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     "/sitemap.xml": {
       id: "/sitemap.xml";
       path: "/sitemap.xml";
@@ -318,6 +351,13 @@ declare module "@tanstack/react-router" {
       path: "/projects";
       fullPath: "/projects";
       preLoaderRoute: typeof ProjectsRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/privacy": {
+      id: "/privacy";
+      path: "/privacy";
+      fullPath: "/privacy";
+      preLoaderRoute: typeof PrivacyRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/dashboard": {
@@ -439,10 +479,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChallengesRoute: ChallengesRoute,
   DashboardRoute: DashboardRoute,
+  PrivacyRoute: PrivacyRoute,
   ProjectsRoute: ProjectsRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SettingsRoute: SettingsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TermsRoute: TermsRoute,
   authForgotPasswordRoute: authForgotPasswordRoute,
   authResetPasswordRoute: authResetPasswordRoute,
   authSignInRoute: authSignInRoute,

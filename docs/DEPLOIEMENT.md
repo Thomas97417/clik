@@ -297,6 +297,17 @@ Les callbacks passent par le frontend Clik, qui relaie les requêtes vers Convex
 1. Ouvrir la [console Google Cloud](https://console.cloud.google.com/) et créer ou sélectionner le projet **Clik**.
 2. Ouvrir **Google Auth Platform → Branding**, puis **Get started** si la configuration initiale n’a pas encore été faite.
 3. Renseigner **App name : Clik**, choisir une adresse de support que l’on peut réellement consulter, sélectionner l’audience **External**, puis renseigner une adresse de contact développeur. Terminer la création. Si le formulaire demande un domaine autorisé, indiquer `clik.build` ; pour l’URL d’accueil, utiliser `https://clik.build`. [Configuration du consentement Google](https://developers.google.com/workspace/guides/configure-oauth-consent), [Paramètres de Branding](https://support.google.com/cloud/answer/15549049?hl=en)
+
+   Dans les paramètres **Branding → App domain**, renseigner les pages publiques de Clik :
+
+   | Champ                             | URL                          |
+   | --------------------------------- | ---------------------------- |
+   | Application home page             | `https://clik.build`         |
+   | Application privacy policy link   | `https://clik.build/privacy` |
+   | Application terms of service link | `https://clik.build/terms`   |
+
+   Déployer ces pages sur Cloudflare avant de soumettre les URL à Google. Elles sont accessibles sans connexion et liées depuis l’accueil et les écrans d’authentification. L’éditeur indiqué est **TOMA**, en **France**, avec **contact@clik.build** comme contact. Les coordonnées communes sont définies dans `apps/web/src/lib/legal.ts`. [Exigences Google pour la politique de confidentialité](https://support.google.com/cloud/answer/13806988?hl=en)
+
 4. Dans **Data Access → Add or remove scopes**, sélectionner les trois autorisations utilisées par la connexion Clik :
 
    | Scope                                              | Données utilisées |

@@ -1,23 +1,23 @@
 import { useEffect } from "react";
+import {
+  analyticsConfigured,
+  getAnalyticsConsent,
+  useAnalyticsConsent,
+} from "../lib/analytics-consent";
 
 // Keep analytics and its optional extensions out of the initial application bundle.
 let clientPromise:
   Promise<(typeof import("posthog-js"))["default"]> | undefined;
+let initialized = false;
 function analyticsClient() {
-  clientPromise ??= import("posthog-js").then(({ default: client }) => {
-    client.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY, {
-      api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
-      defaults: "2026-01-30",
-    });
-    return client;
-  });
+  clientPromise ??= import("posthog-js").then(({ default: client }) => client);
   return clientPromise;
 }
 
 export default function SiteAnalytics() {
+  const consent = useAnalyticsConsent();
   useEffect(() => {
-    if (!import.meta.env.PROD || !import.meta.env.VITE_PUBLIC_POSTHOG_KEY)
-      return;
+    if (!analyticsConfigured() || consent !== "accepted") return;
     let active = true;
     let cancelIdle: (() => void) | undefined;
     const route = location.pathname
@@ -27,13 +27,33 @@ export default function SiteAnalytics() {
     const start = () => {
       void Promise.all([analyticsClient(), import("web-vitals")])
         .then(([client, { onCLS, onINP, onLCP }]) => {
-          if (!active) return;
+          if (!active || getAnalyticsConsent() !== "accepted") return;
+          if (!initialized) {
+            client.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY, {
+              api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+              defaults: "2026-01-30",
+              autocapture: false,
+              capture_pageview: false,
+              capture_pageleave: false,
+              disable_session_recording: true,
+              person_profiles: "never",
+              persistence: "memory",
+              opt_out_capturing_by_default: true,
+              opt_out_persistence_by_default: true,
+            });
+            initialized = true;
+          }
+          client.opt_in_capturing({ captureEventName: false });
+          client.capture("$pageview", {
+            $current_url: `${location.origin}${route}`,
+            $pathname: route,
+          });
           const report = (metric: {
             name: string;
             value: number;
             rating: string;
           }) => {
-            if (active)
+            if (active && getAnalyticsConsent() === "accepted")
               client.capture("web_vital", {
                 metric: metric.name,
                 value: metric.value,
@@ -66,9 +86,12 @@ export default function SiteAnalytics() {
     else window.addEventListener("load", schedule, { once: true });
     return () => {
       active = false;
+      // Stop SDK capture as soon as the choice is withdrawn.
+      if (initialized)
+        void clientPromise?.then((client) => client.opt_out_capturing());
       window.removeEventListener("load", schedule);
       cancelIdle?.();
     };
-  }, []);
+  }, [consent]);
   return null;
 }

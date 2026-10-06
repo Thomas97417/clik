@@ -29,6 +29,9 @@ export function getRouter() {
 
   const router = createTanStackRouter({
     routeTree,
+    scrollRestoration: true,
+    // Le contenu défile dans le conteneur partagé du layout, plutôt que window.
+    scrollToTopSelectors: [".page-scroll"],
     defaultPreload: "intent",
     defaultPendingComponent: () => <Loader />,
     defaultNotFoundComponent: NotFound,

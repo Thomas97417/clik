@@ -29,6 +29,8 @@ export async function sitemapFiles() {
       { path: "/" },
       { path: "/gallery" },
       { path: "/challenges" },
+      { path: "/privacy" },
+      { path: "/terms" },
     ];
     const owners = new Set<string>();
     let cursor: string | null = null;
