@@ -1,6 +1,5 @@
 import { useEffect, useRef, type ReactNode } from "react";
-import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Cloud, FolderHeart, Globe } from "lucide-react";
+import { Cloud, FolderHeart, Globe } from "lucide-react";
 
 function StoryCube({
   x,
