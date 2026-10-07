@@ -1,66 +1,45 @@
 import { useEffect } from "react";
-import {
-  analyticsConfigured,
-  getAnalyticsConsent,
-  useAnalyticsConsent,
-} from "../lib/analytics-consent";
+import { usePostHog } from "@posthog/react";
+import { useLocation } from "@tanstack/react-router";
+import { analyticsPathname } from "../lib/analytics";
 
-// Keep analytics and its optional extensions out of the initial application bundle.
-let clientPromise:
-  Promise<(typeof import("posthog-js"))["default"]> | undefined;
-let initialized = false;
-function analyticsClient() {
-  clientPromise ??= import("posthog-js").then(({ default: client }) => client);
-  return clientPromise;
-}
+export default function SiteAnalytics({ ready }: { ready: boolean }) {
+  const client = usePostHog();
+  const pathname = useLocation({ select: (location) => location.pathname });
+  const route = analyticsPathname(pathname);
 
-export default function SiteAnalytics() {
-  const consent = useAnalyticsConsent();
   useEffect(() => {
-    if (!analyticsConfigured() || consent !== "accepted") return;
+    if (!ready) return;
+    client.capture("$pageview", {
+      environment: import.meta.env.MODE,
+      $current_url: `${location.origin}${route}`,
+      $pathname: route,
+    });
+  }, [client, ready, route]);
+
+  useEffect(() => {
+    if (!ready) return;
     let active = true;
     let cancelIdle: (() => void) | undefined;
-    const route = location.pathname
-      .replace(/\/creations\/[^/]+/, "/creations/$publicationId")
-      .replace(/\/gallery\/user\/[^/]+/, "/gallery/user/$userId")
-      .replace(/\/editor\/[^/]+/, "/editor/$projectId");
+    const initialRoute = analyticsPathname(location.pathname);
     const start = () => {
-      void Promise.all([analyticsClient(), import("web-vitals")])
-        .then(([client, { onCLS, onINP, onLCP }]) => {
-          if (!active || getAnalyticsConsent() !== "accepted") return;
-          if (!initialized) {
-            client.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY, {
-              api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
-              defaults: "2026-01-30",
-              autocapture: false,
-              capture_pageview: false,
-              capture_pageleave: false,
-              disable_session_recording: true,
-              person_profiles: "never",
-              persistence: "memory",
-              opt_out_capturing_by_default: true,
-              opt_out_persistence_by_default: true,
-            });
-            initialized = true;
-          }
-          client.opt_in_capturing({ captureEventName: false });
-          client.capture("$pageview", {
-            $current_url: `${location.origin}${route}`,
-            $pathname: route,
-          });
+      void import("web-vitals")
+        .then(({ onCLS, onINP, onLCP }) => {
+          if (!active) return;
           const report = (metric: {
             name: string;
             value: number;
             rating: string;
           }) => {
-            if (active && getAnalyticsConsent() === "accepted")
+            if (active)
               client.capture("web_vital", {
+                environment: import.meta.env.MODE,
                 metric: metric.name,
                 value: metric.value,
                 rating: metric.rating,
-                route,
-                $current_url: `${location.origin}${route}`,
-                $pathname: route,
+                route: initialRoute,
+                $current_url: `${location.origin}${initialRoute}`,
+                $pathname: initialRoute,
                 $set: undefined,
               });
           };
@@ -86,12 +65,9 @@ export default function SiteAnalytics() {
     else window.addEventListener("load", schedule, { once: true });
     return () => {
       active = false;
-      // Stop SDK capture as soon as the choice is withdrawn.
-      if (initialized)
-        void clientPromise?.then((client) => client.opt_out_capturing());
       window.removeEventListener("load", schedule);
       cancelIdle?.();
     };
-  }, [consent]);
+  }, [client, ready]);
   return null;
 }

@@ -5,5 +5,5 @@ export const legalPublisher = {
   email: "contact@clik.build",
 };
 
-export const legalUpdatedAt = "2026-10-07";
-export const legalUpdatedLabel = "7 octobre 2026";
+export const legalUpdatedAt = "2026-10-08";
+export const legalUpdatedLabel = "8 octobre 2026";

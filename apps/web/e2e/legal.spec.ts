@@ -4,20 +4,18 @@ async function anonymous(page: Page) {
   await page.route("**/api/auth/get-session*", (route) =>
     route.fulfill({ json: null }),
   );
-  await page.route("https://analytics.clik.test/**", (route) =>
-    route.fulfill({
-      json: {
-        status: 1,
-        supportedCompression: [],
-        config: { enable_collect_everything: false },
-      },
-    }),
-  );
-  await page.addInitScript(() =>
-    localStorage.setItem(
-      "clik-analytics-consent",
-      JSON.stringify({ value: "declined", expiresAt: Date.now() + 86400000 }),
-    ),
+  await page.route(
+    /https:\/\/(?:[^/]+\.)?posthog\.com\/|https:\/\/analytics\.clik\.test\//,
+    (route) =>
+      route.request().resourceType() === "script"
+        ? route.fulfill({ contentType: "text/javascript", body: "" })
+        : route.fulfill({
+            json: {
+              status: 1,
+              supportedCompression: [],
+              config: { enable_collect_everything: false },
+            },
+          }),
   );
 }
 
@@ -66,7 +64,7 @@ test("le sommaire et les liens restent utilisables sur ordinateur et mobile", as
       .getByRole("link", { name: last })
       .click();
     await expect(
-      page.getByRole("heading", { name: last, exact: true }),
+      page.getByRole("button", { name: last, exact: true }),
     ).toBeInViewport();
     for (const width of [390, 320]) {
       await page.setViewportSize({ width, height: 844 });
@@ -91,7 +89,7 @@ test("le sommaire et les liens restent utilisables sur ordinateur et mobile", as
         "",
       );
       await expect(
-        page.getByRole("heading", { name: last, exact: true }),
+        page.getByRole("button", { name: last, exact: true }),
       ).toBeInViewport();
     }
   }
@@ -128,80 +126,34 @@ test("l’accueil et les écrans de connexion donnent accès aux deux documents"
   await expect(page).toHaveURL(/\/terms$/);
 });
 
-test("la mesure d’audience attend un accord et son choix se modifie au clavier", async ({
+test("les documents décrivent la mesure automatique sans interface de préférences", async ({
   page,
-}, info) => {
-  let requests = 0;
-  await page.route("**/api/auth/get-session*", (route) =>
-    route.fulfill({ json: null }),
-  );
-  await page.route("**/*", async (route) => {
-    if (
-      new URL(route.request().url()).origin !==
-      new URL(test.info().project.use.baseURL!).origin
-    ) {
-      requests++;
-      await route.fulfill({
-        json: {
-          status: 1,
-          featureFlags: {},
-          supportedCompression: [],
-          config: {},
-        },
-      });
-    } else await route.fallback();
-  });
+}) => {
+  await anonymous(page);
   await page.goto("/privacy#cookies");
-  await expect(page.locator(".header-sign-in")).toBeVisible();
-  const banner = page.locator(".analytics-banner");
-  test.skip(
-    !(await banner.isVisible()),
-    "La mesure d’audience est désactivée dans ce build.",
+  await expect(
+    page.getByText("Clik utilise PostHog pour mesurer automatiquement", {
+      exact: false,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", {
+      name: /Accepter|Refuser|Préférences de confidentialité/,
+    }),
+  ).toHaveCount(0);
+  await expect(page.locator(".site-footer nav").getByRole("link")).toHaveCount(
+    2,
   );
-  await page.setViewportSize({ width: 390, height: 844 });
-  await expect(
-    banner.getByRole("button", { name: "Refuser", exact: true }),
-  ).toBeVisible();
-  await expect(
-    banner.getByRole("button", { name: "Accepter", exact: true }),
-  ).toBeVisible();
-  await page.screenshot({
-    path: `/tmp/clik-legal-consent-${info.project.name}.png`,
-  });
-  await page.waitForTimeout(1800);
-  expect(requests).toBe(0);
-  await banner.getByRole("button", { name: "Refuser", exact: true }).click();
-  await expect(banner).not.toBeVisible();
-  expect(
-    await page.evaluate(
-      () => JSON.parse(localStorage.getItem("clik-analytics-consent")!).value,
-    ),
-  ).toBe("declined");
-
-  const preferences = page
+  await page
     .locator(".site-footer")
-    .getByRole("button", { name: "Préférences de confidentialité" });
-  await preferences.click();
-  const dialog = page.getByRole("dialog");
+    .getByRole("link", { name: "Conditions d’utilisation", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Vos données personnelles", exact: true })
+    .click();
   await expect(
-    dialog.getByRole("button", { name: "Refuser", exact: true }),
-  ).toHaveAttribute("aria-pressed", "true");
-  await page.keyboard.press("Escape");
-  await expect(dialog).not.toBeVisible();
-  await expect(preferences).toBeFocused();
-  await preferences.press("Enter");
-  await dialog.getByRole("button", { name: "Accepter", exact: true }).click();
-  await expect(dialog).not.toBeVisible();
-  await expect.poll(() => requests).toBeGreaterThan(0);
-  expect(
-    await page.evaluate(
-      () => JSON.parse(localStorage.getItem("clik-analytics-consent")!).value,
-    ),
-  ).toBe("accepted");
-
-  await preferences.click();
-  await dialog.getByRole("button", { name: "Refuser", exact: true }).click();
-  await expect(page.locator(".legal-prose").getByRole("status")).toContainText(
-    "refusée",
-  );
+    page.getByText("Clik mesure automatiquement la fréquentation", {
+      exact: false,
+    }),
+  ).toBeVisible();
 });

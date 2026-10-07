@@ -1,7 +1,6 @@
 import { seo } from "@/lib/seo/meta";
-import SiteAnalytics from "@/components/site-analytics";
+import SiteAnalyticsProvider from "@/components/site-analytics-provider";
 import SiteFooter from "@/components/site-footer";
-import { AnalyticsConsentBanner } from "@/components/analytics-preferences";
 import type { ConvexQueryClient } from "@convex-dev/react-query";
 import type { QueryClient } from "@tanstack/react-query";
 
@@ -113,35 +112,35 @@ function RootDocument() {
       authClient={authClient}
       initialToken={context.token}
     >
-      <html lang="fr" suppressHydrationWarning>
-        <head>
-          <HeadContent />
-        </head>
-        <body>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            forcedTheme="light"
-            disableTransitionOnChange
-            storageKey="vite-ui-theme"
-          >
-            <div className="grid h-svh grid-rows-[auto_1fr]">
-              <Header />
-              <div className="page-scroll overflow-y-auto">
-                <div className="page-content">
-                  <Outlet />
+      <SiteAnalyticsProvider>
+        <html lang="fr" suppressHydrationWarning>
+          <head>
+            <HeadContent />
+          </head>
+          <body>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="light"
+              forcedTheme="light"
+              disableTransitionOnChange
+              storageKey="vite-ui-theme"
+            >
+              <div className="grid h-svh grid-rows-[auto_1fr]">
+                <Header />
+                <div className="page-scroll overflow-y-auto">
+                  <div className="page-content">
+                    <Outlet />
+                  </div>
+                  <SiteFooter />
                 </div>
-                <SiteFooter />
               </div>
-            </div>
-            <Toaster richColors />
-            <SiteAnalytics />
-            <AnalyticsConsentBanner />
+              <Toaster richColors />
 
-            <Scripts />
-          </ThemeProvider>
-        </body>
-      </html>
+              <Scripts />
+            </ThemeProvider>
+          </body>
+        </html>
+      </SiteAnalyticsProvider>
     </ConvexBetterAuthProvider>
   );
 }

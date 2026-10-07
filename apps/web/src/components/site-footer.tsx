@@ -1,5 +1,4 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { AnalyticsPreferencesButton } from "./analytics-preferences";
 
 export default function SiteFooter() {
   const pathname = useLocation({ select: (location) => location.pathname });
@@ -17,7 +16,6 @@ export default function SiteFooter() {
       <nav aria-label="Informations et confidentialité">
         <Link to="/privacy">Confidentialité</Link>
         <Link to="/terms">Conditions d’utilisation</Link>
-        <AnalyticsPreferencesButton />
       </nav>
     </footer>
   );

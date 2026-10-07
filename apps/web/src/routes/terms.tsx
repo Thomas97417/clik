@@ -219,8 +219,11 @@ const sections: LegalSection[] = [
           les prestataires techniques, le stockage local et vos droits.
         </p>
         <p>
-          La mesure d’audience optionnelle dépend de votre choix et peut être
-          refusée sans perdre l’accès à l’application.
+          Clik mesure automatiquement la fréquentation et les performances de
+          l’application. Cette mesure fonctionne sans écran d’acceptation, sans
+          cookies d’analyse persistants ni enregistrement des sessions. Son
+          fonctionnement et vos droits sont décrits dans la politique de
+          confidentialité.
         </p>
       </>
     ),

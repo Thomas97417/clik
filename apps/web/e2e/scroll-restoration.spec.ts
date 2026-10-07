@@ -4,11 +4,12 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/auth/get-session*", (route) =>
     route.fulfill({ json: null }),
   );
-  await page.addInitScript(() =>
-    localStorage.setItem(
-      "clik-analytics-consent",
-      JSON.stringify({ value: "declined", expiresAt: Date.now() + 86400000 }),
-    ),
+  await page.route(
+    /https:\/\/(?:[^/]+\.)?posthog\.com\/|https:\/\/analytics\.clik\.test\//,
+    (route) =>
+      route.request().resourceType() === "script"
+        ? route.fulfill({ contentType: "text/javascript", body: "" })
+        : route.fulfill({ json: { status: 1, featureFlags: {}, config: {} } }),
   );
 });
 
@@ -53,6 +54,7 @@ for (const width of [1440, 390]) {
     await page.goForward();
     await expect(page).toHaveURL(/\/terms$/);
     await expect.poll(scrollTop).toBe(0);
+    await page.waitForTimeout(150);
 
     // Un nouveau lien vers une page déjà visitée doit aussi repartir en haut.
     await page

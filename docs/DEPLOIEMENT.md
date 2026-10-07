@@ -279,8 +279,12 @@ Dans la même section **Build variables and secrets**, ajouter ces valeurs publi
 | `VITE_CONVEX_URL`          | URL Convex de production terminant en `.convex.cloud` | Obligatoire                                                                |
 | `VITE_CONVEX_SITE_URL`     | URL du même déploiement terminant en `.convex.site`   | Obligatoire                                                                |
 | `VITE_SEO_INDEXABLE`       | `true`                                                | Pour autoriser le référencement du site public ; `false` pendant les tests |
-| `VITE_PUBLIC_POSTHOG_KEY`  | Clé publique du projet PostHog                        | Optionnel                                                                  |
-| `VITE_PUBLIC_POSTHOG_HOST` | URL fournie par PostHog                               | Optionnel, avec la clé                                                     |
+| `VITE_POSTHOG_PROJECT_TOKEN` | Token public du projet PostHog                       | Optionnel                                                                  |
+| `VITE_POSTHOG_HOST`          | URL fournie par PostHog                               | Optionnel, avec le token                                                   |
+
+Les anciens noms `VITE_PUBLIC_POSTHOG_KEY` et `VITE_PUBLIC_POSTHOG_HOST` restent compatibles. `VITE_POSTHOG_PROJECT_KEY` est aussi accepté pour le token ; `VITE_POSTHOG_PROJECT_TOKEN` a priorité.
+
+Le Provider PostHog démarre automatiquement lorsque le token est configuré, en développement comme en production. L’intégration mesure les visites et les performances, avec persistance désactivée et sans enregistrement des sessions. Les événements portent une propriété `environment` pour distinguer les environnements.
 
 Clik lit ces variables via Vite pendant la compilation. Les modifier nécessite donc de relancer un **build complet**. La section **Settings → Variables & Secrets** configure les variables du Worker à l’exécution ; pour les `VITE_*` actuelles, utiliser la section **Build**.
 

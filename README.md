@@ -117,11 +117,15 @@ Configurer également les URL de retour OAuth chez chaque fournisseur en fonctio
 Ajouter les valeurs du projet PostHog dans **`apps/web/.env`** :
 
 ```dotenv
-VITE_PUBLIC_POSTHOG_KEY=cle_publique_du_projet
-VITE_PUBLIC_POSTHOG_HOST=https://hote-indique-par-posthog
+VITE_POSTHOG_PROJECT_TOKEN=token_public_du_projet
+VITE_POSTHOG_HOST=https://hote-indique-par-posthog
 ```
 
 Utiliser la clé publique du projet destinée au SDK web et l’hôte indiqué par PostHog.
+
+PostHog est initialisé automatiquement par `PostHogProvider`, en développement comme en production. Redémarrer le serveur après modification du fichier `.env`. Les événements incluent une propriété `environment` pour distinguer les environnements. La mesure se limite aux visites et aux performances, avec stockage en mémoire, persistance désactivée et sans enregistrement des sessions.
+
+`VITE_POSTHOG_PROJECT_KEY` est également accepté pour le token. Les anciens noms `VITE_PUBLIC_POSTHOG_KEY` et `VITE_PUBLIC_POSTHOG_HOST` restent compatibles ; les noms ci-dessus ont priorité.
 
 ## Dépannage
 
@@ -239,8 +243,9 @@ leur manipulation 3D démarre lorsqu’ils approchent de la zone visible. Les cr
 publiques affichent leur miniature pendant le chargement du canvas. L’image de
 partage par défaut est `public/og/clik.png` (1200 × 630).
 
-Si PostHog est configuré, les événements `web_vital` mesurent LCP, INP et CLS en
-production. Les routes sont normalisées, sans identifiants de projets ni paramètres
+Si PostHog est configuré, les événements `web_vital` mesurent LCP, INP et CLS.
+Filtrer sur `environment=production` pour les mesures du site public.
+Les routes sont normalisées, sans identifiants de projets ni paramètres
 d’URL. Suivre le 75e percentile mobile et bureau : LCP ≤ 2,5 s, INP ≤ 200 ms,
 CLS ≤ 0,1. Les mesures locales ne remplacent pas les données réelles de production.
 
@@ -259,8 +264,9 @@ Les assertions couvrent le HTML sans JavaScript, les métadonnées après naviga
 les URL canoniques, les 404, l’exclusion des données privées, les sitemaps et les
 interactions publiques sur Chromium, Firefox et WebKit.
 
-PostHog est chargé après le chargement initial, pendant un créneau libre du
-navigateur, et uniquement en production. Le moteur de rendu Three est séparé des
+Le Provider PostHog est monté à la racine et suit les visites au fil des navigations.
+Les mesures de performance sont chargées après le chargement initial, pendant un
+créneau libre du navigateur. Le moteur de rendu Three est séparé des
 modules mathématiques utilisés par les pages publiques. Les paramètres `VITE_*`
 font partie de la clé du cache de build Turbo, pour éviter de réutiliser les
 métadonnées d’un autre environnement.

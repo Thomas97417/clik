@@ -20,6 +20,7 @@
     "@convex-dev/react-query": "^0.1.0",
     "@my-better-t-app/backend": "workspace:*",
     "@my-better-t-app/env": "workspace:*",
+    "@posthog/react": "^1.11.3",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9",
     "@tailwindcss/vite": "^4.1.8",

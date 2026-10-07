@@ -4,7 +4,6 @@ import LegalPage, {
   LegalContact,
   type LegalSection,
 } from "@/components/legal/legal-page";
-import { AnalyticsPreferences } from "@/components/analytics-preferences";
 import { legalPublisher } from "@/lib/legal";
 import { seo } from "@/lib/seo/meta";
 
@@ -95,9 +94,8 @@ const sections: LegalSection[] = [
                 <th scope="row">Visiter le site</th>
                 <td>
                   Informations techniques nécessaires à l’hébergement et à la
-                  sécurité. Si vous acceptez la mesure d’audience, des
-                  informations de navigation et de performance sont aussi
-                  utilisées.
+                  sécurité, pages consultées, type de navigateur et d’appareil,
+                  ainsi que mesures de performance du site.
                 </td>
               </tr>
             </tbody>
@@ -183,8 +181,9 @@ const sections: LegalSection[] = [
           </li>
           <li>
             <strong>Mesurer la performance et la fréquentation :</strong>{" "}
-            lorsque la mesure d’audience est activée et que vous y consentez.
-            Vous pouvez retirer ce choix à tout moment.
+            comprendre l’utilisation de Clik et améliorer sa fiabilité. Cette
+            mesure est activée automatiquement et poursuit l’intérêt légitime de
+            l’éditeur à améliorer le service.
           </li>
           <li>
             <strong>Répondre à une demande ou à une obligation légale :</strong>{" "}
@@ -236,9 +235,8 @@ const sections: LegalSection[] = [
       <>
         <p>
           Clik fait appel à des prestataires pour héberger le site, enregistrer
-          les comptes et les projets, envoyer les emails de compte et, si vous
-          l’acceptez, mesurer l’audience. Ils reçoivent les informations utiles
-          à ces fonctions.
+          les comptes et les projets, envoyer les emails de compte et mesurer
+          l’audience. Ils reçoivent les informations utiles à ces fonctions.
         </p>
         <p>
           Des informations peuvent aussi être transmises à une autorité lorsque
@@ -260,21 +258,21 @@ const sections: LegalSection[] = [
         <p>
           Clik utilise des cookies de session et le stockage du navigateur pour
           maintenir votre connexion, mémoriser des préférences, conserver vos
-          brouillons et enregistrer votre choix concernant la mesure d’audience.
-          Ces éléments servent au fonctionnement du service.
+          brouillons. Ces éléments servent au fonctionnement du service.
         </p>
         <p>
-          La mesure d’audience reste désactivée tant que vous ne l’avez pas
-          acceptée. Elle concerne les pages visitées et la performance du site,
-          sans enregistrement vidéo des sessions ni contenu de vos créations ou
-          formulaires.
+          Clik utilise PostHog pour mesurer automatiquement la fréquentation et
+          la performance dès votre visite. Aucun écran d’acceptation n’est
+          affiché. La configuration de cette mesure n’utilise pas de cookies ni
+          d’identifiants persistants dans le stockage de votre navigateur.
         </p>
         <p>
-          Accepter ou refuser ne change pas votre accès à Clik. Votre choix est
-          conservé pendant six mois sur cet appareil ; vous pouvez le modifier
-          ci-dessous ou depuis le pied de page.
+          Cette mesure concerne les pages consultées et des informations
+          techniques sur le navigateur, l’appareil et les temps de chargement.
+          Elle n’enregistre pas vos sessions, le contenu de vos créations ou vos
+          formulaires, et n’est pas reliée à votre compte Clik. Les identifiants
+          de créations et de comptes sont retirés des chemins transmis.
         </p>
-        <AnalyticsPreferences />
         <p>
           Effacer les données du site dans votre navigateur supprime aussi vos
           préférences et peut effacer les créations enregistrées uniquement sur
@@ -308,6 +306,11 @@ const sections: LegalSection[] = [
           </p>
         </div>
         <p>
+          Les mesures de fréquentation et de performance sont conservées dans le
+          service d’analyse selon les réglages de conservation du projet.
+          Contactez-nous pour obtenir des précisions sur ces durées.
+        </p>
+        <p>
           Les créations reprises par d’autres personnes et les références à
           leurs sources peuvent subsister dans leurs propres projets. Certaines
           informations peuvent être conservées si une obligation légale ou la
@@ -326,8 +329,8 @@ const sections: LegalSection[] = [
           Selon les règles applicables à votre situation, vous pouvez demander
           l’accès à vos données, leur rectification, leur effacement, la
           limitation de leur utilisation, leur portabilité ou vous opposer à
-          certains traitements. Vous pouvez retirer votre consentement à la
-          mesure d’audience à tout moment.
+          certains traitements, notamment la mesure d’audience. Pour exercer ces
+          droits ou poser une question, contactez-nous à l’adresse ci-dessous.
         </p>
         <p>
           Vos paramètres permettent déjà de modifier votre nom et votre adresse
@@ -368,8 +371,7 @@ const sections: LegalSection[] = [
           Cette politique peut évoluer avec l’application. La date en tête de
           page indique la dernière mise à jour. Une modification importante
           concernant l’utilisation de vos données fera l’objet d’une information
-          adaptée ; un nouveau consentement sera demandé lorsqu’il est
-          nécessaire.
+          adaptée.
         </p>
       </>
     ),
@@ -382,7 +384,7 @@ function PrivacyPage() {
       kind="privacy"
       title="Politique de"
       accent="confidentialité"
-      description="Pour construire l’esprit libre. Voici les données que Clik utilise, pourquoi elles sont utiles et les choix qui vous appartiennent."
+      description="Pour construire l’esprit libre. Voici les données que Clik utilise, pourquoi elles sont utiles et comment exercer vos droits."
       sections={sections}
     />
   );
