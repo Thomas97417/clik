@@ -154,38 +154,47 @@ function Challenges() {
           </p>
         </div>
       </div>
-      <div className="challenge-navigation">
-        <button
-          aria-label="Défi précédent"
-          disabled={!data || selected <= data.firstDay}
-          onClick={() =>
-            choose(challengeDay(challengeStart(selected) - CHALLENGE_DAY_MS))
-          }
-        >
-          <ArrowLeft size={18} />
-        </button>
-        <ChallengeDatePicker
-          key={selected}
-          day={selected}
-          first={data?.firstDay ?? today}
-          last={today}
-          onChange={choose}
-        />
-        <button
-          aria-label="Défi suivant"
-          disabled={selected >= today}
-          onClick={() =>
-            choose(challengeDay(challengeStart(selected) + CHALLENGE_DAY_MS))
-          }
-        >
-          <ArrowRight size={18} />
-        </button>
-        <button
-          onClick={() => void navigate({ to: "/challenges", search: {} })}
-          disabled={!date}
-        >
-          Aujourd’hui
-        </button>
+      <div className="challenge-toolbar">
+        <div className="challenge-navigation">
+          <button
+            aria-label="Défi précédent"
+            disabled={!data || selected <= data.firstDay}
+            onClick={() =>
+              choose(challengeDay(challengeStart(selected) - CHALLENGE_DAY_MS))
+            }
+          >
+            <ArrowLeft size={18} />
+          </button>
+          <ChallengeDatePicker
+            key={selected}
+            day={selected}
+            first={data?.firstDay ?? today}
+            last={today}
+            onChange={choose}
+          />
+          <button
+            aria-label="Défi suivant"
+            disabled={selected >= today}
+            onClick={() =>
+              choose(challengeDay(challengeStart(selected) + CHALLENGE_DAY_MS))
+            }
+          >
+            <ArrowRight size={18} />
+          </button>
+          <button
+            onClick={() => void navigate({ to: "/challenges", search: {} })}
+            disabled={!date}
+          >
+            Aujourd’hui
+          </button>
+        </div>
+        {challenge && (
+          <ChallengeRewards
+            key={challenge._id}
+            challenge={challenge}
+            now={now}
+          />
+        )}
       </div>
       {error && (
         <p className="challenge-error" role="alert">
@@ -293,7 +302,6 @@ function Challenges() {
           <Entries
             key={challenge._id}
             challenge={challenge}
-            now={now}
             open={open}
             choices={data.choices}
             initial={initial}
@@ -305,13 +313,11 @@ function Challenges() {
 }
 function Entries({
   challenge,
-  now,
   open,
   choices,
   initial,
 }: {
   challenge: Doc<"challenges">;
-  now: number;
   open: boolean;
   choices: { publicationId: Id<"publications"> }[];
   initial: PublicData["challenge"];
@@ -370,7 +376,6 @@ function Entries({
           </Select>
         </div>
       </div>
-      <ChallengeRewards challenge={challenge} now={now} />
       {!results.length ? (
         <div className="empty-state">
           {status === "LoadingFirstPage"

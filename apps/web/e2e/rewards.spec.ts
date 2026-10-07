@@ -122,25 +122,23 @@ test("défis : échéance et podium figé avec ex æquo et création retirée", 
   await page.goto("/challenges");
   const rewards = page.getByRole("region", { name: "Récompenses du défi" });
   const toggle = rewards.getByRole("button", {
-    name: /Les règles|Réduire|Voir le podium/,
+    name: /Récompenses|Voir le podium/,
   });
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
-  await expect(rewards.locator("time")).toBeVisible();
-  await expect(
-    rewards.getByText(/24 h après la fin des constructions/),
-  ).toBeHidden();
+  const rules = page.getByRole("dialog", { name: "Or, argent, bronze" });
+  await expect(rules).toBeHidden();
   await toggle.focus();
   await page.keyboard.press("Enter");
-  await expect(rewards).toContainText("24 h après la fin des constructions");
-  await expect(
-    rewards.getByRole("link", { name: "Personnaliser mon avatar" }),
-  ).toBeVisible();
-  await toggle.click();
+  await expect(rules).toContainText("Une couronne pour les 3 premières places");
+  await expect(rules.locator("time")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(rules).toBeHidden();
+  await expect(toggle).toBeFocused();
   fixture.setRewardPhase("complete");
-  await expect(rewards).toContainText("Podium définitif");
+  await expect(toggle).toHaveText("Voir le podium");
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
   await expect(
-    rewards.getByRole("link", { name: "Le phare couronné" }),
+    page.getByRole("link", { name: "Le phare couronné" }),
   ).toHaveCount(0);
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 1000 });
@@ -155,30 +153,34 @@ test("défis : échéance et podium figé avec ex æquo et création retirée", 
     });
   }
   await toggle.click();
-  await expect(rewards.getByText("1er · Or", { exact: true })).toHaveCount(2);
-  await expect(rewards.getByText("3e · Bronze", { exact: true })).toBeVisible();
+  const podium = page.getByRole("dialog", { name: "Podium du défi" });
+  await expect(podium.getByText("1er · Or", { exact: true })).toHaveCount(2);
+  await expect(podium.getByText("3e · Bronze", { exact: true })).toBeVisible();
   await expect(
-    rewards.getByRole("link", { name: "Création retirée" }),
+    podium.getByRole("link", { name: "Création retirée" }),
   ).toHaveCount(0);
   await expect(
-    rewards.getByText("Création retirée", { exact: true }),
+    podium.getByText("Création retirée", { exact: true }),
   ).toBeVisible();
   await expect(
-    rewards.getByRole("link", { name: "Le phare couronné" }),
+    podium.getByRole("link", { name: "Le phare couronné" }),
   ).toHaveAttribute("href", "/creations/creation-1");
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 1000 });
     expect(
-      await rewards.evaluate((el) => el.scrollWidth <= el.clientWidth),
+      await podium.evaluate((el) => el.scrollWidth <= el.clientWidth),
     ).toBe(true);
-    await rewards.screenshot({
+    const bounds = await podium.boundingBox();
+    expect(bounds!.x).toBeGreaterThanOrEqual(0);
+    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width);
+    await podium.screenshot({
       path: `/tmp/clik-podium-${width}-${info.project.name}.png`,
     });
   }
   await toggle.focus();
   await page.keyboard.press("Space");
   await expect(
-    rewards.getByRole("link", { name: "Le phare couronné" }),
+    page.getByRole("link", { name: "Le phare couronné" }),
   ).toHaveCount(0);
   await expect(toggle).toBeFocused();
 });

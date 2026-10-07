@@ -220,7 +220,13 @@ test("tri des participations : souris, clavier et menu mobile", async ({
   await sort.focus();
   await sort.press("Enter");
   await expect(page.getByRole("listbox")).toBeVisible();
+  await expect(
+    page.getByRole("option", { name: "Les plus aimées" }),
+  ).toBeFocused();
   await page.keyboard.press("Home");
+  await expect(
+    page.getByRole("option", { name: "Récentes", exact: true }),
+  ).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(sort).toHaveText("Récentes");
   await expect(titles.first()).toHaveText("Le petit phare");
