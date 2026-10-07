@@ -217,7 +217,16 @@ body {
   font-size: 16px;
 }
 .page-scroll {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   scrollbar-gutter: stable;
+}
+.page-content {
+  flex: 1 0 auto;
+}
+.page-content:only-child {
+  height: 100%;
 }
 button,
 a,

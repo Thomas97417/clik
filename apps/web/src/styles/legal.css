@@ -489,6 +489,7 @@
 
 .site-footer {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 18px 28px;
   max-width: 1296px;
@@ -886,7 +887,9 @@
     overflow: visible !important;
   }
   body > div,
-  body .grid.h-svh {
+  body .grid.h-svh,
+  .page-scroll,
+  .page-content {
     display: block;
     height: auto;
   }

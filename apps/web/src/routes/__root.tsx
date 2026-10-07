@@ -128,7 +128,9 @@ function RootDocument() {
             <div className="grid h-svh grid-rows-[auto_1fr]">
               <Header />
               <div className="page-scroll overflow-y-auto">
-                <Outlet />
+                <div className="page-content">
+                  <Outlet />
+                </div>
                 <SiteFooter />
               </div>
             </div>
