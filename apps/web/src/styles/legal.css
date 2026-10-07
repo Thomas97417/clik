@@ -157,26 +157,48 @@
   font-weight: 650;
 }
 .legal-help {
-  margin-top: 30px;
-  padding: 19px 17px;
-  border: 1px solid #e0e7f0;
-  border-radius: 14px;
-  background: #fff9;
+  margin-top: 24px;
+  padding: 18px;
+  border: 1px solid #d2e0f5;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #edf4ff, #fff 75%);
+  box-shadow: 0 5px 20px #254c8507;
+}
+.legal-help-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 .legal-help-icon {
-  display: inline-flex;
-  color: #6c89b6;
-  margin-bottom: 11px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border: 1px solid #d9e5f8;
+  border-radius: 13px;
+  color: var(--legal-accent);
+  background: #fff;
+  box-shadow: 0 3px 8px #356ae609;
+}
+.legal-help-art {
+  flex-shrink: 0;
+  width: 76px;
+  height: 61px;
 }
 .legal-help h2 {
   margin: 0 0 8px;
-  font-size: 13px;
+  font-size: 17px;
+  line-height: 1.4;
   font-weight: 750;
-  color: #34445f;
+  letter-spacing: -0.3px;
+  color: #2d4266;
 }
 .legal-help p {
-  margin: 0 0 14px;
-  color: #687a92;
+  margin: 0 0 18px;
+  color: #5c7090;
   font-size: 12px;
   line-height: 1.8;
 }
@@ -190,15 +212,49 @@
   color: #356ae6;
   overflow-wrap: anywhere;
 }
-.legal-help .legal-contact-link {
-  font-size: 11px;
-  gap: 5px;
-}
-.legal-help .legal-contact-link > svg:first-child {
-  display: none;
-}
 .legal-contact-link:hover {
   color: #224fab;
+}
+.legal-contact-card {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  min-height: 62px;
+  padding: 11px 12px;
+  border: 1px solid #ccdbf4;
+  border-radius: 11px;
+  background: #fff;
+  transition:
+    background-color 150ms,
+    border-color 150ms;
+}
+.legal-contact-card-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.5;
+}
+.legal-contact-card-label > svg {
+  flex-shrink: 0;
+}
+.legal-contact-card-email {
+  color: #5c7090;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.legal-contact-card:hover {
+  border-color: #91afe5;
+  background: #f3f7ff;
+}
+.legal-help .legal-contact-card:focus-visible {
+  border-radius: 11px;
+  outline: 3px solid #8cace8;
+  outline-offset: 3px;
 }
 .legal-mobile-contents {
   display: none;
@@ -817,7 +873,8 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .legal-section {
+  .legal-section,
+  .legal-contact-card {
     transition: none;
   }
 }

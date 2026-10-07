@@ -8,15 +8,40 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import LegalArt from "./legal-art";
+import LegalHelpArt from "./legal-help-art";
 import { legalPublisher, legalUpdatedAt, legalUpdatedLabel } from "@/lib/legal";
 
 export type LegalSection = { id: string; title: string; content: ReactNode };
 
-export function LegalContact() {
+export function LegalContact({
+  variant = "inline",
+}: {
+  variant?: "inline" | "card";
+}) {
   return (
-    <a href={`mailto:${legalPublisher.email}`} className="legal-contact-link">
-      <Mail size={17} aria-hidden="true" /> {legalPublisher.email}
-      <ArrowUpRight size={15} aria-hidden="true" />
+    <a
+      href={`mailto:${legalPublisher.email}`}
+      className={
+        variant === "card"
+          ? "legal-contact-link legal-contact-card"
+          : "legal-contact-link"
+      }
+    >
+      {variant === "card" ? (
+        <>
+          <span className="legal-contact-card-label">
+            Nous contacter <ArrowUpRight size={16} aria-hidden="true" />
+          </span>
+          <span className="legal-contact-card-email">
+            {legalPublisher.email}
+          </span>
+        </>
+      ) : (
+        <>
+          <Mail size={17} aria-hidden="true" /> {legalPublisher.email}
+          <ArrowUpRight size={15} aria-hidden="true" />
+        </>
+      )}
     </a>
   );
 }
@@ -129,15 +154,15 @@ export default function LegalPage({
             {contents()}
           </nav>
           <div className="legal-help">
-            <span className="legal-help-icon">
-              <Mail size={19} aria-hidden="true" />
-            </span>
+            <div className="legal-help-heading">
+              <LegalHelpArt />
+            </div>
             <h2>Une question ?</h2>
             <p>
               Écrivez-nous pour parler de vos données ou de votre utilisation de
               Clik.
             </p>
-            <LegalContact />
+            <LegalContact variant="card" />
           </div>
         </aside>
         <div className="legal-document">
