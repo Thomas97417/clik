@@ -163,7 +163,6 @@ export default function LegalPage({
             ))}
           </Accordion>
           <div className="legal-ending">
-            <p>Merci de faire partie de l’atelier.</p>
             <Link to={kind === "privacy" ? "/terms" : "/privacy"}>
               {kind === "privacy"
                 ? "Lire les conditions d’utilisation"

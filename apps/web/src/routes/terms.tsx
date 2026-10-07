@@ -191,9 +191,8 @@ const sections: LegalSection[] = [
           synchronisation aboutit.
         </p>
         <p>
-          Gardez une copie des constructions importantes en utilisant l’export
-          de l’atelier. Une coupure de réseau, un incident ou une opération de
-          maintenance peut interrompre l’accès ou retarder l’enregistrement.
+          Une coupure de réseau, un incident ou une opération de maintenance
+          peut interrompre l’accès ou retarder l’enregistrement.
         </p>
         <p>
           Clik évolue régulièrement. Certaines fonctionnalités peuvent être
@@ -237,12 +236,11 @@ const sections: LegalSection[] = [
           <Link to="/settings">les paramètres</Link>.
         </p>
         <p>
-          Avant cette suppression, exportez les constructions à conserver et
-          supprimez ou dépubliez les contenus que vous souhaitez retirer. La
-          suppression du compte ferme votre accès ; elle ne supprime pas
-          automatiquement tous les projets, publications et commentaires
-          associés. Contactez-nous pour demander l’effacement des données
-          restantes.
+          Avant cette suppression, supprimez ou dépubliez les contenus que vous
+          souhaitez retirer. La suppression du compte ferme votre accès ; elle
+          ne supprime pas automatiquement tous les projets, publications et
+          commentaires associés. Contactez-nous pour demander l’effacement des
+          données restantes.
         </p>
         <p>
           Les reprises déjà réalisées par d’autres utilisateurs et leurs

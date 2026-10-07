@@ -278,8 +278,7 @@ const sections: LegalSection[] = [
         <p>
           Effacer les données du site dans votre navigateur supprime aussi vos
           préférences et peut effacer les créations enregistrées uniquement sur
-          cet appareil. Pensez à exporter les constructions que vous souhaitez
-          conserver.
+          cet appareil.
         </p>
       </>
     ),
@@ -301,11 +300,11 @@ const sections: LegalSection[] = [
         </p>
         <div className="legal-callout legal-callout-peach">
           <p>
-            <strong>Avant de supprimer votre compte :</strong> exportez ce que
-            vous voulez garder et retirez les publications souhaitées. La
-            suppression du compte ne supprime pas automatiquement tous les
-            projets, publications ou commentaires associés. Pour demander leur
-            effacement et celui des informations restantes, contactez-nous.
+            <strong>Avant de supprimer votre compte :</strong> supprimez ou
+            dépubliez les créations que vous souhaitez retirer. La suppression
+            du compte ne supprime pas automatiquement tous les projets,
+            publications ou commentaires associés. Pour demander leur effacement
+            et celui des informations restantes, contactez-nous.
           </p>
         </div>
         <p>
