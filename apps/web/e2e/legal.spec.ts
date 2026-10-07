@@ -55,6 +55,7 @@ test("le sommaire et les liens restent utilisables sur ordinateur et mobile", as
   ]) {
     await page.setViewportSize({ width: 1440, height: 1000 });
     await page.goto(path);
+    await expect(page.locator(".header-sign-in")).toBeVisible();
     await expect(page.getByRole("heading", { level: 1 })).toContainText(title);
     await expect(page.locator(".legal-art")).toBeVisible();
     await page.screenshot({
@@ -70,6 +71,7 @@ test("le sommaire et les liens restent utilisables sur ordinateur et mobile", as
     for (const width of [390, 320]) {
       await page.setViewportSize({ width, height: 844 });
       await page.goto(path);
+      await expect(page.locator(".header-sign-in")).toBeVisible();
       await expect(page.locator(".legal-sidebar")).not.toBeVisible();
       expect(
         await page
@@ -113,11 +115,9 @@ test("l’accueil et les écrans de connexion donnent accès aux deux documents"
         exact: true,
       }),
     ).toHaveAttribute("href", "/terms");
-    if (path !== "/")
-      await expect(page.locator(".auth-legal-links")).toBeVisible();
   }
   await page
-    .locator(".auth-legal-links")
+    .locator(".site-footer")
     .getByRole("link", { name: "Confidentialité", exact: true })
     .click();
   await expect(page).toHaveURL(/\/privacy$/);
@@ -151,7 +151,8 @@ test("la mesure d’audience attend un accord et son choix se modifie au clavier
       });
     } else await route.fallback();
   });
-  await page.goto("/privacy");
+  await page.goto("/privacy#cookies");
+  await expect(page.locator(".header-sign-in")).toBeVisible();
   const banner = page.locator(".analytics-banner");
   test.skip(
     !(await banner.isVisible()),

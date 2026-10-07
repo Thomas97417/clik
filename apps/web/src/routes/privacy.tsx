@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Eye, ShieldCheck, SlidersHorizontal } from "lucide-react";
+import { Eye, ShieldCheck } from "lucide-react";
 import LegalPage, {
   LegalContact,
   type LegalSection,
@@ -117,26 +117,14 @@ const sections: LegalSection[] = [
     content: (
       <>
         <p>
-          Si vous choisissez Google, Clik reçoit votre identifiant Google, votre
-          nom, votre adresse email, son statut de vérification et, lorsqu’elle
-          est fournie, votre photo de profil. Les autorisations demandées sont
-          celles de connexion et de profil : <code>openid</code>,{" "}
-          <code>email</code> et <code>profile</code>.
+          Si vous choisissez Google ou GitHub, Clik reçoit les informations de
+          profil nécessaires à votre compte : identifiant, nom ou pseudonyme,
+          adresse email et, lorsqu’elle est disponible, photo de profil.
         </p>
         <p>
-          Avec GitHub, Clik reçoit l’identifiant de votre compte, votre nom ou
-          pseudonyme, votre adresse email et les informations de profil
-          nécessaires à la connexion, dont votre avatar lorsqu’il est fourni.
-          Les autorisations utilisées sont <code>read:user</code> et{" "}
-          <code>user:email</code>.
-        </p>
-        <p>
-          Ces informations servent à créer ou retrouver votre compte Clik et à
-          établir votre session. Les identifiants et jetons nécessaires à cette
-          connexion sont conservés par le service d’authentification dans
-          Convex. Les données de connexion ne sont pas vendues ni utilisées pour
-          de la publicité ciblée ou l’entraînement de modèles d’intelligence
-          artificielle.
+          Ces informations servent à créer ou retrouver votre compte et à vous
+          connecter. Elles ne sont ni vendues ni utilisées pour de la publicité
+          ciblée ou l’entraînement de modèles d’intelligence artificielle.
         </p>
         <div className="legal-callout">
           <ShieldCheck size={20} aria-hidden="true" />
@@ -243,78 +231,23 @@ const sections: LegalSection[] = [
   },
   {
     id: "prestataires",
-    title: "Les services qui nous accompagnent",
+    title: "Avec qui les données sont-elles partagées ?",
     content: (
       <>
         <p>
-          Les prestataires suivants interviennent selon les fonctionnalités
-          utilisées :
-        </p>
-        <ul>
-          <li>
-            <a
-              href="https://www.cloudflare.com/privacypolicy/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <strong>Cloudflare</strong>
-            </a>{" "}
-            : hébergement et distribution du site, sécurité des requêtes et
-            informations techniques associées.
-          </li>
-          <li>
-            <a
-              href="https://www.convex.dev/legal/privacy"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <strong>Convex</strong>
-            </a>{" "}
-            : base de données, authentification, projets, contenus et fichiers
-            enregistrés en ligne.
-          </li>
-          <li>
-            <a
-              href="https://resend.com/legal/privacy-policy"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <strong>Resend</strong>
-            </a>{" "}
-            : livraison des emails de vérification et de réinitialisation,
-            adresse du destinataire, contenu du message et informations de
-            livraison.
-          </li>
-          <li>
-            <strong>Google et GitHub</strong> : identification lorsque vous
-            choisissez l’un de ces modes de connexion. Leur propre politique
-            s’applique à l’utilisation de votre compte chez eux.
-          </li>
-          <li>
-            <a
-              href="https://posthog.com/privacy"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <strong>PostHog</strong>
-            </a>{" "}
-            : mesure d’audience et de performance, uniquement si elle est
-            activée et si vous l’acceptez. Clik n’y transmet pas votre nom,
-            votre adresse email, vos constructions ou le contenu de vos
-            formulaires.
-          </li>
-        </ul>
-        <p>
-          Les informations sont communiquées pour les besoins de ces services.
-          Elles peuvent aussi être transmises à une autorité lorsque la loi
-          l’impose.
+          Clik fait appel à des prestataires pour héberger le site, enregistrer
+          les comptes et les projets, envoyer les emails de compte et, si vous
+          l’acceptez, mesurer l’audience. Ils reçoivent les informations utiles
+          à ces fonctions.
         </p>
         <p>
-          Ces prestataires peuvent traiter des données dans différents pays, y
-          compris hors de l’Espace économique européen. Les lieux d’hébergement
-          et les garanties de transfert dépendent des services et régions
-          configurés ; vous pouvez nous demander les informations applicables à
-          votre compte.
+          Des informations peuvent aussi être transmises à une autorité lorsque
+          la loi l’impose.
+        </p>
+        <p>
+          Certains services peuvent traiter des données hors de l’Espace
+          économique européen. Contactez-nous pour connaître les destinations et
+          les garanties applicables à votre compte.
         </p>
       </>
     ),
@@ -331,11 +264,10 @@ const sections: LegalSection[] = [
           Ces éléments servent au fonctionnement du service.
         </p>
         <p>
-          La mesure optionnelle avec PostHog reste désactivée tant que vous ne
-          l’avez pas acceptée. Elle porte sur les pages visitées et la
-          performance, avec un identifiant technique temporaire.
-          L’enregistrement vidéo des sessions et la capture automatique des
-          clics ou des formulaires sont désactivés.
+          La mesure d’audience reste désactivée tant que vous ne l’avez pas
+          acceptée. Elle concerne les pages visitées et la performance du site,
+          sans enregistrement vidéo des sessions ni contenu de vos créations ou
+          formulaires.
         </p>
         <p>
           Accepter ou refuser ne change pas votre accès à Clik. Votre choix est
@@ -358,11 +290,8 @@ const sections: LegalSection[] = [
     content: (
       <>
         <p>
-          Les informations de compte et les projets restent enregistrés pour
-          vous permettre d’utiliser Clik et de retrouver vos créations. Les
-          sessions et jetons suivent les délais du système d’authentification ;
-          les journaux et messages de livraison suivent les durées appliquées
-          par les prestataires.
+          Les informations de compte et les projets sont conservés pour assurer
+          votre accès à Clik et vous permettre de retrouver vos créations.
         </p>
         <p>
           Vous pouvez supprimer vos projets ou dépublier vos créations depuis{" "}
@@ -432,10 +361,9 @@ const sections: LegalSection[] = [
     content: (
       <>
         <p>
-          Les communications avec Clik utilisent HTTPS. L’accès aux projets
-          privés est lié à votre compte et les secrets d’authentification sont
-          traités côté serveur. Protégez vos moyens de connexion et fermez votre
-          session sur les appareils partagés.
+          L’accès à vos projets privés est protégé par votre compte. Protégez
+          vos moyens de connexion et fermez votre session sur les appareils
+          partagés.
         </p>
         <p>
           Cette politique peut évoluer avec l’application. La date en tête de
@@ -456,26 +384,6 @@ function PrivacyPage() {
       title="Politique de"
       accent="confidentialité"
       description="Pour construire l’esprit libre. Voici les données que Clik utilise, pourquoi elles sont utiles et les choix qui vous appartiennent."
-      summaries={[
-        {
-          title: "Une connexion, rien de plus",
-          text: "Google et GitHub nous aident à vous identifier, avec votre email et votre profil.",
-          section: "connexions",
-          icon: ShieldCheck,
-        },
-        {
-          title: "Vous décidez de partager",
-          text: "Vos projets restent privés jusqu’à leur publication dans la galerie.",
-          section: "publications",
-          icon: Eye,
-        },
-        {
-          title: "Vos choix restent les vôtres",
-          text: "Gérez la mesure d’audience et retrouvez vos droits sur vos données.",
-          section: "cookies",
-          icon: SlidersHorizontal,
-        },
-      ]}
       sections={sections}
     />
   );

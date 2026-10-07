@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Link } from "@tanstack/react-router";
-import { ArrowUpRight, ChevronDown, Mail, type LucideIcon } from "lucide-react";
+import { Link, useLocation } from "@tanstack/react-router";
+import { ArrowUpRight, ChevronDown, Mail } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import LegalArt from "./legal-art";
 import { legalPublisher, legalUpdatedAt, legalUpdatedLabel } from "@/lib/legal";
 
 export type LegalSection = { id: string; title: string; content: ReactNode };
-type Summary = {
-  title: string;
-  text: string;
-  section: string;
-  icon: LucideIcon;
-};
 
 export function LegalContact() {
   return (
@@ -26,19 +26,30 @@ export default function LegalPage({
   title,
   accent,
   description,
-  summaries,
   sections,
 }: {
   kind: "privacy" | "terms";
   title: string;
   accent: string;
   description: string;
-  summaries: Summary[];
   sections: LegalSection[];
 }) {
   const root = useRef<HTMLElement>(null);
   const mobileContents = useRef<HTMLDetailsElement>(null);
   const [active, setActive] = useState(sections[0].id);
+  const [expanded, setExpanded] = useState<string[]>([sections[0].id]);
+  const hash = useLocation({ select: (location) => location.hash });
+
+  useEffect(() => {
+    if (!sections.some(({ id }) => id === hash)) return;
+    setExpanded((current) =>
+      current.includes(hash) ? current : [...current, hash],
+    );
+    const frame = requestAnimationFrame(() =>
+      document.getElementById(hash)?.scrollIntoView({ block: "start" }),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [hash, sections]);
 
   useEffect(() => {
     const scroll = root.current?.closest(".page-scroll");
@@ -74,6 +85,9 @@ export default function LegalPage({
             href={`#${id}`}
             aria-current={active === id ? "location" : undefined}
             onClick={() => {
+              setExpanded((current) =>
+                current.includes(id) ? current : [...current, id],
+              );
               if (mobile && mobileContents.current)
                 mobileContents.current.open = false;
             }}
@@ -103,30 +117,6 @@ export default function LegalPage({
         </div>
         <LegalArt kind={kind} />
       </header>
-      <div className="legal-summaries" aria-label="Les points à retenir">
-        {summaries.map(
-          ({ title: summaryTitle, text, section, icon: Icon }, index) => (
-            <a
-              className={`legal-summary legal-summary-${index + 1}`}
-              href={`#${section}`}
-              key={summaryTitle}
-            >
-              <span className="legal-summary-icon">
-                <Icon size={20} aria-hidden="true" />
-              </span>
-              <div>
-                <h2>{summaryTitle}</h2>
-                <p>{text}</p>
-              </div>
-              <ArrowUpRight
-                className="legal-summary-arrow"
-                size={16}
-                aria-hidden="true"
-              />
-            </a>
-          ),
-        )}
-      </div>
       <details ref={mobileContents} className="legal-mobile-contents">
         <summary>
           Dans cette page <ChevronDown size={16} aria-hidden="true" />
@@ -136,7 +126,6 @@ export default function LegalPage({
       <div className="legal-body">
         <aside className="legal-sidebar">
           <nav className="legal-contents" aria-label="Sommaire">
-            <p>Dans cette page</p>
             {contents()}
           </nav>
           <div className="legal-help">
@@ -152,19 +141,27 @@ export default function LegalPage({
           </div>
         </aside>
         <div className="legal-document">
-          {sections.map(({ id, title: sectionTitle, content }, index) => (
-            <section key={id} aria-labelledby={id} className="legal-section">
-              <div className="legal-section-heading">
-                <span aria-hidden="true">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <h2 id={id} tabIndex={-1}>
-                  {sectionTitle}
-                </h2>
-              </div>
-              <div className="legal-prose">{content}</div>
-            </section>
-          ))}
+          <Accordion
+            className="legal-accordion"
+            multiple
+            hiddenUntilFound
+            value={expanded}
+            onValueChange={setExpanded}
+          >
+            {sections.map(({ id, title: sectionTitle, content }, index) => (
+              <AccordionItem key={id} value={id} className="legal-section">
+                <AccordionTrigger id={id} className="legal-section-trigger">
+                  <span className="legal-section-number" aria-hidden="true">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span className="legal-section-title">{sectionTitle}</span>
+                </AccordionTrigger>
+                <AccordionContent className="legal-section-content">
+                  <div className="legal-prose">{content}</div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
           <div className="legal-ending">
             <p>Merci de faire partie de l’atelier.</p>
             <Link to={kind === "privacy" ? "/terms" : "/privacy"}>

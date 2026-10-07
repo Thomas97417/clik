@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Blocks, HeartHandshake, Palette } from "lucide-react";
+import { Palette } from "lucide-react";
 import LegalPage, {
   LegalContact,
   type LegalSection,
@@ -281,26 +281,6 @@ function TermsPage() {
       title="Conditions"
       accent="d’utilisation"
       description="De bonnes bases pour de grandes idées. Quelques règles pour créer, partager et prendre soin de l’atelier ensemble."
-      summaries={[
-        {
-          title: "Créez à votre façon",
-          text: "Un atelier pour essayer, construire et retrouver vos idées, avec ou sans compte.",
-          section: "acces",
-          icon: Blocks,
-        },
-        {
-          title: "Gardez vos droits",
-          text: "Vos créations restent les vôtres. Leur publication permet les reprises dans Clik.",
-          section: "creations",
-          icon: Palette,
-        },
-        {
-          title: "Construisons ensemble",
-          text: "Respectez les auteurs, les personnes et les règles de la communauté.",
-          section: "communaute",
-          icon: HeartHandshake,
-        },
-      ]}
       sections={sections}
     />
   );

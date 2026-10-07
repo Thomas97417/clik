@@ -42,13 +42,7 @@ export default function LegalArt({ kind }: { kind: "privacy" | "terms" }) {
       aria-hidden="true"
       focusable="false"
     >
-      <ellipse
-        cx="218"
-        cy="166"
-        rx="143"
-        ry="123"
-        fill={kind === "privacy" ? "#eaf1fe" : "#faf0e8"}
-      />
+      <ellipse cx="218" cy="166" rx="143" ry="123" fill="#eaf1fe" />
       <ellipse
         cx="217"
         cy="259"
@@ -118,8 +112,8 @@ export default function LegalArt({ kind }: { kind: "privacy" | "terms" }) {
             height="178"
             rx="15"
             transform="rotate(-9 214 150)"
-            fill="#e2d6c9"
-            stroke="#d8c8b5"
+            fill="#dce7fa"
+            stroke="#abc3ee"
           />
           <rect
             x="161"
@@ -128,8 +122,8 @@ export default function LegalArt({ kind }: { kind: "privacy" | "terms" }) {
             height="178"
             rx="15"
             transform="rotate(7 228 147)"
-            fill="#fffdf9"
-            stroke="#e4d9cc"
+            fill="#f9fbff"
+            stroke="#d6e3f7"
             strokeWidth="1.5"
           />
           <g transform="rotate(7 228 147)">
@@ -164,7 +158,7 @@ export default function LegalArt({ kind }: { kind: "privacy" | "terms" }) {
             <path d="m-4 24 4 8 4-8" fill="#3a4a65" />
             <path d="M-9-67H9" stroke="#edf3ff" strokeWidth="5" />
           </g>
-          <circle cx="149" cy="69" r="21" fill="#fff" stroke="#e5dace" />
+          <circle cx="149" cy="69" r="21" fill="#fff" stroke="#d6e3f7" />
           <path
             d="m140 70 6 6 12-14"
             stroke="#5d8a73"
