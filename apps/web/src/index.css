@@ -2461,6 +2461,134 @@ button:focus-visible {
   max-width: 510px;
   line-height: 1.8;
 }
+
+/* A missing page is another small, unfinished construction in the workshop. */
+.not-found-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 56px 5%;
+}
+.not-found-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  align-items: center;
+  gap: 28px;
+  width: 100%;
+  max-width: 1060px;
+}
+.not-found-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border: 1px solid #dce7fb;
+  border-radius: 7px;
+  background: #edf3ff;
+  color: #285bc5;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.not-found-label::before {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+}
+.not-found-copy h1 {
+  margin: 20px 0 16px;
+  color: #202b40;
+  font-size: clamp(32px, 3.8vw, 46px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -1.5px;
+}
+.not-found-copy h1 > span {
+  color: #356ae6;
+}
+.not-found-copy p {
+  max-width: 390px;
+  color: #65738a;
+  font-size: 14px;
+  line-height: 1.85;
+}
+.not-found-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin-top: 28px;
+}
+.not-found-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.not-found-actions a:focus-visible {
+  outline: 2px solid #356ae6;
+  outline-offset: 4px;
+}
+.not-found-primary {
+  padding: 10px 17px;
+  border-radius: 10px;
+  background: #356ae6;
+  color: #fff;
+  box-shadow: 0 4px 12px #356ae61a;
+}
+.not-found-primary:hover {
+  background: #285abd;
+}
+.not-found-secondary {
+  border-radius: 6px;
+  color: #536e99;
+}
+.not-found-secondary:hover {
+  color: #285abd;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.not-found-art {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+@media (max-width: 760px) {
+  .not-found-page {
+    padding: 32px 24px 40px;
+  }
+  .not-found-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    max-width: 460px;
+    text-align: center;
+  }
+  .not-found-art {
+    grid-row: 1;
+    max-width: 340px;
+    justify-self: center;
+  }
+  .not-found-copy h1 {
+    margin-top: 16px;
+    font-size: clamp(32px, 6vw, 40px);
+  }
+  .not-found-copy p {
+    margin-inline: auto;
+    font-size: 13px;
+  }
+  .not-found-actions {
+    justify-content: center;
+    gap: 10px 20px;
+    margin-top: 24px;
+  }
+}
 .mobile-editor {
   display: none;
 }

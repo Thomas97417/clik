@@ -1,28 +1,32 @@
 import { Link } from "@tanstack/react-router";
-import { Button } from "./ui/button";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
+import NotFoundArt from "./clik/not-found-art";
 
 export default function NotFound() {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-6 px-4 text-center">
-      <div className="flex flex-col items-center gap-2">
-        <span className="text-muted-foreground text-[10rem] leading-none font-bold tracking-tighter select-none">
-          404
-        </span>
-        <h1 className="text-foreground text-xl font-semibold">
-          Page introuvable
-        </h1>
-        <p className="text-muted-foreground max-w-sm text-sm">
-          Cette page n’existe pas ou n’est plus disponible.
-        </p>
+    <main className="not-found-page">
+      <div className="not-found-layout">
+        <div className="not-found-copy">
+          <span className="not-found-label">Erreur 404</span>
+          <h1>
+            Page introuvable<span>.</span>
+          </h1>
+          <p>
+            Cette page n’existe pas ou n’est plus disponible. Votre prochaine
+            idée vous attend ailleurs dans Clik.
+          </p>
+          <div className="not-found-actions">
+            <Link to="/" className="not-found-primary">
+              <ArrowLeft size={17} aria-hidden="true" />
+              Retour à l’accueil
+            </Link>
+            <Link to="/gallery" className="not-found-secondary">
+              Explorer la galerie <ArrowUpRight size={17} aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+        <NotFoundArt />
       </div>
-      <Button
-        variant="outline"
-        size="lg"
-        nativeButton={false}
-        render={<Link to="/" />}
-      >
-        Retour à l’accueil
-      </Button>
-    </div>
+    </main>
   );
 }
