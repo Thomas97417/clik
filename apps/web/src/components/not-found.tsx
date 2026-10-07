@@ -7,7 +7,6 @@ export default function NotFound() {
     <main className="not-found-page">
       <div className="not-found-layout">
         <div className="not-found-copy">
-          <span className="not-found-label">Erreur 404</span>
           <h1>
             Page introuvable<span>.</span>
           </h1>

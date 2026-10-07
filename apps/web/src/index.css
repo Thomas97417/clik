@@ -2478,27 +2478,7 @@ button:focus-visible {
   width: 100%;
   max-width: 1060px;
 }
-.not-found-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 6px 10px;
-  border: 1px solid #dce7fb;
-  border-radius: 7px;
-  background: #edf3ff;
-  color: #285bc5;
-  font-size: 10px;
-  font-weight: 650;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-.not-found-label::before {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: currentColor;
-  content: "";
-}
+
 .not-found-copy h1 {
   margin: 20px 0 16px;
   color: #202b40;

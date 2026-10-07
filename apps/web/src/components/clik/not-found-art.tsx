@@ -92,14 +92,6 @@ export default function NotFoundArt() {
 
       <Four x={92} />
       <Four x={326} />
-      <path
-        d="M290 63c23 30-14 40-25 57m-4-9 4 9 9-4"
-        stroke="#b7c9e7"
-        strokeWidth="1.8"
-        strokeDasharray="3 6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
       <LostBrick x={264} y={49} scale={1.15} />
       <ellipse cx="203" cy="284" rx="20" ry="4" fill="#d9e3f2" />
       <LostBrick x={201} y={261} scale={0.65} />
