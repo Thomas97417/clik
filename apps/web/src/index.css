@@ -4399,21 +4399,285 @@ dialog.modal-backdrop::backdrop {
   font-size: 11px;
   color: #7d8da5;
 }
+.challenge-navigation .challenge-date-trigger {
+  min-height: 44px;
+  gap: 10px;
+  padding: 6px 12px 6px 7px;
+  border-color: #d9e3f3;
+  border-radius: 11px;
+  color: #344964;
+  font-weight: 650;
+}
+.challenge-navigation .challenge-date-trigger:hover,
+.challenge-navigation .challenge-date-trigger[data-popup-open] {
+  border-color: #adc5f0;
+  background: #f5f8ff;
+  color: #285abd;
+}
+.challenge-date-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: #eaf0fc;
+  color: #356ae6;
+}
+.challenge-date-label {
+  min-width: 0;
+  white-space: nowrap;
+}
+.challenge-date-chevron {
+  color: #7d8da5;
+  transition: transform 0.15s;
+}
+.challenge-date-trigger[data-popup-open] .challenge-date-chevron {
+  transform: rotate(180deg);
+  color: #356ae6;
+}
 .challenge-calendar-positioner {
   z-index: 60;
 }
 .challenge-calendar {
-  padding: 15px;
+  width: 344px;
+  max-width: calc(100vw - 24px);
+  max-height: var(--available-height);
+  overflow-y: auto;
   background: #fff;
   border: 1px solid #dce5f4;
-  border-radius: 15px;
-  box-shadow: 0 15px 45px #233b7220;
+  border-radius: 18px;
+  box-shadow:
+    0 18px 50px #20396220,
+    0 3px 10px #20396208;
+  color: #344964;
+  font-family: var(--font-sans);
+  transform-origin: var(--transform-origin);
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
+}
+.challenge-calendar[data-starting-style],
+.challenge-calendar[data-ending-style] {
+  opacity: 0;
+  transform: scale(0.97);
+}
+.challenge-calendar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 16px;
+  border-bottom: 1px solid #edf1f7;
+  background: #fbfcff;
+}
+.challenge-calendar-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border: 1px solid #f1dac7;
+  border-radius: 12px;
+  background: #fff0e4;
+  color: #ad7044;
+}
+.challenge-calendar-title {
+  color: #263b58;
+  font-size: 15px;
+  font-weight: 750;
+  letter-spacing: -0.35px;
+  line-height: 1.4;
+}
+.challenge-calendar-description {
+  margin-top: 4px;
+  color: #71839c;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.challenge-calendar-body {
+  padding: 16px;
+}
+.challenge-calendar .rdp-root {
   --rdp-accent-color: #356ae6;
-  --rdp-day_button-width: 36px;
-  --rdp-day_button-height: 36px;
-  --rdp-day-width: 36px;
-  --rdp-day-height: 36px;
+  --rdp-accent-background-color: #edf3ff;
+  --rdp-day-width: calc(100% / 7);
+  --rdp-day-height: 44px;
+  --rdp-day_button-width: calc(100% - 4px);
+  --rdp-day_button-height: 40px;
+  --rdp-day_button-border-radius: 10px;
+  --rdp-day_button-border: 1px solid transparent;
+  --rdp-selected-border: 1px solid #356ae6;
+  --rdp-nav_button-width: 36px;
+  --rdp-nav-height: 36px;
+  --rdp-nav_button-disabled-opacity: 0.35;
+  --rdp-disabled-opacity: 0.35;
+  --rdp-outside-opacity: 1;
+  --rdp-weekday-opacity: 1;
+  --rdp-weekday-padding: 14px 0 8px;
   font-size: 13px;
+}
+.challenge-calendar .rdp-months,
+.challenge-calendar .rdp-month {
+  width: 100%;
+  max-width: none;
+}
+.challenge-calendar .rdp-month_grid {
+  width: 100%;
+  table-layout: fixed;
+}
+.challenge-calendar .rdp-month_caption {
+  color: #263b58;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.35px;
+  text-transform: capitalize;
+}
+.challenge-calendar .rdp-button_previous,
+.challenge-calendar .rdp-button_next {
+  border: 1px solid #e0e7f2;
+  border-radius: 9px;
+  background: #fff;
+  color: #536f97;
+}
+.challenge-calendar .rdp-chevron {
+  fill: none;
+  color: inherit;
+}
+.challenge-calendar
+  .rdp-button_previous:hover:not(:disabled):not([aria-disabled="true"]),
+.challenge-calendar
+  .rdp-button_next:hover:not(:disabled):not([aria-disabled="true"]) {
+  background: #edf3ff;
+  color: #356ae6;
+}
+.challenge-calendar .rdp-weekday {
+  color: #8a98ae;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+.challenge-calendar .rdp-day_button {
+  position: relative;
+  margin-inline: auto;
+  font-weight: 550;
+  outline-offset: 1px;
+}
+.challenge-calendar button:disabled {
+  cursor: not-allowed;
+  opacity: 1;
+}
+.challenge-calendar .rdp-day_button:hover:not(:disabled) {
+  background: #edf3ff;
+  color: #2458ce;
+}
+.challenge-calendar .rdp-outside:not(.rdp-selected) .rdp-day_button {
+  color: #8a98ae;
+}
+.challenge-calendar .rdp-today:not(.rdp-selected) .rdp-day_button {
+  background: #edf3ff;
+  color: #356ae6;
+  font-weight: 700;
+}
+.challenge-calendar .rdp-today .rdp-day_button::after {
+  position: absolute;
+  bottom: 4px;
+  left: calc(50% - 2px);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #356ae6;
+  content: "";
+}
+.challenge-calendar .rdp-selected {
+  font-size: 13px;
+}
+.challenge-calendar .rdp-selected .rdp-day_button {
+  background: #356ae6;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 3px 8px #356ae625;
+}
+.challenge-calendar .rdp-selected .rdp-day_button:hover:not(:disabled) {
+  background: #285abd;
+  color: #fff;
+}
+.challenge-calendar .rdp-selected .rdp-day_button:focus-visible {
+  outline-color: #203b65;
+}
+.challenge-calendar .rdp-selected .rdp-day_button::after {
+  background: #fff;
+}
+.challenge-calendar-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px solid #e8eef7;
+  background: #f7faff;
+}
+.challenge-calendar-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #71839c;
+  font-size: 11px;
+}
+.challenge-calendar-legend > span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #356ae6;
+}
+.challenge-calendar-today {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 8px 11px;
+  border: 1px solid #dce6f7;
+  border-radius: 9px;
+  background: #fff;
+  color: #356ae6;
+  font-size: 11px;
+  font-weight: 650;
+}
+.challenge-calendar-today:hover {
+  border-color: #b8cef2;
+  background: #edf3ff;
+}
+@media (max-width: 480px) {
+  .challenge-navigation {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) 42px;
+  }
+  .challenge-navigation > button[aria-label] {
+    padding-inline: 8px;
+  }
+  .challenge-navigation .challenge-date-trigger {
+    gap: 6px;
+    padding-inline: 6px;
+    font-size: 12px;
+  }
+  .challenge-date-icon {
+    width: 24px;
+    height: 28px;
+  }
+  .challenge-date-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .challenge-navigation > button:last-child {
+    grid-column: 1 / -1;
+    justify-self: end;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .challenge-calendar,
+  .challenge-date-chevron {
+    transition: none;
+  }
 }
 .challenge-kit {
   border: 1px solid #dfe7f3;

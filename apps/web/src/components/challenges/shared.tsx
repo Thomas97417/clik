@@ -5,6 +5,7 @@ import { ArrowUpRight, Heart, LoaderCircle } from "lucide-react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import { toast } from "sonner";
+import { formatChallengeDay } from "@/lib/clik/challenge-date";
 export function useServerNow(serverNow?: number) {
   const [offset, setOffset] = useState(0),
     [now, setNow] = useState(serverNow ?? Date.now());
@@ -145,10 +146,7 @@ export function CreationChallenge({
   const data = useQuery(api.challenges.day, { day });
   const { isAuthenticated } = useConvexAuth();
   const used = data?.choices.length ?? 0;
-  const formattedDay = new Date(`${day}T00:00:00Z`).toLocaleDateString(
-    "fr-FR",
-    { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" },
-  );
+  const formattedDay = formatChallengeDay(day);
   return (
     <div className="creation-challenge">
       <Link

@@ -1,5 +1,6 @@
 import { loadPublic, type PublicData } from "@/lib/seo/public-data";
 import { seo, collection } from "@/lib/seo/meta";
+import { formatChallengeDay } from "@/lib/clik/challenge-date";
 import {
   usePublicPagination,
   continuationHref,
@@ -90,15 +91,16 @@ export const Route = createFileRoute("/challenges")({
   },
   head: ({ loaderData, match }) => {
     const date = match.search.date;
+    const formattedDate = date ? formatChallengeDay(date) : "";
     const archive = date && date !== loaderData?.data.today;
     const path = archive ? `/challenges?date=${date}` : "/challenges";
     const title = archive
-      ? `Défi de construction du ${date}`
+      ? `Défi de construction du ${formattedDate}`
       : "Le défi du jour : construisez en briques 3D";
     return seo({
       title,
       text: archive
-        ? `Découvrez les créations du défi Clik du ${date}. Explorez les constructions, votez pour vos préférées et partagez vos idées.`
+        ? `Découvrez les créations du défi Clik du ${formattedDate}. Explorez les constructions, votez pour vos préférées et partagez vos idées.`
         : "100 pièces, 24 heures, votre imagination. Participez au défi de construction en briques 3D du jour et découvrez les créations de la communauté Clik.",
       path,
       noindex: !!match.search.cursor || !loaderData,
@@ -139,27 +141,12 @@ function Challenges() {
   const remaining = challenge ? Math.max(0, challenge.closesAt - now) : 0;
   return (
     <main className="collection-page challenges-page">
-      <nav className="challenge-archive-links" aria-label="Archives des défis">
-        {initial.previous && (
-          <Link to="/challenges" search={{ date: initial.previous }}>
-            Défi du {initial.previous}
-          </Link>
-        )}
-        {date && date !== today && (
-          <Link to="/challenges" search={{}}>
-            Le défi du jour
-          </Link>
-        )}
-        {initial.next && (
-          <Link to="/challenges" search={{ date: initial.next }}>
-            Défi du {initial.next}
-          </Link>
-        )}
-      </nav>
       <div className="page-heading">
         <div>
           <h1>
-            {date && date !== today ? `Le défi du ${date}` : "Le défi du jour"}
+            {date && date !== today
+              ? `Le défi du ${formatChallengeDay(date)}`
+              : "Le défi du jour"}
             <span>.</span>
           </h1>
           <p>
