@@ -15,7 +15,6 @@ import { Route as SettingsRouteImport } from "./routes/settings";
 import { Route as RobotsDottxtRouteImport } from "./routes/robots[.]txt";
 import { Route as ProjectsRouteImport } from "./routes/projects";
 import { Route as PrivacyRouteImport } from "./routes/privacy";
-import { Route as DashboardRouteImport } from "./routes/dashboard";
 import { Route as ChallengesRouteImport } from "./routes/challenges";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as GalleryIndexRouteImport } from "./routes/gallery.index";
@@ -60,11 +59,6 @@ const ProjectsRoute = ProjectsRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: "/privacy",
   path: "/privacy",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const DashboardRoute = DashboardRouteImport.update({
-  id: "/dashboard",
-  path: "/dashboard",
   getParentRoute: () => rootRouteImport,
 } as any);
 const ChallengesRoute = ChallengesRouteImport.update({
@@ -146,7 +140,6 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/challenges": typeof ChallengesRoute;
-  "/dashboard": typeof DashboardRoute;
   "/privacy": typeof PrivacyRoute;
   "/projects": typeof ProjectsRoute;
   "/robots.txt": typeof RobotsDottxtRoute;
@@ -170,7 +163,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/challenges": typeof ChallengesRoute;
-  "/dashboard": typeof DashboardRoute;
   "/privacy": typeof PrivacyRoute;
   "/projects": typeof ProjectsRoute;
   "/robots.txt": typeof RobotsDottxtRoute;
@@ -195,7 +187,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
   "/challenges": typeof ChallengesRoute;
-  "/dashboard": typeof DashboardRoute;
   "/privacy": typeof PrivacyRoute;
   "/projects": typeof ProjectsRoute;
   "/robots.txt": typeof RobotsDottxtRoute;
@@ -221,7 +212,6 @@ export interface FileRouteTypes {
   fullPaths:
     | "/"
     | "/challenges"
-    | "/dashboard"
     | "/privacy"
     | "/projects"
     | "/robots.txt"
@@ -245,7 +235,6 @@ export interface FileRouteTypes {
   to:
     | "/"
     | "/challenges"
-    | "/dashboard"
     | "/privacy"
     | "/projects"
     | "/robots.txt"
@@ -269,7 +258,6 @@ export interface FileRouteTypes {
     | "__root__"
     | "/"
     | "/challenges"
-    | "/dashboard"
     | "/privacy"
     | "/projects"
     | "/robots.txt"
@@ -294,7 +282,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   ChallengesRoute: typeof ChallengesRoute;
-  DashboardRoute: typeof DashboardRoute;
   PrivacyRoute: typeof PrivacyRoute;
   ProjectsRoute: typeof ProjectsRoute;
   RobotsDottxtRoute: typeof RobotsDottxtRoute;
@@ -358,13 +345,6 @@ declare module "@tanstack/react-router" {
       path: "/privacy";
       fullPath: "/privacy";
       preLoaderRoute: typeof PrivacyRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/dashboard": {
-      id: "/dashboard";
-      path: "/dashboard";
-      fullPath: "/dashboard";
-      preLoaderRoute: typeof DashboardRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/challenges": {
@@ -478,7 +458,6 @@ declare module "@tanstack/react-router" {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChallengesRoute: ChallengesRoute,
-  DashboardRoute: DashboardRoute,
   PrivacyRoute: PrivacyRoute,
   ProjectsRoute: ProjectsRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,

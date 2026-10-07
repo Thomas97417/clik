@@ -17,7 +17,6 @@
     "@base-ui/react": "^1.0.0",
     "@clik/scene": "workspace:*",
     "@convex-dev/better-auth": "catalog:",
-    "@convex-dev/r2": "^0.9.1",
     "@convex-dev/react-query": "^0.1.0",
     "@my-better-t-app/backend": "workspace:*",
     "@my-better-t-app/env": "workspace:*",

@@ -1,12 +1,10 @@
 # Clik
 
-Application TypeScript avec React, TanStack Start et Convex.
+Clik est un atelier de construction en briques 3D, directement dans le navigateur. Créez librement, partagez vos constructions dans la galerie ou imaginez votre propre version de celles de la communauté. Chaque jour, un défi propose à tous le même lot de pièces.
 
 L’atelier 3D et la galerie Clik sont documentés dans [le guide V1](docs/CLIK.md), avec les résultats dans [le rapport de validation](docs/VALIDATION.md).
 
 Le déploiement sur Convex, Cloudflare Workers et Resend est décrit dans [le guide de déploiement](docs/DEPLOIEMENT.md).
-
-Le boilerplate inclut l’authentification Better Auth, la vérification d’email et la réinitialisation du mot de passe via Resend, les connexions Google et GitHub, le stockage de fichiers avec Cloudflare R2 et les analytics PostHog. L’interface utilise Tailwind CSS et shadcn/ui ; le monorepo utilise Bun et Turborepo.
 
 ## Prérequis
 
@@ -66,7 +64,7 @@ Les exemples utilisent `bunx --bun` pour exécuter la CLI avec Bun.
 
 ### 4. Configurer les emails sur Convex
 
-La vérification d’email est activée dans ce boilerplate. **Resend doit être configuré pour terminer une inscription par email**, ainsi que pour réinitialiser un mot de passe.
+**Resend doit être configuré pour terminer une inscription par email**, ainsi que pour réinitialiser un mot de passe.
 
 Dans les paramètres du déploiement Convex de développement, ajouter :
 
@@ -95,7 +93,7 @@ Pour les démarrages suivants, `bun run dev` suffit si la configuration est déj
 | ------------------------------- | -------------------------------------------------------------------------------------- |
 | `packages/backend/.env.local`   | Configuration locale de la CLI, notamment le déploiement ciblé par `CONVEX_DEPLOYMENT` |
 | `apps/web/.env`                 | Variables du frontend : URL Convex et configuration publique PostHog                   |
-| Variables du déploiement Convex | Configuration des fonctions backend : authentification, Resend, OAuth et R2            |
+| Variables du déploiement Convex | Configuration des fonctions backend : authentification, Resend et OAuth               |
 
 Ne pas copier tout le fichier du backend dans celui du frontend. Ajouter uniquement les variables nécessaires à chaque emplacement. Les variables préfixées par `VITE_` sont accessibles au navigateur : elles ne doivent pas contenir de secrets. Les fichiers `.env` locaux sont ignorés par Git.
 
@@ -113,17 +111,6 @@ Créer les applications OAuth auprès des fournisseurs concernés, puis ajouter 
 | GitHub      | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` |
 
 Configurer également les URL de retour OAuth chez chaque fournisseur en fonction de l’URL de l’application.
-
-### Fichiers et avatars avec Cloudflare R2
-
-Configurer le bucket et ses accès dans Cloudflare, puis ajouter les variables suivantes dans **Convex** :
-
-```text
-R2_BUCKET
-R2_ENDPOINT
-R2_ACCESS_KEY_ID
-R2_SECRET_ACCESS_KEY
-```
 
 ### Analytics avec PostHog
 

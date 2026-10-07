@@ -5,7 +5,7 @@ import schema from "../convex/schema";
 import { api } from "../convex/_generated/api";
 import { emptyScene } from "@clik/scene";
 
-const { accounts, avatar } = vi.hoisted(() => ({
+const { accounts } = vi.hoisted(() => ({
   accounts: new Map<
     string,
     {
@@ -16,7 +16,6 @@ const { accounts, avatar } = vi.hoisted(() => ({
       emailVerified: boolean;
     }
   >(),
-  avatar: vi.fn(),
 }));
 vi.mock("../convex/auth", () => ({
   authComponent: {
@@ -31,11 +30,9 @@ vi.mock("../convex/auth", () => ({
     },
   },
 }));
-vi.mock("../convex/r2", () => ({ r2: { getMetadata: avatar } }));
 const modules = import.meta.glob("../convex/**/*.{ts,tsx,js}");
 beforeEach(() => {
   accounts.clear();
-  avatar.mockReset();
 });
 
 async function seed() {
@@ -291,7 +288,6 @@ describe("Galeries publiques des créateurs", () => {
         avatar: defaultAvatar("alice"),
       });
     }
-    expect(avatar).not.toHaveBeenCalled();
   });
   it("gère les comptes inexistants sans masquer les erreurs du service", async () => {
     const t = convexTest(schema, modules);
