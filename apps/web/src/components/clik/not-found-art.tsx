@@ -47,7 +47,7 @@ function LostBrick({
 export default function NotFoundArt() {
   return (
     <svg
-      className="not-found-art block w-full h-auto [@media(width<=760px)]:row-1 [@media(width<=760px)]:max-w-85 [@media(width<=760px)]:justify-self-center"
+      className="not-found-art block w-full h-auto max-md-compact:row-1 max-md-compact:max-w-85 max-md-compact:justify-self-center"
       viewBox="0 0 500 320"
       fill="none"
       aria-hidden="true"

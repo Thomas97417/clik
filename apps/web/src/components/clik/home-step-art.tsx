@@ -43,7 +43,7 @@ export default function HomeStepArt({
   return (
     <svg
       className={cn(
-        "home-step-art block w-37 max-w-[calc(100%-38px)] h-28 shrink-0 [@media(width<=520px)]:w-33 [@media(width<=520px)]:h-25",
+        "home-step-art block w-37 max-w-[calc(100%-38px)] h-28 shrink-0 max-sm-narrow:w-33 max-sm-narrow:h-25",
         className,
       )}
       viewBox="0 0 160 120"

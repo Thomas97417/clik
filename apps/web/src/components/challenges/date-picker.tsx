@@ -80,11 +80,11 @@ export function ChallengeDatePicker({
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
-      <Popover.Trigger className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 challenge-date-trigger group/challenge-date-trigger group/challenge-date-trigger py-1.5 gap-2.5 border-[#d9e3f3] min-h-11 pr-3 pl-1.75 rounded-[11px] text-[#344964] font-[650] [@media(width<=480px)]:px-1.5 [@media(width<=480px)]:gap-1.5 [@media(width<=480px)]:text-xs [@media(width<=480px)]:leading-[inherit] hover:border-[#adc5f0] hover:bg-[#f5f8ff] hover:text-[#285abd] data-popup-open:border-[#adc5f0] data-popup-open:bg-[#f5f8ff] data-popup-open:text-[#285abd] border border-solid inline-flex items-center justify-center bg-white text-[13px] leading-normal">
-        <span className="challenge-date-icon grid place-items-center shrink-0 rounded-[8px] bg-[#eaf0fc] text-[#356ae6] [@media(width<=480px)]:w-6 [@media(width<=480px)]:h-7 size-7.5">
+      <Popover.Trigger className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 challenge-date-trigger group/challenge-date-trigger group/challenge-date-trigger py-1.5 gap-2.5 border-[#d9e3f3] min-h-11 pr-3 pl-1.75 rounded-[11px] text-[#344964] font-[650] max-xs-wide:px-1.5 max-xs-wide:gap-1.5 max-xs-wide:text-xs max-xs-wide:leading-[inherit] hover:border-[#adc5f0] hover:bg-[#f5f8ff] hover:text-[#285abd] data-popup-open:border-[#adc5f0] data-popup-open:bg-[#f5f8ff] data-popup-open:text-[#285abd] border border-solid inline-flex items-center justify-center bg-white text-[13px] leading-normal">
+        <span className="challenge-date-icon grid place-items-center shrink-0 rounded-[8px] bg-[#eaf0fc] text-[#356ae6] max-xs-wide:w-6 max-xs-wide:h-7 size-7.5">
           <CalendarDays className="shrink-0" size={17} aria-hidden="true" />
         </span>
-        <span className="challenge-date-label min-w-0 whitespace-nowrap [@media(width<=480px)]:overflow-hidden [@media(width<=480px)]:text-ellipsis block">
+        <span className="challenge-date-label min-w-0 whitespace-nowrap max-xs-wide:overflow-hidden max-xs-wide:text-ellipsis block">
           {formatChallengeDay(day)}
         </span>
         <ChevronDown

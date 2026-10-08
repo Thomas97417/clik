@@ -160,14 +160,14 @@ export function CreationChallenge({
   const used = data?.choices.length ?? 0;
   const formattedDay = formatChallengeDay(day);
   return (
-    <div className="creation-challenge px-4 py-2.5 mx-0 overflow-hidden border border-solid border-[#e4dbee] flex items-center justify-between gap-y-3 gap-x-6 mt-5 mb-0 rounded-[12px] bg-[#f6f2fb] [@media(width<=640px)]:px-3.5 [@media(width<=640px)]:py-3 [@media(width<=640px)]:flex-wrap peer/creation-challenge">
+    <div className="creation-challenge px-4 py-2.5 mx-0 overflow-hidden border border-solid border-[#e4dbee] flex items-center justify-between gap-y-3 gap-x-6 mt-5 mb-0 rounded-[12px] bg-[#f6f2fb] max-sm:px-3.5 max-sm:py-3 max-sm:flex-wrap peer/creation-challenge">
       <Link
-        className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 creation-challenge-heading px-0 py-0.5 gap-2.5 flex items-center rounded-[6px] text-[#644780] [@media(width<=640px)]:w-full hover:bg-[#eee6f7] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#9672c0] focus-visible:[outline-offset:-3px]"
+        className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 creation-challenge-heading px-0 py-0.5 gap-2.5 flex items-center rounded-[6px] text-[#644780] max-sm:w-full hover:bg-[#eee6f7] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#9672c0] focus-visible:[outline-offset:-3px]"
         to="/challenges"
         search={{ date: day }}
       >
         <svg
-          className="creation-challenge-art shrink-0 size-8 last:ml-1 last:shrink-0 last:text-[#9982b2] [@media(width<=640px)]:last:ml-auto"
+          className="creation-challenge-art shrink-0 size-8 last:ml-1 last:shrink-0 last:text-[#9982b2] max-sm:last:ml-auto"
           viewBox="0 0 56 56"
           fill="none"
           aria-hidden="true"
@@ -202,12 +202,12 @@ export function CreationChallenge({
           </time>
         </span>
         <ArrowUpRight
-          className="last:ml-1 last:shrink-0 last:text-[#9982b2] [@media(width<=640px)]:last:ml-auto"
+          className="last:ml-1 last:shrink-0 last:text-[#9982b2] max-sm:last:ml-auto"
           size={17}
           aria-hidden="true"
         />
       </Link>
-      <div className="creation-challenge-voting gap-4.5 flex justify-between items-center flex-wrap [@media(width<=640px)]:w-full [@media(width<=640px)]:pt-2.5 [@media(width<=640px)]:border-t [@media(width<=640px)]:border-t-[#ded1ec]">
+      <div className="creation-challenge-voting gap-4.5 flex justify-between items-center flex-wrap max-sm:w-full max-sm:pt-2.5 max-sm:border-t max-sm:border-t-[#ded1ec]">
         <div
           className="challenge-vote-budget gap-1.25 flex flex-col text-[#9989a8] text-[10px] leading-normal"
           title="Vous pouvez soutenir trois créations par défi et retirer un vote pour changer de choix."

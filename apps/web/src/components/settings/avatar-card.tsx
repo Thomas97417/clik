@@ -74,8 +74,8 @@ export default function AvatarCard({ avatar }: { avatar: AvatarDescriptor }) {
   };
   return (
     <Dialog open={open} onOpenChange={changeOpen}>
-      <article className="avatar-settings-card group/avatar-settings-card overflow-hidden p-7 gap-6.5 border border-solid border-[#dbe5f6] flex items-center mb-4 rounded-2xl [background:linear-gradient(120deg,#edf3fe,#fffaf5)] [@media(width<=640px)]:p-5 [@media(width<=640px)]:gap-4.5 [@media(width<=640px)]:items-start [@media(width<=640px)]:flex-col">
-        <div className="avatar-settings-current p-3 border border-solid border-white shrink-0 bg-[#ffffff99] rounded-[22px] transform-[rotate(-4deg)] [@media(width<=640px)]:p-2">
+      <article className="avatar-settings-card group/avatar-settings-card overflow-hidden p-7 gap-6.5 border border-solid border-[#dbe5f6] flex items-center mb-4 rounded-2xl [background:linear-gradient(120deg,#edf3fe,#fffaf5)] max-sm:p-5 max-sm:gap-4.5 max-sm:items-start max-sm:flex-col">
+        <div className="avatar-settings-current p-3 border border-solid border-white shrink-0 bg-[#ffffff99] rounded-[22px] transform-[rotate(-4deg)] max-sm:p-2">
           <BrickAvatar avatar={avatar} size={96} label="Votre avatar actuel" />
         </div>
         <div className="avatar-settings-copy min-w-0">
@@ -128,12 +128,12 @@ export default function AvatarCard({ avatar }: { avatar: AvatarDescriptor }) {
         </div>
       </article>
       <DialogContent
-        className="avatar-dialog data-[slot=dialog-content]:p-0 data-[slot=dialog-content]:gap-0 data-[slot=dialog-content]:overflow-hidden data-[slot=dialog-content]:w-[min(850px,calc(100vw-40px))] data-[slot=dialog-content]:max-w-none data-[slot=dialog-content]:max-h-[calc(100dvh-48px)] data-[slot=dialog-content]:rounded-[20px] data-[slot=dialog-content]:bg-white data-[slot=dialog-content]:text-[#26344c] data-[slot=dialog-content]:flex data-[slot=dialog-content]:flex-col data-[slot=dialog-content]:[box-shadow:0_24px_100px_#18345b30] [@media(width<=640px)]:data-[slot=dialog-content]:w-[calc(100vw-20px)] [@media(width<=640px)]:data-[slot=dialog-content]:max-h-[calc(100dvh-24px)] [@media(width<=640px)]:data-[slot=dialog-content]:rounded-2xl motion-reduce:data-[slot=dialog-content]:animate-none"
+        className="avatar-dialog data-[slot=dialog-content]:p-0 data-[slot=dialog-content]:gap-0 data-[slot=dialog-content]:overflow-hidden data-[slot=dialog-content]:w-[min(850px,calc(100vw-40px))] data-[slot=dialog-content]:max-w-none data-[slot=dialog-content]:max-h-[calc(100dvh-48px)] data-[slot=dialog-content]:rounded-[20px] data-[slot=dialog-content]:bg-white data-[slot=dialog-content]:text-[#26344c] data-[slot=dialog-content]:flex data-[slot=dialog-content]:flex-col data-[slot=dialog-content]:[box-shadow:0_24px_100px_#18345b30] max-sm:data-[slot=dialog-content]:w-[calc(100vw-20px)] max-sm:data-[slot=dialog-content]:max-h-[calc(100dvh-24px)] max-sm:data-[slot=dialog-content]:rounded-2xl motion-reduce:data-[slot=dialog-content]:animate-none"
         showCloseButton={false}
         aria-busy={busy}
       >
-        <DialogHeader className="avatar-dialog-heading relative pt-6.5 pr-15 pb-5.5 pl-7 shrink-0 border-b border-solid border-b-[#e4eaf3] [@media(width<=640px)]:pt-5 [@media(width<=640px)]:pr-12 [@media(width<=640px)]:pb-4 [@media(width<=640px)]:pl-5">
-          <DialogTitle className="text-[23px] font-bold leading-tight tracking-[-0.7px] [@media(width<=640px)]:text-xl">
+        <DialogHeader className="avatar-dialog-heading relative pt-6.5 pr-15 pb-5.5 pl-7 shrink-0 border-b border-solid border-b-[#e4eaf3] max-sm:pt-5 max-sm:pr-12 max-sm:pb-4 max-sm:pl-5">
+          <DialogTitle className="text-[23px] font-bold leading-tight tracking-[-0.7px] max-sm:text-xl">
             Un avatar à votre façon.
           </DialogTitle>
           <DialogDescription className="text-xs leading-[1.7] text-[#77869c] mt-1">
@@ -141,30 +141,30 @@ export default function AvatarCard({ avatar }: { avatar: AvatarDescriptor }) {
           </DialogDescription>
           <DialogClose
             render={<Button variant="ghost" size="icon" disabled={busy} />}
-            className="avatar-dialog-close absolute top-5.5 right-5 rounded-[8px] [@media(width<=640px)]:top-4 [@media(width<=640px)]:right-3"
+            className="avatar-dialog-close absolute top-5.5 right-5 rounded-[8px] max-sm:top-4 max-sm:right-3"
             aria-label="Fermer la personnalisation"
           >
             <X className="size-4 pointer-events-none shrink-0" size={18} />
           </DialogClose>
         </DialogHeader>
-        <div className="avatar-dialog-body overflow-hidden grid grid-cols-[245px_minmax(0,1fr)] min-h-0 [@media(width<=640px)]:block [@media(width<=640px)]:overflow-y-auto [@media(width<=640px)]:overscroll-contain">
-          <div className="avatar-dialog-preview-panel px-5 py-9.5 gap-4 flex flex-col items-center text-center bg-[#f1f5fc] [@media(width<=640px)]:py-5 [@media(width<=640px)]:grid [@media(width<=640px)]:text-left [@media(width<=640px)]:gap-y-2 [@media(width<=640px)]:grid-cols-[90px_minmax(0,1fr)]">
-            <div className="avatar-settings-preview group/avatar-settings-preview p-4 border border-solid border-white grid place-items-center bg-[#ffffffa6] rounded-3xl [box-shadow:0_8px_28px_#27457508] [@media(width<=640px)]:p-1.5 [@media(width<=640px)]:rounded-[15px] [@media(width<=640px)]:row-[1/4]">
+        <div className="avatar-dialog-body overflow-hidden grid grid-cols-[245px_minmax(0,1fr)] min-h-0 max-sm:block max-sm:overflow-y-auto max-sm:overscroll-contain">
+          <div className="avatar-dialog-preview-panel px-5 py-9.5 gap-4 flex flex-col items-center text-center bg-[#f1f5fc] max-sm:py-5 max-sm:grid max-sm:text-left max-sm:gap-y-2 max-sm:grid-cols-[90px_minmax(0,1fr)]">
+            <div className="avatar-settings-preview group/avatar-settings-preview p-4 border border-solid border-white grid place-items-center bg-[#ffffffa6] rounded-3xl [box-shadow:0_8px_28px_#27457508] max-sm:p-1.5 max-sm:rounded-[15px] max-sm:row-[1/4]">
               <BrickAvatar
-                className="[@media(width<=640px)]:size-19"
+                className="max-sm:size-19"
                 avatar={displayed}
                 size={128}
                 label="Aperçu de votre avatar"
               />
             </div>
-            <h3 className="m-0 text-[13px] font-semibold [@media(width<=640px)]:text-xs [@media(width<=640px)]:leading-[inherit]">
+            <h3 className="m-0 text-[13px] font-semibold max-sm:text-xs max-sm:leading-[inherit]">
               Votre signature en briques
             </h3>
-            <p className="m-0 text-xs leading-[1.7] text-[#74849d] [@media(width<=640px)]:text-[11px]">
+            <p className="m-0 text-xs leading-[1.7] text-[#74849d] max-sm:text-[11px]">
               Essayez une autre combinaison de formes et de couleurs.
             </p>
             <Button
-              className="px-3.25 gap-2 rounded-[8px] min-h-9.5 bg-white [@media(width<=640px)]:px-2 [@media(width<=640px)]:min-h-8.5 [@media(width<=640px)]:justify-self-start [@media(width<=640px)]:text-[11px] leading-(--text-xs--line-height)"
+              className="px-3.25 gap-2 rounded-[8px] min-h-9.5 bg-white max-sm:px-2 max-sm:min-h-8.5 max-sm:justify-self-start max-sm:text-[11px] leading-(--text-xs--line-height)"
               type="button"
               variant="outline"
               disabled={busy}
@@ -177,14 +177,14 @@ export default function AvatarCard({ avatar }: { avatar: AvatarDescriptor }) {
               />{" "}
               Nouveau motif
             </Button>
-            <p className="avatar-dialog-preview-note group/avatar-dialog-preview-note m-0 text-[#74849d] text-[10px] [@media(width<=640px)]:col-span-full [@media(width<=640px)]:text-center leading-[1.7]">
+            <p className="avatar-dialog-preview-note group/avatar-dialog-preview-note m-0 text-[#74849d] text-[10px] max-sm:col-span-full max-sm:text-center leading-[1.7]">
               Vos accessoires restent en place quand vous changez de motif.
             </p>
             <span className="sr-only" role="status">
               {message}
             </span>
           </div>
-          <div className="avatar-dialog-options p-6 min-w-0 overflow-y-auto overscroll-contain [scrollbar-gutter:stable] [@media(width<=640px)]:p-5 [@media(width<=640px)]:overflow-visible">
+          <div className="avatar-dialog-options p-6 min-w-0 overflow-y-auto overscroll-contain [scrollbar-gutter:stable] max-sm:p-5 max-sm:overflow-visible">
             <div
               className="avatar-wardrobe group/avatar-wardrobe gap-6 grid mt-0"
               aria-busy={rewards === undefined}
@@ -199,7 +199,7 @@ export default function AvatarCard({ avatar }: { avatar: AvatarDescriptor }) {
                     Vos places sur le podium
                   </span>
                 </legend>
-                <div className="avatar-reward-options avatar-crown-options gap-2 grid grid-cols-4 [@media(width<=640px)]:grid-cols-2">
+                <div className="avatar-reward-options avatar-crown-options gap-2 grid grid-cols-4 max-sm:grid-cols-2">
                   <button
                     type="button"
                     className="outline-offset-3 avatar-reward-option group/avatar-reward-option px-1.75 gap-2 border border-solid border-[#e0e7f1] flex flex-col items-center bg-white text-[#344760] text-center cursor-pointer [transition:border-color_150ms,background_150ms] hover:enabled:border-[#8eadee] hover:enabled:bg-[#f7f9ff] aria-pressed:border-[#356ae6] aria-pressed:[box-shadow:inset_0_0_0_1px_#356ae6] aria-pressed:bg-[#f2f6ff] focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 disabled:opacity-100 disabled:cursor-not-allowed disabled:bg-[#f7f8fa] size-full py-3 rounded-[10px]"
@@ -301,7 +301,7 @@ export default function AvatarCard({ avatar }: { avatar: AvatarDescriptor }) {
                       : "Chargement…"}
                   </span>
                 </legend>
-                <div className="avatar-reward-options avatar-ring-options gap-2 grid grid-cols-3 [@media(width<=640px)]:grid-cols-2">
+                <div className="avatar-reward-options avatar-ring-options gap-2 grid grid-cols-3 max-sm:grid-cols-2">
                   <button
                     type="button"
                     className="outline-offset-3 avatar-reward-option group/avatar-reward-option px-1.75 gap-2 border border-solid border-[#e0e7f1] flex flex-col items-center bg-white text-[#344760] text-center cursor-pointer [transition:border-color_150ms,background_150ms] hover:enabled:border-[#8eadee] hover:enabled:bg-[#f7f9ff] aria-pressed:border-[#356ae6] aria-pressed:[box-shadow:inset_0_0_0_1px_#356ae6] aria-pressed:bg-[#f2f6ff] focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 disabled:opacity-100 disabled:cursor-not-allowed disabled:bg-[#f7f8fa] size-full py-3 rounded-[10px]"
@@ -385,8 +385,8 @@ export default function AvatarCard({ avatar }: { avatar: AvatarDescriptor }) {
             </div>
           </div>
         </div>
-        <DialogFooter className="avatar-dialog-footer data-[slot=dialog-footer]:px-6 data-[slot=dialog-footer]:py-4 data-[slot=dialog-footer]:gap-4 data-[slot=dialog-footer]:shrink-0 data-[slot=dialog-footer]:flex data-[slot=dialog-footer]:items-center data-[slot=dialog-footer]:flex-row data-[slot=dialog-footer]:justify-between data-[slot=dialog-footer]:border-t data-[slot=dialog-footer]:border-solid data-[slot=dialog-footer]:border-t-[#e4eaf3] data-[slot=dialog-footer]:bg-[#fafbfd] [@media(width<=640px)]:data-[slot=dialog-footer]:px-4 [@media(width<=640px)]:data-[slot=dialog-footer]:py-3 [@media(width<=640px)]:data-[slot=dialog-footer]:gap-2.5 [@media(width<=640px)]:data-[slot=dialog-footer]:items-stretch [@media(width<=640px)]:data-[slot=dialog-footer]:flex-col">
-          <div className="avatar-dialog-feedback max-w-85 text-[11px] leading-[1.6] text-[#77869c] [@media(width<=640px)]:max-w-none [@media(width<=640px)]:text-[10px]">
+        <DialogFooter className="avatar-dialog-footer data-[slot=dialog-footer]:px-6 data-[slot=dialog-footer]:py-4 data-[slot=dialog-footer]:gap-4 data-[slot=dialog-footer]:shrink-0 data-[slot=dialog-footer]:flex data-[slot=dialog-footer]:items-center data-[slot=dialog-footer]:flex-row data-[slot=dialog-footer]:justify-between data-[slot=dialog-footer]:border-t data-[slot=dialog-footer]:border-solid data-[slot=dialog-footer]:border-t-[#e4eaf3] data-[slot=dialog-footer]:bg-[#fafbfd] max-sm:data-[slot=dialog-footer]:px-4 max-sm:data-[slot=dialog-footer]:py-3 max-sm:data-[slot=dialog-footer]:gap-2.5 max-sm:data-[slot=dialog-footer]:items-stretch max-sm:data-[slot=dialog-footer]:flex-col">
+          <div className="avatar-dialog-feedback max-w-85 text-[11px] leading-[1.6] text-[#77869c] max-sm:max-w-none max-sm:text-[10px]">
             {error ? (
               <p className="text-[#b4473d]" role="alert">
                 {error}
@@ -399,11 +399,11 @@ export default function AvatarCard({ avatar }: { avatar: AvatarDescriptor }) {
               </p>
             )}
           </div>
-          <div className="avatar-dialog-actions gap-2 flex shrink-0 [@media(width<=640px)]:justify-end">
+          <div className="avatar-dialog-actions gap-2 flex shrink-0 max-sm:justify-end">
             <DialogClose
               render={
                 <Button
-                  className="px-3.75 rounded-[8px] min-h-10 [@media(width<=640px)]:px-2.75 [@media(width<=640px)]:text-[11px] leading-(--text-xs--line-height)"
+                  className="px-3.75 rounded-[8px] min-h-10 max-sm:px-2.75 max-sm:text-[11px] leading-(--text-xs--line-height)"
                   variant="outline"
                   disabled={busy}
                 />
@@ -412,7 +412,7 @@ export default function AvatarCard({ avatar }: { avatar: AvatarDescriptor }) {
               Fermer
             </DialogClose>
             <Button
-              className="px-3.75 rounded-[8px] min-h-10 [@media(width<=640px)]:px-2.75 [@media(width<=640px)]:text-[11px] leading-(--text-xs--line-height)"
+              className="px-3.75 rounded-[8px] min-h-10 max-sm:px-2.75 max-sm:text-[11px] leading-(--text-xs--line-height)"
               type="button"
               disabled={!changed || busy}
               onClick={() => void persist()}

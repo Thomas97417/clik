@@ -6,7 +6,7 @@ export default function SettingsArt() {
       fill="none"
       aria-hidden="true"
       focusable="false"
-      className="settings-art w-70 shrink-0 [@media(width<=370px)]:w-26 [@media(width<=370px)]:mt-8.5 [@media(width<=370px)]:hidden [@media(370px<width<=640px)]:w-26 [@media(370px<width<=640px)]:mt-8.5"
+      className="settings-art w-70 shrink-0 max-2xs:w-26 max-2xs:mt-8.5 max-2xs:hidden min-2xs:max-sm:w-26 min-2xs:max-sm:mt-8.5"
     >
       <ellipse
         cx="166"

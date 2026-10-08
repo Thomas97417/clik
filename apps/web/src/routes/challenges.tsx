@@ -141,10 +141,10 @@ function Challenges() {
     void navigate({ to: "/challenges", search: { date } });
   const remaining = challenge ? Math.max(0, challenge.closesAt - now) : 0;
   return (
-    <main className="collection-page challenges-page px-[5%] py-16 m-auto max-w-330 [@media(width<=850px)]:pt-10">
-      <div className="page-heading group/page-heading gap-6.25 flex justify-between items-center mb-11.25 [@media(width<=850px)]:items-start [@media(width<=850px)]:flex-col">
+    <main className="collection-page challenges-page px-[5%] py-16 m-auto max-w-330 max-lg-narrow:pt-10">
+      <div className="page-heading group/page-heading gap-6.25 flex justify-between items-center mb-11.25 max-lg-narrow:items-start max-lg-narrow:flex-col">
         <div>
-          <h1 className="mx-0 my-3 text-5xl leading-[inherit] tracking-[-2px] font-extrabold [@media(width<=850px)]:text-[40px]">
+          <h1 className="mx-0 my-3 text-5xl leading-[inherit] tracking-[-2px] font-extrabold max-lg-narrow:text-[40px]">
             {date && date !== today
               ? `Le défi du ${formatChallengeDay(date)}`
               : "Le défi du jour"}
@@ -156,9 +156,9 @@ function Challenges() {
         </div>
       </div>
       <div className="challenge-toolbar mx-0 my-7 flex items-center flex-wrap gap-y-3 gap-x-6">
-        <div className="challenge-navigation gap-2 flex items-center flex-wrap flex-[1_1_auto] min-w-0 [@media(width<=480px)]:grid [@media(width<=480px)]:grid-cols-[42px_minmax(0,1fr)_42px] [@media(width<=480px)]:basis-full [@media(480px<width<=640px)]:basis-full">
+        <div className="challenge-navigation gap-2 flex items-center flex-wrap flex-[1_1_auto] min-w-0 max-xs-wide:grid max-xs-wide:grid-cols-[42px_minmax(0,1fr)_42px] max-xs-wide:basis-full min-xs-wide:max-sm:basis-full">
           <button
-            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-3.25 py-2 gap-2.5 border border-solid border-[#dee5f0] inline-flex items-center justify-center min-h-10.5 rounded-[9px] bg-white text-[#435976] text-[13px] hover:enabled:bg-[#edf3ff] [@media(width<=480px)]:[&[aria-label]]:px-2 [@media(width<=480px)]:last:col-span-full [@media(width<=480px)]:last:justify-self-end"
+            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-3.25 py-2 gap-2.5 border border-solid border-[#dee5f0] inline-flex items-center justify-center min-h-10.5 rounded-[9px] bg-white text-[#435976] text-[13px] hover:enabled:bg-[#edf3ff] max-xs-wide:[&[aria-label]]:px-2 max-xs-wide:last:col-span-full max-xs-wide:last:justify-self-end"
             aria-label="Défi précédent"
             disabled={!data || selected <= data.firstDay}
             onClick={() =>
@@ -175,7 +175,7 @@ function Challenges() {
             onChange={choose}
           />
           <button
-            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-3.25 py-2 gap-2.5 border border-solid border-[#dee5f0] inline-flex items-center justify-center min-h-10.5 rounded-[9px] bg-white text-[#435976] text-[13px] hover:enabled:bg-[#edf3ff] [@media(width<=480px)]:[&[aria-label]]:px-2 [@media(width<=480px)]:last:col-span-full [@media(width<=480px)]:last:justify-self-end"
+            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-3.25 py-2 gap-2.5 border border-solid border-[#dee5f0] inline-flex items-center justify-center min-h-10.5 rounded-[9px] bg-white text-[#435976] text-[13px] hover:enabled:bg-[#edf3ff] max-xs-wide:[&[aria-label]]:px-2 max-xs-wide:last:col-span-full max-xs-wide:last:justify-self-end"
             aria-label="Défi suivant"
             disabled={selected >= today}
             onClick={() =>
@@ -185,7 +185,7 @@ function Challenges() {
             <ArrowRight className="shrink-0" size={18} />
           </button>
           <button
-            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-3.25 py-2 gap-2.5 border border-solid border-[#dee5f0] inline-flex items-center justify-center min-h-10.5 rounded-[9px] bg-white text-[#435976] text-[13px] hover:enabled:bg-[#edf3ff] [@media(width<=480px)]:[&[aria-label]]:px-2 [@media(width<=480px)]:last:col-span-full [@media(width<=480px)]:last:justify-self-end"
+            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-3.25 py-2 gap-2.5 border border-solid border-[#dee5f0] inline-flex items-center justify-center min-h-10.5 rounded-[9px] bg-white text-[#435976] text-[13px] hover:enabled:bg-[#edf3ff] max-xs-wide:[&[aria-label]]:px-2 max-xs-wide:last:col-span-full max-xs-wide:last:justify-self-end"
             onClick={() => void navigate({ to: "/challenges", search: {} })}
             disabled={!date}
           >
@@ -238,7 +238,7 @@ function Challenges() {
             className="challenge-kit overflow-hidden border border-solid border-[#dfe7f3] bg-white rounded-[20px]"
             aria-label="Le lot du défi"
           >
-            <div className="challenge-kit-heading px-7 py-6.25 gap-5 flex items-center justify-between flex-wrap [@media(width<=640px)]:p-5">
+            <div className="challenge-kit-heading px-7 py-6.25 gap-5 flex items-center justify-between flex-wrap max-sm:p-5">
               <div>
                 <h2 className="mx-0 my-1.75 text-[25px] font-extrabold tracking-[-0.7px]">
                   Les pièces du jour
@@ -259,17 +259,17 @@ function Challenges() {
                   : "Participations closes"}
               </span>
             </div>
-            <div className="challenge-stock-grid px-7 gap-2.5 grid grid-cols-6 pt-0 pb-6.25 [@media(width<=640px)]:px-3.5 [@media(width<=640px)]:gap-1.75 [@media(width<=640px)]:grid-cols-3 [@media(width<=640px)]:pb-4.5 [@media(640px<width<=850px)]:grid-cols-4">
+            <div className="challenge-stock-grid px-7 gap-2.5 grid grid-cols-6 pt-0 pb-6.25 max-sm:px-3.5 max-sm:gap-1.75 max-sm:grid-cols-3 max-sm:pb-4.5 min-sm:max-lg-narrow:grid-cols-4">
               {challenge.stock.map((item) => (
                 <div
-                  className="challenge-stock-card px-2.25 border border-solid border-[#e7ecf6] relative pt-5 pb-3 bg-[#f6f8fd] rounded-[12px] text-center [@media(width<=640px)]:px-1.25"
+                  className="challenge-stock-card px-2.25 border border-solid border-[#e7ecf6] relative pt-5 pb-3 bg-[#f6f8fd] rounded-[12px] text-center max-sm:px-1.25"
                   key={item.type}
                 >
                   <span className="absolute top-2 right-2.5 text-xs leading-[inherit] font-bold text-[#356ae6]">
                     × {item.quantity}
                   </span>
                   <PartPreview
-                    className="mx-auto my-1.25 h-17.5 [@media(width<=640px)]:h-13.75"
+                    className="mx-auto my-1.25 h-17.5 max-sm:h-13.75"
                     type={item.type as PartType}
                     color="#4079e8"
                   />
@@ -279,7 +279,7 @@ function Challenges() {
                 </div>
               ))}
             </div>
-            <div className="challenge-kit-footer px-7 py-6.25 gap-5 flex items-center justify-between flex-wrap border-t border-solid border-t-[#e8edf5] bg-[#fafbff] [@media(width<=640px)]:p-5">
+            <div className="challenge-kit-footer px-7 py-6.25 gap-5 flex items-center justify-between flex-wrap border-t border-solid border-t-[#e8edf5] bg-[#fafbff] max-sm:p-5">
               <p className="text-[13px] leading-[1.8] text-[#6e809d]">
                 {open
                   ? "Une création par personne, modifiable jusqu’à minuit UTC."
@@ -288,7 +288,7 @@ function Challenges() {
               {open ? (
                 isAuthenticated ? (
                   <button
-                    className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 primary-link group/primary-link px-4.75 py-3 gap-2.5 inline-flex items-center justify-center bg-[#356ae6] text-white rounded-[9px] text-sm leading-[inherit] font-[650] whitespace-nowrap hover:bg-[#2458ce] [@media(width<=640px)]:w-full"
+                    className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 primary-link group/primary-link px-4.75 py-3 gap-2.5 inline-flex items-center justify-center bg-[#356ae6] text-white rounded-[9px] text-sm leading-[inherit] font-[650] whitespace-nowrap hover:bg-[#2458ce] max-sm:w-full"
                     disabled={busy}
                     onClick={async () => {
                       setBusy(true);
@@ -330,7 +330,7 @@ function Challenges() {
                 )
               )}
             </div>
-            <p className="challenge-device-note px-5.5 hidden pt-0 pb-5 text-[#70839f] text-xs leading-[1.8] bg-[#fafbff] [@media(width<=850px)]:block">
+            <p className="challenge-device-note px-5.5 hidden pt-0 pb-5 text-[#70839f] text-xs leading-[1.8] bg-[#fafbff] max-lg-narrow:block">
               Pour construire, ouvrez l’atelier sur ordinateur. Vous pouvez
               voter et commenter sur mobile.
             </p>
@@ -376,7 +376,7 @@ function Entries({
       <div className="challenge-entries-heading gap-5 flex items-center justify-between flex-wrap mb-6.25">
         <div>
           <h2
-            className="text-[25px] tracking-[-0.7px] font-extrabold [@media(width<=640px)]:text-[23px]"
+            className="text-[25px] tracking-[-0.7px] font-extrabold max-sm:text-[23px]"
             id="entries-title"
           >
             À vous de choisir vos coups de cœur.
@@ -439,7 +439,7 @@ function Entries({
               : "Aucune création n’a été proposée pour ce défi."}
         </div>
       ) : (
-        <div className="creation-grid group/creation-grid gap-6.5 grid grid-cols-3 [@media(width<=520px)]:gap-3.75 [@media(width<=520px)]:grid-cols-1 [@media(520px<width<=850px)]:gap-3.75 [@media(520px<width<=850px)]:grid-cols-2">
+        <div className="creation-grid group/creation-grid gap-6.5 grid grid-cols-3 max-sm-narrow:gap-3.75 max-sm-narrow:grid-cols-1 min-sm-narrow:max-lg-narrow:gap-3.75 min-sm-narrow:max-lg-narrow:grid-cols-2">
           {results.map((p) => (
             <article
               className="creation-card challenge-entry group/creation-card overflow-hidden border border-solid border-[#e4eaf2] rounded-[14px] bg-white"

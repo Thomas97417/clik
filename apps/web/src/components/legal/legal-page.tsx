@@ -120,7 +120,7 @@ export default function LegalPage({
               "outline-offset-3",
               "focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#a7c0f2] focus-visible:outline-offset-4 focus-visible:rounded-[5px] px-3 py-2.5 gap-2.5 flex items-baseline -ml-3 rounded-[9px] text-xs leading-[1.55] text-[#64758c] hover:text-[#356ae6] hover:bg-[#edf3fc]",
               mobile
-                ? "[@media(width<=760px)]:px-0 [@media(width<=760px)]:py-2.25 [@media(width<=760px)]:m-0"
+                ? "max-md-compact:px-0 max-md-compact:py-2.25 max-md-compact:m-0"
                 : "aria-[current=location]:text-[#356ae6] aria-[current=location]:bg-[#eaf0fc] aria-[current=location]:font-[650]",
             )}
             href={`#${id}`}
@@ -150,18 +150,18 @@ export default function LegalPage({
     <main
       ref={root}
       className={cn(
-        "legal-page px-12 mx-auto my-0 max-w-300 pt-9 pb-18 [--legal-accent:#356ae6] [--legal-tint:#f2f6ff] [--legal-open-border:#c0d2f0] [@media(width<=360px)]:px-4.5 [@media(width<=360px)]:pt-6 [@media(width<=360px)]:pb-12 [@media(360px<width<=760px)]:px-6 [@media(360px<width<=760px)]:pt-6 [@media(360px<width<=760px)]:pb-12 [@media(760px<width<=1000px)]:px-8 print:[&&]:p-0 print:[&&]:max-w-none",
+        "legal-page px-12 mx-auto my-0 max-w-300 pt-9 pb-18 [--legal-accent:#356ae6] [--legal-tint:#f2f6ff] [--legal-open-border:#c0d2f0] max-3xs:px-4.5 max-3xs:pt-6 max-3xs:pb-12 min-3xs:max-md-compact:px-6 min-3xs:max-md-compact:pt-6 min-3xs:max-md-compact:pb-12 min-md-compact:max-lg-wide:px-8 print:[&&]:p-0 print:[&&]:max-w-none",
         `legal-page-${kind}`,
       )}
     >
-      <header className="legal-hero px-0 gap-8.5 grid grid-cols-[1.35fr_1fr] items-center pt-14 pb-9 [@media(width<=760px)]:gap-0 [@media(width<=760px)]:grid-cols-1 [@media(width<=760px)]:pt-9.5 [@media(width<=760px)]:pb-6 [@media(760px<width<=1000px)]:gap-3 print:[&&]:block print:[&&]:pt-0">
+      <header className="legal-hero px-0 gap-8.5 grid grid-cols-[1.35fr_1fr] items-center pt-14 pb-9 max-md-compact:gap-0 max-md-compact:grid-cols-1 max-md-compact:pt-9.5 max-md-compact:pb-6 min-md-compact:max-lg-wide:gap-3 print:[&&]:block print:[&&]:pt-0">
         <div>
-          <h1 className="mx-0 my-5 text-[clamp(38px,_4.2vw,_58px)] tracking-[-2.4px] leading-[1.12] font-[850] text-[#243148] [@media(width<=360px)]:text-[32px] [@media(width<=360px)]:tracking-[-1.5px] [@media(360px<width<=760px)]:text-[clamp(33px,_7vw,_46px)] [@media(360px<width<=760px)]:tracking-[-1.5px] [@media(760px<width<=1000px)]:text-[46px] print:text-3xl print:[&&]:text-3xl">
+          <h1 className="mx-0 my-5 text-[clamp(38px,_4.2vw,_58px)] tracking-[-2.4px] leading-[1.12] font-[850] text-[#243148] max-3xs:text-[32px] max-3xs:tracking-[-1.5px] min-3xs:max-md-compact:text-[clamp(33px,_7vw,_46px)] min-3xs:max-md-compact:tracking-[-1.5px] min-md-compact:max-lg-wide:text-[46px] print:text-3xl print:[&&]:text-3xl">
             {title}
             <br />
             <em className="not-italic text-[var(--legal-accent)]">{accent}.</em>
           </h1>
-          <p className="legal-intro m-0 max-w-120 text-[#65758e] text-[15px] leading-[1.85] [@media(width<=760px)]:text-sm">
+          <p className="legal-intro m-0 max-w-120 text-[#65758e] text-[15px] leading-[1.85] max-md-compact:text-sm">
             {description}
           </p>
           <p className="legal-updated gap-1.75 flex flex-wrap mt-5.75 text-[#687b95] text-[11px]">
@@ -173,25 +173,25 @@ export default function LegalPage({
       </header>
       <details
         ref={mobileContents}
-        className="legal-mobile-contents hidden [@media(width<=760px)]:border [@media(width<=760px)]:border-solid [@media(width<=760px)]:border-[#dbe4f1] [@media(width<=760px)]:block [@media(width<=760px)]:mb-8 [@media(width<=760px)]:rounded-[12px] [@media(width<=760px)]:bg-[#fff8] print:[&&]:hidden! group/legal-mobile-contents"
+        className="legal-mobile-contents hidden max-md-compact:border max-md-compact:border-solid max-md-compact:border-[#dbe4f1] max-md-compact:block max-md-compact:mb-8 max-md-compact:rounded-[12px] max-md-compact:bg-[#fff8] print:[&&]:hidden! group/legal-mobile-contents"
       >
-        <summary className="[@media(width<=760px)]:px-4.5 [@media(width<=760px)]:py-4 [@media(width<=760px)]:flex [@media(width<=760px)]:items-center [@media(width<=760px)]:justify-between [@media(width<=760px)]:list-none [@media(width<=760px)]:text-[#435d85] [@media(width<=760px)]:text-[13px] [@media(width<=760px)]:font-[650] [@media(width<=760px)]:cursor-pointer [@media(width<=760px)]:[&::-webkit-details-marker]:hidden [@media(width<=760px)]:focus-visible:outline-3 [@media(width<=760px)]:focus-visible:outline-solid [@media(width<=760px)]:focus-visible:outline-[#a7c0f2] [@media(width<=760px)]:focus-visible:outline-offset-3 [@media(width<=760px)]:focus-visible:rounded-[9px]">
+        <summary className="max-md-compact:px-4.5 max-md-compact:py-4 max-md-compact:flex max-md-compact:items-center max-md-compact:justify-between max-md-compact:list-none max-md-compact:text-[#435d85] max-md-compact:text-[13px] max-md-compact:font-[650] max-md-compact:cursor-pointer max-md-compact:[&::-webkit-details-marker]:hidden max-md-compact:focus-visible:outline-3 max-md-compact:focus-visible:outline-solid max-md-compact:focus-visible:outline-[#a7c0f2] max-md-compact:focus-visible:outline-offset-3 max-md-compact:focus-visible:rounded-[9px]">
           Dans cette page{" "}
           <ChevronDown
-            className="[@media(width<=760px)]:group-open/legal-mobile-contents:transform-[rotate(180deg)]"
+            className="max-md-compact:group-open/legal-mobile-contents:transform-[rotate(180deg)]"
             size={16}
             aria-hidden="true"
           />
         </summary>
         <nav
-          className="[@media(width<=760px)]:px-4.5 [@media(width<=760px)]:pt-0 [@media(width<=760px)]:pb-3.5"
+          className="max-md-compact:px-4.5 max-md-compact:pt-0 max-md-compact:pb-3.5"
           aria-label="Sommaire"
         >
           {contents(true)}
         </nav>
       </details>
-      <div className="legal-body gap-16 grid grid-cols-[220px_minmax(0,1fr)] items-start mt-4 [@media(width<=760px)]:gap-8 [@media(width<=760px)]:block [@media(width<=760px)]:grid-cols-[200px_minmax(0,1fr)] [@media(760px<width<=1000px)]:gap-8 [@media(760px<width<=1000px)]:grid-cols-[200px_minmax(0,1fr)] print:[&&]:block">
-        <aside className="legal-sidebar sticky top-7 [@media(width<=760px)]:hidden print:[&&]:hidden!">
+      <div className="legal-body gap-16 grid grid-cols-[220px_minmax(0,1fr)] items-start mt-4 max-md-compact:gap-8 max-md-compact:block max-md-compact:grid-cols-[200px_minmax(0,1fr)] min-md-compact:max-lg-wide:gap-8 min-md-compact:max-lg-wide:grid-cols-[200px_minmax(0,1fr)] print:[&&]:block">
+        <aside className="legal-sidebar sticky top-7 max-md-compact:hidden print:[&&]:hidden!">
           <nav className="legal-contents" aria-label="Sommaire">
             {contents()}
           </nav>
@@ -230,10 +230,10 @@ export default function LegalPage({
                 <AccordionTrigger
                   iconClassName="p-1.25 rounded-[8px] text-[var(--legal-accent)] bg-[#f0f4fa] size-6.5"
                   id={id}
-                  className="legal-section-trigger px-5 py-4.5 gap-3 border-0 border-none [&&]:border-current flex items-center min-h-18.5 text-[#2c3b53] text-base leading-normal font-bold tracking-[-0.3px] scroll-mt-7 [@media(width<=360px)]:p-3.5 [@media(width<=360px)]:gap-2 [@media(width<=360px)]:min-h-17.5 [@media(width<=360px)]:text-sm [@media(width<=360px)]:scroll-mt-6 [@media(360px<width<=760px)]:p-4 [@media(360px<width<=760px)]:gap-2.5 [@media(360px<width<=760px)]:min-h-17.5 [@media(360px<width<=760px)]:text-[15px] [@media(360px<width<=760px)]:scroll-mt-6 hover:bg-[var(--legal-tint)] hover:text-[var(--legal-accent)] hover:no-underline aria-expanded:bg-[var(--legal-tint)] aria-expanded:text-[var(--legal-accent)] focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#a7c0f2] focus-visible:-outline-offset-4 print:[&&]:px-0 print:[&&]:py-3 print:[&&]:min-h-0 print:[&&]:text-[#222] print:[&&]:bg-transparent group/legal-section-trigger print:aria-expanded:[&&]:bg-[var(--legal-tint)] print:aria-expanded:[&&]:text-[var(--legal-accent)]"
+                  className="legal-section-trigger px-5 py-4.5 gap-3 border-0 border-none [&&]:border-current flex items-center min-h-18.5 text-[#2c3b53] text-base leading-normal font-bold tracking-[-0.3px] scroll-mt-7 max-3xs:p-3.5 max-3xs:gap-2 max-3xs:min-h-17.5 max-3xs:text-sm max-3xs:scroll-mt-6 min-3xs:max-md-compact:p-4 min-3xs:max-md-compact:gap-2.5 min-3xs:max-md-compact:min-h-17.5 min-3xs:max-md-compact:text-[15px] min-3xs:max-md-compact:scroll-mt-6 hover:bg-[var(--legal-tint)] hover:text-[var(--legal-accent)] hover:no-underline aria-expanded:bg-[var(--legal-tint)] aria-expanded:text-[var(--legal-accent)] focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#a7c0f2] focus-visible:-outline-offset-4 print:[&&]:px-0 print:[&&]:py-3 print:[&&]:min-h-0 print:[&&]:text-[#222] print:[&&]:bg-transparent group/legal-section-trigger print:aria-expanded:[&&]:bg-[var(--legal-tint)] print:aria-expanded:[&&]:text-[var(--legal-accent)]"
                 >
                   <span
-                    className="legal-section-number group/legal-section-number grid place-items-center shrink-0 rounded-[8px] text-[#6a83aa] bg-[#f0f4fa] text-[10px] font-bold tabular-nums [@media(width<=360px)]:text-[9px] size-7.5 [@media(width<=360px)]:size-6.25 group-aria-expanded/legal-section-trigger:text-white group-aria-expanded/legal-section-trigger:bg-[var(--legal-accent)]"
+                    className="legal-section-number group/legal-section-number grid place-items-center shrink-0 rounded-[8px] text-[#6a83aa] bg-[#f0f4fa] text-[10px] font-bold tabular-nums max-3xs:text-[9px] size-7.5 max-3xs:size-6.25 group-aria-expanded/legal-section-trigger:text-white group-aria-expanded/legal-section-trigger:bg-[var(--legal-accent)]"
                     aria-hidden="true"
                   >
                     {String(index + 1).padStart(2, "0")}
@@ -242,15 +242,15 @@ export default function LegalPage({
                     {sectionTitle}
                   </span>
                 </AccordionTrigger>
-                <AccordionContent className="legal-section-content px-5 pt-4.5 pb-5.5 border-t border-solid border-t-[#edf1f7] [@media(width<=760px)]:p-4 print:[&&]:px-0 print:[&&]:border-0 print:[&&]:border-none print:[&&]:border-current print:[&&]:pt-0 print:[&&]:pb-3">
-                  <div className="legal-prose text-[#55677f] text-sm leading-[1.95] [@media(width<=760px)]:text-[13px] print:[&&]:text-[#222] print:[&&]:text-[11px]">
+                <AccordionContent className="legal-section-content px-5 pt-4.5 pb-5.5 border-t border-solid border-t-[#edf1f7] max-md-compact:p-4 print:[&&]:px-0 print:[&&]:border-0 print:[&&]:border-none print:[&&]:border-current print:[&&]:pt-0 print:[&&]:pb-3">
+                  <div className="legal-prose text-[#55677f] text-sm leading-[1.95] max-md-compact:text-[13px] print:[&&]:text-[#222] print:[&&]:text-[11px]">
                     {content}
                   </div>
                 </AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
-          <div className="legal-ending gap-4 flex justify-between items-center flex-wrap mt-7 text-xs leading-[inherit] [@media(width<=760px)]:gap-3 [@media(width<=760px)]:items-start [@media(width<=760px)]:flex-col print:[&&]:hidden!">
+          <div className="legal-ending gap-4 flex justify-between items-center flex-wrap mt-7 text-xs leading-[inherit] max-md-compact:gap-3 max-md-compact:items-start max-md-compact:flex-col print:[&&]:hidden!">
             <Link
               className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#a7c0f2] focus-visible:outline-offset-4 focus-visible:rounded-[5px] gap-1.5 inline-flex items-center text-[#356ae6] font-[650]"
               to={kind === "privacy" ? "/terms" : "/privacy"}

@@ -170,7 +170,7 @@ export default function CreationPreview({
                 pour zoomer, Début pour réinitialiser.
               </span>
               <span
-                className="creation-preview-hint text-[11px] mr-1.5 [@media(width<=360px)]:hidden"
+                className="creation-preview-hint text-[11px] mr-1.5 max-3xs:hidden"
                 aria-hidden="true"
               >
                 Glisser pour tourner

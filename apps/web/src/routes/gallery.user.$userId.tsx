@@ -52,7 +52,7 @@ export const Route = createFileRoute("/gallery/user/$userId")({
     });
   },
   errorComponent: () => (
-    <main className="collection-page empty-state gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0] px-[5%] py-16 m-auto max-w-330 [@media(width<=850px)]:pt-10">
+    <main className="collection-page empty-state gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0] px-[5%] py-16 m-auto max-w-330 max-lg-narrow:pt-10">
       <h1 className="text-[#32445f] text-2xl leading-[inherit] font-bold">
         Cette galerie n’a pas pu être chargée.
       </h1>
@@ -83,7 +83,7 @@ function CreatorGallery({ userId }: { userId: string }) {
     cursor,
   );
   return (
-    <main className="collection-page creator-page px-[5%] py-16 m-auto max-w-330 [@media(width<=850px)]:pt-10">
+    <main className="collection-page creator-page px-[5%] py-16 m-auto max-w-330 max-lg-narrow:pt-10">
       {creator === undefined ? (
         <div
           className="empty-state px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0]"
@@ -102,8 +102,8 @@ function CreatorGallery({ userId }: { userId: string }) {
         </div>
       ) : (
         <>
-          <div className="page-heading creator-heading group/page-heading flex items-center mb-11.25 [@media(width<=850px)]:items-start [@media(width<=850px)]:flex-col gap-6 justify-start [@media(width<=640px)]:gap-4.5 [@media(width<=640px)]:items-start">
-            <div className="creator-avatar overflow-hidden grid place-items-center flex-[0_0_96px] rounded-2xl bg-[#f1f5fc] text-[#356ae6] text-[38px] font-[750] [@media(width<=640px)]:rounded-[12px] [@media(width<=640px)]:text-3xl [@media(width<=640px)]:leading-[inherit] [@media(width<=640px)]:basis-18 size-24 [@media(width<=640px)]:size-18">
+          <div className="page-heading creator-heading group/page-heading flex items-center mb-11.25 max-lg-narrow:items-start max-lg-narrow:flex-col gap-6 justify-start max-sm:gap-4.5 max-sm:items-start">
+            <div className="creator-avatar overflow-hidden grid place-items-center flex-[0_0_96px] rounded-2xl bg-[#f1f5fc] text-[#356ae6] text-[38px] font-[750] max-sm:rounded-[12px] max-sm:text-3xl max-sm:leading-[inherit] max-sm:basis-18 size-24 max-sm:size-18">
               <BrickAvatar
                 className="object-cover size-full"
                 avatar={creator.avatar ?? defaultAvatar(creator.id)}
@@ -112,7 +112,7 @@ function CreatorGallery({ userId }: { userId: string }) {
               />
             </div>
             <div className="creator-identity min-w-0">
-              <h1 className="mx-0 my-3 text-5xl leading-[inherit] tracking-[-2px] font-extrabold [@media(width<=850px)]:text-[40px] wrap-anywhere mb-0">
+              <h1 className="mx-0 my-3 text-5xl leading-[inherit] tracking-[-2px] font-extrabold max-lg-narrow:text-[40px] wrap-anywhere mb-0">
                 {creator.name}
                 <span className="text-[#356ae6]">.</span>
               </h1>
@@ -121,7 +121,7 @@ function CreatorGallery({ userId }: { userId: string }) {
               </p>
             </div>
           </div>
-          <div className="collection-meta group/collection-meta px-0 py-5.5 flex justify-between border-t border-solid border-t-[#e0e6ef] text-[13px] text-[#8090a6] gap-4 items-center flex-wrap [@media(width<=640px)]:gap-2 [@media(width<=640px)]:items-start [@media(width<=640px)]:flex-col">
+          <div className="collection-meta group/collection-meta px-0 py-5.5 flex justify-between border-t border-solid border-t-[#e0e6ef] text-[13px] text-[#8090a6] gap-4 items-center flex-wrap max-sm:gap-2 max-sm:items-start max-sm:flex-col">
             <span className="first:text-[#3b4b65] first:font-[650]">
               Créations publiques
             </span>
@@ -157,7 +157,7 @@ function CreatorGallery({ userId }: { userId: string }) {
               </p>
             </div>
           ) : (
-            <div className="creation-grid group/creation-grid gap-6.5 grid grid-cols-3 [@media(width<=520px)]:gap-3.75 [@media(width<=520px)]:grid-cols-1 [@media(520px<width<=850px)]:gap-3.75 [@media(520px<width<=850px)]:grid-cols-2">
+            <div className="creation-grid group/creation-grid gap-6.5 grid grid-cols-3 max-sm-narrow:gap-3.75 max-sm-narrow:grid-cols-1 min-sm-narrow:max-lg-narrow:gap-3.75 min-sm-narrow:max-lg-narrow:grid-cols-2">
               {results.map((creation) => (
                 <PublicCreationCard key={creation._id} creation={creation} />
               ))}

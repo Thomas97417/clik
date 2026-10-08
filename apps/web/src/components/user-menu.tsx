@@ -28,7 +28,7 @@ export default function UserMenu() {
         render={
           <Button
             variant="outline"
-            className="header-user-trigger focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-4 py-0.75 gap-2.25 border border-solid border-transparent inline-flex items-center justify-center h-10 max-w-full rounded-3xl text-xs font-medium whitespace-nowrap [box-shadow:none] [transition:background_150ms,color_150ms] pr-2.5 pl-0.75 bg-[#f6f8fc] text-[#344964] [@media(width<=680px)]:p-1.25 [@media(width<=680px)]:h-11 [@media(width<=680px)]:min-w-11 hover:bg-[#e4edff] hover:text-[#2458be] aria-expanded:bg-[#e4edff] aria-expanded:text-[#2458be]"
+            className="header-user-trigger focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-4 py-0.75 gap-2.25 border border-solid border-transparent inline-flex items-center justify-center h-10 max-w-full rounded-3xl text-xs font-medium whitespace-nowrap [box-shadow:none] [transition:background_150ms,color_150ms] pr-2.5 pl-0.75 bg-[#f6f8fc] text-[#344964] max-sm-wide:p-1.25 max-sm-wide:h-11 max-sm-wide:min-w-11 hover:bg-[#e4edff] hover:text-[#2458be] aria-expanded:bg-[#e4edff] aria-expanded:text-[#2458be]"
           />
         }
       >
@@ -43,13 +43,13 @@ export default function UserMenu() {
             />
           )}
         </span>
-        <span className="header-user-copy flex min-w-0 text-left [@media(width<=900px)]:hidden">
-          <span className="header-user-name overflow-hidden max-w-32.5 text-ellipsis [@media(width<=1100px)]:max-w-25">
+        <span className="header-user-copy flex min-w-0 text-left max-lg-compact:hidden">
+          <span className="header-user-name overflow-hidden max-w-32.5 text-ellipsis max-xl-narrow:max-w-25">
             {user?.name || "Mon compte"}
           </span>
         </span>
         <ChevronDown
-          className="header-account-chevron shrink-0 text-[#8495af] [@media(width<=680px)]:hidden size-4"
+          className="header-account-chevron shrink-0 text-[#8495af] max-sm-wide:hidden size-4"
           size={14}
           aria-hidden="true"
         />

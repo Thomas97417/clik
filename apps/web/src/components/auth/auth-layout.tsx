@@ -130,13 +130,13 @@ export default function AuthLayout({
     previousTitle.current = title;
   }, [title]);
   return (
-    <main className="auth-page px-10 mx-auto my-0 max-w-310 pt-14 pb-7 [@media(width<=440px)]:px-3.5 [@media(width<=440px)]:py-5.5 [@media(width<=440px)]:max-w-135 [@media(440px<width<=800px)]:px-5.5 [@media(440px<width<=800px)]:max-w-135 [@media(440px<width<=800px)]:pt-7.5 [@media(440px<width<=800px)]:pb-6 [@media(800px<width<=1000px)]:px-7 [@media(800px<width<=1000px)]:pt-9 [@media(800px<width<=1000px)]:pb-6">
-      <div className="auth-layout overflow-hidden border border-solid border-[#dfe7f4] grid grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)] rounded-[26px] [background:radial-gradient(ellipse_at_35%_40%,#fff9ef_0%,transparent_50%),linear-gradient(145deg,#f0f5ff,#f8faff_65%,#edf3ff)] [box-shadow:0_16px_48px_#233f750c] [@media(width<=440px)]:block [@media(width<=440px)]:grid-cols-2 [@media(width<=440px)]:rounded-[17px] [@media(440px<width<=800px)]:block [@media(440px<width<=800px)]:grid-cols-2 [@media(800px<width<=1000px)]:grid-cols-2">
+    <main className="auth-page px-10 mx-auto my-0 max-w-310 pt-14 pb-7 max-xs:px-3.5 max-xs:py-5.5 max-xs:max-w-135 min-xs:max-md-wide:px-5.5 min-xs:max-md-wide:max-w-135 min-xs:max-md-wide:pt-7.5 min-xs:max-md-wide:pb-6 min-md-wide:max-lg-wide:px-7 min-md-wide:max-lg-wide:pt-9 min-md-wide:max-lg-wide:pb-6">
+      <div className="auth-layout overflow-hidden border border-solid border-[#dfe7f4] grid grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)] rounded-[26px] [background:radial-gradient(ellipse_at_35%_40%,#fff9ef_0%,transparent_50%),linear-gradient(145deg,#f0f5ff,#f8faff_65%,#edf3ff)] [box-shadow:0_16px_48px_#233f750c] max-xs:block max-xs:grid-cols-2 max-xs:rounded-[17px] min-xs:max-md-wide:block min-xs:max-md-wide:grid-cols-2 min-md-wide:max-lg-wide:grid-cols-2">
         <aside
-          className="auth-story px-9 overflow-hidden flex flex-col min-w-0 pt-10 pb-8 [@media(width<=800px)]:px-5.5 [@media(width<=800px)]:hidden [@media(width<=800px)]:pt-6.5 [@media(width<=800px)]:pb-5.5 [@media(800px<width<=1000px)]:px-5.5 [@media(800px<width<=1000px)]:pt-6.5 [@media(800px<width<=1000px)]:pb-5.5"
+          className="auth-story px-9 overflow-hidden flex flex-col min-w-0 pt-10 pb-8 max-md-wide:px-5.5 max-md-wide:hidden max-md-wide:pt-6.5 max-md-wide:pb-5.5 min-md-wide:max-lg-wide:px-5.5 min-md-wide:max-lg-wide:pt-6.5 min-md-wide:max-lg-wide:pb-5.5"
           aria-label="Votre espace Clik"
         >
-          <h2 className="mx-0 mt-6 mb-4 text-[clamp(32px,_3.4vw,_44px)] font-[850] tracking-[-1.8px] leading-[1.14] [@media(width<=1000px)]:text-[32px] [@media(width<=1000px)]:tracking-[-1.3px]">
+          <h2 className="mx-0 mt-6 mb-4 text-[clamp(32px,_3.4vw,_44px)] font-[850] tracking-[-1.8px] leading-[1.14] max-lg-wide:text-[32px] max-lg-wide:tracking-[-1.3px]">
             De petites briques.
             <br />
             <em className="not-italic text-[#356ae6]">De grandes idées.</em>
@@ -151,7 +151,7 @@ export default function AuthLayout({
               Un peu d’imagination. Et tout prend forme.
             </p>
           </div>
-          <ul className="auth-benefits px-0 m-0 gap-3.5 grid grid-cols-3 pt-5.5 pb-0 border-t border-solid border-t-[#dce5f3] list-none [@media(width<=1000px)]:gap-2.25">
+          <ul className="auth-benefits px-0 m-0 gap-3.5 grid grid-cols-3 pt-5.5 pb-0 border-t border-solid border-t-[#dce5f3] list-none max-lg-wide:gap-2.25">
             <li className="gap-2.25 flex flex-col items-start text-[11px] leading-[1.6] text-[#617594]">
               <Cloud
                 className="text-[#527dc9] shrink-0"
@@ -194,12 +194,12 @@ export default function AuthLayout({
           </ul>
         </aside>
         <section
-          className="auth-card px-[clamp(32px,4vw,56px)] py-10 flex flex-col justify-center min-w-0 border-l border-solid border-l-[#e1e8f5] bg-[#ffffffb3] [@media(width<=440px)]:px-5.25 [@media(width<=440px)]:py-6.25 [@media(width<=440px)]:[border-left-width:0] [@media(width<=440px)]:border-l-[currentColor] [@media(440px<width<=800px)]:px-6.5 [@media(440px<width<=800px)]:py-8 [@media(440px<width<=800px)]:[border-left-width:0] [@media(440px<width<=800px)]:border-l-[currentColor] [@media(800px<width<=1000px)]:px-6.5 [@media(800px<width<=1000px)]:py-8"
+          className="auth-card px-[clamp(32px,4vw,56px)] py-10 flex flex-col justify-center min-w-0 border-l border-solid border-l-[#e1e8f5] bg-[#ffffffb3] max-xs:px-5.25 max-xs:py-6.25 max-xs:[border-left-width:0] max-xs:border-l-[currentColor] min-xs:max-md-wide:px-6.5 min-xs:max-md-wide:py-8 min-xs:max-md-wide:[border-left-width:0] min-xs:max-md-wide:border-l-[currentColor] min-md-wide:max-lg-wide:px-6.5 min-md-wide:max-lg-wide:py-8"
           aria-labelledby="auth-title"
         >
-          <div className="auth-card-heading mb-6.75 [@media(width<=440px)]:mb-5.75">
+          <div className="auth-card-heading mb-6.75 max-xs:mb-5.75">
             <h1
-              className="mx-0 mt-0 mb-3.25 text-[32px] font-extrabold tracking-[-1.1px] leading-[1.16] outline-none [@media(width<=440px)]:text-[29px]"
+              className="mx-0 mt-0 mb-3.25 text-[32px] font-extrabold tracking-[-1.1px] leading-[1.16] outline-none max-xs:text-[29px]"
               ref={heading}
               id="auth-title"
               tabIndex={-1}

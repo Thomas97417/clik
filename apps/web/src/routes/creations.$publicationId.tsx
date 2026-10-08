@@ -126,10 +126,10 @@ function CreationDetail({
     );
   return (
     <main className="creation-page px-[5%] m-auto max-w-350 pt-8.75 pb-16">
-      <div className="creation-layout gap-9 grid grid-cols-[minmax(0,1.8fr)_minmax(300px,1fr)] items-start [@media(width<=850px)]:gap-6.25 [@media(width<=850px)]:grid-cols-1 [@media(851px<=width<=1100px)]:gap-6 [@media(851px<=width<=1100px)]:grid-cols-[minmax(0,1.4fr)_minmax(280px,1fr)]">
+      <div className="creation-layout gap-9 grid grid-cols-[minmax(0,1.8fr)_minmax(300px,1fr)] items-start max-lg-narrow:gap-6.25 max-lg-narrow:grid-cols-1 lg-start:max-xl-narrow:gap-6 lg-start:max-xl-narrow:grid-cols-[minmax(0,1.4fr)_minmax(280px,1fr)]">
         <div className="creation-preview-panel min-w-0">
           <div
-            className="public-scene overflow-hidden border border-solid border-[#e2e8f1] h-140 rounded-[20px] relative bg-[#edf1f7] [@media(width<=520px)]:h-87.5 [@media(520px<width<=850px)]:h-112.5"
+            className="public-scene overflow-hidden border border-solid border-[#e2e8f1] h-140 rounded-[20px] relative bg-[#edf1f7] max-sm-narrow:h-87.5 min-sm-narrow:max-lg-narrow:h-112.5"
             role="region"
             aria-label={`Aperçu 3D de ${p.title}`}
           >
@@ -140,7 +140,7 @@ function CreationDetail({
               poster={p.thumbnailUrl}
               title={p.title}
             />
-            <p className="creation-view-hint gap-1.75 absolute bottom-1.25 left-3 right-27.5 min-h-7.5 flex justify-start items-center text-[11px] text-[#8190a5] leading-[1.6] pointer-events-none [@media(width<=640px)]:gap-1.25 [@media(width<=640px)]:left-2.5 [@media(width<=640px)]:text-[10px]">
+            <p className="creation-view-hint gap-1.75 absolute bottom-1.25 left-3 right-27.5 min-h-7.5 flex justify-start items-center text-[11px] text-[#8190a5] leading-[1.6] pointer-events-none max-sm:gap-1.25 max-sm:left-2.5 max-sm:text-[10px]">
               <MousePointer2
                 className="shrink-0"
                 size={14}
@@ -148,7 +148,7 @@ function CreationDetail({
               />
               <span>
                 Glissez pour explorer
-                <span className="creation-view-hint-zoom [@media(width<=640px)]:hidden">
+                <span className="creation-view-hint-zoom max-sm:hidden">
                   {" "}
                   · Pincez ou défilez pour zoomer
                 </span>
@@ -156,7 +156,7 @@ function CreationDetail({
             </p>
           </div>
         </div>
-        <aside className="creation-details min-w-0 [@media(width<=850px)]:pb-7.5">
+        <aside className="creation-details min-w-0 max-lg-narrow:pb-7.5">
           {p.isAssembly && (
             <span className="assembly-badge group/assembly-badge px-2 py-0.75 border border-solid border-[#c7dfdf] inline-flex w-fit items-center rounded-[6px] bg-[#edf7f5] text-[#37786b] text-[10px] font-[650] leading-normal whitespace-nowrap">
               Assemblage
@@ -231,7 +231,7 @@ function CreationDetail({
                 Les votes sont conservés.
               </p>
             )}
-          <div className="creation-fork p-5 border border-solid border-[#dce6f7] mt-7 rounded-2xl bg-[#f0f5fd] [@media(851px<=width<=1100px)]:p-4">
+          <div className="creation-fork p-5 border border-solid border-[#dce6f7] mt-7 rounded-2xl bg-[#f0f5fd] lg-start:max-xl-narrow:p-4">
             <div className="creation-fork-heading gap-3 flex items-center mb-4.5">
               <svg
                 className="creation-fork-art w-12 h-15 shrink-0"

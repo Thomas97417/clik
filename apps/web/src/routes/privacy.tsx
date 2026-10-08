@@ -57,20 +57,20 @@ const sections: LegalSection[] = [
           Les informations dépendent de la manière dont vous utilisez l’atelier.
         </p>
         <div className="legal-table-wrap mx-0 overflow-hidden border border-solid border-[#e0e7f1] mt-4.5 mb-5.5 rounded-[12px] last:mb-0">
-          <table className="border-collapse w-full text-xs leading-[1.8] [@media(width<=760px)]:text-[11px]">
+          <table className="border-collapse w-full text-xs leading-[1.8] max-md-compact:text-[11px]">
             <caption className="px-4 py-3 text-left bg-white text-[11px] text-[#677b96]">
               Données utilisées selon votre activité
             </caption>
             <thead className="bg-[#edf2f9] text-[#435b7e]">
               <tr className="print:break-inside-avoid">
                 <th
-                  className="px-4 py-3.25 text-left align-top font-[650] [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3"
+                  className="px-4 py-3.25 text-left align-top font-[650] max-md-compact:px-2.5 max-md-compact:py-3"
                   scope="col"
                 >
                   Votre activité
                 </th>
                 <th
-                  className="px-4 py-3.25 text-left align-top font-[650] [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3"
+                  className="px-4 py-3.25 text-left align-top font-[650] max-md-compact:px-2.5 max-md-compact:py-3"
                   scope="col"
                 >
                   Les données concernées
@@ -80,12 +80,12 @@ const sections: LegalSection[] = [
             <tbody>
               <tr className="bg-[#fff9] border-t border-solid border-t-[#e5ebf3] print:break-inside-avoid">
                 <th
-                  className="px-4 py-3.25 text-left align-top font-[650] [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3 w-[27%] text-[#435772] [@media(width<=760px)]:w-[28%]"
+                  className="px-4 py-3.25 text-left align-top font-[650] max-md-compact:px-2.5 max-md-compact:py-3 w-[27%] text-[#435772] max-md-compact:w-[28%]"
                   scope="row"
                 >
                   Créer un compte
                 </th>
-                <td className="px-4 py-3.25 text-left align-top [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3">
+                <td className="px-4 py-3.25 text-left align-top max-md-compact:px-2.5 max-md-compact:py-3">
                   Nom ou pseudonyme, adresse email, statut de vérification,
                   identifiant du compte et informations de connexion. Avec une
                   inscription par email, votre mot de passe est conservé sous
@@ -94,24 +94,24 @@ const sections: LegalSection[] = [
               </tr>
               <tr className="bg-[#fff9] border-t border-solid border-t-[#e5ebf3] print:break-inside-avoid">
                 <th
-                  className="px-4 py-3.25 text-left align-top font-[650] [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3 w-[27%] text-[#435772] [@media(width<=760px)]:w-[28%]"
+                  className="px-4 py-3.25 text-left align-top font-[650] max-md-compact:px-2.5 max-md-compact:py-3 w-[27%] text-[#435772] max-md-compact:w-[28%]"
                   scope="row"
                 >
                   Construire
                 </th>
-                <td className="px-4 py-3.25 text-left align-top [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3">
+                <td className="px-4 py-3.25 text-left align-top max-md-compact:px-2.5 max-md-compact:py-3">
                   Titres, pièces et scènes 3D, dates de modification, versions
                   et références aux créations utilisées comme point de départ.
                 </td>
               </tr>
               <tr className="bg-[#fff9] border-t border-solid border-t-[#e5ebf3] print:break-inside-avoid">
                 <th
-                  className="px-4 py-3.25 text-left align-top font-[650] [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3 w-[27%] text-[#435772] [@media(width<=760px)]:w-[28%]"
+                  className="px-4 py-3.25 text-left align-top font-[650] max-md-compact:px-2.5 max-md-compact:py-3 w-[27%] text-[#435772] max-md-compact:w-[28%]"
                   scope="row"
                 >
                   Participer
                 </th>
-                <td className="px-4 py-3.25 text-left align-top [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3">
+                <td className="px-4 py-3.25 text-left align-top max-md-compact:px-2.5 max-md-compact:py-3">
                   Publications, descriptions, commentaires, votes,
                   participations aux défis, récompenses et personnalisation de
                   votre avatar.
@@ -119,12 +119,12 @@ const sections: LegalSection[] = [
               </tr>
               <tr className="bg-[#fff9] border-t border-solid border-t-[#e5ebf3] print:break-inside-avoid">
                 <th
-                  className="px-4 py-3.25 text-left align-top font-[650] [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3 w-[27%] text-[#435772] [@media(width<=760px)]:w-[28%]"
+                  className="px-4 py-3.25 text-left align-top font-[650] max-md-compact:px-2.5 max-md-compact:py-3 w-[27%] text-[#435772] max-md-compact:w-[28%]"
                   scope="row"
                 >
                   Se connecter
                 </th>
-                <td className="px-4 py-3.25 text-left align-top [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3">
+                <td className="px-4 py-3.25 text-left align-top max-md-compact:px-2.5 max-md-compact:py-3">
                   Sessions, fournisseur de connexion, jetons d’authentification
                   et informations techniques associées, telles que l’adresse IP
                   et le navigateur.
@@ -132,12 +132,12 @@ const sections: LegalSection[] = [
               </tr>
               <tr className="bg-[#fff9] border-t border-solid border-t-[#e5ebf3] print:break-inside-avoid">
                 <th
-                  className="px-4 py-3.25 text-left align-top font-[650] [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3 w-[27%] text-[#435772] [@media(width<=760px)]:w-[28%]"
+                  className="px-4 py-3.25 text-left align-top font-[650] max-md-compact:px-2.5 max-md-compact:py-3 w-[27%] text-[#435772] max-md-compact:w-[28%]"
                   scope="row"
                 >
                   Visiter le site
                 </th>
-                <td className="px-4 py-3.25 text-left align-top [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3">
+                <td className="px-4 py-3.25 text-left align-top max-md-compact:px-2.5 max-md-compact:py-3">
                   Informations techniques nécessaires à l’hébergement et à la
                   sécurité, pages consultées, type de navigateur et d’appareil,
                   ainsi que mesures de performance du site.
@@ -169,13 +169,13 @@ const sections: LegalSection[] = [
           connecter. Elles ne sont ni vendues ni utilisées pour de la publicité
           ciblée ou l’entraînement de modèles d’intelligence artificielle.
         </p>
-        <div className="legal-callout px-5 py-4.5 mx-0 my-5.5 gap-3 border border-solid border-[#dce7f8] flex items-start rounded-[12px] bg-[#edf3fd] text-[#4f678a] [@media(width<=760px)]:p-3.75 [@media(width<=760px)]:gap-2.5 print:[&&]:break-inside-avoid last:mb-0">
+        <div className="legal-callout px-5 py-4.5 mx-0 my-5.5 gap-3 border border-solid border-[#dce7f8] flex items-start rounded-[12px] bg-[#edf3fd] text-[#4f678a] max-md-compact:p-3.75 max-md-compact:gap-2.5 print:[&&]:break-inside-avoid last:mb-0">
           <ShieldCheck
             className="shrink-0 mt-0.75 text-[#668dcb]"
             size={20}
             aria-hidden="true"
           />
-          <p className="m-0 text-[13px] leading-[1.85] [@media(width<=760px)]:text-xs">
+          <p className="m-0 text-[13px] leading-[1.85] max-md-compact:text-xs">
             Clik n’accède pas à vos emails Gmail, à votre Google Drive ou à vos
             dépôts GitHub. Votre mot de passe Google ou GitHub est saisi auprès
             du fournisseur, qui ne le transmet pas à Clik.
@@ -274,13 +274,13 @@ const sections: LegalSection[] = [
           moteurs de recherche. Votre adresse email et vos jetons de connexion
           ne sont pas affichés dans la galerie.
         </p>
-        <div className="legal-callout px-5 py-4.5 mx-0 my-5.5 gap-3 border border-solid border-[#dce7f8] flex items-start rounded-[12px] bg-[#edf3fd] text-[#4f678a] [@media(width<=760px)]:p-3.75 [@media(width<=760px)]:gap-2.5 print:[&&]:break-inside-avoid last:mb-0">
+        <div className="legal-callout px-5 py-4.5 mx-0 my-5.5 gap-3 border border-solid border-[#dce7f8] flex items-start rounded-[12px] bg-[#edf3fd] text-[#4f678a] max-md-compact:p-3.75 max-md-compact:gap-2.5 print:[&&]:break-inside-avoid last:mb-0">
           <Eye
             className="shrink-0 mt-0.75 text-[#668dcb]"
             size={20}
             aria-hidden="true"
           />
-          <p className="m-0 text-[13px] leading-[1.85] [@media(width<=760px)]:text-xs">
+          <p className="m-0 text-[13px] leading-[1.85] max-md-compact:text-xs">
             Publier permet aussi à d’autres personnes de reprendre une création
             dans l’atelier. Dépublier retire votre publication de la galerie,
             mais ne supprime pas les copies déjà reprises, les captures d’écran
@@ -373,8 +373,8 @@ const sections: LegalSection[] = [
           </Link>{" "}
           et met fin à votre accès à ce compte.
         </p>
-        <div className="legal-callout legal-callout-peach px-5 py-4.5 mx-0 my-5.5 gap-3 border border-solid flex items-start rounded-[12px] [@media(width<=760px)]:p-3.75 [@media(width<=760px)]:gap-2.5 print:[&&]:break-inside-avoid border-[#eee2d7] bg-[#fbf3ec] text-[#806047] last:mb-0">
-          <p className="m-0 text-[13px] leading-[1.85] [@media(width<=760px)]:text-xs">
+        <div className="legal-callout legal-callout-peach px-5 py-4.5 mx-0 my-5.5 gap-3 border border-solid flex items-start rounded-[12px] max-md-compact:p-3.75 max-md-compact:gap-2.5 print:[&&]:break-inside-avoid border-[#eee2d7] bg-[#fbf3ec] text-[#806047] last:mb-0">
+          <p className="m-0 text-[13px] leading-[1.85] max-md-compact:text-xs">
             <strong className="font-[650] text-[#384a64] text-[#785538]">
               Avant de supprimer votre compte :
             </strong>{" "}

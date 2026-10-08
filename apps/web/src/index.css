@@ -3,6 +3,57 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --breakpoint-3xs: 360px;
+  --breakpoint-2xs: 370px;
+  --breakpoint-xs: 440px;
+  --breakpoint-xs-wide: 480px;
+  --breakpoint-sm-narrow: 520px;
+  --breakpoint-sm: 640px;
+  --breakpoint-sm-wide: 680px;
+  --breakpoint-md-narrow: 700px;
+  --breakpoint-md-compact: 760px;
+  --breakpoint-md: 768px;
+  --breakpoint-md-wide: 800px;
+  --breakpoint-lg-narrow: 850px;
+  --breakpoint-lg-start: 851px;
+  --breakpoint-lg-compact: 900px;
+  --breakpoint-lg-wide: 1000px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl-narrow: 1100px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl-narrow: 1500px;
+  --breakpoint-2xl: 1536px;
+}
+
+/* Keep the existing inclusive upper bounds and exclusive lower bounds. */
+@custom-variant max-xl-narrow (@media (width <= theme(--breakpoint-xl-narrow)));
+@custom-variant max-lg-wide (@media (width <= theme(--breakpoint-lg-wide)));
+@custom-variant max-lg-compact (@media (width <= theme(--breakpoint-lg-compact)));
+@custom-variant max-lg-narrow (@media (width <= theme(--breakpoint-lg-narrow)));
+@custom-variant max-md-wide (@media (width <= theme(--breakpoint-md-wide)));
+@custom-variant max-md-compact (@media (width <= theme(--breakpoint-md-compact)));
+@custom-variant max-md-narrow (@media (width <= theme(--breakpoint-md-narrow)));
+@custom-variant max-sm-wide (@media (width <= theme(--breakpoint-sm-wide)));
+@custom-variant max-sm (@media (width <= theme(--breakpoint-sm)));
+@custom-variant max-sm-narrow (@media (width <= theme(--breakpoint-sm-narrow)));
+@custom-variant max-xs-wide (@media (width <= theme(--breakpoint-xs-wide)));
+@custom-variant max-xs (@media (width <= theme(--breakpoint-xs)));
+@custom-variant max-2xs (@media (width <= theme(--breakpoint-2xs)));
+@custom-variant max-3xs (@media (width <= theme(--breakpoint-3xs)));
+
+@custom-variant min-3xs (@media (width > theme(--breakpoint-3xs)));
+@custom-variant min-2xs (@media (width > theme(--breakpoint-2xs)));
+@custom-variant min-xs (@media (width > theme(--breakpoint-xs)));
+@custom-variant min-xs-wide (@media (width > theme(--breakpoint-xs-wide)));
+@custom-variant min-sm-narrow (@media (width > theme(--breakpoint-sm-narrow)));
+@custom-variant min-sm (@media (width > theme(--breakpoint-sm)));
+@custom-variant min-sm-wide (@media (width > theme(--breakpoint-sm-wide)));
+@custom-variant min-md-narrow (@media (width > theme(--breakpoint-md-narrow)));
+@custom-variant min-md-compact (@media (width > theme(--breakpoint-md-compact)));
+@custom-variant min-md-wide (@media (width > theme(--breakpoint-md-wide)));
+@custom-variant min-lg-narrow (@media (width > theme(--breakpoint-lg-narrow)));
+
 :root {
   --background: oklch(0.9892 0.0054 117.9205);
   --foreground: oklch(0.2077 0.0398 265.7549);

@@ -43,16 +43,16 @@ export default function Comments({
   return (
     <section
       id="comments"
-      className="creation-comments px-0 gap-12 grid grid-cols-[240px_minmax(0,1fr)] items-start scroll-mt-25 mt-14 pt-3 pb-5 [@media(width<=700px)]:gap-4 [@media(width<=700px)]:grid-cols-1 [@media(width<=700px)]:mt-9.5 [@media(700px<width<=1000px)]:gap-7 [@media(700px<width<=1000px)]:grid-cols-[200px_minmax(0,1fr)]"
+      className="creation-comments px-0 gap-12 grid grid-cols-[240px_minmax(0,1fr)] items-start scroll-mt-25 mt-14 pt-3 pb-5 max-md-narrow:gap-4 max-md-narrow:grid-cols-1 max-md-narrow:mt-9.5 min-md-narrow:max-lg-wide:gap-7 min-md-narrow:max-lg-wide:grid-cols-[200px_minmax(0,1fr)]"
       aria-labelledby="comments-title"
     >
-      <header className="comments-heading pt-1 [@media(width<=700px)]:px-0 [@media(width<=700px)]:pt-3 [@media(width<=700px)]:relative [@media(width<=700px)]:pb-0">
+      <header className="comments-heading pt-1 max-md-narrow:px-0 max-md-narrow:pt-3 max-md-narrow:relative max-md-narrow:pb-0">
         <CommunityArt
-          className="w-31.25 h-24 mt-0 mr-0 mb-4 -ml-3 [@media(width<=700px)]:w-16.5 [@media(width<=700px)]:h-13.75 [@media(width<=700px)]:mb-0 [@media(width<=700px)]:ml-0 [@media(width<=700px)]:absolute [@media(width<=700px)]:right-0 [@media(width<=700px)]:top-1"
+          className="w-31.25 h-24 mt-0 mr-0 mb-4 -ml-3 max-md-narrow:w-16.5 max-md-narrow:h-13.75 max-md-narrow:mb-0 max-md-narrow:ml-0 max-md-narrow:absolute max-md-narrow:right-0 max-md-narrow:top-1"
           kind="comments"
         />
         <h2
-          className="text-[27px] font-extrabold tracking-[-0.8px] text-[#25354e] [@media(width<=700px)]:text-[21px] [@media(width<=700px)]:pr-17.5 [@media(700px<width<=1000px)]:text-[23px]"
+          className="text-[27px] font-extrabold tracking-[-0.8px] text-[#25354e] max-md-narrow:text-[21px] max-md-narrow:pr-17.5 min-md-narrow:max-lg-wide:text-[23px]"
           id="comments-title"
         >
           Commentaires
@@ -61,7 +61,7 @@ export default function Comments({
             {count}
           </span>
         </h2>
-        <p className="mt-3.5 text-[#7d8798] text-[13px] leading-[1.9] max-w-77.5 [@media(width<=700px)]:mt-2.5 [@media(width<=700px)]:text-xs [@media(width<=700px)]:max-w-95 [@media(width<=700px)]:pr-19.5">
+        <p className="mt-3.5 text-[#7d8798] text-[13px] leading-[1.9] max-w-77.5 max-md-narrow:mt-2.5 max-md-narrow:text-xs max-md-narrow:max-w-95 max-md-narrow:pr-19.5">
           Les idées s’assemblent aussi à plusieurs. Un petit mot peut donner
           envie d’aller plus loin.
         </p>
@@ -69,7 +69,7 @@ export default function Comments({
       <div className="comments-thread min-w-0">
         {isAuthenticated ? (
           <form
-            className="comment-form p-5.5 mx-0 border border-solid border-[#e6ded6] relative mt-3 mb-7.5 rounded-[8px_20px_20px_20px] bg-[#fffefc] [box-shadow:0_5px_0_#eee6dc66] [@media(width<=640px)]:p-3.75 before:[content:''] before:absolute before:w-13.5 before:h-3.75 before:-top-2 before:right-6.5 before:bg-[#f1d9bcbb] before:transform-[rotate(4deg)] before:pointer-events-none"
+            className="comment-form p-5.5 mx-0 border border-solid border-[#e6ded6] relative mt-3 mb-7.5 rounded-[8px_20px_20px_20px] bg-[#fffefc] [box-shadow:0_5px_0_#eee6dc66] max-sm:p-3.75 before:[content:''] before:absolute before:w-13.5 before:h-3.75 before:-top-2 before:right-6.5 before:bg-[#f1d9bcbb] before:transform-[rotate(4deg)] before:pointer-events-none"
             onSubmit={async (e) => {
               e.preventDefault();
               if (busy || !body.trim()) return;
@@ -132,7 +132,7 @@ export default function Comments({
             </div>
           </form>
         ) : (
-          <div className="comments-signin p-6.5 mx-0 border border-solid border-[#ede0d2] mt-3 mb-7 bg-[#fcf5ed] rounded-[8px_20px_20px_20px] [@media(width<=700px)]:p-5">
+          <div className="comments-signin p-6.5 mx-0 border border-solid border-[#ede0d2] mt-3 mb-7 bg-[#fcf5ed] rounded-[8px_20px_20px_20px] max-md-narrow:p-5">
             <p className="text-[#755d49] text-base font-[650] leading-[1.6]">
               Votre regard fait aussi partie de la création.
             </p>
@@ -223,7 +223,7 @@ function Comment({
           size={32}
         />
       </div>
-      <div className="comment-content group/comment-content px-5 py-4.5 border border-solid border-[#e6ebf3] flex-1 min-w-0 bg-white rounded-[4px_18px_18px_18px] [@media(width<=700px)]:p-3.5 group-data-[mine]/comment:border-[#dbe5f8] group-data-[mine]/comment:bg-[#f4f7fd]">
+      <div className="comment-content group/comment-content px-5 py-4.5 border border-solid border-[#e6ebf3] flex-1 min-w-0 bg-white rounded-[4px_18px_18px_18px] max-md-narrow:p-3.5 group-data-[mine]/comment:border-[#dbe5f8] group-data-[mine]/comment:bg-[#f4f7fd]">
         <header className="flex items-baseline flex-wrap gap-y-1.5 gap-x-3.5 mb-2.5">
           <strong className="text-[13px] wrap-anywhere">
             <AuthorLink
@@ -233,7 +233,7 @@ function Comment({
             />
           </strong>
           <time
-            className="text-[11px] text-[#95a0b1] ml-auto [@media(width<=700px)]:ml-0"
+            className="text-[11px] text-[#95a0b1] ml-auto max-md-narrow:ml-0"
             dateTime={new Date(comment.createdAt).toISOString()}
           >
             {new Date(comment.createdAt).toLocaleDateString("fr-FR", {

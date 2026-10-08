@@ -62,7 +62,7 @@ export default function HomeNextArt({
     return (
       <svg
         className={cn(
-          "home-collection-art self-end w-32 h-23.5 -mt-1.5 -mr-1.5 mb-2 ml-0 [@media(width<=520px)]:w-27.5 [@media(width<=520px)]:h-20.25 [@media(width<=520px)]:static [@media(width<=520px)]:right-7 [@media(width<=520px)]:top-7 [@media(520px<width<=850px)]:absolute [@media(520px<width<=850px)]:right-7 [@media(520px<width<=850px)]:top-7",
+          "home-collection-art self-end w-32 h-23.5 -mt-1.5 -mr-1.5 mb-2 ml-0 max-sm-narrow:w-27.5 max-sm-narrow:h-20.25 max-sm-narrow:static max-sm-narrow:right-7 max-sm-narrow:top-7 min-sm-narrow:max-lg-narrow:absolute min-sm-narrow:max-lg-narrow:right-7 min-sm-narrow:max-lg-narrow:top-7",
           className,
         )}
         viewBox="0 0 170 125"
@@ -104,7 +104,7 @@ export default function HomeNextArt({
     );
   return (
     <svg
-      className="home-gallery-art block w-full max-w-67.5 h-auto justify-self-end [@media(width<=520px)]:w-55 [@media(width<=520px)]:justify-self-center"
+      className="home-gallery-art block w-full max-w-67.5 h-auto justify-self-end max-sm-narrow:w-55 max-sm-narrow:justify-self-center"
       viewBox="0 0 270 282"
       fill="none"
       aria-hidden="true"

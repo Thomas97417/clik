@@ -142,10 +142,10 @@ function Projects() {
   const newCreation = () =>
     void navigate({ to: "/editor", search: { draft: crypto.randomUUID() } });
   return (
-    <main className="collection-page projects-page px-[5%] py-16 m-auto max-w-330 [@media(width<=850px)]:pt-10">
-      <div className="page-heading group/page-heading gap-6.25 flex justify-between items-center [@media(width<=850px)]:flex-col mb-7.5 [@media(width<=850px)]:items-start">
+    <main className="collection-page projects-page px-[5%] py-16 m-auto max-w-330 max-lg-narrow:pt-10">
+      <div className="page-heading group/page-heading gap-6.25 flex justify-between items-center max-lg-narrow:flex-col mb-7.5 max-lg-narrow:items-start">
         <div>
-          <h1 className="mx-0 my-3 text-5xl leading-[inherit] tracking-[-2px] font-extrabold [@media(width<=850px)]:text-[40px]">
+          <h1 className="mx-0 my-3 text-5xl leading-[inherit] tracking-[-2px] font-extrabold max-lg-narrow:text-[40px]">
             Mes créations<span className="text-[#356ae6]">.</span>
           </h1>
           <p className="text-[#7b889b] text-[15px]">
@@ -166,11 +166,11 @@ function Projects() {
         </Button>
       </div>
       {!isLoading && !isAuthenticated && (
-        <div className="projects-account-note px-6 py-5 gap-4 border border-solid border-[#e0e8fa] flex items-center bg-[#f3f6fd] rounded-[12px] mb-8 [@media(width<=850px)]:p-4.5 [@media(width<=850px)]:flex-wrap">
+        <div className="projects-account-note px-6 py-5 gap-4 border border-solid border-[#e0e8fa] flex items-center bg-[#f3f6fd] rounded-[12px] mb-8 max-lg-narrow:p-4.5 max-lg-narrow:flex-wrap">
           <span className="projects-note-icon grid place-items-center shrink-0 rounded-[12px] text-[#356ae6] bg-white size-11">
             <Cloud size={22} aria-hidden="true" />
           </span>
-          <div className="[@media(width<=850px)]:flex-1 [@media(width<=850px)]:min-w-47.5">
+          <div className="max-lg-narrow:flex-1 max-lg-narrow:min-w-47.5">
             <h2 className="text-sm leading-[inherit] font-bold mb-1">
               Vos créations vous suivent.
             </h2>
@@ -180,7 +180,7 @@ function Projects() {
             </p>
           </div>
           <Link
-            className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 gap-2 inline-flex items-center ml-auto text-[#356ae6] text-xs font-[650] whitespace-nowrap [@media(width<=850px)]:ml-15 leading-normal"
+            className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 gap-2 inline-flex items-center ml-auto text-[#356ae6] text-xs font-[650] whitespace-nowrap max-lg-narrow:ml-15 leading-normal"
             to="/sign-in"
             onClick={() =>
               sessionStorage.setItem("clik-return-to", "/projects")
@@ -190,9 +190,9 @@ function Projects() {
           </Link>
         </div>
       )}
-      <div className="projects-toolbar px-0 gap-4 flex items-center justify-between flex-wrap pt-0 pb-5.5 mb-7 border-b border-solid border-b-[#e4eaf2] [@media(width<=520px)]:gap-3">
+      <div className="projects-toolbar px-0 gap-4 flex items-center justify-between flex-wrap pt-0 pb-5.5 mb-7 border-b border-solid border-b-[#e4eaf2] max-sm-narrow:gap-3">
         <div
-          className="project-filters p-1 gap-1 flex bg-[#f2f5f9] rounded-[10px] [@media(width<=520px)]:grid [@media(width<=520px)]:grid-cols-2 [@media(width<=520px)]:w-full"
+          className="project-filters p-1 gap-1 flex bg-[#f2f5f9] rounded-[10px] max-sm-narrow:grid max-sm-narrow:grid-cols-2 max-sm-narrow:w-full"
           role="group"
           aria-label="Filtrer les créations"
         >
@@ -205,14 +205,14 @@ function Projects() {
             ] as const
           ).map(([value, label, Icon]) => (
             <button
-              className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-3.5 py-2.25 gap-1.75 flex items-center rounded-[7px] text-[#697a94] text-xs leading-[inherit] font-semibold whitespace-nowrap [@media(width<=520px)]:px-2.25 [@media(width<=520px)]:text-[11px] [@media(width<=520px)]:justify-center hover:text-[#356ae6] aria-pressed:text-[#356ae6] aria-pressed:bg-white aria-pressed:[box-shadow:0_2px_5px_#31476b10]"
+              className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-3.5 py-2.25 gap-1.75 flex items-center rounded-[7px] text-[#697a94] text-xs leading-[inherit] font-semibold whitespace-nowrap max-sm-narrow:px-2.25 max-sm-narrow:text-[11px] max-sm-narrow:justify-center hover:text-[#356ae6] aria-pressed:text-[#356ae6] aria-pressed:bg-white aria-pressed:[box-shadow:0_2px_5px_#31476b10]"
               key={value}
               aria-pressed={filter === value}
               onClick={() => setFilter(value)}
             >
               {Icon && (
                 <Icon
-                  className="[@media(width<=520px)]:hidden"
+                  className="max-sm-narrow:hidden"
                   size={15}
                   aria-hidden="true"
                 />
@@ -221,7 +221,7 @@ function Projects() {
             </button>
           ))}
         </div>
-        <div className="projects-toolbar-controls flex items-center justify-between flex-wrap gap-y-3 gap-x-5 ml-auto [@media(width<=520px)]:gap-2.5 [@media(width<=520px)]:w-full">
+        <div className="projects-toolbar-controls flex items-center justify-between flex-wrap gap-y-3 gap-x-5 ml-auto max-sm-narrow:gap-2.5 max-sm-narrow:w-full">
           <span
             className="projects-count text-[#78869c] text-xs leading-[inherit]"
             aria-live="polite"
@@ -230,9 +230,9 @@ function Projects() {
               ? "Chargement…"
               : `${creations.length} création${creations.length === 1 ? "" : "s"} affichée${creations.length === 1 ? "" : "s"}`}
           </span>
-          <div className="collection-sort group/collection-sort gap-2.5 flex items-center shrink-0 text-xs leading-[inherit] text-[#71839c] [@media(width<=520px)]:ml-auto">
+          <div className="collection-sort group/collection-sort gap-2.5 flex items-center shrink-0 text-xs leading-[inherit] text-[#71839c] max-sm-narrow:ml-auto">
             <label
-              className="[@media(width<=520px)]:overflow-hidden [@media(width<=520px)]:absolute [@media(width<=520px)]:[clip-path:inset(50%)] [@media(width<=520px)]:whitespace-nowrap [@media(width<=520px)]:size-px"
+              className="max-sm-narrow:overflow-hidden max-sm-narrow:absolute max-sm-narrow:[clip-path:inset(50%)] max-sm-narrow:whitespace-nowrap max-sm-narrow:size-px"
               htmlFor="projects-sort"
             >
               Trier par
@@ -251,7 +251,7 @@ function Projects() {
             >
               <SelectTrigger
                 id="projects-sort"
-                className="collection-sort-trigger group/collection-sort-trigger px-2.75 py-2 border border-solid border-[#dfe7f2] w-47.5 min-h-9.5 rounded-[9px] bg-white text-[#455f83] cursor-pointer hover:border-[#b7caf0] hover:bg-[#f8faff] data-popup-open:border-[#b7caf0] data-popup-open:bg-[#f8faff] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 [@media(width<=520px)]:w-43.5"
+                className="collection-sort-trigger group/collection-sort-trigger px-2.75 py-2 border border-solid border-[#dfe7f2] w-47.5 min-h-9.5 rounded-[9px] bg-white text-[#455f83] cursor-pointer hover:border-[#b7caf0] hover:bg-[#f8faff] data-popup-open:border-[#b7caf0] data-popup-open:bg-[#f8faff] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 max-sm-narrow:w-43.5"
               >
                 <SelectValue />
               </SelectTrigger>
@@ -290,7 +290,7 @@ function Projects() {
       )}
       {loading ? (
         <div
-          className="creation-grid projects-skeletons group/creation-grid gap-6.5 grid grid-cols-3 [@media(width<=520px)]:gap-3.75 [@media(width<=520px)]:grid-cols-1 [@media(520px<width<=850px)]:gap-3.75 [@media(520px<width<=850px)]:grid-cols-2"
+          className="creation-grid projects-skeletons group/creation-grid gap-6.5 grid grid-cols-3 max-sm-narrow:gap-3.75 max-sm-narrow:grid-cols-1 min-sm-narrow:max-lg-narrow:gap-3.75 min-sm-narrow:max-lg-narrow:grid-cols-2"
           role="status"
           aria-label="Chargement des créations"
         >
@@ -307,7 +307,7 @@ function Projects() {
           ))}
         </div>
       ) : creations.length ? (
-        <div className="creation-grid projects-grid group/creation-grid gap-6.5 grid grid-cols-3 [@media(width<=520px)]:gap-3.75 [@media(width<=520px)]:grid-cols-1 [@media(520px<width<=850px)]:gap-3.75 [@media(520px<width<=850px)]:grid-cols-2">
+        <div className="creation-grid projects-grid group/creation-grid gap-6.5 grid grid-cols-3 max-sm-narrow:gap-3.75 max-sm-narrow:grid-cols-1 min-sm-narrow:max-lg-narrow:gap-3.75 min-sm-narrow:max-lg-narrow:grid-cols-2">
           {creations.map((creation) => (
             <ProjectCard
               key={creation.id}
@@ -380,9 +380,9 @@ function Projects() {
       {isAuthenticated &&
         filter !== "local" &&
         (status === "CanLoadMore" || status === "LoadingMore") && (
-          <div className="projects-pagination gap-4.5 flex items-center justify-center mt-8 before:[content:''] before:h-px before:flex-1 before:max-w-27.5 before:bg-[#e0e7f2] [@media(width<=520px)]:before:hidden after:[content:''] after:h-px after:flex-1 after:max-w-27.5 after:bg-[#e0e7f2] [@media(width<=520px)]:after:hidden">
+          <div className="projects-pagination gap-4.5 flex items-center justify-center mt-8 before:[content:''] before:h-px before:flex-1 before:max-w-27.5 before:bg-[#e0e7f2] max-sm-narrow:before:hidden after:[content:''] after:h-px after:flex-1 after:max-w-27.5 after:bg-[#e0e7f2] max-sm-narrow:after:hidden">
             <Button
-              className="projects-load-more data-[slot=button]:px-4.5 data-[slot=button]:py-2.25 data-[slot=button]:gap-2.5 data-[slot=button]:border data-[slot=button]:border-solid data-[slot=button]:border-[#d7e2f3] data-[slot=button]:min-w-62 data-[slot=button]:min-h-11.5 data-[slot=button]:rounded-[12px] data-[slot=button]:bg-white data-[slot=button]:text-[#455f83] data-[slot=button]:text-xs data-[slot=button]:font-[650] data-[slot=button]:[box-shadow:0_2px_5px_#31476b08] data-[slot=button]:[transition:background_150ms,border-color_150ms,box-shadow_150ms] [@media(width<=520px)]:data-[slot=button]:min-w-0 [@media(width<=520px)]:data-[slot=button]:w-full [@media(width<=520px)]:data-[slot=button]:max-w-80 [&[data-slot='button']:hover:not(:disabled)]:border-[#b5c9ef] [&[data-slot='button']:hover:not(:disabled)]:bg-[#f6f9ff] [&[data-slot='button']:hover:not(:disabled)]:text-[#356ae6] [&[data-slot='button']:hover:not(:disabled)]:[box-shadow:0_3px_10px_#31476b0c] [&[data-slot='button']:focus-visible]:outline-2 [&[data-slot='button']:focus-visible]:outline-solid [&[data-slot='button']:focus-visible]:outline-[#356ae6] [&[data-slot='button']:focus-visible]:outline-offset-4 [&[data-slot='button']:disabled]:opacity-100 [&[data-slot='button']:disabled]:bg-[#f6f8fc] [&[data-slot='button']:disabled]:text-[#71839c]"
+              className="projects-load-more data-[slot=button]:px-4.5 data-[slot=button]:py-2.25 data-[slot=button]:gap-2.5 data-[slot=button]:border data-[slot=button]:border-solid data-[slot=button]:border-[#d7e2f3] data-[slot=button]:min-w-62 data-[slot=button]:min-h-11.5 data-[slot=button]:rounded-[12px] data-[slot=button]:bg-white data-[slot=button]:text-[#455f83] data-[slot=button]:text-xs data-[slot=button]:font-[650] data-[slot=button]:[box-shadow:0_2px_5px_#31476b08] data-[slot=button]:[transition:background_150ms,border-color_150ms,box-shadow_150ms] max-sm-narrow:data-[slot=button]:min-w-0 max-sm-narrow:data-[slot=button]:w-full max-sm-narrow:data-[slot=button]:max-w-80 [&[data-slot='button']:hover:not(:disabled)]:border-[#b5c9ef] [&[data-slot='button']:hover:not(:disabled)]:bg-[#f6f9ff] [&[data-slot='button']:hover:not(:disabled)]:text-[#356ae6] [&[data-slot='button']:hover:not(:disabled)]:[box-shadow:0_3px_10px_#31476b0c] [&[data-slot='button']:focus-visible]:outline-2 [&[data-slot='button']:focus-visible]:outline-solid [&[data-slot='button']:focus-visible]:outline-[#356ae6] [&[data-slot='button']:focus-visible]:outline-offset-4 [&[data-slot='button']:disabled]:opacity-100 [&[data-slot='button']:disabled]:bg-[#f6f8fc] [&[data-slot='button']:disabled]:text-[#71839c]"
               variant="outline"
               disabled={status === "LoadingMore" || loadingPublished}
               aria-busy={status === "LoadingMore" || loadingPublished}

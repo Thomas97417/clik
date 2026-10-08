@@ -7,7 +7,7 @@ export default function GalleryArt() {
   ];
   return (
     <svg
-      className="gallery-art w-full max-w-105 self-center justify-self-end [@media(width<=640px)]:hidden"
+      className="gallery-art w-full max-w-105 self-center justify-self-end max-sm:hidden"
       viewBox="0 0 420 240"
       fill="none"
       aria-hidden="true"

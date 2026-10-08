@@ -100,12 +100,12 @@ export function AuthField({
       {props.type === "password" ? (
         <PasswordInput
           toggleClassName="size-9.5"
-          className="px-3.25 py-2.75 border border-solid border-[#dce4f0] h-11.5 text-[15px] rounded-[10px] bg-[#f9fbfe] [box-shadow:none] [@media(width<=440px)]:text-base placeholder:text-[#8997ab] hover:enabled:border-[#b6c8e4] focus-visible:border-[#356ae6] focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#e7eeff] focus-visible:outline-offset-1 focus-visible:bg-white aria-invalid:border-[#cf5361] pr-11.5 leading-(--text-xs--line-height) focus-visible:shadow-none aria-invalid:shadow-none focus-visible:ring-0 aria-invalid:ring-0"
+          className="px-3.25 py-2.75 border border-solid border-[#dce4f0] h-11.5 text-[15px] rounded-[10px] bg-[#f9fbfe] [box-shadow:none] max-xs:text-base placeholder:text-[#8997ab] hover:enabled:border-[#b6c8e4] focus-visible:border-[#356ae6] focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#e7eeff] focus-visible:outline-offset-1 focus-visible:bg-white aria-invalid:border-[#cf5361] pr-11.5 leading-(--text-xs--line-height) focus-visible:shadow-none aria-invalid:shadow-none focus-visible:ring-0 aria-invalid:ring-0"
           {...input}
         />
       ) : (
         <Input
-          className="px-3.25 py-2.75 border border-solid border-[#dce4f0] h-11.5 text-[15px] rounded-[10px] bg-[#f9fbfe] [box-shadow:none] [@media(width<=440px)]:text-base placeholder:text-[#8997ab] hover:enabled:border-[#b6c8e4] focus-visible:border-[#356ae6] focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#e7eeff] focus-visible:outline-offset-1 focus-visible:bg-white aria-invalid:border-[#cf5361] leading-(--text-xs--line-height) focus-visible:shadow-none aria-invalid:shadow-none focus-visible:ring-0 aria-invalid:ring-0"
+          className="px-3.25 py-2.75 border border-solid border-[#dce4f0] h-11.5 text-[15px] rounded-[10px] bg-[#f9fbfe] [box-shadow:none] max-xs:text-base placeholder:text-[#8997ab] hover:enabled:border-[#b6c8e4] focus-visible:border-[#356ae6] focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#e7eeff] focus-visible:outline-offset-1 focus-visible:bg-white aria-invalid:border-[#cf5361] leading-(--text-xs--line-height) focus-visible:shadow-none aria-invalid:shadow-none focus-visible:ring-0 aria-invalid:ring-0"
           {...input}
         />
       )}

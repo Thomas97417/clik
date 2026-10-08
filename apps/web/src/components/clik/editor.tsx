@@ -656,7 +656,7 @@ export default function Editor({
     );
   return (
     <>
-      <div className="mobile-editor empty-state px-6.25 py-17.5 gap-5 min-h-75 flex-col items-center justify-center text-center text-[#7d8ba0] hidden [@media(width<=850px)]:flex">
+      <div className="mobile-editor empty-state px-6.25 py-17.5 gap-5 min-h-75 flex-col items-center justify-center text-center text-[#7d8ba0] hidden max-lg-narrow:flex">
         <Box size={40} />
         <h1 className="text-[#32445f] text-2xl leading-[inherit] font-bold">
           Un peu plus de place pour construire
@@ -672,9 +672,9 @@ export default function Editor({
           Voir la galerie
         </Link>
       </div>
-      <main className="editor h-full min-h-150 flex flex-col bg-white [@media(width<=850px)]:hidden">
+      <main className="editor h-full min-h-150 flex flex-col bg-white max-lg-narrow:hidden">
         <header
-          className="editor-top px-4.5 py-2 gap-4 min-h-13 flex items-center border-b border-solid border-b-[#ebeff5] shrink-0 bg-white [@media(width<=1100px)]:px-4 [@media(width<=1100px)]:gap-3"
+          className="editor-top px-4.5 py-2 gap-4 min-h-13 flex items-center border-b border-solid border-b-[#ebeff5] shrink-0 bg-white max-xl-narrow:px-4 max-xl-narrow:gap-3"
           aria-label="Projet et sauvegarde"
         >
           <div className="editor-project gap-3 flex items-center flex-1 min-w-0">
@@ -708,10 +708,10 @@ export default function Editor({
               <ProjectSources sources={projectSources(s.provenance)} />
             </div>
           </div>
-          <div className="editor-project-actions gap-3.5 flex items-center shrink-0 pl-4 border-l border-solid border-l-[#e9edf4] [@media(width<=1100px)]:gap-2.5 [@media(width<=1100px)]:pl-3">
+          <div className="editor-project-actions gap-3.5 flex items-center shrink-0 pl-4 border-l border-solid border-l-[#e9edf4] max-xl-narrow:gap-2.5 max-xl-narrow:pl-3">
             {onNewCreation && (
               <Button
-                className="editor-new-action group/editor-new-action px-2.25 py-0 gap-1.5 border border-solid border-transparent h-8 rounded-[6px] bg-transparent [box-shadow:none] text-[#536888] text-[11px] [@media(width<=1100px)]:px-0 [@media(width<=1100px)]:w-8 hover:enabled:border-[#e5ebf5] hover:enabled:bg-[#f3f6fb] hover:enabled:text-[#356ae6] leading-(--text-xs--line-height)"
+                className="editor-new-action group/editor-new-action px-2.25 py-0 gap-1.5 border border-solid border-transparent h-8 rounded-[6px] bg-transparent [box-shadow:none] text-[#536888] text-[11px] max-xl-narrow:px-0 max-xl-narrow:w-8 hover:enabled:border-[#e5ebf5] hover:enabled:bg-[#f3f6fb] hover:enabled:text-[#356ae6] leading-(--text-xs--line-height)"
                 variant="outline"
                 aria-label="Nouvelle création"
                 title="Démarrer une nouvelle création"
@@ -731,13 +731,11 @@ export default function Editor({
                   size={16}
                   aria-hidden="true"
                 />
-                <span className="[@media(width<=1100px)]:hidden">
-                  Nouvelle création
-                </span>
+                <span className="max-xl-narrow:hidden">Nouvelle création</span>
               </Button>
             )}
             <Button
-              className="editor-import-action group/editor-import-action px-2.25 py-0 gap-1.5 border border-solid border-transparent h-8 rounded-[6px] bg-transparent [box-shadow:none] text-[#536888] text-[11px] [@media(width<=1100px)]:px-0 [@media(width<=1100px)]:w-8 hover:enabled:border-[#e5ebf5] hover:enabled:bg-[#f3f6fb] hover:enabled:text-[#356ae6] leading-(--text-xs--line-height)"
+              className="editor-import-action group/editor-import-action px-2.25 py-0 gap-1.5 border border-solid border-transparent h-8 rounded-[6px] bg-transparent [box-shadow:none] text-[#536888] text-[11px] max-xl-narrow:px-0 max-xl-narrow:w-8 hover:enabled:border-[#e5ebf5] hover:enabled:bg-[#f3f6fb] hover:enabled:text-[#356ae6] leading-(--text-xs--line-height)"
               variant="outline"
               title={
                 s.challenge
@@ -762,7 +760,7 @@ export default function Editor({
                 size={16}
                 aria-hidden="true"
               />
-              <span className="[@media(width<=1100px)]:hidden">Importer</span>
+              <span className="max-xl-narrow:hidden">Importer</span>
             </Button>
             <div
               className="save-status gap-1.5 flex items-center text-[#68788e] text-xs max-w-57.5 leading-[1.4] data-[state=offline]:text-[#9b660c] data-[state=conflict]:text-[#9b660c] data-[state=error]:text-[#c33e42] group/save-status"
@@ -905,7 +903,7 @@ export default function Editor({
           </div>
         )}
         <div
-          className="editor-body [--library-width:236px] [--inspector-width:264px] [--scene-min-width:300px] flex-1 grid grid-cols-[var(--library-width)_minmax(var(--scene-min-width),1fr)_var(--inspector-width)] min-h-0 [@media(width<=1100px)]:[--library-width:210px] [@media(width<=1100px)]:[--inspector-width:230px] [@media(width<=1100px)]:[--scene-min-width:280px] [@media(width>=1500px)]:[--library-width:260px] [@media(width>=1500px)]:[--inspector-width:285px] data-[library-collapsed=true]:[--library-width:0px] data-[inspector-collapsed=true]:[--inspector-width:0px] group/editor-body"
+          className="editor-body [--library-width:236px] [--inspector-width:264px] [--scene-min-width:300px] flex-1 grid grid-cols-[var(--library-width)_minmax(var(--scene-min-width),1fr)_var(--inspector-width)] min-h-0 max-xl-narrow:[--library-width:210px] max-xl-narrow:[--inspector-width:230px] max-xl-narrow:[--scene-min-width:280px] 2xl-narrow:[--library-width:260px] 2xl-narrow:[--inspector-width:285px] data-[library-collapsed=true]:[--library-width:0px] data-[inspector-collapsed=true]:[--inspector-width:0px] group/editor-body"
           inert={busy && !publishing}
           data-library-collapsed={libraryCollapsed}
           data-inspector-collapsed={inspectorCollapsed}
@@ -1011,7 +1009,7 @@ export default function Editor({
                         "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
                         "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
                         "outline-offset-3",
-                        "piece-card group/piece-card px-0.75 py-2 gap-1.25 border border-solid border-[#e7ebf1] touch-none select-none min-w-0 min-h-25 rounded-[9px] flex flex-col items-center justify-center bg-[#fbfcfe] cursor-grab [@media(width>=1500px)]:min-h-26.5 hover:border-[#8dacf1] hover:bg-[#f0f5ff] [&[class~='group/active']]:border-[#8dacf1] [&[class~='group/active']]:bg-[#f0f5ff] active:cursor-grabbing disabled:cursor-default",
+                        "piece-card group/piece-card px-0.75 py-2 gap-1.25 border border-solid border-[#e7ebf1] touch-none select-none min-w-0 min-h-25 rounded-[9px] flex flex-col items-center justify-center bg-[#fbfcfe] cursor-grab 2xl-narrow:min-h-26.5 hover:border-[#8dacf1] hover:bg-[#f0f5ff] [&[class~='group/active']]:border-[#8dacf1] [&[class~='group/active']]:bg-[#f0f5ff] active:cursor-grabbing disabled:cursor-default",
                         s.pending === id ? "active group/active" : "",
                         "focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:-outline-offset-2",
                       )}
@@ -1245,7 +1243,7 @@ export default function Editor({
                 onClick={() => useEditor.setState({ snap: !s.snap })}
               >
                 <Magnet className="shrink-0" size={18} />
-                <span className="text-sm! leading-[inherit]! whitespace-nowrap [@media(width<=1100px)]:hidden">
+                <span className="text-sm! leading-[inherit]! whitespace-nowrap max-xl-narrow:hidden">
                   Aimantation
                 </span>
               </button>
@@ -1263,7 +1261,7 @@ export default function Editor({
                 onClick={() => useEditor.setState({ showGrid: !s.showGrid })}
               >
                 <Grid2X2 className="shrink-0" size={18} />
-                <span className="text-sm! leading-[inherit]! whitespace-nowrap [@media(width<=1100px)]:hidden">
+                <span className="text-sm! leading-[inherit]! whitespace-nowrap max-xl-narrow:hidden">
                   Grille
                 </span>
               </button>

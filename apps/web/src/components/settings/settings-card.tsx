@@ -28,7 +28,7 @@ export function SettingsCardContent({
   return (
     <div
       className={cn(
-        "settings-card-content p-6 gap-5 flex flex-col [@media(width<=640px)]:p-5",
+        "settings-card-content p-6 gap-5 flex flex-col max-sm:p-5",
         className,
       )}
     >
@@ -47,7 +47,7 @@ export function SettingsCardFooter({
   return (
     <div
       className={cn(
-        "settings-card-footer px-6 py-4 gap-3.5 flex items-start flex-col mt-auto border-t border-solid border-t-[#e8edf5] bg-[#fafbfd] [@media(width<=640px)]:px-5",
+        "settings-card-footer px-6 py-4 gap-3.5 flex items-start flex-col mt-auto border-t border-solid border-t-[#e8edf5] bg-[#fafbfd] max-sm:px-5",
         className,
       )}
     >

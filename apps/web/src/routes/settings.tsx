@@ -33,29 +33,29 @@ function RouteComponent() {
   if (!user) return null;
 
   return (
-    <main className="settings-page px-9 mx-auto my-0 max-w-295 pt-12 pb-20 text-[#26344c] [@media(width<=640px)]:px-4.5 [@media(width<=640px)]:pt-7 [@media(width<=640px)]:pb-12">
-      <header className="settings-heading px-3 gap-8 flex items-center justify-between pt-0 pb-9.5 border-b border-solid border-b-[#e1e7f0] [@media(width<=640px)]:px-0 [@media(width<=640px)]:gap-2 [@media(width<=640px)]:items-start [@media(width<=640px)]:pb-6">
+    <main className="settings-page px-9 mx-auto my-0 max-w-295 pt-12 pb-20 text-[#26344c] max-sm:px-4.5 max-sm:pt-7 max-sm:pb-12">
+      <header className="settings-heading px-3 gap-8 flex items-center justify-between pt-0 pb-9.5 border-b border-solid border-b-[#e1e7f0] max-sm:px-0 max-sm:gap-2 max-sm:items-start max-sm:pb-6">
         <div>
-          <h1 className="m-0 text-[clamp(36px,_4.2vw,_56px)] font-extrabold leading-[1.1] tracking-[-2px] [@media(width<=640px)]:text-[35px] [@media(width<=640px)]:tracking-[-1.5px]">
+          <h1 className="m-0 text-[clamp(36px,_4.2vw,_56px)] font-extrabold leading-[1.1] tracking-[-2px] max-sm:text-[35px] max-sm:tracking-[-1.5px]">
             Votre espace,
             <br />
             <em className="not-italic text-[#356ae6]">à votre façon.</em>
           </h1>
-          <p className="mx-0 max-w-112.5 mt-5 mb-0 text-[#697a93] text-sm leading-[1.8] [@media(width<=640px)]:text-xs">
+          <p className="mx-0 max-w-112.5 mt-5 mb-0 text-[#697a93] text-sm leading-[1.8] max-sm:text-xs">
             Les petits détails qui font que vous êtes chez vous. Ajustez votre
             profil et gardez la main sur votre compte.
           </p>
         </div>
         <SettingsArt />
       </header>
-      <div className="settings-layout gap-10 grid grid-cols-[170px_minmax(0,1fr)] items-start pt-9.5 [@media(width<=1000px)]:gap-7 [@media(width<=1000px)]:grid-cols-1 [@media(width<=1000px)]:pt-5.5">
-        <aside className="settings-sidebar sticky top-6 [@media(width<=640px)]:gap-3 [@media(width<=640px)]:static [@media(width<=640px)]:block [@media(width<=640px)]:items-center [@media(width<=640px)]:justify-between [@media(640px<width<=1000px)]:gap-3 [@media(640px<width<=1000px)]:static [@media(640px<width<=1000px)]:flex [@media(640px<width<=1000px)]:items-center [@media(640px<width<=1000px)]:justify-between">
+      <div className="settings-layout gap-10 grid grid-cols-[170px_minmax(0,1fr)] items-start pt-9.5 max-lg-wide:gap-7 max-lg-wide:grid-cols-1 max-lg-wide:pt-5.5">
+        <aside className="settings-sidebar sticky top-6 max-sm:gap-3 max-sm:static max-sm:block max-sm:items-center max-sm:justify-between min-sm:max-lg-wide:gap-3 min-sm:max-lg-wide:static min-sm:max-lg-wide:flex min-sm:max-lg-wide:items-center min-sm:max-lg-wide:justify-between">
           <nav
-            className="gap-2 grid [@media(width<=640px)]:gap-1 [@media(width<=640px)]:flex [@media(width<=640px)]:flex-wrap [@media(width<=640px)]:justify-between [@media(640px<width<=1000px)]:gap-1 [@media(640px<width<=1000px)]:flex [@media(640px<width<=1000px)]:flex-wrap"
+            className="gap-2 grid max-sm:gap-1 max-sm:flex max-sm:flex-wrap max-sm:justify-between min-sm:max-lg-wide:gap-1 min-sm:max-lg-wide:flex min-sm:max-lg-wide:flex-wrap"
             aria-label="Sections des paramètres"
           >
             <a
-              className="focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-2.5 py-3 gap-3 flex items-center rounded-[8px] text-[#435773] text-xs leading-[inherit] [transition:background_150ms] [@media(width<=640px)]:px-1 [@media(width<=640px)]:py-2.25 [@media(width<=640px)]:gap-1.25 [@media(width<=640px)]:text-[11px] hover:bg-[#eaf0fc] hover:text-[#356ae6] focus-visible:bg-[#eaf0fc] focus-visible:text-[#356ae6]"
+              className="focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-2.5 py-3 gap-3 flex items-center rounded-[8px] text-[#435773] text-xs leading-[inherit] [transition:background_150ms] max-sm:px-1 max-sm:py-2.25 max-sm:gap-1.25 max-sm:text-[11px] hover:bg-[#eaf0fc] hover:text-[#356ae6] focus-visible:bg-[#eaf0fc] focus-visible:text-[#356ae6]"
               href="#identity"
             >
               <span
@@ -67,7 +67,7 @@ function RouteComponent() {
               Votre identité
             </a>
             <a
-              className="focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-2.5 py-3 gap-3 flex items-center rounded-[8px] text-[#435773] text-xs leading-[inherit] [transition:background_150ms] [@media(width<=640px)]:px-1 [@media(width<=640px)]:py-2.25 [@media(width<=640px)]:gap-1.25 [@media(width<=640px)]:text-[11px] hover:bg-[#eaf0fc] hover:text-[#356ae6] focus-visible:bg-[#eaf0fc] focus-visible:text-[#356ae6]"
+              className="focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-2.5 py-3 gap-3 flex items-center rounded-[8px] text-[#435773] text-xs leading-[inherit] [transition:background_150ms] max-sm:px-1 max-sm:py-2.25 max-sm:gap-1.25 max-sm:text-[11px] hover:bg-[#eaf0fc] hover:text-[#356ae6] focus-visible:bg-[#eaf0fc] focus-visible:text-[#356ae6]"
               href="#security"
             >
               <span
@@ -79,7 +79,7 @@ function RouteComponent() {
               Sécurité
             </a>
             <a
-              className="focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-2.5 py-3 gap-3 flex items-center rounded-[8px] text-[#435773] text-xs leading-[inherit] [transition:background_150ms] [@media(width<=640px)]:px-1 [@media(width<=640px)]:py-2.25 [@media(width<=640px)]:gap-1.25 [@media(width<=640px)]:text-[11px] hover:bg-[#eaf0fc] hover:text-[#356ae6] focus-visible:bg-[#eaf0fc] focus-visible:text-[#356ae6]"
+              className="focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-2.5 py-3 gap-3 flex items-center rounded-[8px] text-[#435773] text-xs leading-[inherit] [transition:background_150ms] max-sm:px-1 max-sm:py-2.25 max-sm:gap-1.25 max-sm:text-[11px] hover:bg-[#eaf0fc] hover:text-[#356ae6] focus-visible:bg-[#eaf0fc] focus-visible:text-[#356ae6]"
               href="#account"
             >
               <span
@@ -94,7 +94,7 @@ function RouteComponent() {
           <Link
             to="/gallery/user/$userId"
             params={{ userId: user._id }}
-            className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 settings-profile-link px-2.5 gap-2 flex items-center pt-5 pb-0 mt-4 border-t border-solid border-t-[#e1e7f0] text-[#356ae6] text-[11px] [@media(width<=640px)]:px-1 [@media(width<=640px)]:m-0 [@media(width<=640px)]:border-0 [@media(width<=640px)]:border-none [@media(width<=640px)]:border-current [@media(width<=640px)]:inline-flex [@media(width<=640px)]:pt-3 [@media(640px<width<=1000px)]:px-0 [@media(640px<width<=1000px)]:py-2.5 [@media(640px<width<=1000px)]:m-0 [@media(640px<width<=1000px)]:border-0 [@media(640px<width<=1000px)]:border-none [@media(640px<width<=1000px)]:border-current hover:underline"
+            className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 settings-profile-link px-2.5 gap-2 flex items-center pt-5 pb-0 mt-4 border-t border-solid border-t-[#e1e7f0] text-[#356ae6] text-[11px] max-sm:px-1 max-sm:m-0 max-sm:border-0 max-sm:border-none max-sm:border-current max-sm:inline-flex max-sm:pt-3 min-sm:max-lg-wide:px-0 min-sm:max-lg-wide:py-2.5 min-sm:max-lg-wide:m-0 min-sm:max-lg-wide:border-0 min-sm:max-lg-wide:border-none min-sm:max-lg-wide:border-current hover:underline"
           >
             Voir ma page publique <span aria-hidden="true">↗</span>
           </Link>
@@ -128,7 +128,7 @@ function RouteComponent() {
               key={user._id}
               avatar={user.avatar ?? defaultAvatar(user._id)}
             />
-            <div className="settings-form-grid gap-4 grid grid-cols-2 items-start [@media(width<=640px)]:grid-cols-1">
+            <div className="settings-form-grid gap-4 grid grid-cols-2 items-start max-sm:grid-cols-1">
               <UpdateNameCard name={user.name} />
               <EmailCard email={user.email} />
             </div>
@@ -158,7 +158,7 @@ function RouteComponent() {
                 </p>
               </div>
             </div>
-            <div className="settings-form-grid settings-security-grid gap-4 grid grid-cols-2 items-start [@media(width<=640px)]:grid-cols-1">
+            <div className="settings-form-grid settings-security-grid gap-4 grid grid-cols-2 items-start max-sm:grid-cols-1">
               <ChangePasswordCard />
               <SessionsCard />
             </div>

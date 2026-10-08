@@ -38,13 +38,13 @@ function Gallery() {
     cursor,
   );
   return (
-    <main className="collection-page gallery-page px-[5%] py-16 m-auto max-w-330 [@media(width<=850px)]:pt-10">
-      <header className="gallery-hero gap-8 grid grid-cols-[1.2fr_1fr] items-start pb-10 [@media(width<=640px)]:px-0 [@media(width<=640px)]:block [@media(width<=640px)]:pb-7 [@media(width<=640px)]:relative [@media(width<=640px)]:pt-0">
+    <main className="collection-page gallery-page px-[5%] py-16 m-auto max-w-330 max-lg-narrow:pt-10">
+      <header className="gallery-hero gap-8 grid grid-cols-[1.2fr_1fr] items-start pb-10 max-sm:px-0 max-sm:block max-sm:pb-7 max-sm:relative max-sm:pt-0">
         <div className="gallery-hero-copy">
-          <h1 className="mx-0 my-3 text-5xl leading-[inherit] tracking-[-2px] font-extrabold [@media(width<=850px)]:text-[40px]">
+          <h1 className="mx-0 my-3 text-5xl leading-[inherit] tracking-[-2px] font-extrabold max-lg-narrow:text-[40px]">
             La galerie<span className="text-[#356ae6]">.</span>
           </h1>
-          <p className="mx-0 mt-5 mb-6.25 max-w-110 text-[#71839c] text-[15px] leading-[1.8] [@media(width<=640px)]:max-w-85 [@media(width<=640px)]:text-sm">
+          <p className="mx-0 mt-5 mb-6.25 max-w-110 text-[#71839c] text-[15px] leading-[1.8] max-sm:max-w-85 max-sm:text-sm">
             De petites briques, de grandes idées.
             <br />
             Explorez les constructions de la communauté et imaginez la suite.
@@ -60,7 +60,7 @@ function Gallery() {
         <GalleryArt />
       </header>
       <section aria-labelledby="gallery-creations-title">
-        <div className="gallery-toolbar px-0 py-6.25 gap-5 flex items-center justify-between flex-wrap border-t border-solid border-t-[#e0e6ef] [@media(width<=640px)]:gap-4 [@media(width<=640px)]:items-start">
+        <div className="gallery-toolbar px-0 py-6.25 gap-5 flex items-center justify-between flex-wrap border-t border-solid border-t-[#e0e6ef] max-sm:gap-4 max-sm:items-start">
           <div>
             <h2
               className="text-xl leading-[inherit] font-[750] tracking-[-0.5px]"
@@ -86,7 +86,7 @@ function Gallery() {
           <div role="status" aria-label="Chargement des créations">
             <span className="sr-only">Ouverture de la galerie…</span>
             <div
-              className="creation-grid group/creation-grid gap-6.5 grid grid-cols-3 [@media(width<=520px)]:gap-3.75 [@media(width<=520px)]:grid-cols-1 [@media(520px<width<=850px)]:gap-3.75 [@media(520px<width<=850px)]:grid-cols-2"
+              className="creation-grid group/creation-grid gap-6.5 grid grid-cols-3 max-sm-narrow:gap-3.75 max-sm-narrow:grid-cols-1 min-sm-narrow:max-lg-narrow:gap-3.75 min-sm-narrow:max-lg-narrow:grid-cols-2"
               aria-hidden="true"
             >
               {Array.from({ length: 6 }, (_, i) => (
@@ -117,7 +117,7 @@ function Gallery() {
             </Link>
           </div>
         ) : (
-          <div className="creation-grid group/creation-grid gap-6.5 grid grid-cols-3 [@media(width<=520px)]:gap-3.75 [@media(width<=520px)]:grid-cols-1 [@media(520px<width<=850px)]:gap-3.75 [@media(520px<width<=850px)]:grid-cols-2">
+          <div className="creation-grid group/creation-grid gap-6.5 grid grid-cols-3 max-sm-narrow:gap-3.75 max-sm-narrow:grid-cols-1 min-sm-narrow:max-lg-narrow:gap-3.75 min-sm-narrow:max-lg-narrow:grid-cols-2">
             {results.map((p) => (
               <PublicCreationCard key={p._id} creation={p} />
             ))}
@@ -148,11 +148,11 @@ function Gallery() {
           </div>
         )}
       </section>
-      <aside className="gallery-remix-note p-6 gap-4.5 flex items-center mt-12 bg-[#edf2fa] rounded-2xl [@media(width<=640px)]:p-5 [@media(width<=640px)]:gap-3 [@media(width<=640px)]:flex-wrap">
+      <aside className="gallery-remix-note p-6 gap-4.5 flex items-center mt-12 bg-[#edf2fa] rounded-2xl max-sm:p-5 max-sm:gap-3 max-sm:flex-wrap">
         <span className="gallery-remix-icon grid place-items-center shrink-0 rounded-[12px] bg-white text-[#356ae6] size-11">
           <GitBranch size={22} aria-hidden="true" />
         </span>
-        <div className="[@media(width<=640px)]:flex-1 [@media(width<=640px)]:min-w-45">
+        <div className="max-sm:flex-1 max-sm:min-w-45">
           <h2 className="text-[15px] font-bold">
             Une création, mille possibilités.
           </h2>
@@ -162,7 +162,7 @@ function Gallery() {
           </p>
         </div>
         <Link
-          className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 gap-2 inline-flex items-center shrink-0 ml-auto text-[#356ae6] text-xs font-[650] [@media(width<=640px)]:ml-14 hover:underline hover:underline-offset-4 leading-normal"
+          className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 gap-2 inline-flex items-center shrink-0 ml-auto text-[#356ae6] text-xs font-[650] max-sm:ml-14 hover:underline hover:underline-offset-4 leading-normal"
           to="/editor"
         >
           Faire le premier clik <ArrowRight size={16} aria-hidden="true" />

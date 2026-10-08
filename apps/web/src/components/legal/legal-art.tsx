@@ -36,7 +36,7 @@ function Brick({
 export default function LegalArt({ kind }: { kind: "privacy" | "terms" }) {
   return (
     <svg
-      className="legal-art block w-full max-w-105 h-auto justify-self-end [@media(width<=760px)]:w-75 [@media(width<=760px)]:max-w-full [@media(width<=760px)]:justify-self-center [@media(width<=760px)]:mt-3 print:[&&]:hidden!"
+      className="legal-art block w-full max-w-105 h-auto justify-self-end max-md-compact:w-75 max-md-compact:max-w-full max-md-compact:justify-self-center max-md-compact:mt-3 print:[&&]:hidden!"
       viewBox="0 0 420 310"
       fill="none"
       aria-hidden="true"

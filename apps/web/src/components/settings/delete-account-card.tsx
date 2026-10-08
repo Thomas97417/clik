@@ -50,7 +50,7 @@ export default function DeleteAccountCard() {
           description="Vous souhaitez quitter Clik ? La suppression de votre compte est définitive."
         />
       </SettingsCardContent>
-      <SettingsCardFooter className="settings-danger-footer border-[#f1e5e0] flex-row items-center justify-between bg-[#fffaf8] [@media(width<=640px)]:flex-col [@media(width<=640px)]:items-start">
+      <SettingsCardFooter className="settings-danger-footer border-[#f1e5e0] flex-row items-center justify-between bg-[#fffaf8] max-sm:flex-col max-sm:items-start">
         <p className="text-[11px] text-[#7c899d] leading-[1.6]">
           Cette action est irréversible.
         </p>

@@ -101,13 +101,13 @@ const sections: LegalSection[] = [
           l’afficher selon la visibilité choisie. Cette autorisation sert au
           fonctionnement de l’atelier et de la galerie.
         </p>
-        <div className="legal-callout px-5 py-4.5 mx-0 my-5.5 gap-3 border border-solid border-[#dce7f8] flex items-start rounded-[12px] bg-[#edf3fd] text-[#4f678a] [@media(width<=760px)]:p-3.75 [@media(width<=760px)]:gap-2.5 print:[&&]:break-inside-avoid last:mb-0">
+        <div className="legal-callout px-5 py-4.5 mx-0 my-5.5 gap-3 border border-solid border-[#dce7f8] flex items-start rounded-[12px] bg-[#edf3fd] text-[#4f678a] max-md-compact:p-3.75 max-md-compact:gap-2.5 print:[&&]:break-inside-avoid last:mb-0">
           <Palette
             className="shrink-0 mt-0.75 text-[#668dcb]"
             size={20}
             aria-hidden="true"
           />
-          <p className="m-0 text-[13px] leading-[1.85] [@media(width<=760px)]:text-xs">
+          <p className="m-0 text-[13px] leading-[1.85] max-md-compact:text-xs">
             En publiant une création, vous permettez aux autres utilisateurs de
             la consulter et de la reprendre dans l’atelier, notamment pour la
             modifier ou l’intégrer à une nouvelle construction, avec les

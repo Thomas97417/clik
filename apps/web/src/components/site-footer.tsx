@@ -4,7 +4,7 @@ export default function SiteFooter() {
   const pathname = useLocation({ select: (location) => location.pathname });
   if (pathname === "/editor" || pathname.startsWith("/editor/")) return null;
   return (
-    <footer className="site-footer px-0 mx-auto my-0 flex shrink-0 items-center gap-y-4.5 gap-x-7 max-w-324 pt-6.5 pb-8 w-[90%] border-t border-solid border-t-[#e0e6ef] text-[#67788f] [@media(width<=360px)]:pt-5.5 [@media(width<=360px)]:w-[calc(100%-36px)] [@media(width<=360px)]:flex-wrap [@media(360px<width<=760px)]:pt-5.5 [@media(360px<width<=760px)]:w-[calc(100%-48px)] [@media(360px<width<=760px)]:flex-wrap print:[&&]:hidden!">
+    <footer className="site-footer px-0 mx-auto my-0 flex shrink-0 items-center gap-y-4.5 gap-x-7 max-w-324 pt-6.5 pb-8 w-[90%] border-t border-solid border-t-[#e0e6ef] text-[#67788f] max-3xs:pt-5.5 max-3xs:w-[calc(100%-36px)] max-3xs:flex-wrap min-3xs:max-md-compact:pt-5.5 min-3xs:max-md-compact:w-[calc(100%-48px)] min-3xs:max-md-compact:flex-wrap print:[&&]:hidden!">
       <Link
         to="/"
         className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 site-footer-brand shrink-0 text-[28px] font-[850] text-[#243148] tracking-[-1.7px] focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#a7c0f2] focus-visible:outline-offset-4 focus-visible:rounded-[5px]"
@@ -18,7 +18,7 @@ export default function SiteFooter() {
         Juste pour le plaisir.
       </p>
       <nav
-        className="flex flex-wrap items-center justify-end gap-y-2.5 gap-x-5.5 ml-auto text-[11px] [@media(width<=760px)]:m-0 [@media(width<=760px)]:justify-start [@media(width<=760px)]:gap-y-3.5 [@media(width<=760px)]:basis-full [@media(width<=760px)]:leading-[1.6]"
+        className="flex flex-wrap items-center justify-end gap-y-2.5 gap-x-5.5 ml-auto text-[11px] max-md-compact:m-0 max-md-compact:justify-start max-md-compact:gap-y-3.5 max-md-compact:basis-full max-md-compact:leading-[1.6]"
         aria-label="Informations et confidentialité"
       >
         <Link

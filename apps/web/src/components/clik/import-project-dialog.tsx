@@ -267,11 +267,11 @@ export default function ImportProjectDialog({
       }}
     >
       <DialogContent
-        className="project-import-dialog p-0 gap-0 overflow-hidden border border-solid border-[#e1e7ef] flex flex-col w-180 max-w-[calc(100vw-32px)]! max-h-[min(820px,calc(100dvh-32px))] rounded-2xl bg-white text-[#26344c] [transition-property:opacity,transform] [box-shadow:0_24px_80px_#1b2d4926] [@media(width<=520px)]:max-w-[calc(100vw-20px)]! [@media(width<=520px)]:max-h-[calc(100dvh-20px)] [@media(width<=520px)]:rounded-[12px]"
+        className="project-import-dialog p-0 gap-0 overflow-hidden border border-solid border-[#e1e7ef] flex flex-col w-180 max-w-[calc(100vw-32px)]! max-h-[min(820px,calc(100dvh-32px))] rounded-2xl bg-white text-[#26344c] [transition-property:opacity,transform] [box-shadow:0_24px_80px_#1b2d4926] max-sm-narrow:max-w-[calc(100vw-20px)]! max-sm-narrow:max-h-[calc(100dvh-20px)] max-sm-narrow:rounded-[12px]"
         showCloseButton={!busy}
       >
-        <DialogHeader className="px-7 shrink-0 pt-6.5 pb-5.5 [@media(width<=520px)]:px-4.5 [@media(width<=520px)]:pt-5.5 [@media(width<=520px)]:pb-4.5">
-          <DialogTitle className="pr-6 text-2xl font-[750] tracking-[-0.8px] leading-tight [@media(width<=520px)]:text-[22px]">
+        <DialogHeader className="px-7 shrink-0 pt-6.5 pb-5.5 max-sm-narrow:px-4.5 max-sm-narrow:pt-5.5 max-sm-narrow:pb-4.5">
+          <DialogTitle className="pr-6 text-2xl font-[750] tracking-[-0.8px] leading-tight max-sm-narrow:text-[22px]">
             Importer une création
           </DialogTitle>
           <DialogDescription className="max-w-127.5 mt-1.5 text-[#718098] text-[13px] leading-[1.6]">
@@ -279,7 +279,7 @@ export default function ImportProjectDialog({
             dans un nouveau groupe, à un emplacement libre.
           </DialogDescription>
         </DialogHeader>
-        <div className="project-import-browser px-7 py-0 flex flex-col min-h-0 [@media(width<=520px)]:px-4.5">
+        <div className="project-import-browser px-7 py-0 flex flex-col min-h-0 max-sm-narrow:px-4.5">
           <div className="project-import-tools shrink-0">
             <label className="project-import-search px-3 py-0 gap-2.5 border border-solid border-[#e1e7ef] flex items-center h-10.5 rounded-[8px] bg-[#f8fafc] text-[#8090a6] focus-within:border-[#8daaf0] focus-within:bg-white">
               <Search size={16} aria-hidden="true" />
@@ -369,7 +369,7 @@ export default function ImportProjectDialog({
             aria-label="Projets à importer"
             aria-busy={isLoading}
           >
-            <div className="project-import-list gap-3.5 grid grid-cols-2 [@media(width<=520px)]:grid-cols-[minmax(0,1fr)]">
+            <div className="project-import-list gap-3.5 grid grid-cols-2 max-sm-narrow:grid-cols-[minmax(0,1fr)]">
               {visibleChoices.map((choice) => {
                 const checked = selected?.id === choice.id;
                 return (
@@ -385,7 +385,7 @@ export default function ImportProjectDialog({
                       setError("");
                     }}
                   >
-                    <div className="project-import-thumbnail overflow-hidden relative w-full h-37.5 shrink-0 bg-[#f0f3f8] [@media(width<=520px)]:h-40">
+                    <div className="project-import-thumbnail overflow-hidden relative w-full h-37.5 shrink-0 bg-[#f0f3f8] max-sm-narrow:h-40">
                       <CreationPreview
                         placeholderClassName="min-h-0 text-[11px]"
                         imageClassName="object-contain size-full"
@@ -497,7 +497,7 @@ export default function ImportProjectDialog({
             )}
           </div>
         </div>
-        <DialogFooter className="px-7 py-4.5 gap-4 grid grid-cols-[minmax(0,1fr)_auto] items-center shrink-0 border-t border-solid border-t-[#e8edf5] bg-[#fafbfd] [@media(width<=520px)]:px-4.5 [@media(width<=520px)]:py-3.5 [@media(width<=520px)]:gap-3 [@media(width<=520px)]:grid-cols-[minmax(0,1fr)]">
+        <DialogFooter className="px-7 py-4.5 gap-4 grid grid-cols-[minmax(0,1fr)_auto] items-center shrink-0 border-t border-solid border-t-[#e8edf5] bg-[#fafbfd] max-sm-narrow:px-4.5 max-sm-narrow:py-3.5 max-sm-narrow:gap-3 max-sm-narrow:grid-cols-[minmax(0,1fr)]">
           {error && (
             <p
               className="project-import-error group/project-import-error px-3 py-2.5 bg-[#fff1ef] rounded-[7px] text-[#af4e3a] text-xs leading-[inherit] m-0 col-span-full"
@@ -519,7 +519,7 @@ export default function ImportProjectDialog({
                 : "Votre projet d’origine reste intact."}
             </span>
           </div>
-          <div className="project-import-actions gap-2 flex items-center [@media(width<=520px)]:justify-end">
+          <div className="project-import-actions gap-2 flex items-center max-sm-narrow:justify-end">
             <Button
               className="px-3.5 gap-1.75 min-h-9.5 rounded-[7px] text-xs"
               variant="ghost"
