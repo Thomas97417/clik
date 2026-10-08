@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1080" viewBox="0 0 1440 1080" fill="none">
+  <defs>
+    <g id="stud">
+      <circle r="12" />
+      <path d="M-17 0h34M0-17v34" stroke-width=".7" stroke-dasharray="2 4" opacity=".55" />
+    </g>
+    <g id="brick-plan">
+      <rect width="192" height="96" rx="3" />
+      <rect x="5" y="5" width="182" height="86" rx="1" stroke-width=".7" />
+      <use href="#stud" x="24" y="24" />
+      <use href="#stud" x="72" y="24" />
+      <use href="#stud" x="120" y="24" />
+      <use href="#stud" x="168" y="24" />
+      <use href="#stud" x="24" y="72" />
+      <use href="#stud" x="72" y="72" />
+      <use href="#stud" x="120" y="72" />
+      <use href="#stud" x="168" y="72" />
+      <g stroke-width=".8">
+        <path d="M0-12v-31M192-12v-31M0-25h79m34 0h79M-5-30l10 10m182-10 10 10" />
+        <path d="M206 0h31M206 96h31M224 0v34m0 28v34m-5-101 10 10m-10 86 10 10" />
+      </g>
+      <g fill="currentColor" stroke="none" font-family="monospace" font-size="9" letter-spacing="1">
+        <text x="96" y="-22" text-anchor="middle">32</text>
+        <text x="224" y="51" text-anchor="middle" transform="rotate(90 224 48)">16</text>
+      </g>
+      <path d="M-24 48h240M96-48v168" stroke-dasharray="8 5 2 5" stroke-width=".7" opacity=".55" />
+    </g>
+    <g id="brick-axonometric" stroke-linejoin="round">
+      <path d="m0 48 144-83 96 55-144 83Zm0 0v62l96 55 144-83V20M96 103v62" />
+      <path d="m0 59 96 55L240 31M0 99l96 55 144-83" stroke-width=".7" />
+      <g transform="matrix(.866 -.5 .866 .5 0 48)">
+        <g transform="translate(0 -13)">
+          <ellipse cx="24" cy="24" rx="12" ry="12" />
+          <ellipse cx="72" cy="24" rx="12" ry="12" />
+          <ellipse cx="120" cy="24" rx="12" ry="12" />
+          <ellipse cx="24" cy="72" rx="12" ry="12" />
+          <ellipse cx="72" cy="72" rx="12" ry="12" />
+          <ellipse cx="120" cy="72" rx="12" ry="12" />
+        </g>
+        <path d="M12 24v-13M36 24v-13M60 24v-13M84 24v-13M108 24v-13M132 24v-13M12 72V59M36 72V59M60 72V59M84 72V59M108 72V59M132 72V59" />
+        <path d="M12 24a12 12 0 0 0 24 0M60 24a12 12 0 0 0 24 0M108 24a12 12 0 0 0 24 0M12 72a12 12 0 0 0 24 0M60 72a12 12 0 0 0 24 0M108 72a12 12 0 0 0 24 0" />
+      </g>
+      <g stroke-width=".8">
+        <path d="m-19 124 96 55m-104-51 16-9m80 64 16-9M-9 116l-19 11m115 35-18 10" />
+        <path d="m115 176 144-83m-149 79 10 9m134-93 10 9m-161 74 10 7m134-90 10 7" />
+      </g>
+      <path d="M144-61v46M-19 48h37M240-3v44" stroke-dasharray="4 5" stroke-width=".8" opacity=".65" />
+    </g>
+    <g id="floor-plan" stroke-linecap="square">
+      <path d="M0 0h272v224H168m-48 0H0Zm8 8h256v208h-96m-48 0H8Z" />
+      <path d="M160 8v80m0 48v80m8-208v80m0 48v80M8 128h104m40 0h8M8 136h104m40 0h8" />
+      <g stroke-width=".8">
+        <path d="M120 216v-48a48 48 0 0 1 48 48M160 88h48a48 48 0 0 1-48 48M112 128V88a40 40 0 0 1 40 40" />
+        <path d="M188 24h56v80h-56Zm0 16h56m-56 16h56m-56 16h56m-56 16h56M216 96V32m-5 7 5-7 5 7" />
+        <path d="M48 40h72v56H48Z" stroke-dasharray="4 4" />
+        <path d="M-16 0h-27m27 128h-27m27 96h-27M-32 0v224m-5-5 10 10m-10-234L-27 5m-10 118 10 10" />
+        <path d="M0-16v-27M160-16v-27M272-16v-27M0-32h272m-5-5 10 10M-5-37 5-27m150-10 10 10" />
+        <path d="M-24 264h320M80-56v320M304 40h-48" stroke-dasharray="9 5 2 5" opacity=".65" />
+      </g>
+      <g fill="currentColor" stroke="none" font-family="monospace" font-size="9" letter-spacing="1">
+        <text x="80" y="-39" text-anchor="middle">240</text>
+        <text x="216" y="-39" text-anchor="middle">160</text>
+      </g>
+    </g>
+    <g id="crosshair">
+      <circle r="8" stroke-width=".7" />
+      <path d="M-16 0h32M0-16v32" stroke-width=".8" />
+      <circle r="2" fill="currentColor" stroke="none" />
+    </g>
+  </defs>
+  <g color="#356ae6" stroke="currentColor" stroke-width="1.2">
+    <g opacity=".16" transform="translate(24 66) rotate(-8 96 48)">
+      <use href="#brick-plan" />
+      <path d="M-36 148h126m28 0h105m-105-6v12m-28-12v12" stroke-width=".8" stroke-dasharray="3 5" />
+    </g>
+    <g opacity=".14" transform="translate(1290 184) rotate(7)">
+      <use href="#brick-axonometric" />
+      <path d="M-32 204h265M96 180v40" stroke-dasharray="3 6" stroke-width=".8" />
+    </g>
+    <g opacity=".13" transform="translate(-126 610) rotate(-6 136 112)">
+      <use href="#floor-plan" />
+    </g>
+    <g opacity=".14" transform="translate(1210 778) rotate(9 96 48)">
+      <use href="#brick-plan" />
+    </g>
+    <g opacity=".095" transform="translate(318 958) scale(.58) rotate(-5)">
+      <use href="#brick-axonometric" />
+    </g>
+    <g opacity=".1" stroke-width=".8" stroke-dasharray="7 6 2 6">
+      <path d="M352 0v120m-36-35h144M1072 14h164m-80-14v102M0 440h105m-36-64v120M1332 584h108m-72-68v164M590 1036h188" />
+    </g>
+    <g opacity=".15">
+      <use href="#crosshair" x="352" y="85" />
+      <use href="#crosshair" x="1156" y="52" />
+      <use href="#crosshair" x="69" y="440" />
+      <use href="#crosshair" x="1368" y="584" />
+      <use href="#crosshair" x="684" y="1036" />
+    </g>
+    <g opacity=".11" stroke-width=".8">
+      <path d="m232 350 8-8m10 8 8-8m10 8 8-8m10 8 8-8M232 337h66M1034 667l8-8m10 8 8-8m10 8 8-8m10 8 8-8m10 8 8-8M1034 654h84" />
+    </g>
+  </g>
+</svg>

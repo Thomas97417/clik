@@ -1,0 +1,41 @@
+/* The drawings belong to the scroll surface, so cards and controls stay above them. */
+.site-blueprint {
+  background-image:
+    url("/blueprint.svg"),
+    linear-gradient(to right, rgb(53 106 230 / 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(53 106 230 / 0.025) 1px, transparent 1px),
+    linear-gradient(to right, rgb(53 106 230 / 0.014) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(53 106 230 / 0.014) 1px, transparent 1px);
+  background-size:
+    1440px 1080px,
+    144px 144px,
+    144px 144px,
+    24px 24px,
+    24px 24px;
+  background-position: center top;
+  background-repeat: repeat;
+  background-attachment: local;
+}
+
+@media (width <= 850px) {
+  .site-blueprint {
+    background-size:
+      864px 648px,
+      120px 120px,
+      120px 120px,
+      24px 24px,
+      24px 24px;
+    background-position:
+      left top,
+      center top,
+      center top,
+      center top,
+      center top;
+  }
+}
+
+@media print {
+  .site-blueprint {
+    background-image: none;
+  }
+}
