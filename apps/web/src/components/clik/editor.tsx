@@ -960,7 +960,7 @@ export default function Editor({
                   </div>
                 </div>
                 <div
-                  className="piece-tabs group/piece-tabs px-3 gap-1.25 grid grid-cols-2 pt-0 pb-3"
+                  className="piece-tabs group/piece-tabs px-3 gap-1.25 grid grid-cols-[repeat(auto-fill,minmax(90px,1fr))] pt-0 pb-3"
                   role="group"
                   aria-label="Catégories de pièces"
                 >
@@ -1004,7 +1004,7 @@ export default function Editor({
                 aria-label="Modèles de pièces"
                 tabIndex={0}
               >
-                <div className="piece-grid p-3 gap-2 grid grid-cols-2 content-start">
+                <div className="piece-grid p-3 gap-2 grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] content-start">
                   {visibleParts.map(([id, p]) => (
                     <button
                       className={cn(
@@ -1100,7 +1100,7 @@ export default function Editor({
                   </h2>
                   <div
                     id={paletteId}
-                    className="palette px-3 gap-1.25 grid grid-cols-6 pt-0 pb-3 [&[hidden]]:hidden"
+                    className="palette px-3 gap-1.25 grid grid-cols-[repeat(auto-fill,minmax(26px,1fr))] pt-0 pb-3 [&[hidden]]:hidden"
                     hidden={paletteCollapsed}
                     role="group"
                     aria-label="Choisir une couleur"
@@ -1116,7 +1116,7 @@ export default function Editor({
                           "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
                           "outline-offset-3",
                           s.color === color ? "chosen group/chosen" : "",
-                          "focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:-outline-offset-2 p-0.75 border border-solid border-transparent min-w-0 h-8.25 rounded-[8px] hover:border-[#d2ddef] hover:bg-[#f1f5fc] [&[class~='group/chosen']]:border-[#356ae6] [&[class~='group/chosen']]:bg-[#edf3ff] [&[class~='group/chosen']]:[box-shadow:0_0_0_1px_#356ae620]",
+                          "focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:-outline-offset-2 p-0.75 border border-solid border-transparent min-w-0 aspect-square rounded-[8px] hover:border-[#d2ddef] hover:bg-[#f1f5fc] [&[class~='group/chosen']]:border-[#356ae6] [&[class~='group/chosen']]:bg-[#edf3ff] [&[class~='group/chosen']]:[box-shadow:0_0_0_1px_#356ae620]",
                         )}
                         onClick={() => {
                           useEditor.setState({ color });
@@ -1152,7 +1152,7 @@ export default function Editor({
                         }}
                       >
                         <span
-                          className="palette-swatch grid place-items-center rounded-[5px] [box-shadow:inset_0_0_0_1px_#00000014] size-full"
+                          className="palette-swatch grid place-items-center rounded-[5px] [box-shadow:inset_0_0_0_1px_#00000014] w-full aspect-square"
                           style={{
                             background: color,
                             color: [2, 3, 4, 7, 9, 10].includes(i)
