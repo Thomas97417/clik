@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import z from "zod";
@@ -51,38 +50,33 @@ export default function SignUpForm() {
         description="Votre compte est créé. Il reste à confirmer votre adresse pour ouvrir votre espace."
       >
         <div
-          className={cn(
-            "auth-confirmation p-[18px] border-[length:1px] border-solid border-[color:#cce8db] mb-[20px] rounded-[12px] bg-[#f1faf6] text-[color:#316e55] [font-size:13px] leading-[1.8] [overflow-wrap:anywhere] [&_strong]:block [&_strong]:mb-[7px] [&_strong]:font-[650]",
-          )}
+          className="auth-confirmation p-4.5 border border-solid border-[#cce8db] mb-5 rounded-[12px] bg-[#f1faf6] text-[#316e55] text-[13px] leading-[1.8] wrap-anywhere"
           role="status"
         >
-          <strong>Un lien vous attend dans votre messagerie.</strong>
+          <strong className="block mb-1.75 font-[650]">
+            Un lien vous attend dans votre messagerie.
+          </strong>
           <p>
             Consultez les messages reçus à <b>{createdEmail}</b>, puis ouvrez le
             lien de vérification.
           </p>
         </div>
-        <p
-          className={cn(
-            "auth-help mb-[24px] [font-size:12px] text-[color:#71819a] leading-[1.8]",
-          )}
-        >
+        <p className="auth-help mb-6 text-xs text-[#71819a] leading-[1.8]">
           Rien reçu ? Pensez à regarder dans vos courriers indésirables.
         </p>
         <Link
-          className={cn(
-            "auth-submit group/auth-submit px-[16px] py-[12px] gap-[10px] border-[length:1px] border-solid border-[color:#356ae6] flex items-center justify-center w-[100%] min-h-[46px] rounded-[10px] text-[color:#fff] bg-[#356ae6] [font-size:13px] leading-[1.5] font-[650] text-center [&:hover:not(:disabled)]:border-[color:#2458ce] [&:hover:not(:disabled)]:bg-[#2458ce] [&:disabled]:opacity-[0.65]",
-          )}
+          className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 auth-submit group/auth-submit px-4 py-3 gap-2.5 border border-solid border-[#356ae6] flex items-center justify-center w-full min-h-11.5 rounded-[10px] text-white bg-[#356ae6] text-[13px] leading-normal font-[650] text-center hover:enabled:border-[#2458ce] hover:enabled:bg-[#2458ce] disabled:opacity-65"
           to="/sign-in"
         >
           Aller à la connexion
         </Link>
-        <p
-          className={cn(
-            "auth-switch pt-[23px] mt-[23px] [border-top-width:1px] [border-top-style:solid] [border-top-color:#e9edf4] text-center [font-size:12px] text-[color:#7b899e] leading-[1.7] [&_a]:gap-[6px] [&_a]:inline-flex [&_a]:items-center [&_a]:text-[color:#356ae6] [&_a]:font-[650]",
-          )}
-        >
-          <Link to="/verify-email">Recevoir un nouveau lien</Link>
+        <p className="auth-switch pt-5.75 mt-5.75 border-t border-solid border-t-[#e9edf4] text-center text-xs text-[#7b899e] leading-[1.7]">
+          <Link
+            className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 gap-1.5 inline-flex items-center text-[#356ae6] font-[650] hover:text-[#2458ce] hover:underline hover:underline-offset-3"
+            to="/verify-email"
+          >
+            Recevoir un nouveau lien
+          </Link>
         </p>
       </AuthLayout>
     );
@@ -93,14 +87,15 @@ export default function SignUpForm() {
       description="Créez votre compte pour conserver vos constructions en ligne et les partager quand vous le souhaitez."
     >
       <form
-        className={cn(
-          "auth-form gap-[19px] grid min-w-[0] [&_fieldset]:p-[0] [&_fieldset]:m-[0] [&_fieldset]:gap-[19px] [&_fieldset]:border-[length:0] [&_fieldset]:border-none [&_fieldset]:border-[color:currentColor] [&_fieldset]:grid [&_fieldset]:min-w-[0]",
-        )}
+        className="auth-form gap-4.75 grid min-w-0"
         noValidate
         onSubmit={form.submit}
         aria-busy={busy}
       >
-        <fieldset disabled={busy}>
+        <fieldset
+          className="p-0 m-0 gap-4.75 border-0 border-none border-current grid min-w-0"
+          disabled={busy}
+        >
           <AuthField
             id="name"
             label="Votre nom"
@@ -142,12 +137,14 @@ export default function SignUpForm() {
         </AuthSubmit>
       </form>
       <SocialLoginButtons disabled={form.busy} onBusyChange={setSocialBusy} />
-      <p
-        className={cn(
-          "auth-switch pt-[23px] mt-[23px] [border-top-width:1px] [border-top-style:solid] [border-top-color:#e9edf4] text-center [font-size:12px] text-[color:#7b899e] leading-[1.7] [&_a]:gap-[6px] [&_a]:inline-flex [&_a]:items-center [&_a]:text-[color:#356ae6] [&_a]:font-[650]",
-        )}
-      >
-        Déjà un compte ? <Link to="/sign-in">Se connecter</Link>
+      <p className="auth-switch pt-5.75 mt-5.75 border-t border-solid border-t-[#e9edf4] text-center text-xs text-[#7b899e] leading-[1.7]">
+        Déjà un compte ?{" "}
+        <Link
+          className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 gap-1.5 inline-flex items-center text-[#356ae6] font-[650] hover:text-[#2458ce] hover:underline hover:underline-offset-3"
+          to="/sign-in"
+        >
+          Se connecter
+        </Link>
       </p>
     </AuthLayout>
   );

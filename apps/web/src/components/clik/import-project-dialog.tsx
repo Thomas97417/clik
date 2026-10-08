@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useConvex, useMutation } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
@@ -268,31 +267,24 @@ export default function ImportProjectDialog({
       }}
     >
       <DialogContent
-        className={cn(
-          "project-import-dialog p-[0] gap-[0] overflow-hidden border-[length:1px] border-solid border-[color:#e1e7ef] flex flex-col w-[720px] max-w-[calc(100vw_-_32px)]! max-h-[min(820px,_calc(100dvh_-_32px))] rounded-[16px] bg-[#fff] text-[color:#26344c] [transition-property:opacity,_transform] [box-shadow:0_24px_80px_#1b2d4926] [@media(width<=520px)]:max-w-[calc(100vw_-_20px)]! [@media(width<=520px)]:max-h-[calc(100dvh_-_20px)] [@media(width<=520px)]:rounded-[12px] [&_[data-slot='dialog-header']]:px-[28px] [&_[data-slot='dialog-header']]:shrink-[0] [&_[data-slot='dialog-header']]:pt-[26px] [&_[data-slot='dialog-header']]:pb-[22px] [@media(width<=520px)]:[&_[data-slot='dialog-header']]:px-[18px] [@media(width<=520px)]:[&_[data-slot='dialog-header']]:pt-[22px] [@media(width<=520px)]:[&_[data-slot='dialog-header']]:pb-[18px] [&_[data-slot='dialog-title']]:pr-[24px] [&_[data-slot='dialog-title']]:[font-size:24px] [&_[data-slot='dialog-title']]:font-[750] [&_[data-slot='dialog-title']]:tracking-[-0.8px] [&_[data-slot='dialog-title']]:leading-[1.25] [@media(width<=520px)]:[&_[data-slot='dialog-title']]:[font-size:22px] [&_[data-slot='dialog-description']]:max-w-[510px] [&_[data-slot='dialog-description']]:mt-[6px] [&_[data-slot='dialog-description']]:text-[color:#718098] [&_[data-slot='dialog-description']]:[font-size:13px] [&_[data-slot='dialog-description']]:leading-[1.6] [&_[data-slot='dialog-footer']]:px-[28px] [&_[data-slot='dialog-footer']]:py-[18px] [&_[data-slot='dialog-footer']]:gap-[16px] [&_[data-slot='dialog-footer']]:grid [&_[data-slot='dialog-footer']]:grid-cols-[minmax(0,_1fr)_auto] [&_[data-slot='dialog-footer']]:items-center [&_[data-slot='dialog-footer']]:shrink-[0] [&_[data-slot='dialog-footer']]:[border-top-width:1px] [&_[data-slot='dialog-footer']]:[border-top-style:solid] [&_[data-slot='dialog-footer']]:[border-top-color:#e8edf5] [&_[data-slot='dialog-footer']]:bg-[#fafbfd] [@media(width<=520px)]:[&_[data-slot='dialog-footer']]:px-[18px] [@media(width<=520px)]:[&_[data-slot='dialog-footer']]:py-[14px] [@media(width<=520px)]:[&_[data-slot='dialog-footer']]:gap-[12px] [@media(width<=520px)]:[&_[data-slot='dialog-footer']]:grid-cols-[minmax(0,_1fr)] [&_[data-slot='dialog-footer']_>_[class~='group/project-import-error']]:m-[0] [&_[data-slot='dialog-footer']_>_[class~='group/project-import-error']]:col-[1_/_-1]",
-        )}
+        className="project-import-dialog p-0 gap-0 overflow-hidden border border-solid border-[#e1e7ef] flex flex-col w-180 max-w-[calc(100vw-32px)]! max-h-[min(820px,calc(100dvh-32px))] rounded-2xl bg-white text-[#26344c] [transition-property:opacity,transform] [box-shadow:0_24px_80px_#1b2d4926] [@media(width<=520px)]:max-w-[calc(100vw-20px)]! [@media(width<=520px)]:max-h-[calc(100dvh-20px)] [@media(width<=520px)]:rounded-[12px]"
         showCloseButton={!busy}
       >
-        <DialogHeader>
-          <DialogTitle>Importer une création</DialogTitle>
-          <DialogDescription>
+        <DialogHeader className="px-7 shrink-0 pt-6.5 pb-5.5 [@media(width<=520px)]:px-4.5 [@media(width<=520px)]:pt-5.5 [@media(width<=520px)]:pb-4.5">
+          <DialogTitle className="pr-6 text-2xl font-[750] tracking-[-0.8px] leading-tight [@media(width<=520px)]:text-[22px]">
+            Importer une création
+          </DialogTitle>
+          <DialogDescription className="max-w-127.5 mt-1.5 text-[#718098] text-[13px] leading-[1.6]">
             Retrouvez vos projets et assemblez-les ici. La copie sera placée
             dans un nouveau groupe, à un emplacement libre.
           </DialogDescription>
         </DialogHeader>
-        <div
-          className={cn(
-            "project-import-browser px-[28px] py-[0] flex flex-col min-h-[0] [@media(width<=520px)]:px-[18px]",
-          )}
-        >
-          <div className={cn("project-import-tools shrink-[0]")}>
-            <label
-              className={cn(
-                "project-import-search px-[12px] py-[0] gap-[10px] border-[length:1px] border-solid border-[color:#e1e7ef] flex items-center h-[42px] rounded-[8px] bg-[#f8fafc] text-[color:#8090a6] [&:focus-within]:border-[color:#8daaf0] [&:focus-within]:bg-[#fff] [&_input]:border-[length:0] [&_input]:border-none [&_input]:border-[color:currentColor] [&_input]:flex-[1] [&_input]:min-w-[0] [&_input]:h-[100%] [&_input]:[outline:none] [&_input]:bg-[transparent] [&_input]:text-[color:#26344c] [&_input]:[font-size:13px] [&_input::placeholder]:text-[color:#8090a6] [&_input::-webkit-search-cancel-button]:[appearance:none] [&_button]:grid [&_button]:[place-items:center] [&_button]:w-[26px] [&_button]:h-[26px] [&_button]:rounded-[5px] [&_button:hover]:bg-[#eaf0fb] [&_button:hover]:text-[color:#356ae6]",
-              )}
-            >
+        <div className="project-import-browser px-7 py-0 flex flex-col min-h-0 [@media(width<=520px)]:px-4.5">
+          <div className="project-import-tools shrink-0">
+            <label className="project-import-search px-3 py-0 gap-2.5 border border-solid border-[#e1e7ef] flex items-center h-10.5 rounded-[8px] bg-[#f8fafc] text-[#8090a6] focus-within:border-[#8daaf0] focus-within:bg-white">
               <Search size={16} aria-hidden="true" />
               <input
+                className="outline-offset-3 border-0 border-none border-current flex-1 min-w-0 h-full outline-none bg-transparent text-[#26344c] text-[13px] placeholder:text-[#8090a6] [&::-webkit-search-cancel-button]:appearance-none"
                 type="search"
                 aria-label="Rechercher parmi les projets chargés"
                 placeholder="Rechercher une création…"
@@ -302,19 +294,18 @@ export default function ImportProjectDialog({
               />
               {search && (
                 <button
+                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 grid place-items-center rounded-[5px] hover:bg-[#eaf0fb] hover:text-[#356ae6] size-6.5"
                   type="button"
                   aria-label="Effacer la recherche"
                   disabled={busy}
                   onClick={() => setSearch("")}
                 >
-                  <X size={14} aria-hidden="true" />
+                  <X className="shrink-0" size={14} aria-hidden="true" />
                 </button>
               )}
             </label>
             <div
-              className={cn(
-                "project-import-filters gap-[4px] flex mt-[12px] [&_button]:px-[10px] [&_button]:py-[6px] [&_button]:rounded-[6px] [&_button]:text-[color:#748198] [&_button]:[font-size:12px] [&_button]:font-[550] [&_button:hover]:bg-[#f1f4f9] [&_button:hover]:text-[color:#26344c] [&_button[aria-pressed='true']]:bg-[#edf2ff] [&_button[aria-pressed='true']]:text-[color:#356ae6]",
-              )}
+              className="project-import-filters gap-1 flex mt-3"
               role="group"
               aria-label="Emplacement des projets"
             >
@@ -322,6 +313,7 @@ export default function ImportProjectDialog({
                 .filter((filter) => authenticated || filter.value !== "online")
                 .map((filter) => (
                   <button
+                    className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-2.5 py-1.5 rounded-[6px] text-[#748198] text-xs leading-[inherit] font-[550] hover:bg-[#f1f4f9] hover:text-[#26344c] aria-pressed:bg-[#edf2ff] aria-pressed:text-[#356ae6]"
                     key={filter.value}
                     type="button"
                     aria-pressed={location === filter.value}
@@ -335,13 +327,12 @@ export default function ImportProjectDialog({
           </div>
           {localError && (
             <div
-              className={cn(
-                "project-import-error group/project-import-error px-[12px] py-[10px] mt-[12px] bg-[#fff1ef] rounded-[7px] text-[color:#af4e3a] [font-size:12px] [&_button]:[text-decoration:underline] [&_button]:underline-offset-[3px]",
-              )}
+              className="project-import-error group/project-import-error px-3 py-2.5 mt-3 bg-[#fff1ef] rounded-[7px] text-[#af4e3a] text-xs leading-[inherit]"
               role="alert"
             >
               Les projets de cet appareil n’ont pas pu être chargés.{" "}
               <button
+                className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 underline underline-offset-3"
                 disabled={busy || loading}
                 onClick={() => setRetry((n) => n + 1)}
               >
@@ -351,13 +342,12 @@ export default function ImportProjectDialog({
           )}
           {remoteError && (
             <div
-              className={cn(
-                "project-import-error group/project-import-error px-[12px] py-[10px] mt-[12px] bg-[#fff1ef] rounded-[7px] text-[color:#af4e3a] [font-size:12px] [&_button]:[text-decoration:underline] [&_button]:underline-offset-[3px]",
-              )}
+              className="project-import-error group/project-import-error px-3 py-2.5 mt-3 bg-[#fff1ef] rounded-[7px] text-[#af4e3a] text-xs leading-[inherit]"
               role="alert"
             >
               {remoteError}{" "}
               <button
+                className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 underline underline-offset-3"
                 disabled={busy || remoteLoading}
                 onClick={() => void loadRemote(cursor)}
               >
@@ -365,11 +355,7 @@ export default function ImportProjectDialog({
               </button>
             </div>
           )}
-          <div
-            className={cn(
-              "project-import-results px-[0] gap-[8px] flex justify-between pt-[16px] pb-[10px] text-[color:#8490a2] [font-size:11px]",
-            )}
-          >
+          <div className="project-import-results px-0 gap-2 flex justify-between pt-4 pb-2.5 text-[#8490a2] text-[11px]">
             <span role="status">
               {visibleChoices.length} création
               {visibleChoices.length === 1 ? "" : "s"}
@@ -379,26 +365,18 @@ export default function ImportProjectDialog({
             )}
           </div>
           <div
-            className={cn(
-              "project-import-scroll min-h-[0] overflow-y-auto [overscroll-behavior:contain] [scrollbar-gutter:stable] pt-[2px] pr-[6px] pb-[20px] pl-[2px]",
-            )}
+            className="project-import-scroll min-h-0 overflow-y-auto overscroll-contain [scrollbar-gutter:stable] pt-0.5 pr-1.5 pb-5 pl-0.5"
             aria-label="Projets à importer"
             aria-busy={isLoading}
           >
-            <div
-              className={cn(
-                "project-import-list gap-[14px] grid grid-cols-[repeat(2,_minmax(0,_1fr))] [@media(width<=520px)]:grid-cols-[minmax(0,_1fr)]",
-              )}
-            >
+            <div className="project-import-list gap-3.5 grid grid-cols-2 [@media(width<=520px)]:grid-cols-[minmax(0,1fr)]">
               {visibleChoices.map((choice) => {
                 const checked = selected?.id === choice.id;
                 return (
                   <button
                     key={choice.id}
                     type="button"
-                    className={cn(
-                      "project-import-choice p-[0] overflow-hidden border-[length:1px] border-solid border-[color:#e1e7ef] flex flex-col min-w-[0] rounded-[10px] text-left bg-[#fff] [transition:border-color_150ms] [&:hover:not(:disabled)]:border-[color:#a5b8d8] [&[aria-pressed='true']]:border-[color:#356ae6] [&[aria-pressed='true']]:[box-shadow:0_0_0_1px_#356ae6] [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:-4px] [&:disabled]:opacity-[0.5] [&:disabled]:cursor-[not-allowed] [&[aria-pressed='true']_[class~='group/project-import-check']]:border-[color:#356ae6] [&[aria-pressed='true']_[class~='group/project-import-check']]:bg-[#356ae6]",
-                    )}
+                    className="cursor-pointer outline-offset-3 project-import-choice p-0 overflow-hidden border border-solid border-[#e1e7ef] flex flex-col min-w-0 rounded-[10px] text-left bg-white [transition:border-color_150ms] hover:enabled:border-[#a5b8d8] aria-pressed:border-[#356ae6] aria-pressed:[box-shadow:0_0_0_1px_#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:-outline-offset-4 disabled:opacity-50 disabled:cursor-not-allowed group/project-import-choice"
                     disabled={busy || !choice.partCount}
                     aria-pressed={checked}
                     aria-label={`Choisir ${choice.title}${choice.invalid ? " — indisponible" : !choice.partCount ? " — sans pièces" : ""}`}
@@ -407,47 +385,49 @@ export default function ImportProjectDialog({
                       setError("");
                     }}
                   >
-                    <div
-                      className={cn(
-                        "project-import-thumbnail overflow-hidden relative w-[100%] h-[150px] shrink-[0] bg-[#f0f3f8] [@media(width<=520px)]:h-[160px] [&_[class~='group/creation-preview']]:w-[100%] [&_[class~='group/creation-preview']]:h-[100%] [&_[class~='group/creation-preview']_img]:w-[100%] [&_[class~='group/creation-preview']_img]:h-[100%] [&_[class~='group/creation-preview']_img]:object-contain [&_[class~='group/creation-preview-placeholder']]:min-h-[0] [&_[class~='group/creation-preview-placeholder']]:[font-size:11px]",
-                      )}
-                    >
+                    <div className="project-import-thumbnail overflow-hidden relative w-full h-37.5 shrink-0 bg-[#f0f3f8] [@media(width<=520px)]:h-40">
                       <CreationPreview
+                        placeholderClassName="min-h-0 text-[11px]"
+                        imageClassName="object-contain size-full"
+                        className="size-full"
                         scene={choice.scene}
                         cacheKey={choice.cacheKey}
                         title={choice.title}
                       />
                       <span
-                        className={cn(
-                          "project-import-check group/project-import-check border-[length:1px] border-solid border-[color:#cfd9e7] absolute top-[10px] right-[10px] grid [place-items:center] w-[23px] h-[23px] rounded-[6px] bg-[#ffffffe0] text-[color:white]",
-                        )}
+                        className="project-import-check group/project-import-check border border-solid border-[#cfd9e7] absolute top-2.5 right-2.5 grid place-items-center rounded-[6px] bg-[#ffffffe0] text-white size-5.75 group-aria-pressed/project-import-choice:border-[#356ae6] group-aria-pressed/project-import-choice:bg-[#356ae6]"
                         aria-hidden="true"
                       >
-                        {checked && <Check size={14} />}
+                        {checked && <Check className="shrink-0" size={14} />}
                       </span>
                     </div>
-                    <span
-                      className={cn(
-                        "project-import-copy px-[14px] py-[12px] block w-[100%] min-w-[0] [&_strong]:overflow-hidden [&_strong]:block [&_strong]:text-ellipsis [&_strong]:whitespace-nowrap [&_strong]:text-[color:#26344c] [&_strong]:[font-size:13px] [&_strong]:font-[650]",
-                      )}
-                    >
-                      <strong title={choice.title}>{choice.title}</strong>
-                      <span
-                        className={cn(
-                          "project-import-meta flex flex-wrap items-center justify-between gap-y-[4px] gap-x-[8px] mt-[7px] text-[color:#7c899d] [font-size:10px] [&_>_span]:gap-[4px] [&_>_span]:inline-flex [&_>_span]:items-center",
-                        )}
+                    <span className="project-import-copy px-3.5 py-3 block w-full min-w-0">
+                      <strong
+                        className="overflow-hidden block text-ellipsis whitespace-nowrap text-[#26344c] text-[13px] font-[650]"
+                        title={choice.title}
                       >
-                        <span>
+                        {choice.title}
+                      </strong>
+                      <span className="project-import-meta flex flex-wrap items-center justify-between gap-y-1 gap-x-2 mt-1.75 text-[#7c899d] text-[10px]">
+                        <span className="gap-1 inline-flex items-center">
                           {choice.location === "online" ? (
-                            <Cloud size={12} aria-hidden="true" />
+                            <Cloud
+                              className="shrink-0"
+                              size={12}
+                              aria-hidden="true"
+                            />
                           ) : (
-                            <HardDrive size={12} aria-hidden="true" />
+                            <HardDrive
+                              className="shrink-0"
+                              size={12}
+                              aria-hidden="true"
+                            />
                           )}
                           {choice.location === "online"
                             ? "En ligne"
                             : "Sur cet appareil"}
                         </span>
-                        <span>
+                        <span className="gap-1 inline-flex items-center">
                           {choice.invalid
                             ? "Indisponible"
                             : `${choice.partCount} pièce${choice.partCount === 1 ? "" : "s"}`}
@@ -460,9 +440,7 @@ export default function ImportProjectDialog({
             </div>
             {isLoading && (
               <p
-                className={cn(
-                  "project-import-loading px-[0] py-[28px] gap-[8px] flex items-center justify-center text-[color:#7c899d] [font-size:12px]",
-                )}
+                className="project-import-loading px-0 py-7 gap-2 flex items-center justify-center text-[#7c899d] text-xs leading-[inherit]"
                 role="status"
               >
                 <LoaderCircle
@@ -474,17 +452,13 @@ export default function ImportProjectDialog({
               </p>
             )}
             {!isLoading && !visibleChoices.length && (
-              <div
-                className={cn(
-                  "project-import-empty px-[20px] py-[42px] gap-[8px] grid [justify-items:center] text-center [&_strong]:text-[color:#465771] [&_strong]:[font-size:15px] [&_p]:max-w-[320px] [&_p]:text-[color:#7c899d] [&_p]:[font-size:13px] [&_p]:leading-[1.6] [&_button]:text-[color:#356ae6] [&_button]:[font-size:12px] [&_button]:[text-decoration:underline] [&_button]:underline-offset-[3px]",
-                )}
-              >
-                <strong>
+              <div className="project-import-empty px-5 py-10.5 gap-2 grid justify-items-center text-center">
+                <strong className="text-[#465771] text-[15px]">
                   {choices.length
                     ? "Aucune création trouvée"
                     : "Pas encore d’autre création"}
                 </strong>
-                <p>
+                <p className="max-w-80 text-[#7c899d] text-[13px] leading-[1.6]">
                   {choices.length
                     ? "Essayez un autre nom ou un autre emplacement."
                     : localError || remoteError
@@ -493,6 +467,7 @@ export default function ImportProjectDialog({
                 </p>
                 {(search || location !== "all") && (
                   <button
+                    className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 text-[#356ae6] text-xs leading-[inherit] underline underline-offset-3"
                     type="button"
                     disabled={busy}
                     onClick={() => {
@@ -507,63 +482,69 @@ export default function ImportProjectDialog({
             )}
             {authenticated && !done && !remoteError && location !== "local" && (
               <Button
-                className={cn(
-                  "project-import-more mx-[auto] flex mt-[14px] mb-[0] text-[color:#356ae6] [font-size:12px]",
-                )}
+                className="project-import-more mx-auto flex mt-3.5 mb-0 text-[#356ae6] text-xs"
                 variant="ghost"
                 disabled={busy || remoteLoading}
                 onClick={() => void loadRemote(cursor)}
               >
-                <Plus size={15} aria-hidden="true" />
+                <Plus
+                  className="size-4 pointer-events-none shrink-0"
+                  size={15}
+                  aria-hidden="true"
+                />
                 Voir plus de projets
               </Button>
             )}
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="px-7 py-4.5 gap-4 grid grid-cols-[minmax(0,1fr)_auto] items-center shrink-0 border-t border-solid border-t-[#e8edf5] bg-[#fafbfd] [@media(width<=520px)]:px-4.5 [@media(width<=520px)]:py-3.5 [@media(width<=520px)]:gap-3 [@media(width<=520px)]:grid-cols-[minmax(0,1fr)]">
           {error && (
             <p
-              className={cn(
-                "project-import-error group/project-import-error px-[12px] py-[10px] mt-[12px] bg-[#fff1ef] rounded-[7px] text-[color:#af4e3a] [font-size:12px] [&_button]:[text-decoration:underline] [&_button]:underline-offset-[3px]",
-              )}
+              className="project-import-error group/project-import-error px-3 py-2.5 bg-[#fff1ef] rounded-[7px] text-[#af4e3a] text-xs leading-[inherit] m-0 col-span-full"
               role="alert"
             >
               {error}
             </p>
           )}
           <div
-            className={cn(
-              "project-import-summary gap-[4px] grid min-w-[0] [&_strong]:overflow-hidden [&_strong]:text-ellipsis [&_strong]:whitespace-nowrap [&_strong]:[font-size:12px] [&_strong]:font-[600] [&_span]:text-[color:#8190a4] [&_span]:[font-size:11px]",
-            )}
+            className="project-import-summary gap-1 grid min-w-0"
             role="status"
           >
-            <strong>{selection?.title || "Choisissez une création"}</strong>
-            <span>
+            <strong className="overflow-hidden text-ellipsis whitespace-nowrap text-xs leading-[inherit] font-semibold">
+              {selection?.title || "Choisissez une création"}
+            </strong>
+            <span className="text-[#8190a4] text-[11px]">
               {selection
                 ? `${selection.partCount} pièce${selection.partCount === 1 ? "" : "s"} · Sources conservées`
                 : "Votre projet d’origine reste intact."}
             </span>
           </div>
-          <div
-            className={cn(
-              "project-import-actions gap-[8px] flex items-center [@media(width<=520px)]:justify-end [&_button]:px-[14px] [&_button]:gap-[7px] [&_button]:min-h-[38px] [&_button]:rounded-[7px] [&_button]:[font-size:12px]",
-            )}
-          >
-            <Button variant="ghost" disabled={busy} onClick={onClose}>
+          <div className="project-import-actions gap-2 flex items-center [@media(width<=520px)]:justify-end">
+            <Button
+              className="px-3.5 gap-1.75 min-h-9.5 rounded-[7px] text-xs"
+              variant="ghost"
+              disabled={busy}
+              onClick={onClose}
+            >
               Annuler
             </Button>
             <Button
+              className="px-3.5 gap-1.75 min-h-9.5 rounded-[7px] text-xs"
               disabled={!selection?.partCount || busy}
               onClick={() => void doImport()}
             >
               {busy ? (
                 <LoaderCircle
-                  className="animate-spin"
+                  className="size-4 pointer-events-none shrink-0 animate-spin"
                   size={16}
                   aria-hidden="true"
                 />
               ) : (
-                <ArrowDownToLine size={16} aria-hidden="true" />
+                <ArrowDownToLine
+                  className="size-4 pointer-events-none shrink-0"
+                  size={16}
+                  aria-hidden="true"
+                />
               )}
               {busy ? "Import en cours…" : "Importer le projet"}
             </Button>

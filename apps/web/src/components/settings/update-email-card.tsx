@@ -52,6 +52,7 @@ export default function UpdateEmailCard({ email }: { email: string }) {
   });
   return (
     <form
+      className="min-w-0 h-full"
       onSubmit={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -68,7 +69,12 @@ export default function UpdateEmailCard({ email }: { email: string }) {
             name="newEmail"
             children={(field) => (
               <div className="flex flex-col gap-1">
-                <Label htmlFor="newEmail">Adresse e-mail</Label>
+                <Label
+                  className="text-xs text-[#445771] mb-1.25 leading-none"
+                  htmlFor="newEmail"
+                >
+                  Adresse e-mail
+                </Label>
                 <Input
                   id="newEmail"
                   type="email"
@@ -78,10 +84,13 @@ export default function UpdateEmailCard({ email }: { email: string }) {
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  className="w-full bg-transparent"
+                  className="w-full bg-transparent px-3 border border-solid border-[#dce4ef] min-w-0 min-h-10.5 rounded-[8px] text-[13px] [box-shadow:none] focus-visible:border-[#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae626] focus-visible:outline-offset-2 leading-(--text-xs--line-height) focus-visible:shadow-none aria-invalid:shadow-none focus-visible:ring-0 aria-invalid:ring-0"
                 />
                 {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-sm text-destructive">
+                  <p
+                    key={error?.message}
+                    className="text-sm leading-(--text-sm--line-height) text-destructive"
+                  >
                     {error?.message}
                   </p>
                 ))}
@@ -90,7 +99,7 @@ export default function UpdateEmailCard({ email }: { email: string }) {
           />
         </SettingsCardContent>
         <SettingsCardFooter>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-[11px] text-[#7c899d] leading-[1.6]">
             {isSocialOnly
               ? "Cette adresse est gérée par votre connexion Google ou GitHub."
               : "Cette adresse reste privée."}
@@ -98,6 +107,7 @@ export default function UpdateEmailCard({ email }: { email: string }) {
           <form.Subscribe>
             {(state) => (
               <Button
+                className="px-3 min-h-9 rounded-[7px] text-[11px] whitespace-normal leading-(--text-xs--line-height)"
                 type="submit"
                 size="sm"
                 disabled={
@@ -110,7 +120,7 @@ export default function UpdateEmailCard({ email }: { email: string }) {
                 {state.isSubmitting ? (
                   <>
                     <Loader2
-                      className="animate-spin size-4"
+                      className="pointer-events-none shrink-0 animate-spin size-4"
                       aria-hidden="true"
                     />{" "}
                     Enregistrement…

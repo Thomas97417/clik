@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -129,28 +128,24 @@ export default function SessionsCard() {
               return (
                 <div
                   key={session.token}
-                  className={cn(
-                    "settings-session p-[12px] gap-[8px] border-[length:1px] border-solid border-[color:#e1e7f0] flex items-center justify-between rounded-[9px] [&_>_div]:min-w-[0] [&_>_div_>_div]:min-w-[0] [&_span]:[overflow-wrap:anywhere] [&_[class~='group/text-xs']]:leading-[1.6] [&_[class~='group/text-xs']]:[font-size:10px] [&_button]:min-w-[30px] [&_button]:min-h-[30px] [&_button]:rounded-[6px]",
-                  )}
+                  className="settings-session p-3 gap-2 border border-solid border-[#e1e7f0] flex items-center justify-between rounded-[9px]"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="text-muted-foreground">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="text-muted-foreground min-w-0">
                       {getDeviceIcon(session.userAgent)}
                     </div>
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-2 text-sm">
-                        <span>{getBrowserName(session.userAgent)}</span>
+                    <div className="flex flex-col min-w-0">
+                      <div className="flex items-center gap-2 text-sm leading-(--text-sm--line-height)">
+                        <span className="wrap-anywhere">
+                          {getBrowserName(session.userAgent)}
+                        </span>
                         {isCurrent && (
-                          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[0.65rem] font-medium text-primary">
+                          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[0.65rem] font-medium text-primary wrap-anywhere">
                             Cet appareil
                           </span>
                         )}
                       </div>
-                      <span
-                        className={cn(
-                          "text-xs text-muted-foreground group/text-xs",
-                        )}
-                      >
+                      <span className="text-muted-foreground group/text-xs wrap-anywhere text-[10px] leading-[1.6]">
                         Dernière activité :{" "}
                         {new Date(session.updatedAt).toLocaleDateString(
                           "fr-FR",
@@ -171,7 +166,7 @@ export default function SessionsCard() {
                           <Button
                             variant="ghost"
                             size="icon-xs"
-                            className="hover:cursor-pointer text-muted-foreground hover:text-destructive group/text-xs"
+                            className="hover:cursor-pointer text-muted-foreground hover:text-destructive group/text-xs text-[10px] min-w-7.5 min-h-7.5 rounded-[6px] leading-(--text-xs--line-height) leading-[1.6]"
                             aria-label="Se déconnecter de cet appareil"
                             disabled={revokingId === session.token}
                           />
@@ -197,8 +192,11 @@ export default function SessionsCard() {
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Annuler</AlertDialogCancel>
+                          <AlertDialogCancel className="min-w-7.5 min-h-7.5 rounded-[6px]">
+                            Annuler
+                          </AlertDialogCancel>
                           <AlertDialogAction
+                            className="min-w-7.5 min-h-7.5 rounded-[6px]"
                             variant="destructive"
                             onClick={() =>
                               revokeSession(session.id, session.token)
@@ -213,15 +211,15 @@ export default function SessionsCard() {
                     <Button
                       variant="ghost"
                       size="icon-xs"
-                      className="hover:cursor-pointer text-muted-foreground hover:text-destructive"
+                      className="hover:cursor-pointer text-muted-foreground hover:text-destructive min-w-7.5 min-h-7.5 rounded-[6px]"
                       aria-label={`Déconnecter ${getBrowserName(session.userAgent)}`}
                       disabled={revokingId === session.token}
                       onClick={() => revokeSession(session.id, session.token)}
                     >
                       {revokingId === session.token ? (
-                        <Loader2 className="size-3 animate-spin" />
+                        <Loader2 className="pointer-events-none shrink-0 size-3 animate-spin" />
                       ) : (
-                        <X className="size-3" />
+                        <X className="pointer-events-none shrink-0 size-3" />
                       )}
                     </Button>
                   )}
@@ -229,25 +227,25 @@ export default function SessionsCard() {
               );
             })
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm leading-(--text-sm--line-height) text-muted-foreground">
               Aucun appareil à afficher.
             </p>
           )}
         </div>
       </SettingsCardContent>
       <SettingsCardFooter>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-[11px] text-[#7c899d] leading-[1.6]">
           Un appareil inconnu ? Vous pouvez lui retirer l’accès.
         </p>
         <Button
           size="sm"
           variant="outline"
-          className="hover:cursor-pointer"
+          className="hover:cursor-pointer px-3 min-h-9 rounded-[7px] text-[11px] whitespace-normal leading-(--text-xs--line-height)"
           disabled={!otherSessions?.length || revokingAll}
           onClick={revokeOtherSessions}
         >
           {revokingAll ? (
-            <Loader2 className="size-4 animate-spin" />
+            <Loader2 className="pointer-events-none shrink-0 size-4 animate-spin" />
           ) : (
             "Déconnecter les autres"
           )}

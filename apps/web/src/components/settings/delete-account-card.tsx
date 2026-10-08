@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 
@@ -44,19 +43,15 @@ export default function DeleteAccountCard() {
   };
 
   return (
-    <SettingsCard className={cn("settings-danger-card h-[auto]")}>
+    <SettingsCard className="settings-danger-card h-auto">
       <SettingsCardContent>
         <SettingsCardHeader
           title="Supprimer mon compte"
           description="Vous souhaitez quitter Clik ? La suppression de votre compte est définitive."
         />
       </SettingsCardContent>
-      <SettingsCardFooter
-        className={cn(
-          "settings-danger-footer [border-top-color:#f1e5e0] border-[color:#f1e5e0] flex-row items-center justify-between bg-[#fffaf8] [@media(width<=640px)]:flex-col [@media(width<=640px)]:items-start [&_button]:shrink-[0]",
-        )}
-      >
-        <p className="text-sm text-muted-foreground">
+      <SettingsCardFooter className="settings-danger-footer border-[#f1e5e0] flex-row items-center justify-between bg-[#fffaf8] [@media(width<=640px)]:flex-col [@media(width<=640px)]:items-start">
+        <p className="text-[11px] text-[#7c899d] leading-[1.6]">
           Cette action est irréversible.
         </p>
         <AlertDialog>
@@ -65,7 +60,7 @@ export default function DeleteAccountCard() {
               <Button
                 size="sm"
                 variant="destructive"
-                className="hover:cursor-pointer"
+                className="hover:cursor-pointer shrink-0 px-3 min-h-9 rounded-[7px] text-[11px] whitespace-normal leading-(--text-xs--line-height)"
               />
             }
           >
@@ -83,8 +78,14 @@ export default function DeleteAccountCard() {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Annuler</AlertDialogCancel>
-              <AlertDialogAction variant="destructive" onClick={handleDelete}>
+              <AlertDialogCancel className="shrink-0">
+                Annuler
+              </AlertDialogCancel>
+              <AlertDialogAction
+                className="shrink-0"
+                variant="destructive"
+                onClick={handleDelete}
+              >
                 Supprimer mon compte
               </AlertDialogAction>
             </AlertDialogFooter>

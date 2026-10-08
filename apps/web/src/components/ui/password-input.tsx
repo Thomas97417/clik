@@ -5,26 +5,26 @@ import { cn } from "@/lib/utils";
 
 export default function PasswordInput({
   className,
+  toggleClassName,
   ...props
-}: ComponentProps<typeof Input> & { id: string }) {
+}: ComponentProps<typeof Input> & { id: string; toggleClassName?: string }) {
   const [visible, setVisible] = useState(false);
   return (
-    <div
-      className={cn(
-        "relative w-full password-field group/password-field",
-        className,
-      )}
-    >
+    <div className="relative w-full password-field group/password-field">
       <Input
         {...props}
         required={props.required ?? true}
         type={visible ? "text" : "password"}
-        className="bg-transparent pr-11"
+        className={cn("bg-transparent pr-11", className)}
       />
       <button
         type="button"
         className={cn(
-          "password-toggle group/password-toggle grid [place-items:center] absolute top-[50%] right-[3px] [transform:translateY(-50%)] w-[32px] h-[30px] rounded-[7px] text-[color:#7787a0] [&:hover]:text-[color:#356ae6] [&:hover]:bg-[#eaf0fc]",
+          "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
+          "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
+          "outline-offset-3",
+          "password-toggle group/password-toggle grid place-items-center absolute top-1/2 right-0.75 transform-[translateY(-50%)] w-8 h-7.5 rounded-[7px] text-[#7787a0] hover:text-[#356ae6] hover:bg-[#eaf0fc]",
+          toggleClassName,
         )}
         aria-label={
           visible ? "Masquer le mot de passe" : "Afficher le mot de passe"
@@ -35,9 +35,9 @@ export default function PasswordInput({
         onClick={() => setVisible((v) => !v)}
       >
         {visible ? (
-          <EyeOff size={17} aria-hidden="true" />
+          <EyeOff className="shrink-0" size={17} aria-hidden="true" />
         ) : (
-          <Eye size={17} aria-hidden="true" />
+          <Eye className="shrink-0" size={17} aria-hidden="true" />
         )}
       </button>
     </div>

@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 /** A little exhibition of bricks. Static SVG, without a 3D renderer. */
 export default function GalleryArt() {
   const palettes = [
@@ -8,9 +7,7 @@ export default function GalleryArt() {
   ];
   return (
     <svg
-      className={cn(
-        "gallery-art w-[100%] max-w-[420px] [align-self:center] [justify-self:end] [@media(width<=640px)]:hidden",
-      )}
+      className="gallery-art w-full max-w-105 self-center justify-self-end [@media(width<=640px)]:hidden"
       viewBox="0 0 420 240"
       fill="none"
       aria-hidden="true"

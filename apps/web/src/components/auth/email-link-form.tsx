@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
@@ -55,37 +54,29 @@ export default function EmailLinkForm({
       {sent ? (
         <>
           <div
-            className={cn(
-              "auth-confirmation p-[18px] border-[length:1px] border-solid border-[color:#cce8db] mb-[20px] rounded-[12px] bg-[#f1faf6] text-[color:#316e55] [font-size:13px] leading-[1.8] [overflow-wrap:anywhere] [&_strong]:block [&_strong]:mb-[7px] [&_strong]:font-[650]",
-            )}
+            className="auth-confirmation p-4.5 border border-solid border-[#cce8db] mb-5 rounded-[12px] bg-[#f1faf6] text-[#316e55] text-[13px] leading-[1.8] wrap-anywhere"
             role="status"
           >
-            <strong>La demande a bien été prise en compte.</strong>
+            <strong className="block mb-1.75 font-[650]">
+              La demande a bien été prise en compte.
+            </strong>
             <p>
               Si un compte est associé à <b>{sent}</b>, vous recevrez un lien de{" "}
               {reset ? "réinitialisation" : "vérification"}.
             </p>
           </div>
-          <p
-            className={cn(
-              "auth-help mb-[24px] [font-size:12px] text-[color:#71819a] leading-[1.8]",
-            )}
-          >
+          <p className="auth-help mb-6 text-xs text-[#71819a] leading-[1.8]">
             L’email peut prendre quelques minutes. Pensez aussi à vérifier vos
             courriers indésirables.
           </p>
           <Link
-            className={cn(
-              "auth-submit group/auth-submit px-[16px] py-[12px] gap-[10px] border-[length:1px] border-solid border-[color:#356ae6] flex items-center justify-center w-[100%] min-h-[46px] rounded-[10px] text-[color:#fff] bg-[#356ae6] [font-size:13px] leading-[1.5] font-[650] text-center [&:hover:not(:disabled)]:border-[color:#2458ce] [&:hover:not(:disabled)]:bg-[#2458ce] [&:disabled]:opacity-[0.65]",
-            )}
+            className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 auth-submit group/auth-submit px-4 py-3 gap-2.5 border border-solid border-[#356ae6] flex items-center justify-center w-full min-h-11.5 rounded-[10px] text-white bg-[#356ae6] text-[13px] leading-normal font-[650] text-center hover:enabled:border-[#2458ce] hover:enabled:bg-[#2458ce] disabled:opacity-65"
             to="/sign-in"
           >
             Retour à la connexion
           </Link>
           <button
-            className={cn(
-              "auth-secondary-link mx-[auto] block mt-[15px] mb-[0] w-[fit-content] text-[color:#71809a] [font-size:11px] text-center [&:hover]:text-[color:#2458ce] [&:hover]:[text-decoration:underline] [&:hover]:underline-offset-[3px]",
-            )}
+            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 auth-secondary-link mx-auto block mt-3.75 mb-0 w-fit text-[#71809a] text-[11px] text-center hover:text-[#2458ce] hover:underline hover:underline-offset-3"
             type="button"
             onClick={() => setSent("")}
           >
@@ -95,14 +86,15 @@ export default function EmailLinkForm({
       ) : (
         <>
           <form
-            className={cn(
-              "auth-form gap-[19px] grid min-w-[0] [&_fieldset]:p-[0] [&_fieldset]:m-[0] [&_fieldset]:gap-[19px] [&_fieldset]:border-[length:0] [&_fieldset]:border-none [&_fieldset]:border-[color:currentColor] [&_fieldset]:grid [&_fieldset]:min-w-[0]",
-            )}
+            className="auth-form gap-4.75 grid min-w-0"
             noValidate
             onSubmit={form.submit}
             aria-busy={form.busy}
           >
-            <fieldset disabled={form.busy}>
+            <fieldset
+              className="p-0 m-0 gap-4.75 border-0 border-none border-current grid min-w-0"
+              disabled={form.busy}
+            >
               <AuthField
                 id="email"
                 label="Adresse email"
@@ -120,12 +112,11 @@ export default function EmailLinkForm({
               Envoyer le lien{reset ? "" : " de vérification"}
             </AuthSubmit>
           </form>
-          <p
-            className={cn(
-              "auth-switch pt-[23px] mt-[23px] [border-top-width:1px] [border-top-style:solid] [border-top-color:#e9edf4] text-center [font-size:12px] text-[color:#7b899e] leading-[1.7] [&_a]:gap-[6px] [&_a]:inline-flex [&_a]:items-center [&_a]:text-[color:#356ae6] [&_a]:font-[650]",
-            )}
-          >
-            <Link to="/sign-in">
+          <p className="auth-switch pt-5.75 mt-5.75 border-t border-solid border-t-[#e9edf4] text-center text-xs text-[#7b899e] leading-[1.7]">
+            <Link
+              className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 gap-1.5 inline-flex items-center text-[#356ae6] font-[650] hover:text-[#2458ce] hover:underline hover:underline-offset-3"
+              to="/sign-in"
+            >
               <ArrowLeft size={15} aria-hidden="true" /> Retour à la connexion
             </Link>
           </p>

@@ -125,10 +125,12 @@ const BrickAvatar = memo(function BrickAvatar({
   avatar,
   size = 32,
   label,
+  className,
 }: {
   avatar: AvatarDescriptor;
   size?: number;
   label?: string;
+  className?: string;
 }) {
   const model = useMemo(() => {
     const assembled = assembleAvatar(avatar);
@@ -148,7 +150,10 @@ const BrickAvatar = memo(function BrickAvatar({
   const ring = RINGS.find((r) => r.id === avatar.ring);
   return (
     <svg
-      className={cn("brick-avatar group/brick-avatar block shrink-[0]")}
+      className={cn(
+        "brick-avatar group/brick-avatar block shrink-0",
+        className,
+      )}
       width={size}
       height={size}
       viewBox="0 0 100 100"

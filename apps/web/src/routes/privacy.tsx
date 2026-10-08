@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Eye, ShieldCheck } from "lucide-react";
 import LegalPage, {
@@ -24,20 +23,28 @@ const sections: LegalSection[] = [
     title: "Qui s’occupe de vos données ?",
     content: (
       <>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Cette politique concerne Clik, l’atelier de construction en briques 3D
-          accessible sur <a href="https://clik.build">clik.build</a>. Elle
-          décrit les données utilisées lorsque vous visitez le site, créez un
-          compte, construisez ou partagez une création.
+          accessible sur{" "}
+          <a
+            className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 text-[#2e61cf] underline underline-offset-3 decoration-current wrap-anywhere hover:decoration-[#356ae6] focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#a7c0f2] focus-visible:outline-offset-4 focus-visible:rounded-[5px]"
+            href="https://clik.build"
+          >
+            clik.build
+          </a>
+          . Elle décrit les données utilisées lorsque vous visitez le site,
+          créez un compte, construisez ou partagez une création.
         </p>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Le responsable du traitement est{" "}
-          <strong>{legalPublisher.name}</strong>
+          <strong className="font-[650] text-[#384a64]">
+            {legalPublisher.name}
+          </strong>
           {legalPublisher.country && `, établi en ${legalPublisher.country}`}.
           Pour toute question concernant vos données personnelles ou pour
           exercer vos droits, contactez-nous :
         </p>
-        <LegalContact />
+        <LegalContact className="text-[#2e61cf] underline-offset-3 decoration-current wrap-anywhere hover:decoration-[#356ae6] mx-0 mt-0 mb-3.75 no-underline" />
       </>
     ),
   },
@@ -46,58 +53,91 @@ const sections: LegalSection[] = [
     title: "Les informations utilisées",
     content: (
       <>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Les informations dépendent de la manière dont vous utilisez l’atelier.
         </p>
-        <div
-          className={cn(
-            "legal-table-wrap mx-[0] overflow-hidden border-[length:1px] border-solid border-[color:#e0e7f1] mt-[18px] mb-[22px] rounded-[12px] [&_table]:[border-collapse:collapse] [&_table]:w-[100%] [&_table]:[font-size:12px] [&_table]:leading-[1.8] [@media(width<=760px)]:[&_table]:[font-size:11px] [&_caption]:px-[16px] [&_caption]:py-[12px] [&_caption]:text-left [&_caption]:bg-[#fff] [&_caption]:[font-size:11px] [&_caption]:text-[color:#677b96] [&_thead]:bg-[#edf2f9] [&_thead]:text-[color:#435b7e] [&_th]:px-[16px] [&_th]:py-[13px] [&_th]:text-left [&_th]:[vertical-align:top] [&_th]:font-[650] [@media(width<=760px)]:[&_th]:px-[10px] [@media(width<=760px)]:[&_th]:py-[12px] [&_td]:px-[16px] [&_td]:py-[13px] [&_td]:text-left [&_td]:[vertical-align:top] [@media(width<=760px)]:[&_td]:px-[10px] [@media(width<=760px)]:[&_td]:py-[12px] [&_tbody_th]:w-[27%] [&_tbody_th]:text-[color:#435772] [@media(width<=760px)]:[&_tbody_th]:w-[28%] [&_tbody_tr]:bg-[#fff9] [&_tbody_tr]:[border-top-width:1px] [&_tbody_tr]:[border-top-style:solid] [&_tbody_tr]:[border-top-color:#e5ebf3] print:[&&]:[&_tr]:[break-inside:avoid]",
-          )}
-        >
-          <table>
-            <caption>Données utilisées selon votre activité</caption>
-            <thead>
-              <tr>
-                <th scope="col">Votre activité</th>
-                <th scope="col">Les données concernées</th>
+        <div className="legal-table-wrap mx-0 overflow-hidden border border-solid border-[#e0e7f1] mt-4.5 mb-5.5 rounded-[12px] last:mb-0">
+          <table className="border-collapse w-full text-xs leading-[1.8] [@media(width<=760px)]:text-[11px]">
+            <caption className="px-4 py-3 text-left bg-white text-[11px] text-[#677b96]">
+              Données utilisées selon votre activité
+            </caption>
+            <thead className="bg-[#edf2f9] text-[#435b7e]">
+              <tr className="print:break-inside-avoid">
+                <th
+                  className="px-4 py-3.25 text-left align-top font-[650] [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3"
+                  scope="col"
+                >
+                  Votre activité
+                </th>
+                <th
+                  className="px-4 py-3.25 text-left align-top font-[650] [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3"
+                  scope="col"
+                >
+                  Les données concernées
+                </th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <th scope="row">Créer un compte</th>
-                <td>
+              <tr className="bg-[#fff9] border-t border-solid border-t-[#e5ebf3] print:break-inside-avoid">
+                <th
+                  className="px-4 py-3.25 text-left align-top font-[650] [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3 w-[27%] text-[#435772] [@media(width<=760px)]:w-[28%]"
+                  scope="row"
+                >
+                  Créer un compte
+                </th>
+                <td className="px-4 py-3.25 text-left align-top [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3">
                   Nom ou pseudonyme, adresse email, statut de vérification,
                   identifiant du compte et informations de connexion. Avec une
                   inscription par email, votre mot de passe est conservé sous
                   une forme hachée.
                 </td>
               </tr>
-              <tr>
-                <th scope="row">Construire</th>
-                <td>
+              <tr className="bg-[#fff9] border-t border-solid border-t-[#e5ebf3] print:break-inside-avoid">
+                <th
+                  className="px-4 py-3.25 text-left align-top font-[650] [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3 w-[27%] text-[#435772] [@media(width<=760px)]:w-[28%]"
+                  scope="row"
+                >
+                  Construire
+                </th>
+                <td className="px-4 py-3.25 text-left align-top [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3">
                   Titres, pièces et scènes 3D, dates de modification, versions
                   et références aux créations utilisées comme point de départ.
                 </td>
               </tr>
-              <tr>
-                <th scope="row">Participer</th>
-                <td>
+              <tr className="bg-[#fff9] border-t border-solid border-t-[#e5ebf3] print:break-inside-avoid">
+                <th
+                  className="px-4 py-3.25 text-left align-top font-[650] [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3 w-[27%] text-[#435772] [@media(width<=760px)]:w-[28%]"
+                  scope="row"
+                >
+                  Participer
+                </th>
+                <td className="px-4 py-3.25 text-left align-top [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3">
                   Publications, descriptions, commentaires, votes,
                   participations aux défis, récompenses et personnalisation de
                   votre avatar.
                 </td>
               </tr>
-              <tr>
-                <th scope="row">Se connecter</th>
-                <td>
+              <tr className="bg-[#fff9] border-t border-solid border-t-[#e5ebf3] print:break-inside-avoid">
+                <th
+                  className="px-4 py-3.25 text-left align-top font-[650] [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3 w-[27%] text-[#435772] [@media(width<=760px)]:w-[28%]"
+                  scope="row"
+                >
+                  Se connecter
+                </th>
+                <td className="px-4 py-3.25 text-left align-top [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3">
                   Sessions, fournisseur de connexion, jetons d’authentification
                   et informations techniques associées, telles que l’adresse IP
                   et le navigateur.
                 </td>
               </tr>
-              <tr>
-                <th scope="row">Visiter le site</th>
-                <td>
+              <tr className="bg-[#fff9] border-t border-solid border-t-[#e5ebf3] print:break-inside-avoid">
+                <th
+                  className="px-4 py-3.25 text-left align-top font-[650] [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3 w-[27%] text-[#435772] [@media(width<=760px)]:w-[28%]"
+                  scope="row"
+                >
+                  Visiter le site
+                </th>
+                <td className="px-4 py-3.25 text-left align-top [@media(width<=760px)]:px-2.5 [@media(width<=760px)]:py-3">
                   Informations techniques nécessaires à l’hébergement et à la
                   sécurité, pages consultées, type de navigateur et d’appareil,
                   ainsi que mesures de performance du site.
@@ -106,7 +146,7 @@ const sections: LegalSection[] = [
             </tbody>
           </table>
         </div>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Vous pouvez essayer l’atelier sans compte. Les brouillons enregistrés
           sur cet appareil restent dans le stockage de votre navigateur tant que
           vous ne les transférez pas vers un compte.
@@ -119,32 +159,33 @@ const sections: LegalSection[] = [
     title: "Connexion avec Google ou GitHub",
     content: (
       <>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Si vous choisissez Google ou GitHub, Clik reçoit les informations de
           profil nécessaires à votre compte : identifiant, nom ou pseudonyme,
           adresse email et, lorsqu’elle est disponible, photo de profil.
         </p>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Ces informations servent à créer ou retrouver votre compte et à vous
           connecter. Elles ne sont ni vendues ni utilisées pour de la publicité
           ciblée ou l’entraînement de modèles d’intelligence artificielle.
         </p>
-        <div
-          className={cn(
-            "legal-callout px-[20px] py-[18px] mx-[0] my-[22px] gap-[12px] border-[length:1px] border-solid border-[color:#dce7f8] flex items-start rounded-[12px] bg-[#edf3fd] text-[color:#4f678a] [@media(width<=760px)]:p-[15px] [@media(width<=760px)]:gap-[10px] [&_>_svg]:shrink-[0] [&_>_svg]:mt-[3px] [&_>_svg]:text-[color:#668dcb] [&_p]:m-[0] [&_p]:[font-size:13px] [&_p]:leading-[1.85] [@media(width<=760px)]:[&_p]:[font-size:12px] print:[&&]:[break-inside:avoid]",
-          )}
-        >
-          <ShieldCheck size={20} aria-hidden="true" />
-          <p>
+        <div className="legal-callout px-5 py-4.5 mx-0 my-5.5 gap-3 border border-solid border-[#dce7f8] flex items-start rounded-[12px] bg-[#edf3fd] text-[#4f678a] [@media(width<=760px)]:p-3.75 [@media(width<=760px)]:gap-2.5 print:[&&]:break-inside-avoid last:mb-0">
+          <ShieldCheck
+            className="shrink-0 mt-0.75 text-[#668dcb]"
+            size={20}
+            aria-hidden="true"
+          />
+          <p className="m-0 text-[13px] leading-[1.85] [@media(width<=760px)]:text-xs">
             Clik n’accède pas à vos emails Gmail, à votre Google Drive ou à vos
             dépôts GitHub. Votre mot de passe Google ou GitHub est saisi auprès
             du fournisseur, qui ne le transmet pas à Clik.
           </p>
         </div>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Vous pouvez retirer l’autorisation depuis les paramètres de sécurité
           de votre compte{" "}
           <a
+            className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 text-[#2e61cf] underline underline-offset-3 decoration-current wrap-anywhere hover:decoration-[#356ae6] focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#a7c0f2] focus-visible:outline-offset-4 focus-visible:rounded-[5px]"
             href="https://myaccount.google.com/connections"
             target="_blank"
             rel="noreferrer"
@@ -153,6 +194,7 @@ const sections: LegalSection[] = [
           </a>{" "}
           ou les{" "}
           <a
+            className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 text-[#2e61cf] underline underline-offset-3 decoration-current wrap-anywhere hover:decoration-[#356ae6] focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#a7c0f2] focus-visible:outline-offset-4 focus-visible:rounded-[5px]"
             href="https://github.com/settings/applications"
             target="_blank"
             rel="noreferrer"
@@ -170,32 +212,43 @@ const sections: LegalSection[] = [
     title: "À quoi servent ces données ?",
     content: (
       <>
-        <ul>
-          <li>
-            <strong>Fournir l’atelier et votre compte :</strong> vous
-            authentifier, enregistrer vos constructions, synchroniser vos
+        <ul className="last:mb-0 mx-0 pl-5 mt-0 mb-4.25 list-disc">
+          <li className="pl-1 mb-3 marker:text-[#86a6db]">
+            <strong className="font-[650] text-[#384a64]">
+              Fournir l’atelier et votre compte :
+            </strong>{" "}
+            vous authentifier, enregistrer vos constructions, synchroniser vos
             projets et permettre les publications, commentaires et défis. Ces
             traitements sont nécessaires à l’exécution du service que vous
             demandez.
           </li>
-          <li>
-            <strong>Protéger le service :</strong> gérer les sessions, prévenir
-            les abus et diagnostiquer les incidents, sur la base de l’intérêt
-            légitime à assurer la sécurité et le bon fonctionnement de Clik.
+          <li className="pl-1 mb-3 marker:text-[#86a6db]">
+            <strong className="font-[650] text-[#384a64]">
+              Protéger le service :
+            </strong>{" "}
+            gérer les sessions, prévenir les abus et diagnostiquer les
+            incidents, sur la base de l’intérêt légitime à assurer la sécurité
+            et le bon fonctionnement de Clik.
           </li>
-          <li>
-            <strong>Envoyer les emails de compte :</strong> vérifier votre
-            adresse ou réinitialiser votre mot de passe, pour fournir et
-            sécuriser votre accès.
+          <li className="pl-1 mb-3 marker:text-[#86a6db]">
+            <strong className="font-[650] text-[#384a64]">
+              Envoyer les emails de compte :
+            </strong>{" "}
+            vérifier votre adresse ou réinitialiser votre mot de passe, pour
+            fournir et sécuriser votre accès.
           </li>
-          <li>
-            <strong>Mesurer la performance et la fréquentation :</strong>{" "}
+          <li className="pl-1 mb-3 marker:text-[#86a6db]">
+            <strong className="font-[650] text-[#384a64]">
+              Mesurer la performance et la fréquentation :
+            </strong>{" "}
             comprendre l’utilisation de Clik et améliorer sa fiabilité. Cette
             mesure est activée automatiquement et poursuit l’intérêt légitime de
             l’éditeur à améliorer le service.
           </li>
-          <li>
-            <strong>Répondre à une demande ou à une obligation légale :</strong>{" "}
+          <li className="pl-1 mb-3 marker:text-[#86a6db]">
+            <strong className="font-[650] text-[#384a64]">
+              Répondre à une demande ou à une obligation légale :
+            </strong>{" "}
             traiter l’exercice de vos droits et respecter les obligations
             applicables.
           </li>
@@ -208,33 +261,33 @@ const sections: LegalSection[] = [
     title: "Ce que les autres peuvent voir",
     content: (
       <>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Les projets enregistrés dans votre compte restent privés tant que vous
           ne les publiez pas. Une publication rend accessibles la création, son
           titre, sa description, votre nom d’auteur, les références à ses
           sources et les informations associées dans la galerie.
         </p>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Les commentaires, profils publics, participations publiées aux défis
           et récompenses affichées peuvent aussi être consultés par d’autres
           personnes. Des pages publiques peuvent être référencées par les
           moteurs de recherche. Votre adresse email et vos jetons de connexion
           ne sont pas affichés dans la galerie.
         </p>
-        <div
-          className={cn(
-            "legal-callout px-[20px] py-[18px] mx-[0] my-[22px] gap-[12px] border-[length:1px] border-solid border-[color:#dce7f8] flex items-start rounded-[12px] bg-[#edf3fd] text-[color:#4f678a] [@media(width<=760px)]:p-[15px] [@media(width<=760px)]:gap-[10px] [&_>_svg]:shrink-[0] [&_>_svg]:mt-[3px] [&_>_svg]:text-[color:#668dcb] [&_p]:m-[0] [&_p]:[font-size:13px] [&_p]:leading-[1.85] [@media(width<=760px)]:[&_p]:[font-size:12px] print:[&&]:[break-inside:avoid]",
-          )}
-        >
-          <Eye size={20} aria-hidden="true" />
-          <p>
+        <div className="legal-callout px-5 py-4.5 mx-0 my-5.5 gap-3 border border-solid border-[#dce7f8] flex items-start rounded-[12px] bg-[#edf3fd] text-[#4f678a] [@media(width<=760px)]:p-3.75 [@media(width<=760px)]:gap-2.5 print:[&&]:break-inside-avoid last:mb-0">
+          <Eye
+            className="shrink-0 mt-0.75 text-[#668dcb]"
+            size={20}
+            aria-hidden="true"
+          />
+          <p className="m-0 text-[13px] leading-[1.85] [@media(width<=760px)]:text-xs">
             Publier permet aussi à d’autres personnes de reprendre une création
             dans l’atelier. Dépublier retire votre publication de la galerie,
             mais ne supprime pas les copies déjà reprises, les captures d’écran
             ou les caches de tiers.
           </p>
         </div>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Évitez d’inscrire des informations personnelles dans les titres,
           descriptions, commentaires ou constructions que vous rendez publics.
         </p>
@@ -246,16 +299,16 @@ const sections: LegalSection[] = [
     title: "Avec qui les données sont-elles partagées ?",
     content: (
       <>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Clik fait appel à des prestataires pour héberger le site, enregistrer
           les comptes et les projets, envoyer les emails de compte et mesurer
           l’audience. Ils reçoivent les informations utiles à ces fonctions.
         </p>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Des informations peuvent aussi être transmises à une autorité lorsque
           la loi l’impose.
         </p>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Certains services peuvent traiter des données hors de l’Espace
           économique européen. Contactez-nous pour connaître les destinations et
           les garanties applicables à votre compte.
@@ -268,25 +321,25 @@ const sections: LegalSection[] = [
     title: "Stockage local et mesure d’audience",
     content: (
       <>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Clik utilise des cookies de session et le stockage du navigateur pour
           maintenir votre connexion, mémoriser des préférences, conserver vos
           brouillons. Ces éléments servent au fonctionnement du service.
         </p>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Clik utilise PostHog pour mesurer automatiquement la fréquentation et
           la performance dès votre visite. Aucun écran d’acceptation n’est
           affiché. La configuration de cette mesure n’utilise pas de cookies ni
           d’identifiants persistants dans le stockage de votre navigateur.
         </p>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Cette mesure concerne les pages consultées et des informations
           techniques sur le navigateur, l’appareil et les temps de chargement.
           Elle n’enregistre pas vos sessions, le contenu de vos créations ou vos
           formulaires, et n’est pas reliée à votre compte Clik. Les identifiants
           de créations et de comptes sont retirés des chemins transmis.
         </p>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Effacer les données du site dans votre navigateur supprime aussi vos
           préférences et peut effacer les créations enregistrées uniquement sur
           cet appareil.
@@ -299,35 +352,44 @@ const sections: LegalSection[] = [
     title: "Conservation et suppression",
     content: (
       <>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Les informations de compte et les projets sont conservés pour assurer
           votre accès à Clik et vous permettre de retrouver vos créations.
         </p>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Vous pouvez supprimer vos projets ou dépublier vos créations depuis{" "}
-          <Link to="/projects">Mes créations</Link>. La suppression du compte
-          est disponible dans <Link to="/settings">les paramètres</Link> et met
-          fin à votre accès à ce compte.
+          <Link
+            className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 text-[#2e61cf] underline underline-offset-3 decoration-current wrap-anywhere hover:decoration-[#356ae6] focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#a7c0f2] focus-visible:outline-offset-4 focus-visible:rounded-[5px]"
+            to="/projects"
+          >
+            Mes créations
+          </Link>
+          . La suppression du compte est disponible dans{" "}
+          <Link
+            className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 text-[#2e61cf] underline underline-offset-3 decoration-current wrap-anywhere hover:decoration-[#356ae6] focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#a7c0f2] focus-visible:outline-offset-4 focus-visible:rounded-[5px]"
+            to="/settings"
+          >
+            les paramètres
+          </Link>{" "}
+          et met fin à votre accès à ce compte.
         </p>
-        <div
-          className={cn(
-            "legal-callout legal-callout-peach px-[20px] py-[18px] mx-[0] my-[22px] gap-[12px] border-[length:1px] border-solid border-[color:#dce7f8] flex items-start rounded-[12px] bg-[#edf3fd] text-[color:#4f678a] [@media(width<=760px)]:p-[15px] [@media(width<=760px)]:gap-[10px] [&_>_svg]:shrink-[0] [&_>_svg]:mt-[3px] [&_>_svg]:text-[color:#668dcb] [&_p]:m-[0] [&_p]:[font-size:13px] [&_p]:leading-[1.85] [@media(width<=760px)]:[&_p]:[font-size:12px] print:[&&]:[break-inside:avoid] border-[color:#eee2d7] bg-[#fbf3ec] text-[color:#806047] [&_strong]:text-[color:#785538]",
-          )}
-        >
-          <p>
-            <strong>Avant de supprimer votre compte :</strong> supprimez ou
-            dépubliez les créations que vous souhaitez retirer. La suppression
-            du compte ne supprime pas automatiquement tous les projets,
-            publications ou commentaires associés. Pour demander leur effacement
-            et celui des informations restantes, contactez-nous.
+        <div className="legal-callout legal-callout-peach px-5 py-4.5 mx-0 my-5.5 gap-3 border border-solid flex items-start rounded-[12px] [@media(width<=760px)]:p-3.75 [@media(width<=760px)]:gap-2.5 print:[&&]:break-inside-avoid border-[#eee2d7] bg-[#fbf3ec] text-[#806047] last:mb-0">
+          <p className="m-0 text-[13px] leading-[1.85] [@media(width<=760px)]:text-xs">
+            <strong className="font-[650] text-[#384a64] text-[#785538]">
+              Avant de supprimer votre compte :
+            </strong>{" "}
+            supprimez ou dépubliez les créations que vous souhaitez retirer. La
+            suppression du compte ne supprime pas automatiquement tous les
+            projets, publications ou commentaires associés. Pour demander leur
+            effacement et celui des informations restantes, contactez-nous.
           </p>
         </div>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Les mesures de fréquentation et de performance sont conservées dans le
           service d’analyse selon les réglages de conservation du projet.
           Contactez-nous pour obtenir des précisions sur ces durées.
         </p>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Les créations reprises par d’autres personnes et les références à
           leurs sources peuvent subsister dans leurs propres projets. Certaines
           informations peuvent être conservées si une obligation légale ou la
@@ -342,27 +404,28 @@ const sections: LegalSection[] = [
     title: "Vos droits et vos choix",
     content: (
       <>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Selon les règles applicables à votre situation, vous pouvez demander
           l’accès à vos données, leur rectification, leur effacement, la
           limitation de leur utilisation, leur portabilité ou vous opposer à
           certains traitements, notamment la mesure d’audience. Pour exercer ces
           droits ou poser une question, contactez-nous à l’adresse ci-dessous.
         </p>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Vos paramètres permettent déjà de modifier votre nom et votre adresse
           email, de gérer vos sessions et de supprimer votre compte. Pour une
           autre demande, indiquez l’adresse du compte concerné et la nature de
           votre demande. Nous pouvons demander les informations nécessaires pour
           vérifier votre identité.
         </p>
-        <LegalContact />
-        <p>
+        <LegalContact className="text-[#2e61cf] underline-offset-3 decoration-current wrap-anywhere hover:decoration-[#356ae6] mx-0 mt-0 mb-3.75 no-underline" />
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Une réponse est normalement apportée dans un délai d’un mois, avec une
           prolongation possible dans les cas prévus par la réglementation. Vous
           pouvez aussi adresser une réclamation à l’autorité de protection des
           données compétente, notamment à la{" "}
           <a
+            className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 text-[#2e61cf] underline underline-offset-3 decoration-current wrap-anywhere hover:decoration-[#356ae6] focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#a7c0f2] focus-visible:outline-offset-4 focus-visible:rounded-[5px]"
             href="https://www.cnil.fr/fr/adresser-une-plainte"
             target="_blank"
             rel="noreferrer"
@@ -379,12 +442,12 @@ const sections: LegalSection[] = [
     title: "Sécurité et évolutions",
     content: (
       <>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           L’accès à vos projets privés est protégé par votre compte. Protégez
           vos moyens de connexion et fermez votre session sur les appareils
           partagés.
         </p>
-        <p>
+        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Cette politique peut évoluer avec l’application. La date en tête de
           page indique la dernière mise à jour. Une modification importante
           concernant l’utilisation de vos données fera l’objet d’une information

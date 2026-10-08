@@ -6,8 +6,10 @@ import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import AuthorLink from "./author-link";
 
 export default function PublicCreationCard({
+  className,
   creation,
 }: {
+  className?: string;
   creation: {
     _id: Id<"publications">;
     owner: string;
@@ -28,21 +30,19 @@ export default function PublicCreationCard({
   return (
     <article
       className={cn(
-        "creation-card public-creation-card group/creation-card overflow-hidden border-[length:1px] border-solid border-[color:#e4eaf2] rounded-[14px] bg-[white] [a&:hover_[class~='group/card-arrow']]:bg-[#356ae6] [a&:hover_[class~='group/card-arrow']]:text-[color:white] [&_>_a:hover_[class~='group/card-arrow']]:bg-[#356ae6] [&_>_a:hover_[class~='group/card-arrow']]:text-[color:white] flex flex-col [&_[class~='group/card-meta']]:pb-[6px] [&_[class~='group/thumbnail']]:relative",
+        "creation-card public-creation-card group/creation-card overflow-hidden border border-solid border-[#e4eaf2] rounded-[14px] bg-white flex flex-col",
+        className,
       )}
     >
       <Link
         {...target}
-        className={cn("public-creation-open block flex-[1]")}
+        className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 public-creation-open block flex-1 group/card-link"
         aria-label={`Voir ${creation.title}`}
       >
-        <div
-          className={cn(
-            "thumbnail group/thumbnail [aspect-ratio:4/3] bg-[#eef2f8] relative [&_img]:w-[100%] [&_img]:h-[100%] [&_img]:object-cover",
-          )}
-        >
+        <div className="thumbnail group/thumbnail aspect-4/3 bg-[#eef2f8] relative">
           {creation.thumbnailUrl ? (
             <img
+              className="object-cover size-full"
               src={creation.thumbnailUrl}
               alt={creation.title}
               loading="lazy"
@@ -52,61 +52,39 @@ export default function PublicCreationCard({
             />
           ) : (
             <div
-              className={cn(
-                "public-thumbnail-placeholder grid [place-items:center] h-[100%] text-[color:#91a3be]",
-              )}
+              className="public-thumbnail-placeholder grid place-items-center h-full text-[#91a3be]"
               aria-hidden="true"
             >
               <Box size={32} />
             </div>
           )}
           {(creation.relationship || creation.isAssembly) && (
-            <span
-              className={cn(
-                "assembly-badge creation-kind-badge group/assembly-badge px-[8px] py-[3px] border-[length:1px] border-solid border-[color:#c7dfdf] inline-flex w-[fit-content] items-center rounded-[6px] bg-[#edf7f5] text-[color:#37786b] [font-size:10px] font-[650] leading-[1.5] whitespace-nowrap group/creation-kind-badge absolute left-[12px] top-[12px] z-[2] pointer-events-none",
-              )}
-            >
+            <span className="assembly-badge creation-kind-badge group/assembly-badge px-2 py-0.75 border border-solid border-[#c7dfdf] inline-flex w-fit items-center rounded-[6px] bg-[#edf7f5] text-[#37786b] text-[10px] font-[650] leading-normal whitespace-nowrap group/creation-kind-badge absolute left-3 top-3 z-2 pointer-events-none">
               {creation.isAssembly || creation.relationship === "assembly"
                 ? "Assemblage"
                 : "Reprise"}
             </span>
           )}
           <span
-            className={cn(
-              "card-arrow group/card-arrow absolute bottom-[15px] right-[15px] bg-[#ffffffde] rounded-[50%] h-[32px] w-[32px] grid [place-items:center] text-[color:#356ae6] [transition:background_150ms]",
-            )}
+            className="card-arrow group/card-arrow absolute bottom-3.75 right-3.75 bg-[#ffffffde] rounded-full grid place-items-center text-[#356ae6] [transition:background_150ms] size-8 group-hover/card-link:bg-[#356ae6] group-hover/card-link:text-white"
             aria-hidden="true"
           >
             <ArrowUpRight size={19} />
           </span>
         </div>
-        <div
-          className={cn(
-            "card-meta group/card-meta px-[20px] py-[18px] [&_h2]:[font-size:16px] [&_h2]:font-[700] [&_p]:[font-size:12px] [&_p]:text-[color:#8a97aa] [&_p]:mt-[6px]",
-          )}
-        >
+        <div className="card-meta group/card-meta px-5 py-4.5 pb-1.5">
           {creation.challenge && (
-            <span
-              className={cn(
-                "challenge-badge px-[7px] py-[4px] block w-[fit-content] mb-[8px] bg-[#eaf0ff] rounded-[5px] text-[color:#356ae6] [font-size:10px]",
-              )}
-            >
+            <span className="challenge-badge px-1.75 py-1 block w-fit mb-2 bg-[#eaf0ff] rounded-[5px] text-[#356ae6] text-[10px]">
               Défi du {creation.challenge.day}
             </span>
           )}
-          <h2>{creation.title}</h2>
+          <h2 className="text-base leading-[inherit] font-bold">
+            {creation.title}
+          </h2>
         </div>
       </Link>
-      <div
-        className={cn(
-          "public-card-footer gap-[12px] flex items-center justify-between pt-[4px] pr-[16px] pb-[14px] pl-[20px]",
-        )}
-      >
-        <p
-          className={cn(
-            "public-card-author group/public-card-author min-w-[0] text-[color:#73829a] [font-size:12px]",
-          )}
-        >
+      <div className="public-card-footer gap-3 flex items-center justify-between pt-1 pr-4 pb-3.5 pl-5">
+        <p className="public-card-author group/public-card-author min-w-0 text-[#73829a] text-xs leading-[inherit]">
           par{" "}
           <AuthorLink
             id={creation.owner}
@@ -117,9 +95,7 @@ export default function PublicCreationCard({
         <Link
           {...target}
           hash="comments"
-          className={cn(
-            "public-card-comments px-[8px] py-[6px] gap-[6px] inline-flex items-center justify-center shrink-[0] min-w-[42px] min-h-[36px] rounded-[8px] text-[color:#71839c] [font-size:12px] tabular-nums [&:hover]:bg-[#edf3ff] [&:hover]:text-[color:#2458ce] [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:2px]",
-          )}
+          className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 public-card-comments px-2 py-1.5 gap-1.5 inline-flex items-center justify-center shrink-0 min-w-10.5 min-h-9 rounded-[8px] text-[#71839c] text-xs tabular-nums hover:bg-[#edf3ff] hover:text-[#2458ce] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 group/card-link leading-normal"
           aria-label={`${creation.commentCount ?? 0} commentaire${(creation.commentCount ?? 0) === 1 ? "" : "s"} sur ${creation.title}`}
         >
           <MessageCircle size={15} aria-hidden="true" />

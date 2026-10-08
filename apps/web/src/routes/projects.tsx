@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { seo } from "@/lib/seo/meta";
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -143,55 +142,45 @@ function Projects() {
   const newCreation = () =>
     void navigate({ to: "/editor", search: { draft: crypto.randomUUID() } });
   return (
-    <main
-      className={cn(
-        "collection-page projects-page [&_[class~='group/page-heading']]:mb-[30px] [@media(width<=850px)]:[&_[class~='group/page-heading']]:items-start [&_[class~='group/new-creation']]:px-[18px] [&_[class~='group/new-creation']]:py-[0] [&_[class~='group/new-creation']]:h-[44px] [&_[class~='group/new-creation']]:rounded-[9px] px-[5%] py-[64px] m-[auto] max-w-[1320px] [@media(width<=850px)]:pt-[40px]",
-      )}
-    >
-      <div
-        className={cn(
-          "page-heading group/page-heading gap-[25px] flex justify-between items-center mb-[45px] [@media(width<=850px)]:items-start [@media(width<=850px)]:flex-col [&_h1]:mx-[0] [&_h1]:my-[12px] [&_h1]:[font-size:48px] [&_h1]:tracking-[-2px] [&_h1]:font-[800] [@media(width<=850px)]:[&_h1]:[font-size:40px] [&_h1_>_span]:text-[color:#356ae6] [&_p]:text-[color:#7b889b] [&_p]:[font-size:15px]",
-        )}
-      >
+    <main className="collection-page projects-page px-[5%] py-16 m-auto max-w-330 [@media(width<=850px)]:pt-10">
+      <div className="page-heading group/page-heading gap-6.25 flex justify-between items-center [@media(width<=850px)]:flex-col mb-7.5 [@media(width<=850px)]:items-start">
         <div>
-          <h1>
-            Mes créations<span>.</span>
+          <h1 className="mx-0 my-3 text-5xl leading-[inherit] tracking-[-2px] font-extrabold [@media(width<=850px)]:text-[40px]">
+            Mes créations<span className="text-[#356ae6]">.</span>
           </h1>
-          <p>
+          <p className="text-[#7b889b] text-[15px]">
             Retrouvez vos constructions. Faites-les évoluer ou partagez-les, à
             votre rythme.
           </p>
         </div>
         <Button
-          className={cn(
-            "primary-link new-creation group/new-creation group/primary-link px-[19px] py-[12px] gap-[10px] inline-flex items-center justify-center bg-[#356ae6] text-[color:#fff] rounded-[9px] [font-size:14px] font-[650] whitespace-nowrap [&:hover]:bg-[#2458ce]",
-          )}
+          className="primary-link new-creation group/new-creation group/primary-link gap-2.5 inline-flex items-center justify-center bg-[#356ae6] text-white text-sm font-[650] whitespace-nowrap hover:bg-[#2458ce] px-4.5 py-0 h-11 rounded-[9px] leading-(--text-xs--line-height)"
           onClick={newCreation}
         >
-          <Plus size={17} aria-hidden="true" /> Nouvelle création
+          <Plus
+            className="size-4 pointer-events-none shrink-0"
+            size={17}
+            aria-hidden="true"
+          />{" "}
+          Nouvelle création
         </Button>
       </div>
       {!isLoading && !isAuthenticated && (
-        <div
-          className={cn(
-            "projects-account-note px-[24px] py-[20px] gap-[16px] border-[length:1px] border-solid border-[color:#e0e8fa] flex items-center bg-[#f3f6fd] rounded-[12px] mb-[32px] [@media(width<=850px)]:p-[18px] [@media(width<=850px)]:flex-wrap [&_h2]:[font-size:14px] [&_h2]:font-[700] [&_h2]:mb-[4px] [&_p]:[font-size:12px] [&_p]:text-[color:#68788e] [&_p]:leading-[1.6] [&_>_a]:gap-[8px] [&_>_a]:inline-flex [&_>_a]:items-center [&_>_a]:ml-[auto] [&_>_a]:text-[color:#356ae6] [&_>_a]:[font-size:12px] [&_>_a]:font-[650] [&_>_a]:whitespace-nowrap [@media(width<=850px)]:[&_>_a]:ml-[60px] [@media(width<=850px)]:[&_>_div]:flex-[1] [@media(width<=850px)]:[&_>_div]:min-w-[190px]",
-          )}
-        >
-          <span
-            className={cn(
-              "projects-note-icon grid [place-items:center] shrink-[0] w-[44px] h-[44px] rounded-[12px] text-[color:#356ae6] bg-[#fff]",
-            )}
-          >
+        <div className="projects-account-note px-6 py-5 gap-4 border border-solid border-[#e0e8fa] flex items-center bg-[#f3f6fd] rounded-[12px] mb-8 [@media(width<=850px)]:p-4.5 [@media(width<=850px)]:flex-wrap">
+          <span className="projects-note-icon grid place-items-center shrink-0 rounded-[12px] text-[#356ae6] bg-white size-11">
             <Cloud size={22} aria-hidden="true" />
           </span>
-          <div>
-            <h2>Vos créations vous suivent.</h2>
-            <p>
+          <div className="[@media(width<=850px)]:flex-1 [@media(width<=850px)]:min-w-47.5">
+            <h2 className="text-sm leading-[inherit] font-bold mb-1">
+              Vos créations vous suivent.
+            </h2>
+            <p className="text-xs text-[#68788e] leading-[1.6]">
               Connectez-vous pour retrouver vos créations en ligne et les
               partager dans la galerie.
             </p>
           </div>
           <Link
+            className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 gap-2 inline-flex items-center ml-auto text-[#356ae6] text-xs font-[650] whitespace-nowrap [@media(width<=850px)]:ml-15 leading-normal"
             to="/sign-in"
             onClick={() =>
               sessionStorage.setItem("clik-return-to", "/projects")
@@ -201,15 +190,9 @@ function Projects() {
           </Link>
         </div>
       )}
-      <div
-        className={cn(
-          "projects-toolbar px-[0] gap-[16px] flex items-center justify-between flex-wrap pt-[0] pb-[22px] mb-[28px] [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:#e4eaf2] [@media(width<=520px)]:gap-[12px]",
-        )}
-      >
+      <div className="projects-toolbar px-0 gap-4 flex items-center justify-between flex-wrap pt-0 pb-5.5 mb-7 border-b border-solid border-b-[#e4eaf2] [@media(width<=520px)]:gap-3">
         <div
-          className={cn(
-            "project-filters p-[4px] gap-[4px] flex bg-[#f2f5f9] rounded-[10px] [@media(width<=520px)]:grid [@media(width<=520px)]:grid-cols-[repeat(2,_minmax(0,_1fr))] [@media(width<=520px)]:w-[100%] [&_button]:px-[14px] [&_button]:py-[9px] [&_button]:gap-[7px] [&_button]:flex [&_button]:items-center [&_button]:rounded-[7px] [&_button]:text-[color:#697a94] [&_button]:[font-size:12px] [&_button]:font-[600] [&_button]:whitespace-nowrap [@media(width<=520px)]:[&_button]:px-[9px] [@media(width<=520px)]:[&_button]:[font-size:11px] [@media(width<=520px)]:[&_button]:justify-center [&_button:hover]:text-[color:#356ae6] [&_button[aria-pressed='true']]:text-[color:#356ae6] [&_button[aria-pressed='true']]:bg-[white] [&_button[aria-pressed='true']]:[box-shadow:0_2px_5px_#31476b10] [@media(width<=520px)]:[&_button_svg]:hidden",
-          )}
+          className="project-filters p-1 gap-1 flex bg-[#f2f5f9] rounded-[10px] [@media(width<=520px)]:grid [@media(width<=520px)]:grid-cols-2 [@media(width<=520px)]:w-full"
           role="group"
           aria-label="Filtrer les créations"
         >
@@ -222,36 +205,38 @@ function Projects() {
             ] as const
           ).map(([value, label, Icon]) => (
             <button
+              className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-3.5 py-2.25 gap-1.75 flex items-center rounded-[7px] text-[#697a94] text-xs leading-[inherit] font-semibold whitespace-nowrap [@media(width<=520px)]:px-2.25 [@media(width<=520px)]:text-[11px] [@media(width<=520px)]:justify-center hover:text-[#356ae6] aria-pressed:text-[#356ae6] aria-pressed:bg-white aria-pressed:[box-shadow:0_2px_5px_#31476b10]"
               key={value}
               aria-pressed={filter === value}
               onClick={() => setFilter(value)}
             >
-              {Icon && <Icon size={15} aria-hidden="true" />}
+              {Icon && (
+                <Icon
+                  className="[@media(width<=520px)]:hidden"
+                  size={15}
+                  aria-hidden="true"
+                />
+              )}
               {label}
             </button>
           ))}
         </div>
-        <div
-          className={cn(
-            "projects-toolbar-controls flex items-center justify-between flex-wrap gap-y-[12px] gap-x-[20px] ml-[auto] [@media(width<=520px)]:gap-[10px] [@media(width<=520px)]:w-[100%] [@media(width<=520px)]:[&_[class~='group/collection-sort']]:ml-[auto] [@media(width<=520px)]:[&_[class~='group/collection-sort']_>_label]:overflow-hidden [@media(width<=520px)]:[&_[class~='group/collection-sort']_>_label]:absolute [@media(width<=520px)]:[&_[class~='group/collection-sort']_>_label]:w-[1px] [@media(width<=520px)]:[&_[class~='group/collection-sort']_>_label]:h-[1px] [@media(width<=520px)]:[&_[class~='group/collection-sort']_>_label]:[clip-path:inset(50%)] [@media(width<=520px)]:[&_[class~='group/collection-sort']_>_label]:whitespace-nowrap [@media(width<=520px)]:[&_[class~='group/collection-sort-trigger']]:w-[174px]",
-          )}
-        >
+        <div className="projects-toolbar-controls flex items-center justify-between flex-wrap gap-y-3 gap-x-5 ml-auto [@media(width<=520px)]:gap-2.5 [@media(width<=520px)]:w-full">
           <span
-            className={cn(
-              "projects-count text-[color:#78869c] [font-size:12px]",
-            )}
+            className="projects-count text-[#78869c] text-xs leading-[inherit]"
             aria-live="polite"
           >
             {loading
               ? "Chargement…"
               : `${creations.length} création${creations.length === 1 ? "" : "s"} affichée${creations.length === 1 ? "" : "s"}`}
           </span>
-          <div
-            className={cn(
-              "collection-sort group/collection-sort gap-[10px] flex items-center shrink-[0] [font-size:12px] text-[color:#71839c]",
-            )}
-          >
-            <label htmlFor="projects-sort">Trier par</label>
+          <div className="collection-sort group/collection-sort gap-2.5 flex items-center shrink-0 text-xs leading-[inherit] text-[#71839c] [@media(width<=520px)]:ml-auto">
+            <label
+              className="[@media(width<=520px)]:overflow-hidden [@media(width<=520px)]:absolute [@media(width<=520px)]:[clip-path:inset(50%)] [@media(width<=520px)]:whitespace-nowrap [@media(width<=520px)]:size-px"
+              htmlFor="projects-sort"
+            >
+              Trier par
+            </label>
             <Select
               items={sortOptions}
               value={sort}
@@ -266,21 +251,21 @@ function Projects() {
             >
               <SelectTrigger
                 id="projects-sort"
-                className={cn(
-                  "collection-sort-trigger group/collection-sort-trigger px-[11px] py-[8px] border-[length:1px] border-solid border-[color:#dfe7f2] w-[190px] min-h-[38px] rounded-[9px] bg-[#fff] text-[color:#455f83] cursor-[pointer] [&:hover]:border-[color:#b7caf0] [&:hover]:bg-[#f8faff] [&[data-popup-open]]:border-[color:#b7caf0] [&[data-popup-open]]:bg-[#f8faff] [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:3px]",
-                )}
+                className="collection-sort-trigger group/collection-sort-trigger px-2.75 py-2 border border-solid border-[#dfe7f2] w-47.5 min-h-9.5 rounded-[9px] bg-white text-[#455f83] cursor-pointer hover:border-[#b7caf0] hover:bg-[#f8faff] data-popup-open:border-[#b7caf0] data-popup-open:bg-[#f8faff] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 [@media(width<=520px)]:w-43.5"
               >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent
-                className={cn(
-                  "collection-sort-menu p-[4px] rounded-[11px] bg-[#fff] text-[color:#455f83] [box-shadow:0_8px_24px_#213d6a14,_0_0_0_1px_#dfe7f2] [&_[data-slot='select-item']]:min-h-[36px] [&_[data-slot='select-item']]:rounded-[7px] [&_[data-slot='select-item']]:cursor-[pointer] [&_[data-slot='select-item'][data-highlighted]]:bg-[#edf3ff] [&_[data-slot='select-item'][data-highlighted]]:text-[color:#2458ce] [&_[data-slot='select-item'][data-selected]]:text-[color:#2458ce]",
-                )}
+                className="collection-sort-menu p-1 rounded-[11px] bg-white text-[#455f83] [box-shadow:0_8px_24px_#213d6a14,0_0_0_1px_#dfe7f2]"
                 align="end"
                 alignItemWithTrigger={false}
               >
                 {sortOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
+                  <SelectItem
+                    className="min-h-9 rounded-[7px] cursor-pointer data-highlighted:bg-[#edf3ff] data-highlighted:text-[#2458ce] data-selected:text-[#2458ce]"
+                    key={option.value}
+                    value={option.value}
+                  >
                     {option.label}
                   </SelectItem>
                 ))}
@@ -291,43 +276,38 @@ function Projects() {
       </div>
       {localError && includesLocal && (
         <div
-          className={cn(
-            "projects-local-error px-[18px] py-[14px] border-[length:1px] border-solid border-[color:#ecd8b4] bg-[#fffbf2] rounded-[9px] mb-[24px] text-[color:#82591a] [font-size:13px] [&_button]:[text-decoration:underline] [&_button]:ml-[8px]",
-          )}
+          className="projects-local-error px-4.5 py-3.5 border border-solid border-[#ecd8b4] bg-[#fffbf2] rounded-[9px] mb-6 text-[#82591a] text-[13px]"
           role="alert"
         >
           Les créations de cet appareil n’ont pas pu être chargées.{" "}
-          <button onClick={() => setRetry((n) => n + 1)}>Réessayer</button>
+          <button
+            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 underline ml-2"
+            onClick={() => setRetry((n) => n + 1)}
+          >
+            Réessayer
+          </button>
         </div>
       )}
       {loading ? (
         <div
-          className={cn(
-            "creation-grid projects-skeletons group/creation-grid gap-[26px] grid grid-cols-[repeat(3,_1fr)] [@media(width<=520px)]:gap-[15px] [@media(width<=520px)]:grid-cols-[1fr] [@media(520px<width<=850px)]:gap-[15px] [@media(520px<width<=850px)]:grid-cols-[repeat(2,_1fr)]",
-          )}
+          className="creation-grid projects-skeletons group/creation-grid gap-6.5 grid grid-cols-3 [@media(width<=520px)]:gap-3.75 [@media(width<=520px)]:grid-cols-1 [@media(520px<width<=850px)]:gap-3.75 [@media(520px<width<=850px)]:grid-cols-2"
           role="status"
           aria-label="Chargement des créations"
         >
           {Array.from({ length: 6 }, (_, i) => (
             <div
-              className={cn(
-                "project-skeleton overflow-hidden border-[length:1px] border-solid border-[color:#e4eaf2] rounded-[14px] pb-[20px] [&_>_div]:[aspect-ratio:4/3] [&_>_div]:bg-[#edf2f8] [&_span]:mx-[18px] [&_span]:block [&_span]:w-[60%] [&_span]:h-[14px] [&_span]:bg-[#edf2f8] [&_span]:mt-[20px] [&_span]:mb-[0] [&_span]:rounded-[4px] [&_span:last-child]:w-[40%] [&_span:last-child]:h-[10px] [&_span:last-child]:mt-[10px]",
-              )}
+              className="project-skeleton overflow-hidden border border-solid border-[#e4eaf2] rounded-[14px] pb-5"
               key={i}
               aria-hidden="true"
             >
-              <div />
-              <span />
-              <span />
+              <div className="aspect-4/3 bg-[#edf2f8]" />
+              <span className="mx-4.5 block w-3/5 h-3.5 bg-[#edf2f8] mt-5 mb-0 rounded-[4px] last:w-[40%] last:h-2.5 last:mt-2.5" />
+              <span className="mx-4.5 block w-3/5 h-3.5 bg-[#edf2f8] mt-5 mb-0 rounded-[4px] last:w-[40%] last:h-2.5 last:mt-2.5" />
             </div>
           ))}
         </div>
       ) : creations.length ? (
-        <div
-          className={cn(
-            "creation-grid projects-grid group/creation-grid gap-[26px] grid grid-cols-[repeat(3,_1fr)] [@media(width<=520px)]:gap-[15px] [@media(width<=520px)]:grid-cols-[1fr] [@media(520px<width<=850px)]:gap-[15px] [@media(520px<width<=850px)]:grid-cols-[repeat(2,_1fr)]",
-          )}
-        >
+        <div className="creation-grid projects-grid group/creation-grid gap-6.5 grid grid-cols-3 [@media(width<=520px)]:gap-3.75 [@media(width<=520px)]:grid-cols-1 [@media(520px<width<=850px)]:gap-3.75 [@media(520px<width<=850px)]:grid-cols-2">
           {creations.map((creation) => (
             <ProjectCard
               key={creation.id}
@@ -337,16 +317,8 @@ function Projects() {
           ))}
         </div>
       ) : (
-        <div
-          className={cn(
-            "projects-empty px-[24px] py-[64px] border-[length:1px] border-dashed border-[color:#d6dfed] flex items-center text-center flex-col rounded-[16px] bg-[#fbfcff] [&_h2]:[font-size:23px] [&_h2]:tracking-[-0.5px] [&_h2]:font-[750] [&_p]:mx-[0] [&_p]:max-w-[420px] [&_p]:text-[color:#73829a] [&_p]:[font-size:14px] [&_p]:leading-[1.8] [&_p]:mt-[12px] [&_p]:mb-[24px] [&_[class~='group/primary-link']]:h-[40px] [&_[class~='group/primary-link']]:rounded-[8px]",
-          )}
-        >
-          <span
-            className={cn(
-              "projects-empty-icon grid [place-items:center] w-[72px] h-[72px] rounded-[20px] bg-[#edf3ff] text-[color:#356ae6] mb-[24px]",
-            )}
-          >
+        <div className="projects-empty px-6 py-16 border border-dashed border-[#d6dfed] flex items-center text-center flex-col rounded-2xl bg-[#fbfcff]">
+          <span className="projects-empty-icon grid place-items-center rounded-[20px] bg-[#edf3ff] text-[#356ae6] mb-6 size-18">
             {filter === "published" ? (
               <Globe2 size={32} />
             ) : filter === "online" ? (
@@ -355,7 +327,7 @@ function Projects() {
               <Box size={32} />
             )}
           </span>
-          <h2>
+          <h2 className="text-[23px] tracking-[-0.5px] font-[750]">
             {filter === "published"
               ? isAuthenticated
                 ? "Aucune création publiée pour le moment."
@@ -366,7 +338,7 @@ function Projects() {
                   : "Retrouvez votre collection en ligne."
                 : "Une place pour votre prochaine idée."}
           </h2>
-          <p>
+          <p className="mx-0 max-w-105 text-[#73829a] text-sm leading-[1.8] mt-3 mb-6">
             {filter === "published"
               ? isAuthenticated
                 ? "Publiez une création depuis son menu pour la retrouver ici et la partager."
@@ -380,9 +352,7 @@ function Projects() {
           {accountRequired ? (
             <Link
               to="/sign-in"
-              className={cn(
-                "primary-link group/primary-link px-[19px] py-[12px] gap-[10px] inline-flex items-center justify-center bg-[#356ae6] text-[color:#fff] rounded-[9px] [font-size:14px] font-[650] whitespace-nowrap [&:hover]:bg-[#2458ce]",
-              )}
+              className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 primary-link group/primary-link px-4.75 py-3 gap-2.5 inline-flex items-center justify-center bg-[#356ae6] text-white text-sm font-[650] whitespace-nowrap hover:bg-[#2458ce] h-10 rounded-[8px] leading-normal"
               onClick={() =>
                 sessionStorage.setItem("clik-return-to", "/projects")
               }
@@ -391,21 +361,18 @@ function Projects() {
             </Link>
           ) : filter === "published" ? (
             <Button
-              className={cn(
-                "primary-link group/primary-link px-[19px] py-[12px] gap-[10px] inline-flex items-center justify-center bg-[#356ae6] text-[color:#fff] rounded-[9px] [font-size:14px] font-[650] whitespace-nowrap [&:hover]:bg-[#2458ce]",
-              )}
+              className="primary-link group/primary-link px-4.75 py-3 gap-2.5 inline-flex items-center justify-center bg-[#356ae6] text-white text-sm font-[650] whitespace-nowrap hover:bg-[#2458ce] h-10 rounded-[8px] leading-(--text-xs--line-height)"
               onClick={() => setFilter("all")}
             >
               Voir mes créations
             </Button>
           ) : (
             <Button
-              className={cn(
-                "primary-link group/primary-link px-[19px] py-[12px] gap-[10px] inline-flex items-center justify-center bg-[#356ae6] text-[color:#fff] rounded-[9px] [font-size:14px] font-[650] whitespace-nowrap [&:hover]:bg-[#2458ce]",
-              )}
+              className="primary-link group/primary-link px-4.75 py-3 gap-2.5 inline-flex items-center justify-center bg-[#356ae6] text-white text-sm font-[650] whitespace-nowrap hover:bg-[#2458ce] h-10 rounded-[8px] leading-(--text-xs--line-height)"
               onClick={newCreation}
             >
-              <Plus size={16} /> Créer dans l’atelier
+              <Plus className="size-4 pointer-events-none shrink-0" size={16} />{" "}
+              Créer dans l’atelier
             </Button>
           )}
         </div>
@@ -413,15 +380,9 @@ function Projects() {
       {isAuthenticated &&
         filter !== "local" &&
         (status === "CanLoadMore" || status === "LoadingMore") && (
-          <div
-            className={cn(
-              "projects-pagination gap-[18px] flex items-center justify-center mt-[32px] [&::before]:[content:''] [&::before]:h-[1px] [&::before]:flex-[1] [&::before]:max-w-[110px] [&::before]:bg-[#e0e7f2] [@media(width<=520px)]:[&::before]:hidden [&::after]:[content:''] [&::after]:h-[1px] [&::after]:flex-[1] [&::after]:max-w-[110px] [&::after]:bg-[#e0e7f2] [@media(width<=520px)]:[&::after]:hidden",
-            )}
-          >
+          <div className="projects-pagination gap-4.5 flex items-center justify-center mt-8 before:[content:''] before:h-px before:flex-1 before:max-w-27.5 before:bg-[#e0e7f2] [@media(width<=520px)]:before:hidden after:[content:''] after:h-px after:flex-1 after:max-w-27.5 after:bg-[#e0e7f2] [@media(width<=520px)]:after:hidden">
             <Button
-              className={cn(
-                "projects-load-more [&[data-slot='button']]:px-[18px] [&[data-slot='button']]:py-[9px] [&[data-slot='button']]:gap-[10px] [&[data-slot='button']]:border-[length:1px] [&[data-slot='button']]:border-solid [&[data-slot='button']]:border-[color:#d7e2f3] [&[data-slot='button']]:min-w-[248px] [&[data-slot='button']]:min-h-[46px] [&[data-slot='button']]:rounded-[12px] [&[data-slot='button']]:bg-[#fff] [&[data-slot='button']]:text-[color:#455f83] [&[data-slot='button']]:[font-size:12px] [&[data-slot='button']]:font-[650] [&[data-slot='button']]:[box-shadow:0_2px_5px_#31476b08] [&[data-slot='button']]:[transition:background_150ms,_border-color_150ms,_box-shadow_150ms] [@media(width<=520px)]:[&[data-slot='button']]:min-w-[0] [@media(width<=520px)]:[&[data-slot='button']]:w-[100%] [@media(width<=520px)]:[&[data-slot='button']]:max-w-[320px] [&[data-slot='button']:hover:not(:disabled)]:border-[color:#b5c9ef] [&[data-slot='button']:hover:not(:disabled)]:bg-[#f6f9ff] [&[data-slot='button']:hover:not(:disabled)]:text-[color:#356ae6] [&[data-slot='button']:hover:not(:disabled)]:[box-shadow:0_3px_10px_#31476b0c] [&[data-slot='button']:focus-visible]:[outline:2px_solid_#356ae6] [&[data-slot='button']:focus-visible]:[outline-offset:4px] [&[data-slot='button']:disabled]:opacity-[1] [&[data-slot='button']:disabled]:bg-[#f6f8fc] [&[data-slot='button']:disabled]:text-[color:#71839c]",
-              )}
+              className="projects-load-more data-[slot=button]:px-4.5 data-[slot=button]:py-2.25 data-[slot=button]:gap-2.5 data-[slot=button]:border data-[slot=button]:border-solid data-[slot=button]:border-[#d7e2f3] data-[slot=button]:min-w-62 data-[slot=button]:min-h-11.5 data-[slot=button]:rounded-[12px] data-[slot=button]:bg-white data-[slot=button]:text-[#455f83] data-[slot=button]:text-xs data-[slot=button]:font-[650] data-[slot=button]:[box-shadow:0_2px_5px_#31476b08] data-[slot=button]:[transition:background_150ms,border-color_150ms,box-shadow_150ms] [@media(width<=520px)]:data-[slot=button]:min-w-0 [@media(width<=520px)]:data-[slot=button]:w-full [@media(width<=520px)]:data-[slot=button]:max-w-80 [&[data-slot='button']:hover:not(:disabled)]:border-[#b5c9ef] [&[data-slot='button']:hover:not(:disabled)]:bg-[#f6f9ff] [&[data-slot='button']:hover:not(:disabled)]:text-[#356ae6] [&[data-slot='button']:hover:not(:disabled)]:[box-shadow:0_3px_10px_#31476b0c] [&[data-slot='button']:focus-visible]:outline-2 [&[data-slot='button']:focus-visible]:outline-solid [&[data-slot='button']:focus-visible]:outline-[#356ae6] [&[data-slot='button']:focus-visible]:outline-offset-4 [&[data-slot='button']:disabled]:opacity-100 [&[data-slot='button']:disabled]:bg-[#f6f8fc] [&[data-slot='button']:disabled]:text-[#71839c]"
               variant="outline"
               disabled={status === "LoadingMore" || loadingPublished}
               aria-busy={status === "LoadingMore" || loadingPublished}
@@ -435,18 +396,19 @@ function Projects() {
               }}
             >
               <span
-                className={cn(
-                  "projects-load-more-icon grid [place-items:center] w-[26px] h-[26px] rounded-[7px] bg-[#edf3ff] text-[color:#356ae6]",
-                )}
+                className="projects-load-more-icon grid place-items-center rounded-[7px] bg-[#edf3ff] text-[#356ae6] size-6.5"
                 aria-hidden="true"
               >
                 {status === "LoadingMore" || loadingPublished ? (
                   <LoaderCircle
-                    className="animate-spin motion-reduce:animate-none"
+                    className="size-4 pointer-events-none shrink-0 animate-spin motion-reduce:animate-none"
                     size={16}
                   />
                 ) : (
-                  <Plus size={16} />
+                  <Plus
+                    className="size-4 pointer-events-none shrink-0"
+                    size={16}
+                  />
                 )}
               </span>
               <span aria-live="polite" aria-atomic="true">
@@ -457,14 +419,10 @@ function Projects() {
             </Button>
           </div>
         )}
-      <p
-        className={cn(
-          "projects-footnote gap-[8px] flex items-center text-[color:#78869a] [font-size:12px] leading-[1.7] mt-[30px] [&_svg]:shrink-[0]",
-        )}
-      >
-        <LockKeyhole size={14} aria-hidden="true" /> Vos créations restent
-        privées. Seules les versions que vous publiez sont visibles dans la
-        galerie.
+      <p className="projects-footnote gap-2 flex items-center text-[#78869a] text-xs leading-[1.7] mt-7.5">
+        <LockKeyhole className="shrink-0" size={14} aria-hidden="true" /> Vos
+        créations restent privées. Seules les versions que vous publiez sont
+        visibles dans la galerie.
       </p>
     </main>
   );

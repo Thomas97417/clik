@@ -3,9 +3,11 @@ import { useEffect, useState } from "react";
 import { Box } from "lucide-react";
 import type { PartType } from "@clik/scene";
 export default function PartPreview({
+  className,
   type,
   color,
 }: {
+  className?: string;
   type: PartType;
   color: string;
 }) {
@@ -24,7 +26,8 @@ export default function PartPreview({
   return url ? (
     <img
       className={cn(
-        "part-preview group/part-preview h-[55px] w-[100%] object-contain pointer-events-none",
+        "part-preview group/part-preview h-13.75 w-full object-contain pointer-events-none",
+        className,
       )}
       src={url}
       alt=""

@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import z from "zod";
@@ -46,14 +45,15 @@ export default function SignInForm() {
       description="Connectez-vous pour retrouver vos créations et continuer là où votre imagination s’est arrêtée."
     >
       <form
-        className={cn(
-          "auth-form gap-[19px] grid min-w-[0] [&_fieldset]:p-[0] [&_fieldset]:m-[0] [&_fieldset]:gap-[19px] [&_fieldset]:border-[length:0] [&_fieldset]:border-none [&_fieldset]:border-[color:currentColor] [&_fieldset]:grid [&_fieldset]:min-w-[0]",
-        )}
+        className="auth-form gap-4.75 grid min-w-0"
         noValidate
         onSubmit={form.submit}
         aria-busy={busy}
       >
-        <fieldset disabled={busy}>
+        <fieldset
+          className="p-0 m-0 gap-4.75 border-0 border-none border-current grid min-w-0"
+          disabled={busy}
+        >
           <AuthField
             id="email"
             label="Adresse email"
@@ -78,7 +78,14 @@ export default function SignInForm() {
             value={form.values.password}
             onChange={(e) => form.change("password", e.target.value)}
             error={form.errors.password}
-            action={<Link to="/forgot-password">Mot de passe oublié ?</Link>}
+            action={
+              <Link
+                className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 text-[11px] text-[#356ae6] hover:text-[#2458ce] hover:underline hover:underline-offset-3"
+                to="/forgot-password"
+              >
+                Mot de passe oublié ?
+              </Link>
+            }
           />
         </fieldset>
         <AuthError>
@@ -86,7 +93,12 @@ export default function SignInForm() {
             <>
               {form.error}
               {verify && (
-                <Link to="/verify-email">Recevoir un lien de vérification</Link>
+                <Link
+                  className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 block mt-1.5 underline font-semibold hover:text-[#2458ce] hover:underline hover:underline-offset-3"
+                  to="/verify-email"
+                >
+                  Recevoir un lien de vérification
+                </Link>
               )}
             </>
           )}
@@ -96,17 +108,17 @@ export default function SignInForm() {
         </AuthSubmit>
       </form>
       <SocialLoginButtons disabled={form.busy} onBusyChange={setSocialBusy} />
-      <p
-        className={cn(
-          "auth-switch pt-[23px] mt-[23px] [border-top-width:1px] [border-top-style:solid] [border-top-color:#e9edf4] text-center [font-size:12px] text-[color:#7b899e] leading-[1.7] [&_a]:gap-[6px] [&_a]:inline-flex [&_a]:items-center [&_a]:text-[color:#356ae6] [&_a]:font-[650]",
-        )}
-      >
-        Première visite ? <Link to="/sign-up">Créer un compte</Link>
+      <p className="auth-switch pt-5.75 mt-5.75 border-t border-solid border-t-[#e9edf4] text-center text-xs text-[#7b899e] leading-[1.7]">
+        Première visite ?{" "}
+        <Link
+          className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 gap-1.5 inline-flex items-center text-[#356ae6] font-[650] hover:text-[#2458ce] hover:underline hover:underline-offset-3"
+          to="/sign-up"
+        >
+          Créer un compte
+        </Link>
       </p>
       <Link
-        className={cn(
-          "auth-secondary-link mx-[auto] block mt-[15px] mb-[0] w-[fit-content] text-[color:#71809a] [font-size:11px] text-center [&:hover]:text-[color:#2458ce] [&:hover]:[text-decoration:underline] [&:hover]:underline-offset-[3px]",
-        )}
+        className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 auth-secondary-link mx-auto block mt-3.75 mb-0 w-fit text-[#71809a] text-[11px] text-center hover:text-[#2458ce] hover:underline hover:underline-offset-3"
         to="/verify-email"
       >
         Vérifier mon adresse email

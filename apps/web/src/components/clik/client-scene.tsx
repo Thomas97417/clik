@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import {
   Component,
   lazy,
@@ -19,13 +18,11 @@ class SceneBoundary extends Component<
   }
   render() {
     return this.state.error ? (
-      <div
-        className={cn(
-          "empty-state px-[25px] py-[70px] gap-[20px] min-h-[300px] flex flex-col items-center justify-center text-center text-[color:#7d8ba0] [&_h1]:text-[color:#32445f] [&_h1]:[font-size:24px] [&_h1]:font-[700] [&_h2]:text-[color:#32445f] [&_h2]:[font-size:24px] [&_h2]:font-[700] [&_p]:max-w-[510px] [&_p]:leading-[1.8]",
-        )}
-      >
-        <h2>La scène 3D n’a pas pu démarrer</h2>
-        <p>
+      <div className="empty-state px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0]">
+        <h2 className="text-[#32445f] text-2xl leading-[inherit] font-bold">
+          La scène 3D n’a pas pu démarrer
+        </h2>
+        <p className="max-w-127.5 leading-[1.8]">
           Vérifiez WebGL et rechargez la page. Votre création enregistrée est
           conservée.
         </p>
@@ -45,9 +42,7 @@ export default function ClientScene(props: {
 }) {
   const placeholder = props.poster ? (
     <img
-      className={cn(
-        "public-scene-poster w-[100%] h-[100%] object-contain bg-[#edf1f7]",
-      )}
+      className="public-scene-poster object-contain bg-[#edf1f7] size-full"
       src={props.poster}
       alt={`Aperçu de ${props.title || "la création"}`}
       width={640}
@@ -55,11 +50,7 @@ export default function ClientScene(props: {
       fetchPriority="high"
     />
   ) : (
-    <div
-      className={cn(
-        "empty-state px-[25px] py-[70px] gap-[20px] min-h-[300px] flex flex-col items-center justify-center text-center text-[color:#7d8ba0] [&_h1]:text-[color:#32445f] [&_h1]:[font-size:24px] [&_h1]:font-[700] [&_h2]:text-[color:#32445f] [&_h2]:[font-size:24px] [&_h2]:font-[700] [&_p]:max-w-[510px] [&_p]:leading-[1.8]",
-      )}
-    >
+    <div className="empty-state px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0]">
       Ouverture de la scène…
     </div>
   );

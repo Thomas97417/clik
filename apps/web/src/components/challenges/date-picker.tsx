@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Popover } from "@base-ui/react/popover";
 import {
@@ -19,31 +18,28 @@ import {
 // Keep its markers for consumers; every visual rule belongs to a utility.
 const calendarClassNames = {
   root: "rdp-root relative select-none text-[13px]",
-  months: "rdp-months relative flex w-full max-w-none flex-wrap gap-[2rem]",
+  months: "rdp-months relative flex w-full max-w-none flex-wrap gap-8",
   month: "rdp-month relative w-full max-w-none",
   month_grid: "rdp-month_grid w-full table-fixed border-collapse",
   month_caption:
-    "rdp-month_caption relative mx-[36px] flex h-[36px] content-center justify-center text-[15px] font-[700] tracking-[-0.35px] text-[#263b58] capitalize",
+    "rdp-month_caption relative mx-9 flex h-9 content-center justify-center text-[15px] font-bold tracking-[-0.35px] text-[#263b58] capitalize",
   caption_label:
-    "rdp-caption_label relative z-[1] inline-flex items-center whitespace-nowrap [border:0]",
+    "rdp-caption_label relative z-1 inline-flex items-center whitespace-nowrap border-0",
   button_previous:
-    "rdp-button_previous absolute top-0 start-0 inline-flex h-[36px] w-[36px] appearance-none items-center justify-center rounded-[9px] border border-[#e0e7f2] bg-[#fff] p-0 m-0  text-[#536f97] disabled:cursor-default disabled:opacity-[0.35] aria-disabled:cursor-default aria-disabled:opacity-[0.35] [&:hover:not(:disabled):not([aria-disabled=true])]:bg-[#edf3ff] [&:hover:not(:disabled):not([aria-disabled=true])]:text-[#356ae6]",
+    "rdp-button_previous cursor-pointer outline-offset-3 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] [transition:background_0.15s,color_0.15s,box-shadow_0.15s] absolute top-0 inset-s-0 inline-flex appearance-none items-center justify-center rounded-[9px] border border-[#e0e7f2] bg-white p-0 m-0 text-[#536f97] disabled:cursor-default disabled:opacity-35 aria-disabled:cursor-default aria-disabled:opacity-35 [&:hover:not(:disabled):not([aria-disabled=true])]:bg-[#edf3ff] [&:hover:not(:disabled):not([aria-disabled=true])]:text-[#356ae6] size-9",
   button_next:
-    "rdp-button_next absolute top-0 end-0 inline-flex h-[36px] w-[36px] appearance-none items-center justify-center rounded-[9px] border border-[#e0e7f2] bg-[#fff] p-0 m-0  text-[#536f97] disabled:cursor-default disabled:opacity-[0.35] aria-disabled:cursor-default aria-disabled:opacity-[0.35] [&:hover:not(:disabled):not([aria-disabled=true])]:bg-[#edf3ff] [&:hover:not(:disabled):not([aria-disabled=true])]:text-[#356ae6]",
+    "rdp-button_next cursor-pointer outline-offset-3 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] [transition:background_0.15s,color_0.15s,box-shadow_0.15s] absolute top-0 inset-e-0 inline-flex appearance-none items-center justify-center rounded-[9px] border border-[#e0e7f2] bg-white p-0 m-0 text-[#536f97] disabled:cursor-default disabled:opacity-35 aria-disabled:cursor-default aria-disabled:opacity-35 [&:hover:not(:disabled):not([aria-disabled=true])]:bg-[#edf3ff] [&:hover:not(:disabled):not([aria-disabled=true])]:text-[#356ae6] size-9",
   chevron: "rdp-chevron inline-block fill-none text-inherit",
   weekday:
-    "rdp-weekday pt-[14px] pb-[8px] px-0 text-center text-[10px] font-[650] tracking-[0.4px] text-[#8a98ae] uppercase opacity-100",
-  day: "rdp-day h-[44px] w-[calc(100%/7)] text-center",
+    "rdp-weekday pt-3.5 pb-2 px-0 text-center text-[10px] font-[650] tracking-[0.4px] text-[#8a98ae] uppercase opacity-100",
+  day: "rdp-day h-11 w-[calc(100%/7)] text-center group/day",
   day_button:
-    "rdp-day_button relative mx-auto my-0 flex h-[40px] w-[calc(100%-4px)] items-center justify-center rounded-[10px] border border-transparent bg-transparent p-0  font-[550] text-inherit [outline-offset:1px] disabled:cursor-not-allowed disabled:opacity-100 [&:hover:not(:disabled)]:bg-[#edf3ff] [&:hover:not(:disabled)]:text-[#2458ce]",
-  today:
-    "rdp-today [&:not([data-outside])]:text-[#356ae6] [&:not([data-selected])_button]:bg-[#edf3ff] [&:not([data-selected])_button]:font-[700] [&:not([data-selected])_button]:text-[#356ae6] [&_button::after]:absolute [&_button::after]:bottom-[4px] [&_button::after]:left-[calc(50%-2px)] [&_button::after]:size-[4px] [&_button::after]:rounded-[50%] [&_button::after]:bg-[#356ae6] [&_button::after]:content-['']",
-  selected:
-    "rdp-selected text-[13px] font-bold [&_button]:border-[#356ae6] [&_button]:bg-[#356ae6] [&_button]:font-[700] [&_button]:text-[#fff] [&_button]:[box-shadow:0_3px_8px_#356ae625] [&_button:hover:not(:disabled)]:bg-[#285abd] [&_button:hover:not(:disabled)]:text-[#fff] [&_button:focus-visible]:[outline-color:#203b65] [&_button::after]:bg-[#fff]",
-  outside:
-    "rdp-outside opacity-100 [&:not([data-selected])_button]:text-[#8a98ae]",
-  disabled: "rdp-disabled [&:not([data-selected])]:opacity-[0.35]",
-  hidden: "rdp-hidden invisible text-[#fff]",
+    "rdp-day_button cursor-pointer focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] [transition:background_0.15s,color_0.15s,box-shadow_0.15s] relative mx-auto my-0 flex h-10 w-[calc(100%-4px)] items-center justify-center rounded-[10px] border border-transparent bg-transparent p-0 font-[550] text-inherit outline-offset-1 disabled:cursor-not-allowed disabled:opacity-100 hover:enabled:bg-[#edf3ff] hover:enabled:text-[#2458ce] group-[[data-today]:not([data-selected])]/day:bg-[#edf3ff] group-[[data-today]:not([data-selected])]/day:font-bold group-[[data-today]:not([data-selected])]/day:text-[#356ae6] group-data-[today]/day:after:absolute group-data-[today]/day:after:bottom-1 group-data-[today]/day:after:left-[calc(50%-2px)] group-data-[today]/day:after:size-1 group-data-[today]/day:after:rounded-full group-data-[today]/day:after:bg-[#356ae6] group-data-[today]/day:after:content-[''] group-data-[selected]/day:border-[#356ae6] group-data-[selected]/day:bg-[#356ae6] group-data-[selected]/day:font-bold group-data-[selected]/day:text-white group-data-[selected]/day:[box-shadow:0_3px_8px_#356ae625] group-data-[selected]/day:hover:enabled:bg-[#285abd] group-data-[selected]/day:hover:enabled:text-white group-data-[selected]/day:focus-visible:outline-[#203b65] group-data-[today]/day:group-data-[selected]/day:after:bg-white group-[[data-outside]:not([data-selected])]/day:text-[#8a98ae]",
+  today: "rdp-today not-data-[outside]:text-[#356ae6]",
+  selected: "rdp-selected text-[13px] font-bold",
+  outside: "rdp-outside opacity-100",
+  disabled: "rdp-disabled [&:not([data-selected])]:opacity-35",
+  hidden: "rdp-hidden invisible text-white",
 } satisfies Partial<ClassNames>;
 
 // Calendar dates are local civil dates; no UTC conversion can shift the chosen day.
@@ -84,29 +80,15 @@ export function ChallengeDatePicker({
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
-      <Popover.Trigger
-        className={cn(
-          "challenge-date-trigger group/challenge-date-trigger [&[data-popup-open]_[class~='group/challenge-date-chevron']]:[transform:rotate(180deg)] [&[data-popup-open]_[class~='group/challenge-date-chevron']]:text-[color:#356ae6]",
-        )}
-      >
-        <span
-          className={cn(
-            "challenge-date-icon grid [place-items:center] w-[30px] h-[30px] shrink-[0] rounded-[8px] bg-[#eaf0fc] text-[color:#356ae6] [@media(width<=480px)]:w-[24px] [@media(width<=480px)]:h-[28px]",
-          )}
-        >
-          <CalendarDays size={17} aria-hidden="true" />
+      <Popover.Trigger className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 challenge-date-trigger group/challenge-date-trigger group/challenge-date-trigger py-1.5 gap-2.5 border-[#d9e3f3] min-h-11 pr-3 pl-1.75 rounded-[11px] text-[#344964] font-[650] [@media(width<=480px)]:px-1.5 [@media(width<=480px)]:gap-1.5 [@media(width<=480px)]:text-xs [@media(width<=480px)]:leading-[inherit] hover:border-[#adc5f0] hover:bg-[#f5f8ff] hover:text-[#285abd] data-popup-open:border-[#adc5f0] data-popup-open:bg-[#f5f8ff] data-popup-open:text-[#285abd] border border-solid inline-flex items-center justify-center bg-white text-[13px] leading-normal">
+        <span className="challenge-date-icon grid place-items-center shrink-0 rounded-[8px] bg-[#eaf0fc] text-[#356ae6] [@media(width<=480px)]:w-6 [@media(width<=480px)]:h-7 size-7.5">
+          <CalendarDays className="shrink-0" size={17} aria-hidden="true" />
         </span>
-        <span
-          className={cn(
-            "challenge-date-label min-w-[0] whitespace-nowrap [@media(width<=480px)]:overflow-hidden [@media(width<=480px)]:text-ellipsis",
-          )}
-        >
+        <span className="challenge-date-label min-w-0 whitespace-nowrap [@media(width<=480px)]:overflow-hidden [@media(width<=480px)]:text-ellipsis block">
           {formatChallengeDay(day)}
         </span>
         <ChevronDown
-          className={cn(
-            "challenge-date-chevron group/challenge-date-chevron text-[color:#7d8da5] [transition:transform_0.15s] motion-reduce:[transition:none]",
-          )}
+          className="shrink-0 challenge-date-chevron group/challenge-date-chevron text-[#7d8da5] [transition:transform_0.15s] motion-reduce:transition-none group-data-[popup-open]/challenge-date-trigger:transform-[rotate(180deg)] group-data-[popup-open]/challenge-date-trigger:text-[#356ae6] motion-reduce:duration-0"
           size={15}
           aria-hidden="true"
         />
@@ -121,37 +103,23 @@ export function ChallengeDatePicker({
             align: "shift",
             fallbackAxisSide: "none",
           }}
-          className={cn("challenge-calendar-positioner z-[60]")}
+          className="challenge-calendar-positioner z-60"
         >
           <Popover.Popup
-            className={cn(
-              "challenge-calendar border-[length:1px] border-solid border-[color:#dce5f4] w-[344px] max-w-[calc(100vw_-_24px)] max-h-[var(--available-height)] overflow-y-auto bg-[#fff] rounded-[18px] [box-shadow:0_18px_50px_#20396220,_0_3px_10px_#20396208] text-[color:#344964] font-[family-name:var(--font-sans)] [transform-origin:var(--transform-origin)] [transition:opacity_0.15s,_transform_0.15s] [&[data-starting-style]]:opacity-[0] [&[data-starting-style]]:[transform:scale(0.97)] [&[data-ending-style]]:opacity-[0] [&[data-ending-style]]:[transform:scale(0.97)] [&_button:disabled]:cursor-[not-allowed] [&_button:disabled]:opacity-[1] motion-reduce:[transition:none]",
-            )}
+            className="challenge-calendar border border-solid border-[#dce5f4] w-86 max-w-[calc(100vw-24px)] max-h-(--available-height) overflow-y-auto bg-white rounded-[18px] [box-shadow:0_18px_50px_#20396220,0_3px_10px_#20396208] text-[#344964] font-sans origin-(--transform-origin) [transition:opacity_0.15s,transform_0.15s] data-starting-style:opacity-0 data-starting-style:transform-[scale(0.97)] data-ending-style:opacity-0 data-ending-style:transform-[scale(0.97)] motion-reduce:transition-none motion-reduce:duration-0"
             initialFocus={false}
           >
-            <div
-              className={cn(
-                "challenge-calendar-header px-[16px] py-[18px] gap-[12px] flex items-center [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:#edf1f7] bg-[#fbfcff]",
-              )}
-            >
+            <div className="challenge-calendar-header px-4 py-4.5 gap-3 flex items-center border-b border-solid border-b-[#edf1f7] bg-[#fbfcff]">
               <div>
-                <Popover.Title
-                  className={cn(
-                    "challenge-calendar-title text-[color:#263b58] [font-size:15px] font-[750] tracking-[-0.35px] leading-[1.4]",
-                  )}
-                >
+                <Popover.Title className="challenge-calendar-title text-[#263b58] text-[15px] font-[750] tracking-[-0.35px] leading-[1.4]">
                   Choisir la date du défi
                 </Popover.Title>
-                <Popover.Description
-                  className={cn(
-                    "challenge-calendar-description mt-[4px] text-[color:#71839c] [font-size:11px] leading-[1.6]",
-                  )}
-                >
+                <Popover.Description className="challenge-calendar-description mt-1 text-[#71839c] text-[11px] leading-[1.6]">
                   Retrouvez les créations de chaque jour.
                 </Popover.Description>
               </div>
             </div>
-            <div className={cn("challenge-calendar-body p-[16px]")}>
+            <div className="challenge-calendar-body p-4">
               <DayPicker
                 classNames={calendarClassNames}
                 locale={fr}
@@ -170,26 +138,25 @@ export function ChallengeDatePicker({
                 onSelect={select}
               />
             </div>
-            <div
-              className={cn(
-                "challenge-calendar-footer px-[16px] py-[12px] gap-[12px] flex items-center justify-between [border-top-width:1px] [border-top-style:solid] [border-top-color:#e8eef7] bg-[#f7faff]",
-              )}
-            >
-              <span
-                className={cn(
-                  "challenge-calendar-legend gap-[7px] inline-flex items-center text-[color:#71839c] [font-size:11px] [&_>_span]:w-[5px] [&_>_span]:h-[5px] [&_>_span]:rounded-[50%] [&_>_span]:bg-[#356ae6]",
-                )}
-              >
-                <span aria-hidden="true" /> Aujourd’hui
+            <div className="challenge-calendar-footer px-4 py-3 gap-3 flex items-center justify-between border-t border-solid border-t-[#e8eef7] bg-[#f7faff]">
+              <span className="challenge-calendar-legend gap-1.75 inline-flex items-center text-[#71839c] text-[11px]">
+                <span
+                  className="rounded-full bg-[#356ae6] size-1.25"
+                  aria-hidden="true"
+                />{" "}
+                Aujourd’hui
               </span>
               <button
                 type="button"
-                className={cn(
-                  "challenge-calendar-today px-[11px] py-[8px] gap-[7px] border-[length:1px] border-solid border-[color:#dce6f7] inline-flex items-center min-h-[36px] rounded-[9px] bg-[#fff] text-[color:#356ae6] [font-size:11px] font-[650] [&:hover]:border-[color:#b8cef2] [&:hover]:bg-[#edf3ff]",
-                )}
+                className="cursor-pointer [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 challenge-calendar-today px-2.75 py-2 gap-1.75 border border-solid border-[#dce6f7] inline-flex items-center min-h-9 rounded-[9px] bg-white text-[#356ae6] text-[11px] font-[650] hover:border-[#b8cef2] hover:bg-[#edf3ff] disabled:cursor-not-allowed disabled:opacity-100"
                 onClick={() => select(today)}
               >
-                Défi du jour <ArrowUpRight size={15} aria-hidden="true" />
+                Défi du jour{" "}
+                <ArrowUpRight
+                  className="shrink-0"
+                  size={15}
+                  aria-hidden="true"
+                />
               </button>
             </div>
           </Popover.Popup>

@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { loadPublic } from "@/lib/seo/public-data";
 import { seo, absolute, breadcrumbs } from "@/lib/seo/meta";
 import {
@@ -101,9 +100,7 @@ function CreationDetail({
   if (p === undefined)
     return (
       <div
-        className={cn(
-          "empty-state px-[25px] py-[70px] gap-[20px] min-h-[300px] flex flex-col items-center justify-center text-center text-[color:#7d8ba0] [&_h1]:text-[color:#32445f] [&_h1]:[font-size:24px] [&_h1]:font-[700] [&_h2]:text-[color:#32445f] [&_h2]:[font-size:24px] [&_h2]:font-[700] [&_p]:max-w-[510px] [&_p]:leading-[1.8]",
-        )}
+        className="empty-state px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0]"
         role="status"
       >
         Chargement de la création…
@@ -111,42 +108,28 @@ function CreationDetail({
     );
   if (!p)
     return (
-      <div
-        className={cn(
-          "empty-state px-[25px] py-[70px] gap-[20px] min-h-[300px] flex flex-col items-center justify-center text-center text-[color:#7d8ba0] [&_h1]:text-[color:#32445f] [&_h1]:[font-size:24px] [&_h1]:font-[700] [&_h2]:text-[color:#32445f] [&_h2]:[font-size:24px] [&_h2]:font-[700] [&_p]:max-w-[510px] [&_p]:leading-[1.8]",
-        )}
-      >
-        <h1>Cette création n’est plus disponible.</h1>
-        <p>
+      <div className="empty-state px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0]">
+        <h1 className="text-[#32445f] text-2xl leading-[inherit] font-bold">
+          Cette création n’est plus disponible.
+        </h1>
+        <p className="max-w-127.5 leading-[1.8]">
           Les reprises déjà enregistrées restent dans les projets de leurs
           auteurs.
         </p>
         <Link
           to="/gallery"
-          className={cn(
-            "primary-link group/primary-link px-[19px] py-[12px] gap-[10px] inline-flex items-center justify-center bg-[#356ae6] text-[color:#fff] rounded-[9px] [font-size:14px] font-[650] whitespace-nowrap [&:hover]:bg-[#2458ce]",
-          )}
+          className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 primary-link group/primary-link px-4.75 py-3 gap-2.5 inline-flex items-center justify-center bg-[#356ae6] text-white rounded-[9px] text-sm font-[650] whitespace-nowrap hover:bg-[#2458ce] leading-normal"
         >
           Retour à la galerie
         </Link>
       </div>
     );
   return (
-    <main
-      className={cn(
-        "creation-page px-[5%] m-[auto] max-w-[1400px] pt-[35px] pb-[64px]",
-      )}
-    >
-      <div
-        className={cn(
-          "creation-layout gap-[36px] grid grid-cols-[minmax(0,_1.8fr)_minmax(300px,_1fr)] [align-items:start] [@media(width<=850px)]:gap-[25px] [@media(width<=850px)]:grid-cols-[1fr] [@media(851px<=width<=1100px)]:gap-[24px] [@media(851px<=width<=1100px)]:grid-cols-[minmax(0,_1.4fr)_minmax(280px,_1fr)] [&_h1]:mx-[0] [&_h1]:[font-size:clamp(28px,_3vw,_42px)] [&_h1]:leading-[1.15] [&_h1]:font-[800] [&_h1]:tracking-[-1.5px] [&_h1]:mt-[6px] [&_h1]:mb-[16px] [&_h1]:[overflow-wrap:anywhere] [@media(width<=850px)]:[&_aside]:pb-[30px]",
-        )}
-      >
-        <div className={cn("creation-preview-panel min-w-[0]")}>
+    <main className="creation-page px-[5%] m-auto max-w-350 pt-8.75 pb-16">
+      <div className="creation-layout gap-9 grid grid-cols-[minmax(0,1.8fr)_minmax(300px,1fr)] items-start [@media(width<=850px)]:gap-6.25 [@media(width<=850px)]:grid-cols-1 [@media(851px<=width<=1100px)]:gap-6 [@media(851px<=width<=1100px)]:grid-cols-[minmax(0,1.4fr)_minmax(280px,1fr)]">
+        <div className="creation-preview-panel min-w-0">
           <div
-            className={cn(
-              "public-scene overflow-hidden border-[length:1px] border-solid border-[color:#e2e8f1] h-[560px] rounded-[20px] relative bg-[#edf1f7] [@media(width<=520px)]:h-[350px] [@media(520px<width<=850px)]:h-[450px]",
-            )}
+            className="public-scene overflow-hidden border border-solid border-[#e2e8f1] h-140 rounded-[20px] relative bg-[#edf1f7] [@media(width<=520px)]:h-87.5 [@media(520px<width<=850px)]:h-112.5"
             role="region"
             aria-label={`Aperçu 3D de ${p.title}`}
           >
@@ -157,19 +140,15 @@ function CreationDetail({
               poster={p.thumbnailUrl}
               title={p.title}
             />
-            <p
-              className={cn(
-                "creation-view-hint gap-[7px] absolute bottom-[5px] left-[12px] right-[110px] min-h-[30px] flex justify-start items-center [font-size:11px] text-[color:#8190a5] leading-[1.6] pointer-events-none [@media(width<=640px)]:gap-[5px] [@media(width<=640px)]:left-[10px] [@media(width<=640px)]:[font-size:10px] [&_svg]:shrink-[0]",
-              )}
-            >
-              <MousePointer2 size={14} aria-hidden="true" />
+            <p className="creation-view-hint gap-1.75 absolute bottom-1.25 left-3 right-27.5 min-h-7.5 flex justify-start items-center text-[11px] text-[#8190a5] leading-[1.6] pointer-events-none [@media(width<=640px)]:gap-1.25 [@media(width<=640px)]:left-2.5 [@media(width<=640px)]:text-[10px]">
+              <MousePointer2
+                className="shrink-0"
+                size={14}
+                aria-hidden="true"
+              />
               <span>
                 Glissez pour explorer
-                <span
-                  className={cn(
-                    "creation-view-hint-zoom [@media(width<=640px)]:hidden",
-                  )}
-                >
+                <span className="creation-view-hint-zoom [@media(width<=640px)]:hidden">
                   {" "}
                   · Pincez ou défilez pour zoomer
                 </span>
@@ -177,25 +156,19 @@ function CreationDetail({
             </p>
           </div>
         </div>
-        <aside className={cn("creation-details min-w-[0]")}>
+        <aside className="creation-details min-w-0 [@media(width<=850px)]:pb-7.5">
           {p.isAssembly && (
-            <span
-              className={cn(
-                "assembly-badge group/assembly-badge px-[8px] py-[3px] border-[length:1px] border-solid border-[color:#c7dfdf] inline-flex w-[fit-content] items-center rounded-[6px] bg-[#edf7f5] text-[color:#37786b] [font-size:10px] font-[650] leading-[1.5] whitespace-nowrap",
-              )}
-            >
+            <span className="assembly-badge group/assembly-badge px-2 py-0.75 border border-solid border-[#c7dfdf] inline-flex w-fit items-center rounded-[6px] bg-[#edf7f5] text-[#37786b] text-[10px] font-[650] leading-normal whitespace-nowrap">
               Assemblage
             </span>
           )}
-          <h1>{p.title}</h1>
-          <p className={cn("author text-[color:#6e84a3] [font-size:14px]")}>
+          <h1 className="mx-0 text-[clamp(28px,_3vw,_42px)] leading-[1.15] font-extrabold tracking-[-1.5px] mt-1.5 mb-4 wrap-anywhere">
+            {p.title}
+          </h1>
+          <p className="author text-[#6e84a3] text-sm leading-[inherit]">
             par <AuthorLink id={p.owner} name={p.author} avatar={p.avatar} />
           </p>
-          <p
-            className={cn(
-              "publication-date mx-[0] [font-size:12px] text-[color:#96a2b5] mt-[12px] mb-[22px]",
-            )}
-          >
+          <p className="publication-date mx-0 text-xs leading-[inherit] text-[#96a2b5] mt-3 mb-5.5">
             Publiée le{" "}
             <time dateTime={new Date(p.createdAt).toISOString()}>
               {new Date(p.createdAt).toLocaleDateString("fr-FR", {
@@ -206,29 +179,22 @@ function CreationDetail({
             </time>
           </p>
           {p.description && (
-            <p
-              className={cn(
-                "description mx-[0] my-[25px] text-[color:#63758f] leading-[1.9] [font-size:15px] [white-space:pre-wrap] [overflow-wrap:anywhere]",
-              )}
-            >
+            <p className="description mx-0 my-6.25 text-[#63758f] text-[15px] whitespace-pre-wrap wrap-anywhere leading-[1.9]">
               {p.description}
             </p>
           )}
           {!!p.sources?.length ? (
-            <div
-              className={cn(
-                "creation-source-list mx-[0] my-[20px] text-[color:#71839c] [font-size:12px] leading-[1.7] [&_>_p]:gap-[7px] [&_>_p]:flex [&_>_p]:items-center [&_>_p]:font-[650] [&_ul]:gap-[6px] [&_ul]:grid [&_ul]:mt-[9px] [&_ul]:[overflow-wrap:anywhere] [&_a]:text-[color:#356ae6] [&_a:hover]:[text-decoration:underline] [&_a:hover]:underline-offset-[3px]",
-              )}
-            >
-              <p>
+            <div className="creation-source-list mx-0 my-5 text-[#71839c] text-xs leading-[1.7]">
+              <p className="gap-1.75 flex items-center font-[650]">
                 <GitBranch size={15} aria-hidden="true" />
                 {p.isAssembly ? "Sources de l’assemblage" : "À partir de"}
               </p>
-              <ul>
+              <ul className="gap-1.5 grid mt-2.25 wrap-anywhere">
                 {p.sources.map((source) => (
                   <li key={source.publicationId}>
                     {source.available ? (
                       <Link
+                        className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 text-[#356ae6] hover:underline hover:underline-offset-3"
                         to="/creations/$publicationId"
                         params={{ publicationId: source.publicationId }}
                       >
@@ -244,12 +210,12 @@ function CreationDetail({
             </div>
           ) : (
             p.origin && (
-              <p
-                className={cn(
-                  "attribution px-[15px] py-[12px] mx-[0] my-[15px] gap-[8px] flex items-start [font-size:12px] leading-[1.7] bg-[#f0f4fb] text-[color:#7b8ea8] rounded-[6px] [overflow-wrap:anywhere] [&_svg]:shrink-[0] [&_svg]:mt-[2px]",
-                )}
-              >
-                <GitBranch size={16} aria-hidden="true" />
+              <p className="attribution px-3.75 py-3 mx-0 my-3.75 gap-2 flex items-start text-xs leading-[1.7] bg-[#f0f4fb] text-[#7b8ea8] rounded-[6px] wrap-anywhere">
+                <GitBranch
+                  className="shrink-0 mt-0.5"
+                  size={16}
+                  aria-hidden="true"
+                />
                 <span>
                   D’après « {p.origin.title} » de {p.origin.author}.
                 </span>
@@ -260,27 +226,15 @@ function CreationDetail({
             p.updatedAt &&
             p.submittedAt &&
             p.updatedAt > p.submittedAt && (
-              <p
-                className={cn(
-                  "publication-date mx-[0] [font-size:12px] text-[color:#96a2b5] mt-[12px] mb-[22px]",
-                )}
-              >
+              <p className="publication-date mx-0 text-xs leading-[inherit] text-[#96a2b5] mt-3 mb-5.5">
                 Mise à jour le {new Date(p.updatedAt).toLocaleString("fr-FR")}.
                 Les votes sont conservés.
               </p>
             )}
-          <div
-            className={cn(
-              "creation-fork p-[20px] border-[length:1px] border-solid border-[color:#dce6f7] mt-[28px] rounded-[16px] bg-[#f0f5fd] [@media(851px<=width<=1100px)]:p-[16px]",
-            )}
-          >
-            <div
-              className={cn(
-                "creation-fork-heading gap-[12px] flex items-center mb-[18px] [&_h2]:[font-size:17px] [&_h2]:font-[750] [&_h2]:tracking-[-0.4px] [&_h2]:leading-[1.4] [&_p]:[font-size:12px] [&_p]:text-[color:#71839c] [&_p]:mt-[5px] [&_p]:leading-[1.7]",
-              )}
-            >
+          <div className="creation-fork p-5 border border-solid border-[#dce6f7] mt-7 rounded-2xl bg-[#f0f5fd] [@media(851px<=width<=1100px)]:p-4">
+            <div className="creation-fork-heading gap-3 flex items-center mb-4.5">
               <svg
-                className={cn("creation-fork-art w-[48px] h-[60px] shrink-[0]")}
+                className="creation-fork-art w-12 h-15 shrink-0"
                 viewBox="0 0 56 68"
                 fill="none"
                 aria-hidden="true"
@@ -334,15 +288,17 @@ function CreationDetail({
                 />
               </svg>
               <div>
-                <h2>Et si vous imaginiez la suite ?</h2>
-                <p>Une nouvelle branche, votre propre version.</p>
+                <h2 className="text-[17px] font-[750] tracking-[-0.4px] leading-[1.4]">
+                  Et si vous imaginiez la suite ?
+                </h2>
+                <p className="text-xs text-[#71839c] mt-1.25 leading-[1.7]">
+                  Une nouvelle branche, votre propre version.
+                </p>
               </div>
             </div>
             {isAuthenticated ? (
               <Button
-                className={cn(
-                  "creation-fork-button p-[12px] gap-[8px] flex justify-center w-[100%] min-h-[44px] h-[auto] rounded-[10px] bg-[#356ae6] text-[color:#fff] [font-size:12px] font-[650] whitespace-normal leading-[1.5] [&:hover]:bg-[#2859cd] [&_svg]:shrink-[0]",
-                )}
+                className="creation-fork-button p-3 gap-2 flex justify-center w-full min-h-11 h-auto rounded-[10px] bg-[#356ae6] text-white text-xs font-[650] whitespace-normal leading-normal hover:bg-[#2859cd]"
                 disabled={busy}
                 onClick={async () => {
                   setBusy(true);
@@ -362,11 +318,19 @@ function CreationDetail({
                   }
                 }}
               >
-                <GitBranch size={17} aria-hidden="true" />
+                <GitBranch
+                  className="size-4 pointer-events-none shrink-0"
+                  size={17}
+                  aria-hidden="true"
+                />
                 {busy
                   ? "Création de votre version…"
                   : "Continuer cette création"}
-                <ArrowRight size={16} aria-hidden="true" />
+                <ArrowRight
+                  className="size-4 pointer-events-none shrink-0"
+                  size={16}
+                  aria-hidden="true"
+                />
               </Button>
             ) : (
               <Link
@@ -377,19 +341,13 @@ function CreationDetail({
                     window.location.pathname,
                   )
                 }
-                className={cn(
-                  "primary-link creation-fork-button group/primary-link px-[19px] py-[12px] gap-[10px] inline-flex items-center justify-center bg-[#356ae6] text-[color:#fff] rounded-[9px] [font-size:14px] font-[650] whitespace-nowrap [&:hover]:bg-[#2458ce] p-[12px] gap-[8px] flex justify-center w-[100%] min-h-[44px] h-[auto] rounded-[10px] bg-[#356ae6] text-[color:#fff] [font-size:12px] font-[650] whitespace-normal leading-[1.5] [&:hover]:bg-[#2859cd] [&_svg]:shrink-[0]",
-                )}
+                className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 primary-link creation-fork-button group/primary-link items-center justify-center bg-[#356ae6] text-white font-[650] p-3 gap-2 flex w-full min-h-11 h-auto rounded-[10px] text-xs whitespace-normal leading-normal hover:bg-[#2859cd]"
               >
-                <GitBranch size={17} aria-hidden="true" /> Se connecter pour
-                continuer
+                <GitBranch className="shrink-0" size={17} aria-hidden="true" />{" "}
+                Se connecter pour continuer
               </Link>
             )}
-            <p
-              className={cn(
-                "creation-fork-note mt-[12px] text-[color:#7889a3] [font-size:11px] leading-[1.7]",
-              )}
-            >
+            <p className="creation-fork-note mt-3 text-[#7889a3] text-[11px] leading-[1.7]">
               Une copie privée rejoint vos créations. L’auteur d’origine reste
               crédité.
             </p>

@@ -51,12 +51,19 @@ function ModelCard({
   );
 }
 
-export default function HomeNextArt({ kind }: { kind: "fork" | "collection" }) {
+export default function HomeNextArt({
+  kind,
+  className,
+}: {
+  kind: "fork" | "collection";
+  className?: string;
+}) {
   if (kind === "collection")
     return (
       <svg
         className={cn(
-          "home-collection-art [align-self:flex-end] w-[128px] h-[94px] mt-[-6px] mr-[-6px] mb-[8px] ml-[0] [@media(width<=520px)]:w-[110px] [@media(width<=520px)]:h-[81px] [@media(width<=520px)]:[position:static] [@media(width<=520px)]:right-[28px] [@media(width<=520px)]:top-[28px] [@media(520px<width<=850px)]:absolute [@media(520px<width<=850px)]:right-[28px] [@media(520px<width<=850px)]:top-[28px]",
+          "home-collection-art self-end w-32 h-23.5 -mt-1.5 -mr-1.5 mb-2 ml-0 [@media(width<=520px)]:w-27.5 [@media(width<=520px)]:h-20.25 [@media(width<=520px)]:static [@media(width<=520px)]:right-7 [@media(width<=520px)]:top-7 [@media(520px<width<=850px)]:absolute [@media(520px<width<=850px)]:right-7 [@media(520px<width<=850px)]:top-7",
+          className,
         )}
         viewBox="0 0 170 125"
         fill="none"
@@ -97,9 +104,7 @@ export default function HomeNextArt({ kind }: { kind: "fork" | "collection" }) {
     );
   return (
     <svg
-      className={cn(
-        "home-gallery-art block w-[100%] max-w-[270px] h-[auto] [justify-self:end] [@media(width<=520px)]:w-[220px] [@media(width<=520px)]:[justify-self:center] [&_text]:font-[family-name:var(--font-sans)]",
-      )}
+      className="home-gallery-art block w-full max-w-67.5 h-auto justify-self-end [@media(width<=520px)]:w-55 [@media(width<=520px)]:justify-self-center"
       viewBox="0 0 270 282"
       fill="none"
       aria-hidden="true"
@@ -150,16 +155,16 @@ export default function HomeNextArt({ kind }: { kind: "fork" | "collection" }) {
       <g transform="translate(138 180)">
         <ModelCard variant />
       </g>
-      <text x="135" y="51" fill="#bfd0eb" fontSize="10">
+      <text className="font-sans" x="135" y="51" fill="#bfd0eb" fontSize="10">
         Une création
       </text>
-      <text x="135" y="65" fill="#bfd0eb" fontSize="10">
+      <text className="font-sans" x="135" y="65" fill="#bfd0eb" fontSize="10">
         vous inspire.
       </text>
-      <text x="9" y="208" fill="#f6c497" fontSize="10">
+      <text className="font-sans" x="9" y="208" fill="#f6c497" fontSize="10">
         Votre version
       </text>
-      <text x="9" y="222" fill="#bfd0eb" fontSize="10">
+      <text className="font-sans" x="9" y="222" fill="#bfd0eb" fontSize="10">
         prend une autre voie.
       </text>
     </svg>

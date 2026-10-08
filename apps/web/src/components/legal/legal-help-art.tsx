@@ -1,8 +1,7 @@
-import { cn } from "@/lib/utils";
 export default function LegalHelpArt() {
   return (
     <svg
-      className={cn("legal-help-art shrink-[0] w-[76px] h-[61px]")}
+      className="legal-help-art shrink-0 w-19 h-15.25"
       viewBox="0 0 100 80"
       fill="none"
       aria-hidden="true"

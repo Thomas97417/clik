@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 function Four({ x }: { x: number }) {
   return (
     <g transform={`translate(${x} 102)`} strokeLinejoin="round">
@@ -48,9 +47,7 @@ function LostBrick({
 export default function NotFoundArt() {
   return (
     <svg
-      className={cn(
-        "not-found-art block w-[100%] h-[auto] [@media(width<=760px)]:row-[1] [@media(width<=760px)]:max-w-[340px] [@media(width<=760px)]:[justify-self:center]",
-      )}
+      className="not-found-art block w-full h-auto [@media(width<=760px)]:row-1 [@media(width<=760px)]:max-w-85 [@media(width<=760px)]:justify-self-center"
       viewBox="0 0 500 320"
       fill="none"
       aria-hidden="true"

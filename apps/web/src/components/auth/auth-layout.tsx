@@ -31,15 +31,15 @@ function StoryCube({
       strokeLinejoin="round"
     >
       <path
-        className={cn("auth-cube-left fill-[var(--cube-left)]")}
+        className="auth-cube-left fill-[var(--cube-left)]"
         d="M-32 0 0 18V56L-32 38Z"
       />
       <path
-        className={cn("auth-cube-right fill-[var(--cube-right)]")}
+        className="auth-cube-right fill-[var(--cube-right)]"
         d="M0 18 32 0V38L0 56Z"
       />
       <path
-        className={cn("auth-cube-top fill-[var(--cube-top)]")}
+        className="auth-cube-top fill-[var(--cube-top)]"
         d="m0-18 32 18-32 18-32-18Z"
       />
       <path
@@ -49,11 +49,11 @@ function StoryCube({
         strokeOpacity=".2"
       />
       <path
-        className={cn("auth-cube-right fill-[var(--cube-right)]")}
+        className="auth-cube-right fill-[var(--cube-right)]"
         d="M-11-6V0a11 6 0 0 0 22 0V-6Z"
       />
       <ellipse
-        className={cn("auth-cube-top fill-[var(--cube-top)]")}
+        className="auth-cube-top fill-[var(--cube-top)]"
         cy="-6"
         rx="11"
         ry="6"
@@ -67,7 +67,7 @@ function StoryCube({
 function StoryConstruction() {
   return (
     <svg
-      className={cn("auth-construction block w-[100%] h-[auto] max-h-[320px]")}
+      className="auth-construction block w-full h-auto max-h-80"
       viewBox="0 0 480 320"
       fill="none"
       aria-hidden="true"
@@ -130,86 +130,88 @@ export default function AuthLayout({
     previousTitle.current = title;
   }, [title]);
   return (
-    <main
-      className={cn(
-        "auth-page px-[40px] mx-[auto] my-[0] max-w-[1240px] pt-[56px] pb-[28px] [@media(width<=440px)]:px-[14px] [@media(width<=440px)]:py-[22px] [@media(width<=440px)]:max-w-[540px] [@media(440px<width<=800px)]:px-[22px] [@media(440px<width<=800px)]:max-w-[540px] [@media(440px<width<=800px)]:pt-[30px] [@media(440px<width<=800px)]:pb-[24px] [@media(800px<width<=1000px)]:px-[28px] [@media(800px<width<=1000px)]:pt-[36px] [@media(800px<width<=1000px)]:pb-[24px]",
-      )}
-    >
-      <div
-        className={cn(
-          "auth-layout overflow-hidden border-[length:1px] border-solid border-[color:#dfe7f4] grid grid-cols-[minmax(0,_1.08fr)_minmax(0,_1fr)] rounded-[26px] [background:radial-gradient(ellipse_at_35%_40%,_#fff9ef_0%,_transparent_50%),_linear-gradient(145deg,_#f0f5ff,_#f8faff_65%,_#edf3ff)] [box-shadow:0_16px_48px_#233f750c] [@media(width<=440px)]:block [@media(width<=440px)]:grid-cols-[repeat(2,_minmax(0,_1fr))] [@media(width<=440px)]:rounded-[17px] [@media(440px<width<=800px)]:block [@media(440px<width<=800px)]:grid-cols-[repeat(2,_minmax(0,_1fr))] [@media(800px<width<=1000px)]:grid-cols-[repeat(2,_minmax(0,_1fr))]",
-        )}
-      >
+    <main className="auth-page px-10 mx-auto my-0 max-w-310 pt-14 pb-7 [@media(width<=440px)]:px-3.5 [@media(width<=440px)]:py-5.5 [@media(width<=440px)]:max-w-135 [@media(440px<width<=800px)]:px-5.5 [@media(440px<width<=800px)]:max-w-135 [@media(440px<width<=800px)]:pt-7.5 [@media(440px<width<=800px)]:pb-6 [@media(800px<width<=1000px)]:px-7 [@media(800px<width<=1000px)]:pt-9 [@media(800px<width<=1000px)]:pb-6">
+      <div className="auth-layout overflow-hidden border border-solid border-[#dfe7f4] grid grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)] rounded-[26px] [background:radial-gradient(ellipse_at_35%_40%,#fff9ef_0%,transparent_50%),linear-gradient(145deg,#f0f5ff,#f8faff_65%,#edf3ff)] [box-shadow:0_16px_48px_#233f750c] [@media(width<=440px)]:block [@media(width<=440px)]:grid-cols-2 [@media(width<=440px)]:rounded-[17px] [@media(440px<width<=800px)]:block [@media(440px<width<=800px)]:grid-cols-2 [@media(800px<width<=1000px)]:grid-cols-2">
         <aside
-          className={cn(
-            "auth-story px-[36px] overflow-hidden flex flex-col min-w-[0] pt-[40px] pb-[32px] [@media(width<=800px)]:px-[22px] [@media(width<=800px)]:hidden [@media(width<=800px)]:pt-[26px] [@media(width<=800px)]:pb-[22px] [@media(800px<width<=1000px)]:px-[22px] [@media(800px<width<=1000px)]:pt-[26px] [@media(800px<width<=1000px)]:pb-[22px] [&_h2]:mx-[0] [&_h2]:mt-[24px] [&_h2]:mb-[16px] [&_h2]:[font-size:clamp(32px,_3.4vw,_44px)] [&_h2]:font-[850] [&_h2]:tracking-[-1.8px] [&_h2]:leading-[1.14] [@media(width<=1000px)]:[&_h2]:[font-size:32px] [@media(width<=1000px)]:[&_h2]:tracking-[-1.3px] [&_h2_em]:not-italic [&_h2_em]:text-[color:#356ae6] [&_>_p]:m-[0] [&_>_p]:max-w-[355px] [&_>_p]:text-[color:#617594] [&_>_p]:leading-[1.75] [&_>_p]:[font-size:14px]",
-          )}
+          className="auth-story px-9 overflow-hidden flex flex-col min-w-0 pt-10 pb-8 [@media(width<=800px)]:px-5.5 [@media(width<=800px)]:hidden [@media(width<=800px)]:pt-6.5 [@media(width<=800px)]:pb-5.5 [@media(800px<width<=1000px)]:px-5.5 [@media(800px<width<=1000px)]:pt-6.5 [@media(800px<width<=1000px)]:pb-5.5"
           aria-label="Votre espace Clik"
         >
-          <h2>
+          <h2 className="mx-0 mt-6 mb-4 text-[clamp(32px,_3.4vw,_44px)] font-[850] tracking-[-1.8px] leading-[1.14] [@media(width<=1000px)]:text-[32px] [@media(width<=1000px)]:tracking-[-1.3px]">
             De petites briques.
             <br />
-            <em>De grandes idées.</em>
+            <em className="not-italic text-[#356ae6]">De grandes idées.</em>
           </h2>
-          <p>
+          <p className="m-0 max-w-88.75 text-[#617594] text-sm leading-[1.75]">
             Assemblez, recommencez, inventez. Votre prochain monde commence par
             une idée, et quelques briques.
           </p>
-          <div
-            className={cn(
-              "auth-story-art mx-[-20px] flex-[1] [align-content:center] mt-[2px] mb-[27px]",
-            )}
-          >
+          <div className="auth-story-art -mx-5 flex-1 content-center mt-0.5 mb-6.75">
             <StoryConstruction />
-            <p
-              className={cn(
-                "auth-story-caption mx-[20px] mt-[-6px] mb-[0] text-center text-[color:#6b7e9b] [font-size:11px]",
-              )}
-            >
+            <p className="auth-story-caption mx-5 -mt-1.5 mb-0 text-center text-[#6b7e9b] text-[11px]">
               Un peu d’imagination. Et tout prend forme.
             </p>
           </div>
-          <ul
-            className={cn(
-              "auth-benefits px-[0] m-[0] gap-[14px] grid grid-cols-[repeat(3,_minmax(0,_1fr))] pt-[22px] pb-[0] [border-top-width:1px] [border-top-style:solid] [border-top-color:#dce5f3] list-none [@media(width<=1000px)]:gap-[9px] [&_li]:gap-[9px] [&_li]:flex [&_li]:flex-col [&_li]:items-start [&_li]:[font-size:11px] [&_li]:leading-[1.6] [&_li]:text-[color:#617594] [&_strong]:block [&_strong]:mb-[1px] [&_strong]:text-[color:#344d73] [&_strong]:[font-size:12px] [&_strong]:font-[650] [&_svg]:text-[color:#527dc9] [&_svg]:shrink-[0]",
-            )}
-          >
-            <li>
-              <Cloud size={18} aria-hidden="true" />
+          <ul className="auth-benefits px-0 m-0 gap-3.5 grid grid-cols-3 pt-5.5 pb-0 border-t border-solid border-t-[#dce5f3] list-none [@media(width<=1000px)]:gap-2.25">
+            <li className="gap-2.25 flex flex-col items-start text-[11px] leading-[1.6] text-[#617594]">
+              <Cloud
+                className="text-[#527dc9] shrink-0"
+                size={18}
+                aria-hidden="true"
+              />
               <span>
-                <strong>Retrouvez</strong> vos créations partout
+                <strong className="block mb-px text-[#344d73] text-xs leading-[inherit] font-[650]">
+                  Retrouvez
+                </strong>{" "}
+                vos créations partout
               </span>
             </li>
-            <li>
-              <FolderHeart size={18} aria-hidden="true" />
+            <li className="gap-2.25 flex flex-col items-start text-[11px] leading-[1.6] text-[#617594]">
+              <FolderHeart
+                className="text-[#527dc9] shrink-0"
+                size={18}
+                aria-hidden="true"
+              />
               <span>
-                <strong>Explorez</strong> toutes vos idées
+                <strong className="block mb-px text-[#344d73] text-xs leading-[inherit] font-[650]">
+                  Explorez
+                </strong>{" "}
+                toutes vos idées
               </span>
             </li>
-            <li>
-              <Globe size={18} aria-hidden="true" />
+            <li className="gap-2.25 flex flex-col items-start text-[11px] leading-[1.6] text-[#617594]">
+              <Globe
+                className="text-[#527dc9] shrink-0"
+                size={18}
+                aria-hidden="true"
+              />
               <span>
-                <strong>Partagez</strong> votre univers
+                <strong className="block mb-px text-[#344d73] text-xs leading-[inherit] font-[650]">
+                  Partagez
+                </strong>{" "}
+                votre univers
               </span>
             </li>
           </ul>
         </aside>
         <section
-          className={cn(
-            "auth-card px-[clamp(32px,_4vw,_56px)] py-[40px] flex flex-col justify-center min-w-[0] [border-left-width:1px] [border-left-style:solid] [border-left-color:#e1e8f5] bg-[#ffffffb3] [@media(width<=440px)]:px-[21px] [@media(width<=440px)]:py-[25px] [@media(width<=440px)]:[border-left-width:0] [@media(width<=440px)]:[border-left-style:none] [@media(width<=440px)]:[border-left-color:currentColor] [@media(440px<width<=800px)]:px-[26px] [@media(440px<width<=800px)]:py-[32px] [@media(440px<width<=800px)]:[border-left-width:0] [@media(440px<width<=800px)]:[border-left-style:none] [@media(440px<width<=800px)]:[border-left-color:currentColor] [@media(800px<width<=1000px)]:px-[26px] [@media(800px<width<=1000px)]:py-[32px] [&_h1]:mx-[0] [&_h1]:mt-[0] [&_h1]:mb-[13px] [&_h1]:[font-size:32px] [&_h1]:font-[800] [&_h1]:tracking-[-1.1px] [&_h1]:leading-[1.16] [&_h1]:[outline:none] [@media(width<=440px)]:[&_h1]:[font-size:29px] [&_h1_>_span]:text-[color:#356ae6] [&_a:not([class~='group/auth-submit']):hover]:text-[color:#2458ce] [&_a:not([class~='group/auth-submit']):hover]:[text-decoration:underline] [&_a:not([class~='group/auth-submit']):hover]:underline-offset-[3px]",
-          )}
+          className="auth-card px-[clamp(32px,4vw,56px)] py-10 flex flex-col justify-center min-w-0 border-l border-solid border-l-[#e1e8f5] bg-[#ffffffb3] [@media(width<=440px)]:px-5.25 [@media(width<=440px)]:py-6.25 [@media(width<=440px)]:[border-left-width:0] [@media(width<=440px)]:border-l-[currentColor] [@media(440px<width<=800px)]:px-6.5 [@media(440px<width<=800px)]:py-8 [@media(440px<width<=800px)]:[border-left-width:0] [@media(440px<width<=800px)]:border-l-[currentColor] [@media(800px<width<=1000px)]:px-6.5 [@media(800px<width<=1000px)]:py-8"
           aria-labelledby="auth-title"
         >
-          <div
-            className={cn(
-              "auth-card-heading [&_>_p]:text-[color:#6b7b94] [&_>_p]:[font-size:14px] [&_>_p]:leading-[1.75] mb-[27px] [@media(width<=440px)]:mb-[23px]",
-            )}
-          >
-            <h1 ref={heading} id="auth-title" tabIndex={-1}>
+          <div className="auth-card-heading mb-6.75 [@media(width<=440px)]:mb-5.75">
+            <h1
+              className="mx-0 mt-0 mb-3.25 text-[32px] font-extrabold tracking-[-1.1px] leading-[1.16] outline-none [@media(width<=440px)]:text-[29px]"
+              ref={heading}
+              id="auth-title"
+              tabIndex={-1}
+            >
               {title}
-              {!/[?!]$/.test(title) && <span>.</span>}
+              {!/[?!]$/.test(title) && (
+                <span className="text-[#356ae6]">.</span>
+              )}
             </h1>
-            <p>{description}</p>
+            <p className="text-[#6b7b94] text-sm leading-[1.75]">
+              {description}
+            </p>
           </div>
           {children}
         </section>

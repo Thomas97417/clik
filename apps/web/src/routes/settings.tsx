@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { seo } from "@/lib/seo/meta";
 import SettingsArt from "@/components/settings/settings-art";
 import { createFileRoute, redirect, Link } from "@tanstack/react-router";
@@ -34,124 +33,158 @@ function RouteComponent() {
   if (!user) return null;
 
   return (
-    <main
-      className={cn(
-        "settings-page px-[36px] mx-[auto] my-[0] max-w-[1180px] pt-[48px] pb-[80px] text-[color:#26344c] [@media(width<=640px)]:px-[18px] [@media(width<=640px)]:pt-[28px] [@media(width<=640px)]:pb-[48px] [&_[class~='group/avatar-settings-card']]:p-[28px] [&_[class~='group/avatar-settings-card']]:gap-[26px] [&_[class~='group/avatar-settings-card']]:border-[length:1px] [&_[class~='group/avatar-settings-card']]:border-solid [&_[class~='group/avatar-settings-card']]:border-[color:#dbe5f6] [&_[class~='group/avatar-settings-card']]:flex [&_[class~='group/avatar-settings-card']]:items-center [&_[class~='group/avatar-settings-card']]:mb-[16px] [&_[class~='group/avatar-settings-card']]:rounded-[16px] [&_[class~='group/avatar-settings-card']]:[background:linear-gradient(120deg,_#edf3fe,_#fffaf5)] [@media(width<=640px)]:[&_[class~='group/avatar-settings-card']]:p-[20px] [@media(width<=640px)]:[&_[class~='group/avatar-settings-card']]:gap-[18px] [@media(width<=640px)]:[&_[class~='group/avatar-settings-card']]:items-start [@media(width<=640px)]:[&_[class~='group/avatar-settings-card']]:flex-col",
-      )}
-    >
-      <header
-        className={cn(
-          "settings-heading px-[12px] gap-[32px] flex items-center justify-between pt-[0] pb-[38px] [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:#e1e7f0] [@media(width<=640px)]:px-[0] [@media(width<=640px)]:gap-[8px] [@media(width<=640px)]:items-start [@media(width<=640px)]:pb-[24px] [&_h1]:m-[0] [&_h1]:[font-size:clamp(36px,_4.2vw,_56px)] [&_h1]:font-[800] [&_h1]:leading-[1.1] [&_h1]:tracking-[-2px] [@media(width<=640px)]:[&_h1]:[font-size:35px] [@media(width<=640px)]:[&_h1]:tracking-[-1.5px] [&_em]:not-italic [&_em]:text-[color:#356ae6] [&_p]:mx-[0] [&_p]:max-w-[450px] [&_p]:mt-[20px] [&_p]:mb-[0] [&_p]:text-[color:#697a93] [&_p]:[font-size:14px] [&_p]:leading-[1.8] [@media(width<=640px)]:[&_p]:[font-size:12px]",
-        )}
-      >
+    <main className="settings-page px-9 mx-auto my-0 max-w-295 pt-12 pb-20 text-[#26344c] [@media(width<=640px)]:px-4.5 [@media(width<=640px)]:pt-7 [@media(width<=640px)]:pb-12">
+      <header className="settings-heading px-3 gap-8 flex items-center justify-between pt-0 pb-9.5 border-b border-solid border-b-[#e1e7f0] [@media(width<=640px)]:px-0 [@media(width<=640px)]:gap-2 [@media(width<=640px)]:items-start [@media(width<=640px)]:pb-6">
         <div>
-          <h1>
+          <h1 className="m-0 text-[clamp(36px,_4.2vw,_56px)] font-extrabold leading-[1.1] tracking-[-2px] [@media(width<=640px)]:text-[35px] [@media(width<=640px)]:tracking-[-1.5px]">
             Votre espace,
             <br />
-            <em>à votre façon.</em>
+            <em className="not-italic text-[#356ae6]">à votre façon.</em>
           </h1>
-          <p>
+          <p className="mx-0 max-w-112.5 mt-5 mb-0 text-[#697a93] text-sm leading-[1.8] [@media(width<=640px)]:text-xs">
             Les petits détails qui font que vous êtes chez vous. Ajustez votre
             profil et gardez la main sur votre compte.
           </p>
         </div>
         <SettingsArt />
       </header>
-      <div
-        className={cn(
-          "settings-layout gap-[40px] grid grid-cols-[170px_minmax(0,_1fr)] [align-items:start] pt-[38px] [@media(width<=1000px)]:gap-[28px] [@media(width<=1000px)]:grid-cols-[1fr] [@media(width<=1000px)]:pt-[22px]",
-        )}
-      >
-        <aside
-          className={cn(
-            "settings-sidebar sticky top-[24px] [@media(width<=640px)]:gap-[12px] [@media(width<=640px)]:[position:static] [@media(width<=640px)]:block [@media(width<=640px)]:items-center [@media(width<=640px)]:justify-between [@media(640px<width<=1000px)]:gap-[12px] [@media(640px<width<=1000px)]:[position:static] [@media(640px<width<=1000px)]:flex [@media(640px<width<=1000px)]:items-center [@media(640px<width<=1000px)]:justify-between [&_nav]:gap-[8px] [&_nav]:grid [@media(width<=640px)]:[&_nav]:gap-[4px] [@media(width<=640px)]:[&_nav]:flex [@media(width<=640px)]:[&_nav]:flex-wrap [@media(width<=640px)]:[&_nav]:justify-between [@media(640px<width<=1000px)]:[&_nav]:gap-[4px] [@media(640px<width<=1000px)]:[&_nav]:flex [@media(640px<width<=1000px)]:[&_nav]:flex-wrap [&_nav_a]:px-[10px] [&_nav_a]:py-[12px] [&_nav_a]:gap-[12px] [&_nav_a]:flex [&_nav_a]:items-center [&_nav_a]:rounded-[8px] [&_nav_a]:text-[color:#435773] [&_nav_a]:[font-size:12px] [&_nav_a]:[transition:background_150ms] [@media(width<=640px)]:[&_nav_a]:px-[4px] [@media(width<=640px)]:[&_nav_a]:py-[9px] [@media(width<=640px)]:[&_nav_a]:gap-[5px] [@media(width<=640px)]:[&_nav_a]:[font-size:11px] [&_nav_a:hover]:bg-[#eaf0fc] [&_nav_a:hover]:text-[color:#356ae6] [&_nav_a:focus-visible]:bg-[#eaf0fc] [&_nav_a:focus-visible]:text-[color:#356ae6] [&_nav_a_span]:[font-size:10px] [&_nav_a_span]:text-[color:#94a5bd] [&_nav_a_span]:tabular-nums",
-          )}
-        >
-          <nav aria-label="Sections des paramètres">
-            <a href="#identity">
-              <span aria-hidden="true">01</span> Votre identité
+      <div className="settings-layout gap-10 grid grid-cols-[170px_minmax(0,1fr)] items-start pt-9.5 [@media(width<=1000px)]:gap-7 [@media(width<=1000px)]:grid-cols-1 [@media(width<=1000px)]:pt-5.5">
+        <aside className="settings-sidebar sticky top-6 [@media(width<=640px)]:gap-3 [@media(width<=640px)]:static [@media(width<=640px)]:block [@media(width<=640px)]:items-center [@media(width<=640px)]:justify-between [@media(640px<width<=1000px)]:gap-3 [@media(640px<width<=1000px)]:static [@media(640px<width<=1000px)]:flex [@media(640px<width<=1000px)]:items-center [@media(640px<width<=1000px)]:justify-between">
+          <nav
+            className="gap-2 grid [@media(width<=640px)]:gap-1 [@media(width<=640px)]:flex [@media(width<=640px)]:flex-wrap [@media(width<=640px)]:justify-between [@media(640px<width<=1000px)]:gap-1 [@media(640px<width<=1000px)]:flex [@media(640px<width<=1000px)]:flex-wrap"
+            aria-label="Sections des paramètres"
+          >
+            <a
+              className="focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-2.5 py-3 gap-3 flex items-center rounded-[8px] text-[#435773] text-xs leading-[inherit] [transition:background_150ms] [@media(width<=640px)]:px-1 [@media(width<=640px)]:py-2.25 [@media(width<=640px)]:gap-1.25 [@media(width<=640px)]:text-[11px] hover:bg-[#eaf0fc] hover:text-[#356ae6] focus-visible:bg-[#eaf0fc] focus-visible:text-[#356ae6]"
+              href="#identity"
+            >
+              <span
+                className="text-[10px] text-[#94a5bd] tabular-nums"
+                aria-hidden="true"
+              >
+                01
+              </span>{" "}
+              Votre identité
             </a>
-            <a href="#security">
-              <span aria-hidden="true">02</span> Sécurité
+            <a
+              className="focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-2.5 py-3 gap-3 flex items-center rounded-[8px] text-[#435773] text-xs leading-[inherit] [transition:background_150ms] [@media(width<=640px)]:px-1 [@media(width<=640px)]:py-2.25 [@media(width<=640px)]:gap-1.25 [@media(width<=640px)]:text-[11px] hover:bg-[#eaf0fc] hover:text-[#356ae6] focus-visible:bg-[#eaf0fc] focus-visible:text-[#356ae6]"
+              href="#security"
+            >
+              <span
+                className="text-[10px] text-[#94a5bd] tabular-nums"
+                aria-hidden="true"
+              >
+                02
+              </span>{" "}
+              Sécurité
             </a>
-            <a href="#account">
-              <span aria-hidden="true">03</span> Votre compte
+            <a
+              className="focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-2.5 py-3 gap-3 flex items-center rounded-[8px] text-[#435773] text-xs leading-[inherit] [transition:background_150ms] [@media(width<=640px)]:px-1 [@media(width<=640px)]:py-2.25 [@media(width<=640px)]:gap-1.25 [@media(width<=640px)]:text-[11px] hover:bg-[#eaf0fc] hover:text-[#356ae6] focus-visible:bg-[#eaf0fc] focus-visible:text-[#356ae6]"
+              href="#account"
+            >
+              <span
+                className="text-[10px] text-[#94a5bd] tabular-nums"
+                aria-hidden="true"
+              >
+                03
+              </span>{" "}
+              Votre compte
             </a>
           </nav>
           <Link
             to="/gallery/user/$userId"
             params={{ userId: user._id }}
-            className={cn(
-              "settings-profile-link px-[10px] gap-[8px] flex items-center pt-[20px] pb-[0] mt-[16px] [border-top-width:1px] [border-top-style:solid] [border-top-color:#e1e7f0] text-[color:#356ae6] [font-size:11px] [@media(width<=640px)]:px-[4px] [@media(width<=640px)]:m-[0] [@media(width<=640px)]:border-[length:0] [@media(width<=640px)]:border-none [@media(width<=640px)]:border-[color:currentColor] [@media(width<=640px)]:inline-flex [@media(width<=640px)]:pt-[12px] [@media(640px<width<=1000px)]:px-[0] [@media(640px<width<=1000px)]:py-[10px] [@media(640px<width<=1000px)]:m-[0] [@media(640px<width<=1000px)]:border-[length:0] [@media(640px<width<=1000px)]:border-none [@media(640px<width<=1000px)]:border-[color:currentColor] [&:hover]:[text-decoration:underline]",
-            )}
+            className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 settings-profile-link px-2.5 gap-2 flex items-center pt-5 pb-0 mt-4 border-t border-solid border-t-[#e1e7f0] text-[#356ae6] text-[11px] [@media(width<=640px)]:px-1 [@media(width<=640px)]:m-0 [@media(width<=640px)]:border-0 [@media(width<=640px)]:border-none [@media(width<=640px)]:border-current [@media(width<=640px)]:inline-flex [@media(width<=640px)]:pt-3 [@media(640px<width<=1000px)]:px-0 [@media(640px<width<=1000px)]:py-2.5 [@media(640px<width<=1000px)]:m-0 [@media(640px<width<=1000px)]:border-0 [@media(640px<width<=1000px)]:border-none [@media(640px<width<=1000px)]:border-current hover:underline"
           >
             Voir ma page publique <span aria-hidden="true">↗</span>
           </Link>
         </aside>
-        <div
-          className={cn(
-            "settings-sections gap-[40px] min-w-[0] grid [&_>_section]:min-w-[0] [&_>_section]:[scroll-margin-top:24px]",
-          )}
-        >
-          <section id="identity" aria-labelledby="identity-title">
-            <div
-              className={cn(
-                "settings-section-heading gap-[14px] flex items-start mb-[18px] [&_>_span]:grid [&_>_span]:[place-items:center] [&_>_span]:w-[30px] [&_>_span]:h-[30px] [&_>_span]:shrink-[0] [&_>_span]:bg-[#e9effa] [&_>_span]:text-[color:#6681b0] [&_>_span]:rounded-[8px_8px_3px_8px] [&_>_span]:[font-size:11px] [&_h2]:mx-[0] [&_h2]:[font-size:19px] [&_h2]:mt-[0] [&_h2]:mb-[5px] [&_h2]:font-[650] [&_h2]:tracking-[-0.4px] [&_p]:m-[0] [&_p]:text-[color:#77869c] [&_p]:[font-size:12px] [&_p]:leading-[1.6]",
-              )}
-            >
-              <span aria-hidden="true">01</span>
+        <div className="settings-sections gap-10 min-w-0 grid">
+          <section
+            className="min-w-0 scroll-mt-6"
+            id="identity"
+            aria-labelledby="identity-title"
+          >
+            <div className="settings-section-heading gap-3.5 flex items-start mb-4.5">
+              <span
+                className="grid place-items-center shrink-0 bg-[#e9effa] text-[#6681b0] rounded-[8px_8px_3px_8px] text-[11px] size-7.5"
+                aria-hidden="true"
+              >
+                01
+              </span>
               <div>
-                <h2 id="identity-title">Votre identité</h2>
-                <p>Ce petit quelque chose qui vous rend reconnaissable.</p>
+                <h2
+                  className="mx-0 text-[19px] mt-0 mb-1.25 font-[650] tracking-[-0.4px]"
+                  id="identity-title"
+                >
+                  Votre identité
+                </h2>
+                <p className="m-0 text-[#77869c] text-xs leading-[1.6]">
+                  Ce petit quelque chose qui vous rend reconnaissable.
+                </p>
               </div>
             </div>
             <AvatarCard
               key={user._id}
               avatar={user.avatar ?? defaultAvatar(user._id)}
             />
-            <div
-              className={cn(
-                "settings-form-grid gap-[16px] grid grid-cols-[repeat(2,_minmax(0,_1fr))] [align-items:start] [@media(width<=640px)]:grid-cols-[1fr] [&_>_form]:min-w-[0] [&_>_form]:h-[100%]",
-              )}
-            >
+            <div className="settings-form-grid gap-4 grid grid-cols-2 items-start [@media(width<=640px)]:grid-cols-1">
               <UpdateNameCard name={user.name} />
               <EmailCard email={user.email} />
             </div>
           </section>
-          <section id="security" aria-labelledby="security-title">
-            <div
-              className={cn(
-                "settings-section-heading gap-[14px] flex items-start mb-[18px] [&_>_span]:grid [&_>_span]:[place-items:center] [&_>_span]:w-[30px] [&_>_span]:h-[30px] [&_>_span]:shrink-[0] [&_>_span]:bg-[#e9effa] [&_>_span]:text-[color:#6681b0] [&_>_span]:rounded-[8px_8px_3px_8px] [&_>_span]:[font-size:11px] [&_h2]:mx-[0] [&_h2]:[font-size:19px] [&_h2]:mt-[0] [&_h2]:mb-[5px] [&_h2]:font-[650] [&_h2]:tracking-[-0.4px] [&_p]:m-[0] [&_p]:text-[color:#77869c] [&_p]:[font-size:12px] [&_p]:leading-[1.6]",
-              )}
-            >
-              <span aria-hidden="true">02</span>
+          <section
+            className="min-w-0 scroll-mt-6"
+            id="security"
+            aria-labelledby="security-title"
+          >
+            <div className="settings-section-heading gap-3.5 flex items-start mb-4.5">
+              <span
+                className="grid place-items-center shrink-0 bg-[#e9effa] text-[#6681b0] rounded-[8px_8px_3px_8px] text-[11px] size-7.5"
+                aria-hidden="true"
+              >
+                02
+              </span>
               <div>
-                <h2 id="security-title">Les clés de votre atelier</h2>
-                <p>
+                <h2
+                  className="mx-0 text-[19px] mt-0 mb-1.25 font-[650] tracking-[-0.4px]"
+                  id="security-title"
+                >
+                  Les clés de votre atelier
+                </h2>
+                <p className="m-0 text-[#77869c] text-xs leading-[1.6]">
                   Votre mot de passe et les appareils qui ont accès à votre
                   compte.
                 </p>
               </div>
             </div>
-            <div
-              className={cn(
-                "settings-form-grid settings-security-grid gap-[16px] grid grid-cols-[repeat(2,_minmax(0,_1fr))] [align-items:start] [@media(width<=640px)]:grid-cols-[1fr] [&_>_form]:min-w-[0] [&_>_form]:h-[100%]",
-              )}
-            >
+            <div className="settings-form-grid settings-security-grid gap-4 grid grid-cols-2 items-start [@media(width<=640px)]:grid-cols-1">
               <ChangePasswordCard />
               <SessionsCard />
             </div>
           </section>
-          <section id="account" aria-labelledby="account-title">
-            <div
-              className={cn(
-                "settings-section-heading gap-[14px] flex items-start mb-[18px] [&_>_span]:grid [&_>_span]:[place-items:center] [&_>_span]:w-[30px] [&_>_span]:h-[30px] [&_>_span]:shrink-[0] [&_>_span]:bg-[#e9effa] [&_>_span]:text-[color:#6681b0] [&_>_span]:rounded-[8px_8px_3px_8px] [&_>_span]:[font-size:11px] [&_h2]:mx-[0] [&_h2]:[font-size:19px] [&_h2]:mt-[0] [&_h2]:mb-[5px] [&_h2]:font-[650] [&_h2]:tracking-[-0.4px] [&_p]:m-[0] [&_p]:text-[color:#77869c] [&_p]:[font-size:12px] [&_p]:leading-[1.6]",
-              )}
-            >
-              <span aria-hidden="true">03</span>
+          <section
+            className="min-w-0 scroll-mt-6"
+            id="account"
+            aria-labelledby="account-title"
+          >
+            <div className="settings-section-heading gap-3.5 flex items-start mb-4.5">
+              <span
+                className="grid place-items-center shrink-0 bg-[#e9effa] text-[#6681b0] rounded-[8px_8px_3px_8px] text-[11px] size-7.5"
+                aria-hidden="true"
+              >
+                03
+              </span>
               <div>
-                <h2 id="account-title">Votre compte</h2>
-                <p>Vous gardez le contrôle, jusqu’à la dernière brique.</p>
+                <h2
+                  className="mx-0 text-[19px] mt-0 mb-1.25 font-[650] tracking-[-0.4px]"
+                  id="account-title"
+                >
+                  Votre compte
+                </h2>
+                <p className="m-0 text-[#77869c] text-xs leading-[1.6]">
+                  Vous gardez le contrôle, jusqu’à la dernière brique.
+                </p>
               </div>
             </div>
             <DeleteAccountCard />

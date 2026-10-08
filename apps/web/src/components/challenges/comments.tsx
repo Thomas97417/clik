@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { usePublicPagination } from "@/lib/clik/use-public-pagination";
 import type { PublicData } from "@/lib/seo/public-data";
 import { defaultAvatar, type AvatarDescriptor } from "@clik/avatars";
@@ -44,35 +43,33 @@ export default function Comments({
   return (
     <section
       id="comments"
-      className={cn(
-        "creation-comments px-[0] gap-[48px] grid grid-cols-[240px_minmax(0,_1fr)] [align-items:start] [scroll-margin-top:100px] mt-[56px] pt-[12px] pb-[20px] [@media(width<=700px)]:gap-[16px] [@media(width<=700px)]:grid-cols-[1fr] [@media(width<=700px)]:mt-[38px] [@media(700px<width<=1000px)]:gap-[28px] [@media(700px<width<=1000px)]:grid-cols-[200px_minmax(0,_1fr)] [&&_textarea]:p-[13px] [&&_textarea]:border-[length:1px] [&&_textarea]:border-solid [&&_textarea]:border-[color:#e5e8ee] [&&_textarea]:w-[100%] [&&_textarea]:[resize:vertical] [&&_textarea]:min-h-[110px] [&&_textarea]:max-h-[360px] [&&_textarea]:bg-[#fff] [&&_textarea]:rounded-[10px] [&&_textarea]:[font-size:14px] [&&_textarea]:leading-[1.7] [&&_textarea]:text-[color:#2e405b] [&&_textarea:focus-visible]:[outline:2px_solid_#356ae6] [&&_textarea:focus-visible]:[outline-offset:2px]",
-      )}
+      className="creation-comments px-0 gap-12 grid grid-cols-[240px_minmax(0,1fr)] items-start scroll-mt-25 mt-14 pt-3 pb-5 [@media(width<=700px)]:gap-4 [@media(width<=700px)]:grid-cols-1 [@media(width<=700px)]:mt-9.5 [@media(700px<width<=1000px)]:gap-7 [@media(700px<width<=1000px)]:grid-cols-[200px_minmax(0,1fr)]"
       aria-labelledby="comments-title"
     >
-      <header
-        className={cn(
-          "comments-heading pt-[4px] [@media(width<=700px)]:px-[0] [@media(width<=700px)]:pt-[12px] [@media(width<=700px)]:relative [@media(width<=700px)]:pb-[0] [&_[class~='group/community-art']]:w-[125px] [&_[class~='group/community-art']]:h-[96px] [&_[class~='group/community-art']]:mt-[0] [&_[class~='group/community-art']]:mr-[0] [&_[class~='group/community-art']]:mb-[16px] [&_[class~='group/community-art']]:ml-[-12px] [@media(width<=700px)]:[&_[class~='group/community-art']]:w-[66px] [@media(width<=700px)]:[&_[class~='group/community-art']]:h-[55px] [@media(width<=700px)]:[&_[class~='group/community-art']]:mb-[0] [@media(width<=700px)]:[&_[class~='group/community-art']]:ml-[0] [@media(width<=700px)]:[&_[class~='group/community-art']]:absolute [@media(width<=700px)]:[&_[class~='group/community-art']]:right-[0] [@media(width<=700px)]:[&_[class~='group/community-art']]:top-[4px] [&_h2]:[font-size:27px] [&_h2]:font-[800] [&_h2]:tracking-[-0.8px] [&_h2]:text-[color:#25354e] [@media(width<=700px)]:[&_h2]:[font-size:21px] [@media(width<=700px)]:[&_h2]:pr-[70px] [@media(700px<width<=1000px)]:[&_h2]:[font-size:23px] [&_h2_span]:px-[7px] [&_h2_span]:py-[0] [&_h2_span]:inline-flex [&_h2_span]:[vertical-align:middle] [&_h2_span]:items-center [&_h2_span]:justify-center [&_h2_span]:min-w-[27px] [&_h2_span]:h-[27px] [&_h2_span]:ml-[8px] [&_h2_span]:rounded-[8px_8px_8px_2px] [&_h2_span]:bg-[#f7e7d9] [&_h2_span]:[font-size:12px] [&_h2_span]:text-[color:#9e714b] [&_h2_span]:font-[600] [&_p]:mt-[14px] [&_p]:text-[color:#7d8798] [&_p]:[font-size:13px] [&_p]:leading-[1.9] [&_p]:max-w-[310px] [@media(width<=700px)]:[&_p]:mt-[10px] [@media(width<=700px)]:[&_p]:[font-size:12px] [@media(width<=700px)]:[&_p]:max-w-[380px] [@media(width<=700px)]:[&_p]:pr-[78px]",
-        )}
-      >
-        <CommunityArt kind="comments" />
-        <h2 id="comments-title">
-          Commentaires<span> {count}</span>
+      <header className="comments-heading pt-1 [@media(width<=700px)]:px-0 [@media(width<=700px)]:pt-3 [@media(width<=700px)]:relative [@media(width<=700px)]:pb-0">
+        <CommunityArt
+          className="w-31.25 h-24 mt-0 mr-0 mb-4 -ml-3 [@media(width<=700px)]:w-16.5 [@media(width<=700px)]:h-13.75 [@media(width<=700px)]:mb-0 [@media(width<=700px)]:ml-0 [@media(width<=700px)]:absolute [@media(width<=700px)]:right-0 [@media(width<=700px)]:top-1"
+          kind="comments"
+        />
+        <h2
+          className="text-[27px] font-extrabold tracking-[-0.8px] text-[#25354e] [@media(width<=700px)]:text-[21px] [@media(width<=700px)]:pr-17.5 [@media(700px<width<=1000px)]:text-[23px]"
+          id="comments-title"
+        >
+          Commentaires
+          <span className="px-1.75 py-0 inline-flex align-middle items-center justify-center min-w-6.75 h-6.75 ml-2 rounded-[8px_8px_8px_2px] bg-[#f7e7d9] text-xs leading-[inherit] text-[#9e714b] font-semibold">
+            {" "}
+            {count}
+          </span>
         </h2>
-        <p>
+        <p className="mt-3.5 text-[#7d8798] text-[13px] leading-[1.9] max-w-77.5 [@media(width<=700px)]:mt-2.5 [@media(width<=700px)]:text-xs [@media(width<=700px)]:max-w-95 [@media(width<=700px)]:pr-19.5">
           Les idées s’assemblent aussi à plusieurs. Un petit mot peut donner
           envie d’aller plus loin.
         </p>
       </header>
-      <div
-        className={cn(
-          "comments-thread min-w-[0] [&_>_[class~='group/load-more']]:px-[16px] [&_>_[class~='group/load-more']]:py-[10px] [&_>_[class~='group/load-more']]:border-[length:1px] [&_>_[class~='group/load-more']]:border-solid [&_>_[class~='group/load-more']]:border-[color:#dfe5ef] [&_>_[class~='group/load-more']]:rounded-[20px] [&_>_[class~='group/load-more']]:[font-size:12px] [&_>_[class~='group/load-more']]:text-[color:#637997] [&_>_[class~='group/load-more']]:bg-[#fff]",
-        )}
-      >
+      <div className="comments-thread min-w-0">
         {isAuthenticated ? (
           <form
-            className={cn(
-              "comment-form p-[22px] mx-[0] border-[length:1px] border-solid border-[color:#e6ded6] relative mt-[12px] mb-[30px] rounded-[8px_20px_20px_20px] bg-[#fffefc] [box-shadow:0_5px_0_#eee6dc66] [@media(width<=640px)]:p-[15px] [&::before]:[content:''] [&::before]:absolute [&::before]:w-[54px] [&::before]:h-[15px] [&::before]:top-[-8px] [&::before]:right-[26px] [&::before]:bg-[#f1d9bcbb] [&::before]:[transform:rotate(4deg)] [&::before]:pointer-events-none [&_label]:block [&_label]:[font-size:13px] [&_label]:text-[color:#536580] [&_label]:font-[600] [&&_textarea]:border-[color:#eee7df] [&&_textarea]:bg-[transparent]",
-            )}
+            className="comment-form p-5.5 mx-0 border border-solid border-[#e6ded6] relative mt-3 mb-7.5 rounded-[8px_20px_20px_20px] bg-[#fffefc] [box-shadow:0_5px_0_#eee6dc66] [@media(width<=640px)]:p-3.75 before:[content:''] before:absolute before:w-13.5 before:h-3.75 before:-top-2 before:right-6.5 before:bg-[#f1d9bcbb] before:transform-[rotate(4deg)] before:pointer-events-none"
             onSubmit={async (e) => {
               e.preventDefault();
               if (busy || !body.trim()) return;
@@ -88,20 +85,22 @@ export default function Comments({
               }
             }}
           >
-            <div
-              className={cn(
-                "comment-composer-heading gap-[10px] flex items-center mb-[14px]",
-              )}
-            >
+            <div className="comment-composer-heading gap-2.5 flex items-center mb-3.5">
               {me && (
                 <BrickAvatar
                   avatar={me.avatar ?? defaultAvatar(me._id)}
                   size={30}
                 />
               )}
-              <label htmlFor="new-comment">Votre commentaire</label>
+              <label
+                className="block text-[13px] text-[#536580] font-semibold"
+                htmlFor="new-comment"
+              >
+                Votre commentaire
+              </label>
             </div>
             <Textarea
+              className="p-3.25 border border-solid w-full resize-y min-h-27.5 max-h-90 rounded-[10px] text-sm leading-[1.7] text-[#2e405b] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 border-[#eee7df] bg-transparent"
               id="new-comment"
               value={body}
               onChange={(e) => setBody(e.target.value)}
@@ -112,31 +111,32 @@ export default function Comments({
               disabled={busy}
               required
             />
-            <div
-              className={cn(
-                "comment-composer-footer gap-[12px] flex items-center justify-between flex-wrap mt-[14px] [&_>_span]:[font-size:11px] [&_>_span]:tabular-nums [&_>_span]:text-[color:#9398a2] [&_button]:px-[14px] [&_button]:py-[10px] [&_button]:gap-[10px] [&_button]:rounded-[10px] [&_button]:min-h-[40px] [&_button]:[font-size:12px]",
-              )}
-            >
-              <span id="comment-length">{body.length} / 1 000</span>
+            <div className="comment-composer-footer gap-3 flex items-center justify-between flex-wrap mt-3.5">
+              <span
+                className="text-[11px] tabular-nums text-[#9398a2]"
+                id="comment-length"
+              >
+                {body.length} / 1 000
+              </span>
               <button
-                className={cn(
-                  "primary-link group/primary-link px-[19px] py-[12px] gap-[10px] inline-flex items-center justify-center bg-[#356ae6] text-[color:#fff] rounded-[9px] [font-size:14px] font-[650] whitespace-nowrap [&:hover]:bg-[#2458ce]",
-                )}
+                className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 primary-link group/primary-link inline-flex items-center justify-center bg-[#356ae6] text-white font-[650] whitespace-nowrap hover:bg-[#2458ce] px-3.5 py-2.5 gap-2.5 rounded-[10px] min-h-10 text-xs leading-[inherit]"
                 disabled={busy || !body.trim()}
               >
                 {busy ? "Envoi…" : "Publier le commentaire"}
-                <ArrowUpRight size={16} aria-hidden="true" />
+                <ArrowUpRight
+                  className="shrink-0"
+                  size={16}
+                  aria-hidden="true"
+                />
               </button>
             </div>
           </form>
         ) : (
-          <div
-            className={cn(
-              "comments-signin p-[26px] mx-[0] border-[length:1px] border-solid border-[color:#ede0d2] mt-[12px] mb-[28px] bg-[#fcf5ed] rounded-[8px_20px_20px_20px] [@media(width<=700px)]:p-[20px] [&_p]:text-[color:#755d49] [&_p]:[font-size:16px] [&_p]:font-[650] [&_p]:leading-[1.6] [&_>_span]:mx-[0] [&_>_span]:block [&_>_span]:text-[color:#9b8775] [&_>_span]:[font-size:13px] [&_>_span]:leading-[1.8] [&_>_span]:mt-[8px] [&_>_span]:mb-[18px]",
-            )}
-          >
-            <p>Votre regard fait aussi partie de la création.</p>
-            <span>
+          <div className="comments-signin p-6.5 mx-0 border border-solid border-[#ede0d2] mt-3 mb-7 bg-[#fcf5ed] rounded-[8px_20px_20px_20px] [@media(width<=700px)]:p-5">
+            <p className="text-[#755d49] text-base font-[650] leading-[1.6]">
+              Votre regard fait aussi partie de la création.
+            </p>
+            <span className="mx-0 block text-[#9b8775] text-[13px] leading-[1.8] mt-2 mb-4.5">
               Rejoignez la conversation pour partager vos idées avec son auteur.
             </span>
             <SignInTo>Se connecter pour commenter</SignInTo>
@@ -144,9 +144,7 @@ export default function Comments({
         )}
         {error && (
           <p
-            className={cn(
-              "challenge-error px-[15px] py-[12px] gap-[10px] border-[length:1px] border-solid border-[color:#efd5db] flex flex-wrap rounded-[9px] bg-[#fff4f6] text-[color:#9d3d50] [font-size:13px] leading-[1.8] [overflow-wrap:anywhere] [&_button]:[text-decoration:underline]",
-            )}
+            className="challenge-error px-3.75 py-3 gap-2.5 border border-solid border-[#efd5db] flex flex-wrap rounded-[9px] bg-[#fff4f6] text-[#9d3d50] text-[13px] leading-[1.8] wrap-anywhere"
             role="alert"
           >
             {error}
@@ -163,9 +161,7 @@ export default function Comments({
         </div>
         {!results.length && (
           <p
-            className={cn(
-              "comments-empty px-[0] pt-[22px] pb-[12px] text-center [font-size:13px] leading-[1.8] text-[color:#8a94a5]",
-            )}
+            className="comments-empty px-0 pt-5.5 pb-3 text-center text-[13px] leading-[1.8] text-[#8a94a5]"
             role="status"
           >
             {status === "LoadingFirstPage"
@@ -175,9 +171,7 @@ export default function Comments({
         )}
         {status === "CanLoadMore" && (
           <button
-            className={cn(
-              "load-more group/load-more mx-[auto] my-[35px] block",
-            )}
+            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 load-more group/load-more mx-auto my-8.75 block px-4 py-2.5 border border-solid border-[#dfe5ef] rounded-[20px] text-xs leading-[inherit] text-[#637997] bg-white"
             onClick={() => loadMore(20)}
           >
             Voir les commentaires précédents
@@ -217,15 +211,11 @@ function Comment({
   };
   return (
     <article
-      className={cn(
-        "comment p-[0] gap-[12px] flex mt-[20px] [&[data-mine]_[class~='group/comment-content']]:border-[color:#dbe5f8] [&[data-mine]_[class~='group/comment-content']]:bg-[#f4f7fd]",
-      )}
+      className="comment p-0 gap-3 flex mt-5 group/comment"
       data-mine={mine || undefined}
     >
       <div
-        className={cn(
-          "comment-avatar grid [place-items:center] w-[34px] h-[34px] mt-[12px] shrink-[0] rounded-[10px] bg-[#eaf0fc] [&:has([class~='group/brick-avatar'])]:bg-[transparent] [&:has([class~='group/brick-avatar'])]:rounded-[6px]",
-        )}
+        className="comment-avatar grid place-items-center mt-3 shrink-0 rounded-[10px] bg-[#eaf0fc] [&:has([class~='group/brick-avatar'])]:bg-transparent [&:has([class~='group/brick-avatar'])]:rounded-[6px] size-8.5"
         aria-hidden="true"
       >
         <BrickAvatar
@@ -233,20 +223,19 @@ function Comment({
           size={32}
         />
       </div>
-      <div
-        className={cn(
-          "comment-content group/comment-content [&_label]:block [&_label]:[font-size:13px] [&_label]:text-[color:#536580] [&_label]:font-[600] [&_label]:mb-[10px] px-[20px] py-[18px] border-[length:1px] border-solid border-[color:#e6ebf3] flex-[1] min-w-[0] bg-[#fff] rounded-[4px_18px_18px_18px] [@media(width<=700px)]:p-[14px] [&_header]:flex [&_header]:items-baseline [&_header]:flex-wrap [&_header]:gap-y-[6px] [&_header]:gap-x-[14px] [&_header]:mb-[10px] [&_strong]:[font-size:13px] [&_strong]:[overflow-wrap:anywhere] [&_time]:[font-size:11px] [&_time]:text-[color:#95a0b1] [&_time]:ml-[auto] [@media(width<=700px)]:[&_time]:ml-[0] [&_>_p]:[white-space:pre-wrap] [&_>_p]:[overflow-wrap:anywhere] [&_>_p]:[font-size:14px] [&_>_p]:leading-[1.8] [&_>_p]:text-[color:#526885]",
-        )}
-      >
-        <header>
-          <strong>
+      <div className="comment-content group/comment-content px-5 py-4.5 border border-solid border-[#e6ebf3] flex-1 min-w-0 bg-white rounded-[4px_18px_18px_18px] [@media(width<=700px)]:p-3.5 group-data-[mine]/comment:border-[#dbe5f8] group-data-[mine]/comment:bg-[#f4f7fd]">
+        <header className="flex items-baseline flex-wrap gap-y-1.5 gap-x-3.5 mb-2.5">
+          <strong className="text-[13px] wrap-anywhere">
             <AuthorLink
               id={comment.owner}
               name={comment.author}
               showAvatar={false}
             />
           </strong>
-          <time dateTime={new Date(comment.createdAt).toISOString()}>
+          <time
+            className="text-[11px] text-[#95a0b1] ml-auto [@media(width<=700px)]:ml-0"
+            dateTime={new Date(comment.createdAt).toISOString()}
+          >
             {new Date(comment.createdAt).toLocaleDateString("fr-FR", {
               day: "numeric",
               month: "short",
@@ -262,7 +251,10 @@ function Comment({
               void perform(() => edit({ id: comment._id, body }));
             }}
           >
-            <label htmlFor={`edit-${comment._id}`}>
+            <label
+              className="block text-[13px] text-[#536580] font-semibold mb-2.5"
+              htmlFor={`edit-${comment._id}`}
+            >
               Modifier votre commentaire
             </label>
             <Textarea
@@ -275,13 +267,15 @@ function Comment({
               rows={3}
               required
             />
-            <div
-              className={cn(
-                "comment-actions flex flex-wrap items-center gap-y-[4px] gap-x-[8px] mt-[12px] [font-size:11px] text-[color:#6b82a6] [&_button]:px-[8px] [&_button]:py-[6px] [&_button]:min-h-[30px] [&_button]:rounded-[6px] [&_button:hover]:text-[color:#356ae6] [&_button:hover]:bg-[#e8effb] [&_button:focus-visible]:[outline:2px_solid_#356ae6] [&_button:focus-visible]:[outline-offset:2px]",
-              )}
-            >
-              <button disabled={busy || !body.trim()}>Enregistrer</button>
+            <div className="comment-actions flex flex-wrap items-center gap-y-1 gap-x-2 mt-3 text-[11px] text-[#6b82a6]">
               <button
+                className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 px-2 py-1.5 min-h-7.5 rounded-[6px] hover:text-[#356ae6] hover:bg-[#e8effb] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2"
+                disabled={busy || !body.trim()}
+              >
+                Enregistrer
+              </button>
+              <button
+                className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 px-2 py-1.5 min-h-7.5 rounded-[6px] hover:text-[#356ae6] hover:bg-[#e8effb] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2"
                 type="button"
                 disabled={busy}
                 onClick={() => setEditing(false)}
@@ -291,18 +285,17 @@ function Comment({
             </div>
           </form>
         ) : (
-          <p>{comment.body}</p>
+          <p className="whitespace-pre-wrap wrap-anywhere text-sm leading-[1.8] text-[#526885]">
+            {comment.body}
+          </p>
         )}
         {mine && !editing && (
-          <div
-            className={cn(
-              "comment-actions flex flex-wrap items-center gap-y-[4px] gap-x-[8px] mt-[12px] [font-size:11px] text-[color:#6b82a6] [&_button]:px-[8px] [&_button]:py-[6px] [&_button]:min-h-[30px] [&_button]:rounded-[6px] [&_button:hover]:text-[color:#356ae6] [&_button:hover]:bg-[#e8effb] [&_button:focus-visible]:[outline:2px_solid_#356ae6] [&_button:focus-visible]:[outline-offset:2px]",
-            )}
-          >
+          <div className="comment-actions flex flex-wrap items-center gap-y-1 gap-x-2 mt-3 text-[11px] text-[#6b82a6]">
             {confirm ? (
               <>
                 <span>Supprimer ce commentaire ?</span>
                 <button
+                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 px-2 py-1.5 min-h-7.5 rounded-[6px] hover:text-[#356ae6] hover:bg-[#e8effb] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2"
                   disabled={busy}
                   onClick={() =>
                     void perform(() => remove({ id: comment._id }))
@@ -310,13 +303,18 @@ function Comment({
                 >
                   Confirmer la suppression
                 </button>
-                <button disabled={busy} onClick={() => setConfirm(false)}>
+                <button
+                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 px-2 py-1.5 min-h-7.5 rounded-[6px] hover:text-[#356ae6] hover:bg-[#e8effb] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2"
+                  disabled={busy}
+                  onClick={() => setConfirm(false)}
+                >
                   Annuler
                 </button>
               </>
             ) : (
               <>
                 <button
+                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 px-2 py-1.5 min-h-7.5 rounded-[6px] hover:text-[#356ae6] hover:bg-[#e8effb] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2"
                   onClick={() => {
                     setBody(comment.body);
                     setEditing(true);
@@ -324,16 +322,19 @@ function Comment({
                 >
                   Modifier
                 </button>
-                <button onClick={() => setConfirm(true)}>Supprimer</button>
+                <button
+                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 px-2 py-1.5 min-h-7.5 rounded-[6px] hover:text-[#356ae6] hover:bg-[#e8effb] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2"
+                  onClick={() => setConfirm(true)}
+                >
+                  Supprimer
+                </button>
               </>
             )}
           </div>
         )}
         {error && (
           <p
-            className={cn(
-              "challenge-error px-[15px] py-[12px] gap-[10px] border-[length:1px] border-solid border-[color:#efd5db] flex flex-wrap rounded-[9px] bg-[#fff4f6] text-[color:#9d3d50] [font-size:13px] leading-[1.8] [overflow-wrap:anywhere] [&_button]:[text-decoration:underline]",
-            )}
+            className="challenge-error px-3.75 py-3 gap-2.5 border border-solid border-[#efd5db] flex flex-wrap rounded-[9px] bg-[#fff4f6] whitespace-pre-wrap wrap-anywhere text-sm leading-[1.8] text-[#526885]"
             role="alert"
           >
             {error}

@@ -141,46 +141,31 @@ function Challenges() {
     void navigate({ to: "/challenges", search: { date } });
   const remaining = challenge ? Math.max(0, challenge.closesAt - now) : 0;
   return (
-    <main
-      className={cn(
-        "collection-page challenges-page px-[5%] py-[64px] m-[auto] max-w-[1320px] [@media(width<=850px)]:pt-[40px] max-w-[1320px]",
-      )}
-    >
-      <div
-        className={cn(
-          "page-heading group/page-heading gap-[25px] flex justify-between items-center mb-[45px] [@media(width<=850px)]:items-start [@media(width<=850px)]:flex-col [&_h1]:mx-[0] [&_h1]:my-[12px] [&_h1]:[font-size:48px] [&_h1]:tracking-[-2px] [&_h1]:font-[800] [@media(width<=850px)]:[&_h1]:[font-size:40px] [&_h1_>_span]:text-[color:#356ae6] [&_p]:text-[color:#7b889b] [&_p]:[font-size:15px]",
-        )}
-      >
+    <main className="collection-page challenges-page px-[5%] py-16 m-auto max-w-330 [@media(width<=850px)]:pt-10">
+      <div className="page-heading group/page-heading gap-6.25 flex justify-between items-center mb-11.25 [@media(width<=850px)]:items-start [@media(width<=850px)]:flex-col">
         <div>
-          <h1>
+          <h1 className="mx-0 my-3 text-5xl leading-[inherit] tracking-[-2px] font-extrabold [@media(width<=850px)]:text-[40px]">
             {date && date !== today
               ? `Le défi du ${formatChallengeDay(date)}`
               : "Le défi du jour"}
-            <span>.</span>
+            <span className="text-[#356ae6]">.</span>
           </h1>
-          <p>
+          <p className="text-[#7b889b] text-[15px]">
             100 pièces à votre disposition. 24 heures pour en faire votre idée.
           </p>
         </div>
       </div>
-      <div
-        className={cn(
-          "challenge-toolbar mx-[0] my-[28px] flex items-center flex-wrap gap-y-[12px] gap-x-[24px]",
-        )}
-      >
-        <div
-          className={cn(
-            "challenge-navigation gap-[8px] flex items-center flex-wrap flex-[1_1_auto] min-w-[0] [@media(width<=480px)]:grid [@media(width<=480px)]:grid-cols-[42px_minmax(0,_1fr)_42px] [@media(width<=480px)]:basis-[100%] [@media(480px<width<=640px)]:basis-[100%] [&_button]:px-[13px] [&_button]:py-[8px] [&_button]:gap-[10px] [&_button]:border-[length:1px] [&_button]:border-solid [&_button]:border-[color:#dee5f0] [&_button]:inline-flex [&_button]:items-center [&_button]:justify-center [&_button]:min-h-[42px] [&_button]:rounded-[9px] [&_button]:bg-[#fff] [&_button]:text-[color:#435976] [&_button]:[font-size:13px] [&_button:hover:not(:disabled)]:bg-[#edf3ff] [&_>_span]:ml-[auto] [&_>_span]:[font-size:11px] [&_>_span]:text-[color:#7d8da5] [@media(width<=640px)]:[&_>_span]:ml-[0] [@media(width<=640px)]:[&_>_span]:w-[100%] [&_[class~='group/challenge-date-trigger']]:py-[6px] [&_[class~='group/challenge-date-trigger']]:gap-[10px] [&_[class~='group/challenge-date-trigger']]:border-[color:#d9e3f3] [&_[class~='group/challenge-date-trigger']]:min-h-[44px] [&_[class~='group/challenge-date-trigger']]:pr-[12px] [&_[class~='group/challenge-date-trigger']]:pl-[7px] [&_[class~='group/challenge-date-trigger']]:rounded-[11px] [&_[class~='group/challenge-date-trigger']]:text-[color:#344964] [&_[class~='group/challenge-date-trigger']]:font-[650] [@media(width<=480px)]:[&_[class~='group/challenge-date-trigger']]:px-[6px] [@media(width<=480px)]:[&_[class~='group/challenge-date-trigger']]:gap-[6px] [@media(width<=480px)]:[&_[class~='group/challenge-date-trigger']]:[font-size:12px] [&_[class~='group/challenge-date-trigger']:hover]:border-[color:#adc5f0] [&_[class~='group/challenge-date-trigger']:hover]:bg-[#f5f8ff] [&_[class~='group/challenge-date-trigger']:hover]:text-[color:#285abd] [&_[class~='group/challenge-date-trigger'][data-popup-open]]:border-[color:#adc5f0] [&_[class~='group/challenge-date-trigger'][data-popup-open]]:bg-[#f5f8ff] [&_[class~='group/challenge-date-trigger'][data-popup-open]]:text-[color:#285abd] [@media(width<=480px)]:[&_>_button[aria-label]]:px-[8px] [@media(width<=480px)]:[&_>_button:last-child]:col-[1_/_-1] [@media(width<=480px)]:[&_>_button:last-child]:[justify-self:end]",
-          )}
-        >
+      <div className="challenge-toolbar mx-0 my-7 flex items-center flex-wrap gap-y-3 gap-x-6">
+        <div className="challenge-navigation gap-2 flex items-center flex-wrap flex-[1_1_auto] min-w-0 [@media(width<=480px)]:grid [@media(width<=480px)]:grid-cols-[42px_minmax(0,1fr)_42px] [@media(width<=480px)]:basis-full [@media(480px<width<=640px)]:basis-full">
           <button
+            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-3.25 py-2 gap-2.5 border border-solid border-[#dee5f0] inline-flex items-center justify-center min-h-10.5 rounded-[9px] bg-white text-[#435976] text-[13px] hover:enabled:bg-[#edf3ff] [@media(width<=480px)]:[&[aria-label]]:px-2 [@media(width<=480px)]:last:col-span-full [@media(width<=480px)]:last:justify-self-end"
             aria-label="Défi précédent"
             disabled={!data || selected <= data.firstDay}
             onClick={() =>
               choose(challengeDay(challengeStart(selected) - CHALLENGE_DAY_MS))
             }
           >
-            <ArrowLeft size={18} />
+            <ArrowLeft className="shrink-0" size={18} />
           </button>
           <ChallengeDatePicker
             key={selected}
@@ -190,15 +175,17 @@ function Challenges() {
             onChange={choose}
           />
           <button
+            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-3.25 py-2 gap-2.5 border border-solid border-[#dee5f0] inline-flex items-center justify-center min-h-10.5 rounded-[9px] bg-white text-[#435976] text-[13px] hover:enabled:bg-[#edf3ff] [@media(width<=480px)]:[&[aria-label]]:px-2 [@media(width<=480px)]:last:col-span-full [@media(width<=480px)]:last:justify-self-end"
             aria-label="Défi suivant"
             disabled={selected >= today}
             onClick={() =>
               choose(challengeDay(challengeStart(selected) + CHALLENGE_DAY_MS))
             }
           >
-            <ArrowRight size={18} />
+            <ArrowRight className="shrink-0" size={18} />
           </button>
           <button
+            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-3.25 py-2 gap-2.5 border border-solid border-[#dee5f0] inline-flex items-center justify-center min-h-10.5 rounded-[9px] bg-white text-[#435976] text-[13px] hover:enabled:bg-[#edf3ff] [@media(width<=480px)]:[&[aria-label]]:px-2 [@media(width<=480px)]:last:col-span-full [@media(width<=480px)]:last:justify-self-end"
             onClick={() => void navigate({ to: "/challenges", search: {} })}
             disabled={!date}
           >
@@ -215,13 +202,12 @@ function Challenges() {
       </div>
       {error && (
         <p
-          className={cn(
-            "challenge-error px-[15px] py-[12px] gap-[10px] border-[length:1px] border-solid border-[color:#efd5db] flex flex-wrap rounded-[9px] bg-[#fff4f6] text-[color:#9d3d50] [font-size:13px] leading-[1.8] [overflow-wrap:anywhere] [&_button]:[text-decoration:underline]",
-          )}
+          className="challenge-error px-3.75 py-3 gap-2.5 border border-solid border-[#efd5db] flex flex-wrap rounded-[9px] bg-[#fff4f6] text-[#9d3d50] text-[13px] leading-[1.8] wrap-anywhere"
           role="alert"
         >
           {error}
           <button
+            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 underline"
             onClick={() => {
               setError("");
               void ensure({}).catch((e) => setError(String(e)));
@@ -232,49 +218,39 @@ function Challenges() {
         </p>
       )}
       {!data ? (
-        <div
-          className={cn(
-            "empty-state px-[25px] py-[70px] gap-[20px] min-h-[300px] flex flex-col items-center justify-center text-center text-[color:#7d8ba0] [&_h1]:text-[color:#32445f] [&_h1]:[font-size:24px] [&_h1]:font-[700] [&_h2]:text-[color:#32445f] [&_h2]:[font-size:24px] [&_h2]:font-[700] [&_p]:max-w-[510px] [&_p]:leading-[1.8]",
-          )}
-        >
+        <div className="empty-state px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0]">
           Ouverture du défi…
         </div>
       ) : !challenge ? (
-        <div
-          className={cn(
-            "empty-state px-[25px] py-[70px] gap-[20px] min-h-[300px] flex flex-col items-center justify-center text-center text-[color:#7d8ba0] [&_h1]:text-[color:#32445f] [&_h1]:[font-size:24px] [&_h1]:font-[700] [&_h2]:text-[color:#32445f] [&_h2]:[font-size:24px] [&_h2]:font-[700] [&_p]:max-w-[510px] [&_p]:leading-[1.8]",
-          )}
-        >
-          <h2>
+        <div className="empty-state px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0]">
+          <h2 className="text-[#32445f] text-2xl leading-[inherit] font-bold">
             {selected === today
               ? "Le défi se prépare…"
               : "Aucun défi à cette date."}
           </h2>
-          <p>Choisissez une autre journée ou revenez au défi d’aujourd’hui.</p>
+          <p className="max-w-127.5 leading-[1.8]">
+            Choisissez une autre journée ou revenez au défi d’aujourd’hui.
+          </p>
         </div>
       ) : (
         <>
           <section
-            className={cn(
-              "challenge-kit overflow-hidden border-[length:1px] border-solid border-[color:#dfe7f3] bg-[#fff] rounded-[20px]",
-            )}
+            className="challenge-kit overflow-hidden border border-solid border-[#dfe7f3] bg-white rounded-[20px]"
             aria-label="Le lot du défi"
           >
-            <div
-              className={cn(
-                "challenge-kit-heading px-[28px] py-[25px] gap-[20px] flex items-center justify-between flex-wrap [@media(width<=640px)]:p-[20px] [&_h2]:mx-[0] [&_h2]:my-[7px] [&_h2]:[font-size:25px] [&_h2]:font-[800] [&_h2]:tracking-[-0.7px] [&_p]:[font-size:13px] [&_p]:leading-[1.8] [&_p]:text-[color:#6e809d]",
-              )}
-            >
+            <div className="challenge-kit-heading px-7 py-6.25 gap-5 flex items-center justify-between flex-wrap [@media(width<=640px)]:p-5">
               <div>
-                <h2>Les pièces du jour</h2>
-                <p>Utilisez tout ou partie du lot. Les couleurs sont libres.</p>
+                <h2 className="mx-0 my-1.75 text-[25px] font-extrabold tracking-[-0.7px]">
+                  Les pièces du jour
+                </h2>
+                <p className="text-[13px] leading-[1.8] text-[#6e809d]">
+                  Utilisez tout ou partie du lot. Les couleurs sont libres.
+                </p>
               </div>
               <span
                 className={cn(
-                  cn(
-                    "challenge-time px-[13px] py-[10px] gap-[8px] inline-flex items-center text-[color:#7e6e59] bg-[#f7f3ec] [font-size:12px] rounded-[9px] [&[class~='group/is-open']]:bg-[#ecf8f1] [&[class~='group/is-open']]:text-[color:#337c59]",
-                    open ? "is-open group/is-open" : "",
-                  ),
+                  "challenge-time px-3.25 py-2.5 gap-2 inline-flex items-center text-[#7e6e59] bg-[#f7f3ec] text-xs leading-[inherit] rounded-[9px] [&[class~='group/is-open']]:bg-[#ecf8f1] [&[class~='group/is-open']]:text-[#337c59]",
+                  open ? "is-open group/is-open" : "",
                 )}
               >
                 <Clock3 size={16} />
@@ -283,30 +259,28 @@ function Challenges() {
                   : "Participations closes"}
               </span>
             </div>
-            <div
-              className={cn(
-                "challenge-stock-grid px-[28px] gap-[10px] grid grid-cols-[repeat(6,_minmax(0,_1fr))] pt-[0] pb-[25px] [@media(width<=640px)]:px-[14px] [@media(width<=640px)]:gap-[7px] [@media(width<=640px)]:grid-cols-[repeat(3,_minmax(0,_1fr))] [@media(width<=640px)]:pb-[18px] [@media(640px<width<=850px)]:grid-cols-[repeat(4,_minmax(0,_1fr))]",
-              )}
-            >
+            <div className="challenge-stock-grid px-7 gap-2.5 grid grid-cols-6 pt-0 pb-6.25 [@media(width<=640px)]:px-3.5 [@media(width<=640px)]:gap-1.75 [@media(width<=640px)]:grid-cols-3 [@media(width<=640px)]:pb-4.5 [@media(640px<width<=850px)]:grid-cols-4">
               {challenge.stock.map((item) => (
                 <div
-                  className={cn(
-                    "challenge-stock-card px-[9px] border-[length:1px] border-solid border-[color:#e7ecf6] relative pt-[20px] pb-[12px] bg-[#f6f8fd] rounded-[12px] text-center [@media(width<=640px)]:px-[5px] [&_>_span]:absolute [&_>_span]:top-[8px] [&_>_span]:right-[10px] [&_>_span]:[font-size:12px] [&_>_span]:font-[700] [&_>_span]:text-[color:#356ae6] [&_[class~='group/part-preview']]:mx-[auto] [&_[class~='group/part-preview']]:my-[5px] [&_[class~='group/part-preview']]:h-[70px] [@media(width<=640px)]:[&_[class~='group/part-preview']]:h-[55px] [&_p]:text-[color:#5e7293] [&_p]:[font-size:11px]",
-                  )}
+                  className="challenge-stock-card px-2.25 border border-solid border-[#e7ecf6] relative pt-5 pb-3 bg-[#f6f8fd] rounded-[12px] text-center [@media(width<=640px)]:px-1.25"
                   key={item.type}
                 >
-                  <span>× {item.quantity}</span>
-                  <PartPreview type={item.type as PartType} color="#4079e8" />
-                  <p>{CATALOG[item.type as PartType].name}</p>
+                  <span className="absolute top-2 right-2.5 text-xs leading-[inherit] font-bold text-[#356ae6]">
+                    × {item.quantity}
+                  </span>
+                  <PartPreview
+                    className="mx-auto my-1.25 h-17.5 [@media(width<=640px)]:h-13.75"
+                    type={item.type as PartType}
+                    color="#4079e8"
+                  />
+                  <p className="text-[#5e7293] text-[11px]">
+                    {CATALOG[item.type as PartType].name}
+                  </p>
                 </div>
               ))}
             </div>
-            <div
-              className={cn(
-                "challenge-kit-footer px-[28px] py-[25px] gap-[20px] flex items-center justify-between flex-wrap [border-top-width:1px] [border-top-style:solid] [border-top-color:#e8edf5] bg-[#fafbff] [@media(width<=640px)]:p-[20px] [&_p]:[font-size:13px] [&_p]:leading-[1.8] [&_p]:text-[color:#6e809d] [&_>_a]:text-[color:#356ae6] [&_>_a]:[font-size:13px] [&_>_a]:font-[600] [@media(width<=640px)]:[&_[class~='group/primary-link']]:w-[100%]",
-              )}
-            >
-              <p>
+            <div className="challenge-kit-footer px-7 py-6.25 gap-5 flex items-center justify-between flex-wrap border-t border-solid border-t-[#e8edf5] bg-[#fafbff] [@media(width<=640px)]:p-5">
+              <p className="text-[13px] leading-[1.8] text-[#6e809d]">
                 {open
                   ? "Une création par personne, modifiable jusqu’à minuit UTC."
                   : "Les constructions sont figées. Les votes et les échanges continuent."}
@@ -314,9 +288,7 @@ function Challenges() {
               {open ? (
                 isAuthenticated ? (
                   <button
-                    className={cn(
-                      "primary-link group/primary-link px-[19px] py-[12px] gap-[10px] inline-flex items-center justify-center bg-[#356ae6] text-[color:#fff] rounded-[9px] [font-size:14px] font-[650] whitespace-nowrap [&:hover]:bg-[#2458ce]",
-                    )}
+                    className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 primary-link group/primary-link px-4.75 py-3 gap-2.5 inline-flex items-center justify-center bg-[#356ae6] text-white rounded-[9px] text-sm leading-[inherit] font-[650] whitespace-nowrap hover:bg-[#2458ce] [@media(width<=640px)]:w-full"
                     disabled={busy}
                     onClick={async () => {
                       setBusy(true);
@@ -339,16 +311,17 @@ function Challenges() {
                       : data.projectId
                         ? "Reprendre ma création"
                         : "Participer au défi"}
-                    <ArrowRight size={16} />
+                    <ArrowRight className="shrink-0" size={16} />
                   </button>
                 ) : (
-                  <SignInTo>
+                  <SignInTo className="text-[13px]">
                     Se connecter pour participer <ArrowRight size={16} />
                   </SignInTo>
                 )
               ) : (
                 data.projectId && (
                   <Link
+                    className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 text-[#356ae6] text-[13px] font-semibold"
                     to="/editor/$projectId"
                     params={{ projectId: data.projectId }}
                   >
@@ -357,11 +330,7 @@ function Challenges() {
                 )
               )}
             </div>
-            <p
-              className={cn(
-                "challenge-device-note px-[22px] hidden pt-[0] pb-[20px] text-[color:#70839f] [font-size:12px] leading-[1.8] bg-[#fafbff] [@media(width<=850px)]:block",
-              )}
-            >
+            <p className="challenge-device-note px-5.5 hidden pt-0 pb-5 text-[#70839f] text-xs leading-[1.8] bg-[#fafbff] [@media(width<=850px)]:block">
               Pour construire, ouvrez l’atelier sur ordinateur. Vous pouvez
               voter et commenter sur mobile.
             </p>
@@ -401,26 +370,23 @@ function Entries({
   );
   return (
     <section
-      className={cn("challenge-entries mt-[48px]")}
+      className="challenge-entries mt-12"
       aria-labelledby="entries-title"
     >
-      <div
-        className={cn(
-          "challenge-entries-heading gap-[20px] flex items-center justify-between flex-wrap mb-[25px] [&_h2]:[font-size:25px] [&_h2]:tracking-[-0.7px] [&_h2]:font-[800] [@media(width<=640px)]:[&_h2]:[font-size:23px] [&_p]:mt-[8px] [&_p]:text-[color:#71839c] [&_p]:[font-size:12px] [&_p]:leading-[1.7]",
-        )}
-      >
+      <div className="challenge-entries-heading gap-5 flex items-center justify-between flex-wrap mb-6.25">
         <div>
-          <h2 id="entries-title">À vous de choisir vos coups de cœur.</h2>
-          <p>
+          <h2
+            className="text-[25px] tracking-[-0.7px] font-extrabold [@media(width<=640px)]:text-[23px]"
+            id="entries-title"
+          >
+            À vous de choisir vos coups de cœur.
+          </h2>
+          <p className="mt-2 text-[#71839c] text-xs leading-[1.7]">
             {choices.length} / 3 votes attribués pour ce défi. Retirez un vote
             pour changer de choix.
           </p>
         </div>
-        <div
-          className={cn(
-            "challenge-sort gap-[10px] flex items-center shrink-[0] [font-size:12px] text-[color:#71839c]",
-          )}
-        >
+        <div className="challenge-sort gap-2.5 flex items-center shrink-0 text-xs leading-[inherit] text-[#71839c]">
           <label htmlFor="challenge-sort">Trier</label>
           <Select
             disabled={!hydrated}
@@ -439,31 +405,33 @@ function Entries({
           >
             <SelectTrigger
               id="challenge-sort"
-              className={cn(
-                "challenge-sort-trigger px-[11px] py-[8px] border-[length:1px] border-solid border-[color:#dfe7f2] w-[160px] min-h-[38px] rounded-[9px] bg-[#fff] text-[color:#455f83] cursor-[pointer] [&:hover]:border-[color:#b7caf0] [&:hover]:bg-[#f8faff] [&[data-popup-open]]:border-[color:#b7caf0] [&[data-popup-open]]:bg-[#f8faff] [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:3px]",
-              )}
+              className="challenge-sort-trigger px-2.75 py-2 border border-solid border-[#dfe7f2] w-40 min-h-9.5 rounded-[9px] bg-white text-[#455f83] cursor-pointer hover:border-[#b7caf0] hover:bg-[#f8faff] data-popup-open:border-[#b7caf0] data-popup-open:bg-[#f8faff] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3"
             >
               <SelectValue />
             </SelectTrigger>
             <SelectContent
-              className={cn(
-                "challenge-sort-menu p-[4px] rounded-[11px] bg-[#fff] text-[color:#455f83] [box-shadow:0_8px_24px_#213d6a14,_0_0_0_1px_#dfe7f2] [&_[data-slot='select-item']]:min-h-[36px] [&_[data-slot='select-item']]:rounded-[7px] [&_[data-slot='select-item']]:cursor-[pointer] [&_[data-slot='select-item'][data-highlighted]]:bg-[#edf3ff] [&_[data-slot='select-item'][data-highlighted]]:text-[color:#2458ce] [&_[data-slot='select-item'][data-selected]]:text-[color:#2458ce]",
-              )}
+              className="challenge-sort-menu p-1 rounded-[11px] bg-white text-[#455f83] [box-shadow:0_8px_24px_#213d6a14,0_0_0_1px_#dfe7f2]"
               align="end"
               alignItemWithTrigger={false}
             >
-              <SelectItem value="recent">Récentes</SelectItem>
-              <SelectItem value="votes">Les plus aimées</SelectItem>
+              <SelectItem
+                className="min-h-9 rounded-[7px] cursor-pointer data-highlighted:bg-[#edf3ff] data-highlighted:text-[#2458ce] data-selected:text-[#2458ce]"
+                value="recent"
+              >
+                Récentes
+              </SelectItem>
+              <SelectItem
+                className="min-h-9 rounded-[7px] cursor-pointer data-highlighted:bg-[#edf3ff] data-highlighted:text-[#2458ce] data-selected:text-[#2458ce]"
+                value="votes"
+              >
+                Les plus aimées
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
       {!results.length ? (
-        <div
-          className={cn(
-            "empty-state px-[25px] py-[70px] gap-[20px] min-h-[300px] flex flex-col items-center justify-center text-center text-[color:#7d8ba0] [&_h1]:text-[color:#32445f] [&_h1]:[font-size:24px] [&_h1]:font-[700] [&_h2]:text-[color:#32445f] [&_h2]:[font-size:24px] [&_h2]:font-[700] [&_p]:max-w-[510px] [&_p]:leading-[1.8]",
-          )}
-        >
+        <div className="empty-state px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0]">
           {status === "LoadingFirstPage"
             ? "Chargement des créations…"
             : open
@@ -471,60 +439,44 @@ function Entries({
               : "Aucune création n’a été proposée pour ce défi."}
         </div>
       ) : (
-        <div
-          className={cn(
-            "creation-grid group/creation-grid gap-[26px] grid grid-cols-[repeat(3,_1fr)] [@media(width<=520px)]:gap-[15px] [@media(width<=520px)]:grid-cols-[1fr] [@media(520px<width<=850px)]:gap-[15px] [@media(520px<width<=850px)]:grid-cols-[repeat(2,_1fr)]",
-          )}
-        >
+        <div className="creation-grid group/creation-grid gap-6.5 grid grid-cols-3 [@media(width<=520px)]:gap-3.75 [@media(width<=520px)]:grid-cols-1 [@media(520px<width<=850px)]:gap-3.75 [@media(520px<width<=850px)]:grid-cols-2">
           {results.map((p) => (
             <article
-              className={cn(
-                "creation-card challenge-entry group/creation-card overflow-hidden border-[length:1px] border-solid border-[color:#e4eaf2] rounded-[14px] bg-[white] [a&:hover_[class~='group/card-arrow']]:bg-[#356ae6] [a&:hover_[class~='group/card-arrow']]:text-[color:white] [&_>_a:hover_[class~='group/card-arrow']]:bg-[#356ae6] [&_>_a:hover_[class~='group/card-arrow']]:text-[color:white] overflow-hidden [&_[class~='group/thumbnail']_img]:w-[100%] [&_[class~='group/thumbnail']_img]:h-[100%] [&_[class~='group/thumbnail']_img]:object-contain [&_h3]:[font-size:16px] [&_h3]:font-[700] [&_[class~='group/public-card-author']]:px-[20px] [&_[class~='group/public-card-author']]:pt-[0] [&_[class~='group/public-card-author']]:pb-[16px]",
-              )}
+              className="creation-card challenge-entry group/creation-card overflow-hidden border border-solid border-[#e4eaf2] rounded-[14px] bg-white"
               key={p._id}
             >
               <Link
+                className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 group/card-link"
                 to="/creations/$publicationId"
                 params={{ publicationId: p._id }}
               >
-                <div
-                  className={cn(
-                    "thumbnail group/thumbnail [aspect-ratio:4/3] bg-[#eef2f8] relative [&_img]:w-[100%] [&_img]:h-[100%] [&_img]:object-cover",
-                  )}
-                >
+                <div className="thumbnail group/thumbnail aspect-4/3 bg-[#eef2f8] relative">
                   {p.thumbnailUrl && (
-                    <img src={p.thumbnailUrl} alt={p.title} loading="lazy" />
+                    <img
+                      className="object-contain size-full"
+                      src={p.thumbnailUrl}
+                      alt={p.title}
+                      loading="lazy"
+                    />
                   )}
                   <span
-                    className={cn(
-                      "card-arrow group/card-arrow absolute bottom-[15px] right-[15px] bg-[#ffffffde] rounded-[50%] h-[32px] w-[32px] grid [place-items:center] text-[color:#356ae6] [transition:background_150ms]",
-                    )}
+                    className="card-arrow group/card-arrow absolute bottom-3.75 right-3.75 bg-[#ffffffde] rounded-full grid place-items-center text-[#356ae6] [transition:background_150ms] size-8 group-hover/card-link:bg-[#356ae6] group-hover/card-link:text-white"
                     aria-hidden="true"
                   >
                     <ArrowUpRight size={19} />
                   </span>
                 </div>
-                <div
-                  className={cn(
-                    "card-meta group/card-meta px-[20px] py-[18px] [&_h2]:[font-size:16px] [&_h2]:font-[700] [&_p]:[font-size:12px] [&_p]:text-[color:#8a97aa] [&_p]:mt-[6px]",
-                  )}
-                >
-                  <h3>{p.title}</h3>
+                <div className="card-meta group/card-meta px-5 py-4.5">
+                  <h3 className="text-base leading-[inherit] font-bold">
+                    {p.title}
+                  </h3>
                 </div>
               </Link>
-              <p
-                className={cn(
-                  "public-card-author group/public-card-author min-w-[0] text-[color:#73829a] [font-size:12px]",
-                )}
-              >
+              <p className="public-card-author group/public-card-author min-w-0 text-[#73829a] text-xs leading-[inherit] px-5 pt-0 pb-4">
                 par{" "}
                 <AuthorLink id={p.owner} name={p.author} avatar={p.avatar} />
               </p>
-              <div
-                className={cn(
-                  "challenge-entry-actions px-[16px] py-[12px] gap-[8px] flex justify-between items-center flex-wrap [border-top-width:1px] [border-top-style:solid] [border-top-color:#edf0f6] bg-[#fcfcfe]",
-                )}
-              >
+              <div className="challenge-entry-actions px-4 py-3 gap-2 flex justify-between items-center flex-wrap border-t border-solid border-t-[#edf0f6] bg-[#fcfcfe]">
                 <VoteButton
                   publicationId={p._id}
                   owner={p.owner}
@@ -535,9 +487,7 @@ function Entries({
                   to="/creations/$publicationId"
                   params={{ publicationId: p._id }}
                   hash="comments"
-                  className={cn(
-                    "challenge-entry-comments px-[9px] py-[6px] gap-[6px] inline-flex items-center justify-center min-h-[38px] min-w-[38px] ml-[auto] rounded-[10px] text-[color:#8792a5] [font-size:12px] tabular-nums [&:hover]:bg-[#eef1f8] [&:hover]:text-[color:#536c90] [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:3px]",
-                  )}
+                  className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 challenge-entry-comments px-2.25 py-1.5 gap-1.5 inline-flex items-center justify-center min-h-9.5 min-w-9.5 ml-auto rounded-[10px] text-[#8792a5] text-xs tabular-nums hover:bg-[#eef1f8] hover:text-[#536c90] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 group/card-link leading-normal"
                   aria-label={`${p.commentCount} commentaires sur ${p.title}`}
                 >
                   <MessageCircle size={16} aria-hidden="true" />
@@ -550,7 +500,7 @@ function Entries({
       )}
       {status === "CanLoadMore" && (
         <PublicMore
-          className={cn("load-more group/load-more mx-[auto] my-[35px] block")}
+          className="load-more group/load-more mx-auto my-8.75 block"
           href={continuationHref("/challenges", nextCursor, {
             date: challenge.day,
             sort,

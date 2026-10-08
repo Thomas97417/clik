@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { loadPublic } from "@/lib/seo/public-data";
 import { seo, collection } from "@/lib/seo/meta";
@@ -39,49 +38,39 @@ function Gallery() {
     cursor,
   );
   return (
-    <main
-      className={cn(
-        "collection-page gallery-page px-[5%] py-[64px] m-[auto] max-w-[1320px] [@media(width<=850px)]:pt-[40px]",
-      )}
-    >
-      <header
-        className={cn(
-          "gallery-hero [&_h1]:mx-[0] [&_h1]:my-[12px] [&_h1]:[font-size:48px] [&_h1]:tracking-[-2px] [&_h1]:font-[800] [@media(width<=850px)]:[&_h1]:[font-size:40px] [&_h1_>_span]:text-[color:#356ae6] gap-[32px] grid grid-cols-[1.2fr_1fr] [align-items:start] pb-[40px] [@media(width<=640px)]:px-[0] [@media(width<=640px)]:block [@media(width<=640px)]:pb-[28px] [@media(width<=640px)]:relative [@media(width<=640px)]:pt-[0]",
-        )}
-      >
-        <div
-          className={cn(
-            "gallery-hero-copy [&_>_p]:mx-[0] [&_>_p]:mt-[20px] [&_>_p]:mb-[25px] [&_>_p]:max-w-[440px] [&_>_p]:text-[color:#71839c] [&_>_p]:[font-size:15px] [&_>_p]:leading-[1.8] [@media(width<=640px)]:[&_>_p]:max-w-[340px] [@media(width<=640px)]:[&_>_p]:[font-size:14px]",
-          )}
-        >
-          <h1>
-            La galerie<span>.</span>
+    <main className="collection-page gallery-page px-[5%] py-16 m-auto max-w-330 [@media(width<=850px)]:pt-10">
+      <header className="gallery-hero gap-8 grid grid-cols-[1.2fr_1fr] items-start pb-10 [@media(width<=640px)]:px-0 [@media(width<=640px)]:block [@media(width<=640px)]:pb-7 [@media(width<=640px)]:relative [@media(width<=640px)]:pt-0">
+        <div className="gallery-hero-copy">
+          <h1 className="mx-0 my-3 text-5xl leading-[inherit] tracking-[-2px] font-extrabold [@media(width<=850px)]:text-[40px]">
+            La galerie<span className="text-[#356ae6]">.</span>
           </h1>
-          <p>
+          <p className="mx-0 mt-5 mb-6.25 max-w-110 text-[#71839c] text-[15px] leading-[1.8] [@media(width<=640px)]:max-w-85 [@media(width<=640px)]:text-sm">
             De petites briques, de grandes idées.
             <br />
             Explorez les constructions de la communauté et imaginez la suite.
           </p>
           <Link
             to="/editor"
-            className={cn(
-              "primary-link group/primary-link px-[19px] py-[12px] gap-[10px] inline-flex items-center justify-center bg-[#356ae6] text-[color:#fff] rounded-[9px] [font-size:14px] font-[650] whitespace-nowrap [&:hover]:bg-[#2458ce]",
-            )}
+            className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 primary-link group/primary-link px-4.75 py-3 gap-2.5 inline-flex items-center justify-center bg-[#356ae6] text-white rounded-[9px] text-sm font-[650] whitespace-nowrap hover:bg-[#2458ce] leading-normal"
           >
-            <Plus size={17} aria-hidden="true" /> À vous de créer
+            <Plus className="shrink-0" size={17} aria-hidden="true" /> À vous de
+            créer
           </Link>
         </div>
         <GalleryArt />
       </header>
       <section aria-labelledby="gallery-creations-title">
-        <div
-          className={cn(
-            "gallery-toolbar px-[0] py-[25px] gap-[20px] flex items-center justify-between flex-wrap [border-top-width:1px] [border-top-style:solid] [border-top-color:#e0e6ef] [@media(width<=640px)]:gap-[16px] [@media(width<=640px)]:items-start [&_h2]:[font-size:20px] [&_h2]:font-[750] [&_h2]:tracking-[-0.5px] [&_p]:mt-[5px] [&_p]:[font-size:12px] [&_p]:leading-[1.7] [&_p]:text-[color:#71839c]",
-          )}
-        >
+        <div className="gallery-toolbar px-0 py-6.25 gap-5 flex items-center justify-between flex-wrap border-t border-solid border-t-[#e0e6ef] [@media(width<=640px)]:gap-4 [@media(width<=640px)]:items-start">
           <div>
-            <h2 id="gallery-creations-title">À découvrir</h2>
-            <p>Ouvrez une création, laissez un mot, faites-en votre version.</p>
+            <h2
+              className="text-xl leading-[inherit] font-[750] tracking-[-0.5px]"
+              id="gallery-creations-title"
+            >
+              À découvrir
+            </h2>
+            <p className="mt-1.25 text-xs leading-[1.7] text-[#71839c]">
+              Ouvrez une création, laissez un mot, faites-en votre version.
+            </p>
           </div>
           <GallerySortSelect
             value={sort}
@@ -97,59 +86,45 @@ function Gallery() {
           <div role="status" aria-label="Chargement des créations">
             <span className="sr-only">Ouverture de la galerie…</span>
             <div
-              className={cn(
-                "creation-grid group/creation-grid gap-[26px] grid grid-cols-[repeat(3,_1fr)] [@media(width<=520px)]:gap-[15px] [@media(width<=520px)]:grid-cols-[1fr] [@media(520px<width<=850px)]:gap-[15px] [@media(520px<width<=850px)]:grid-cols-[repeat(2,_1fr)]",
-              )}
+              className="creation-grid group/creation-grid gap-6.5 grid grid-cols-3 [@media(width<=520px)]:gap-3.75 [@media(width<=520px)]:grid-cols-1 [@media(520px<width<=850px)]:gap-3.75 [@media(520px<width<=850px)]:grid-cols-2"
               aria-hidden="true"
             >
               {Array.from({ length: 6 }, (_, i) => (
                 <div
                   key={i}
-                  className={cn(
-                    "gallery-skeleton overflow-hidden border-[length:1px] border-solid border-[color:#e4eaf2] pb-[22px] rounded-[14px] bg-[#fff] [&_>_div]:[aspect-ratio:4/3] [&_>_div]:bg-[#eef2f8] [&_>_span]:mx-[20px] [&_>_span]:block [&_>_span]:w-[60%] [&_>_span]:h-[14px] [&_>_span]:mt-[18px] [&_>_span]:mb-[0] [&_>_span]:bg-[#eef2f8] [&_>_span]:rounded-[4px] [&_>_span:last-child]:w-[35%] [&_>_span:last-child]:h-[10px] [&_>_span:last-child]:mt-[12px]",
-                  )}
+                  className="gallery-skeleton overflow-hidden border border-solid border-[#e4eaf2] pb-5.5 rounded-[14px] bg-white"
                 >
-                  <div />
-                  <span />
-                  <span />
+                  <div className="aspect-4/3 bg-[#eef2f8]" />
+                  <span className="mx-5 block w-3/5 h-3.5 mt-4.5 mb-0 bg-[#eef2f8] rounded-[4px] last:w-[35%] last:h-2.5 last:mt-3" />
+                  <span className="mx-5 block w-3/5 h-3.5 mt-4.5 mb-0 bg-[#eef2f8] rounded-[4px] last:w-[35%] last:h-2.5 last:mt-3" />
                 </div>
               ))}
             </div>
           </div>
         ) : !results.length ? (
-          <div
-            className={cn(
-              "empty-state gallery-empty px-[25px] py-[70px] gap-[20px] min-h-[300px] flex flex-col items-center justify-center text-center text-[color:#7d8ba0] [&_h1]:text-[color:#32445f] [&_h1]:[font-size:24px] [&_h1]:font-[700] [&_h2]:text-[color:#32445f] [&_h2]:[font-size:24px] [&_h2]:font-[700] [&_p]:max-w-[510px] [&_p]:leading-[1.8] border-[length:1px] border-dashed border-[color:#cfdaec] rounded-[16px] bg-[#f3f6fc]",
-            )}
-          >
-            <h2>La première idée pourrait être la vôtre.</h2>
-            <p>Publiez une création depuis l’atelier pour ouvrir la galerie.</p>
+          <div className="empty-state gallery-empty px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0] border border-dashed border-[#cfdaec] rounded-2xl bg-[#f3f6fc]">
+            <h2 className="text-[#32445f] text-2xl leading-[inherit] font-bold">
+              La première idée pourrait être la vôtre.
+            </h2>
+            <p className="max-w-127.5 leading-[1.8]">
+              Publiez une création depuis l’atelier pour ouvrir la galerie.
+            </p>
             <Link
               to="/editor"
-              className={cn(
-                "primary-link group/primary-link px-[19px] py-[12px] gap-[10px] inline-flex items-center justify-center bg-[#356ae6] text-[color:#fff] rounded-[9px] [font-size:14px] font-[650] whitespace-nowrap [&:hover]:bg-[#2458ce]",
-              )}
+              className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 primary-link group/primary-link px-4.75 py-3 gap-2.5 inline-flex items-center justify-center bg-[#356ae6] text-white rounded-[9px] text-sm font-[650] whitespace-nowrap hover:bg-[#2458ce] leading-normal"
             >
               Ouvrir l’atelier
             </Link>
           </div>
         ) : (
-          <div
-            className={cn(
-              "creation-grid group/creation-grid gap-[26px] grid grid-cols-[repeat(3,_1fr)] [@media(width<=520px)]:gap-[15px] [@media(width<=520px)]:grid-cols-[1fr] [@media(520px<width<=850px)]:gap-[15px] [@media(520px<width<=850px)]:grid-cols-[repeat(2,_1fr)]",
-            )}
-          >
+          <div className="creation-grid group/creation-grid gap-6.5 grid grid-cols-3 [@media(width<=520px)]:gap-3.75 [@media(width<=520px)]:grid-cols-1 [@media(520px<width<=850px)]:gap-3.75 [@media(520px<width<=850px)]:grid-cols-2">
             {results.map((p) => (
               <PublicCreationCard key={p._id} creation={p} />
             ))}
           </div>
         )}
         {!!results.length && (
-          <div
-            className={cn(
-              "gallery-pagination gap-[14px] flex flex-col items-center mt-[28px] text-[color:#71839c] [font-size:12px] [&_button]:px-[18px] [&_button]:py-[10px] [&_button]:gap-[10px] [&_button]:min-h-[42px] [&_button]:rounded-[10px] [&_button]:bg-[#fff] [&_button]:text-[color:#455f83]",
-            )}
-          >
+          <div className="gallery-pagination gap-3.5 flex flex-col items-center mt-7 text-[#71839c] text-xs leading-[inherit]">
             <p role="status">
               {results.length} création{results.length === 1 ? "" : "s"}{" "}
               affichée{results.length === 1 ? "" : "s"}
@@ -163,32 +138,33 @@ function Gallery() {
                 {status === "LoadingMore"
                   ? "Chargement…"
                   : "Voir plus de créations"}
-                <Plus size={15} aria-hidden="true" />
+                <Plus
+                  className="size-4 pointer-events-none shrink-0"
+                  size={15}
+                  aria-hidden="true"
+                />
               </PublicMore>
             )}
           </div>
         )}
       </section>
-      <aside
-        className={cn(
-          "gallery-remix-note p-[24px] gap-[18px] flex items-center mt-[48px] bg-[#edf2fa] rounded-[16px] [@media(width<=640px)]:p-[20px] [@media(width<=640px)]:gap-[12px] [@media(width<=640px)]:flex-wrap [&_h2]:[font-size:15px] [&_h2]:font-[700] [&_p]:mt-[5px] [&_p]:[font-size:12px] [&_p]:leading-[1.7] [&_p]:text-[color:#71839c] [&_>_a]:gap-[8px] [&_>_a]:inline-flex [&_>_a]:items-center [&_>_a]:shrink-[0] [&_>_a]:ml-[auto] [&_>_a]:text-[color:#356ae6] [&_>_a]:[font-size:12px] [&_>_a]:font-[650] [@media(width<=640px)]:[&_>_a]:ml-[56px] [&_>_a:hover]:[text-decoration:underline] [&_>_a:hover]:underline-offset-[4px] [@media(width<=640px)]:[&_>_div]:flex-[1] [@media(width<=640px)]:[&_>_div]:min-w-[180px]",
-        )}
-      >
-        <span
-          className={cn(
-            "gallery-remix-icon grid [place-items:center] shrink-[0] w-[44px] h-[44px] rounded-[12px] bg-[#fff] text-[color:#356ae6]",
-          )}
-        >
+      <aside className="gallery-remix-note p-6 gap-4.5 flex items-center mt-12 bg-[#edf2fa] rounded-2xl [@media(width<=640px)]:p-5 [@media(width<=640px)]:gap-3 [@media(width<=640px)]:flex-wrap">
+        <span className="gallery-remix-icon grid place-items-center shrink-0 rounded-[12px] bg-white text-[#356ae6] size-11">
           <GitBranch size={22} aria-hidden="true" />
         </span>
-        <div>
-          <h2>Une création, mille possibilités.</h2>
-          <p>
+        <div className="[@media(width<=640px)]:flex-1 [@media(width<=640px)]:min-w-45">
+          <h2 className="text-[15px] font-bold">
+            Une création, mille possibilités.
+          </h2>
+          <p className="mt-1.25 text-xs leading-[1.7] text-[#71839c]">
             Chaque création publique peut devenir le point de départ de la
             vôtre. Son auteur reste crédité.
           </p>
         </div>
-        <Link to="/editor">
+        <Link
+          className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 gap-2 inline-flex items-center shrink-0 ml-auto text-[#356ae6] text-xs font-[650] [@media(width<=640px)]:ml-14 hover:underline hover:underline-offset-4 leading-normal"
+          to="/editor"
+        >
           Faire le premier clik <ArrowRight size={16} aria-hidden="true" />
         </Link>
       </aside>

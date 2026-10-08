@@ -37,10 +37,10 @@ export function SignInTo({
     <Link
       to="/sign-in"
       className={cn(
-        cn(
-          "challenge-sign-in gap-[8px] inline-flex items-center justify-center text-[color:#356ae6] [font-size:12px] font-[600]",
-          className,
-        ),
+        "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
+        "outline-offset-3",
+        "challenge-sign-in gap-2 inline-flex items-center justify-center text-[#356ae6] text-xs leading-normal font-semibold",
+        className,
       )}
       title={title}
       aria-label={label}
@@ -77,9 +77,7 @@ export function VoteButton({
     <>
       {busy ? (
         <LoaderCircle
-          className={cn(
-            "vote-pending [animation:spin_1s_linear_infinite] motion-reduce:[animation:none]",
-          )}
+          className="vote-pending animate-spin motion-reduce:animate-none"
           size={16}
           aria-hidden="true"
         />
@@ -90,7 +88,7 @@ export function VoteButton({
           aria-hidden="true"
         />
       )}
-      <span className={cn("challenge-vote-label min-w-[0]")}>
+      <span className="challenge-vote-label min-w-0">
         {busy
           ? "En cours…"
           : own
@@ -99,11 +97,7 @@ export function VoteButton({
               ? "Soutenue"
               : "J’aime"}
       </span>
-      <span
-        className={cn(
-          "challenge-vote-count group/challenge-vote-count px-[6px] py-[2px] inline-flex items-center justify-center min-w-[26px] min-h-[25px] ml-[3px] rounded-[6px] bg-[#f2edf9] [font-size:11px] tabular-nums",
-        )}
-      >
+      <span className="challenge-vote-count group/challenge-vote-count px-1.5 py-0.5 inline-flex items-center justify-center min-w-6.5 min-h-6.25 ml-0.75 rounded-[6px] bg-[#f2edf9] text-[11px] tabular-nums group-aria-pressed/challenge-vote:bg-[#ffffff26] group-data-[own]/challenge-vote:bg-[#e9edf4]">
         {count}
       </span>
     </>
@@ -111,9 +105,7 @@ export function VoteButton({
   if (!isAuthenticated)
     return (
       <SignInTo
-        className={cn(
-          "challenge-vote py-[6px] gap-[8px] border-[length:1px] border-solid border-[color:#e0d7ed] inline-flex items-center justify-center min-h-[38px] max-w-[100%] pr-[7px] pl-[11px] rounded-[11px] text-[color:#795ba0] bg-[#fff] [font-size:12px] font-[600] leading-[1.4] cursor-[pointer] [transition:background_150ms,_border-color_150ms,_color_150ms] [&_>_svg]:shrink-[0] [&:hover:not(:disabled)]:border-[color:#baa2d5] [&:hover:not(:disabled)]:bg-[#f6f0fd] [&[aria-pressed='true']]:border-[color:#7959a5] [&[aria-pressed='true']]:bg-[#7959a5] [&[aria-pressed='true']]:text-[color:#fff] [&[aria-pressed='true']_[class~='group/challenge-vote-count']]:bg-[#ffffff26] [&[aria-pressed='true']:hover:not(:disabled)]:border-[color:#684a93] [&[aria-pressed='true']:hover:not(:disabled)]:bg-[#684a93] [&:focus-visible]:[outline:2px_solid_#9672c0] [&:focus-visible]:[outline-offset:3px] [&:disabled]:cursor-[not-allowed] [&:disabled]:opacity-[0.65] [&[data-own]]:border-[color:#e1e6ed] [&[data-own]]:text-[color:#778499] [&[data-own]]:bg-[#f6f8fb] [&[data-own]]:opacity-[1] [&[data-own]_[class~='group/challenge-vote-count']]:bg-[#e9edf4] [&[aria-busy='true']]:cursor-[wait]",
-        )}
+        className="challenge-vote py-1.5 gap-2 border border-solid border-[#e0d7ed] inline-flex items-center justify-center min-h-9.5 max-w-full pr-1.75 pl-2.75 rounded-[11px] text-[#795ba0] bg-white text-xs font-semibold leading-[1.4] cursor-pointer hover:enabled:border-[#baa2d5] hover:enabled:bg-[#f6f0fd] aria-pressed:border-[#7959a5] aria-pressed:bg-[#7959a5] aria-pressed:text-white [&[aria-pressed='true']:hover:not(:disabled)]:border-[#684a93] [&[aria-pressed='true']:hover:not(:disabled)]:bg-[#684a93] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#9672c0] focus-visible:outline-offset-3 disabled:cursor-not-allowed disabled:opacity-65 data-own:border-[#e1e6ed] data-own:text-[#778499] data-own:bg-[#f6f8fb] data-own:opacity-100 aria-[busy=true]:cursor-wait [transition:background_150ms,border-color_150ms,color_150ms] leading-[1.4]"
         title="Connectez-vous pour soutenir cette création"
         label={`Se connecter pour voter (${count})`}
       >
@@ -122,9 +114,7 @@ export function VoteButton({
     );
   return (
     <button
-      className={cn(
-        "challenge-vote py-[6px] gap-[8px] border-[length:1px] border-solid border-[color:#e0d7ed] inline-flex items-center justify-center min-h-[38px] max-w-[100%] pr-[7px] pl-[11px] rounded-[11px] text-[color:#795ba0] bg-[#fff] [font-size:12px] font-[600] leading-[1.4] cursor-[pointer] [transition:background_150ms,_border-color_150ms,_color_150ms] [&_>_svg]:shrink-[0] [&:hover:not(:disabled)]:border-[color:#baa2d5] [&:hover:not(:disabled)]:bg-[#f6f0fd] [&[aria-pressed='true']]:border-[color:#7959a5] [&[aria-pressed='true']]:bg-[#7959a5] [&[aria-pressed='true']]:text-[color:#fff] [&[aria-pressed='true']_[class~='group/challenge-vote-count']]:bg-[#ffffff26] [&[aria-pressed='true']:hover:not(:disabled)]:border-[color:#684a93] [&[aria-pressed='true']:hover:not(:disabled)]:bg-[#684a93] [&:focus-visible]:[outline:2px_solid_#9672c0] [&:focus-visible]:[outline-offset:3px] [&:disabled]:cursor-[not-allowed] [&:disabled]:opacity-[0.65] [&[data-own]]:border-[color:#e1e6ed] [&[data-own]]:text-[color:#778499] [&[data-own]]:bg-[#f6f8fb] [&[data-own]]:opacity-[1] [&[data-own]_[class~='group/challenge-vote-count']]:bg-[#e9edf4] [&[aria-busy='true']]:cursor-[wait]",
-      )}
+      className="outline-offset-3 challenge-vote py-1.5 gap-2 border border-solid border-[#e0d7ed] inline-flex items-center justify-center min-h-9.5 max-w-full pr-1.75 pl-2.75 rounded-[11px] text-[#795ba0] bg-white text-xs font-semibold leading-[1.4] cursor-pointer hover:enabled:border-[#baa2d5] hover:enabled:bg-[#f6f0fd] aria-pressed:border-[#7959a5] aria-pressed:bg-[#7959a5] aria-pressed:text-white [&[aria-pressed='true']:hover:not(:disabled)]:border-[#684a93] [&[aria-pressed='true']:hover:not(:disabled)]:bg-[#684a93] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#9672c0] focus-visible:outline-offset-3 disabled:cursor-not-allowed disabled:opacity-65 data-own:border-[#e1e6ed] data-own:text-[#778499] data-own:bg-[#f6f8fb] data-own:opacity-100 aria-[busy=true]:cursor-wait [transition:background_150ms,border-color_150ms,color_150ms] leading-[1.4]"
       aria-pressed={voted}
       aria-busy={busy}
       data-own={own || undefined}
@@ -170,20 +160,14 @@ export function CreationChallenge({
   const used = data?.choices.length ?? 0;
   const formattedDay = formatChallengeDay(day);
   return (
-    <div
-      className={cn(
-        "creation-challenge px-[16px] py-[10px] mx-[0] overflow-hidden border-[length:1px] border-solid border-[color:#e4dbee] flex items-center justify-between gap-y-[12px] gap-x-[24px] mt-[20px] mb-[0] rounded-[12px] bg-[#f6f2fb] [@media(width<=640px)]:px-[14px] [@media(width<=640px)]:py-[12px] [@media(width<=640px)]:flex-wrap [&_+_[class~='group/creation-remixes']]:mt-[24px]",
-      )}
-    >
+    <div className="creation-challenge px-4 py-2.5 mx-0 overflow-hidden border border-solid border-[#e4dbee] flex items-center justify-between gap-y-3 gap-x-6 mt-5 mb-0 rounded-[12px] bg-[#f6f2fb] [@media(width<=640px)]:px-3.5 [@media(width<=640px)]:py-3 [@media(width<=640px)]:flex-wrap peer/creation-challenge">
       <Link
-        className={cn(
-          "creation-challenge-heading px-[0] py-[2px] gap-[10px] flex items-center rounded-[6px] text-[color:#644780] [@media(width<=640px)]:w-[100%] [&:hover]:bg-[#eee6f7] [&:focus-visible]:[outline:2px_solid_#9672c0] [&:focus-visible]:[outline-offset:-3px] [&_>_span]:min-w-[0] [&_time]:block [&_time]:[font-size:13px] [&_time]:font-[700] [&_time]:leading-[1.4] [&_>_svg:last-child]:ml-[4px] [&_>_svg:last-child]:shrink-[0] [&_>_svg:last-child]:text-[color:#9982b2] [@media(width<=640px)]:[&_>_svg:last-child]:ml-[auto]",
-        )}
+        className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 creation-challenge-heading px-0 py-0.5 gap-2.5 flex items-center rounded-[6px] text-[#644780] [@media(width<=640px)]:w-full hover:bg-[#eee6f7] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#9672c0] focus-visible:[outline-offset:-3px]"
         to="/challenges"
         search={{ date: day }}
       >
         <svg
-          className={cn("creation-challenge-art w-[32px] h-[32px] shrink-[0]")}
+          className="creation-challenge-art shrink-0 size-8 last:ml-1 last:shrink-0 last:text-[#9982b2] [@media(width<=640px)]:last:ml-auto"
           viewBox="0 0 56 56"
           fill="none"
           aria-hidden="true"
@@ -206,37 +190,35 @@ export function CreationChallenge({
             fill="#fff3cd"
           />
         </svg>
-        <span>
-          <span
-            className={cn(
-              "creation-challenge-label block [font-size:11px] text-[color:#9987aa] mb-[2px]",
-            )}
-          >
+        <span className="min-w-0">
+          <span className="creation-challenge-label block text-[11px] text-[#9987aa] mb-0.5">
             Création du défi
           </span>
-          <time dateTime={day}>{formattedDay}</time>
+          <time
+            className="block text-[13px] font-bold leading-[1.4]"
+            dateTime={day}
+          >
+            {formattedDay}
+          </time>
         </span>
-        <ArrowUpRight size={17} aria-hidden="true" />
+        <ArrowUpRight
+          className="last:ml-1 last:shrink-0 last:text-[#9982b2] [@media(width<=640px)]:last:ml-auto"
+          size={17}
+          aria-hidden="true"
+        />
       </Link>
-      <div
-        className={cn(
-          "creation-challenge-voting gap-[18px] flex justify-between items-center flex-wrap [@media(width<=640px)]:w-[100%] [@media(width<=640px)]:pt-[10px] [@media(width<=640px)]:[border-top-width:1px] [@media(width<=640px)]:[border-top-style:dashed] [@media(width<=640px)]:[border-top-color:#ded1ec]",
-        )}
-      >
+      <div className="creation-challenge-voting gap-4.5 flex justify-between items-center flex-wrap [@media(width<=640px)]:w-full [@media(width<=640px)]:pt-2.5 [@media(width<=640px)]:border-t [@media(width<=640px)]:border-t-[#ded1ec]">
         <div
-          className={cn(
-            "challenge-vote-budget gap-[5px] flex flex-col text-[color:#9989a8] [font-size:10px] leading-[1.5]",
-          )}
+          className="challenge-vote-budget gap-1.25 flex flex-col text-[#9989a8] text-[10px] leading-normal"
           title="Vous pouvez soutenir trois créations par défi et retirer un vote pour changer de choix."
         >
           <span
-            className={cn(
-              "challenge-vote-studs gap-[5px] inline-flex [&_i]:relative [&_i]:block [&_i]:w-[15px] [&_i]:h-[11px] [&_i]:mt-[3px] [&_i]:rounded-[2px] [&_i]:bg-[#e3d9ed] [&_i::before]:[content:''] [&_i::before]:absolute [&_i::before]:w-[7px] [&_i::before]:h-[3px] [&_i::before]:left-[4px] [&_i::before]:top-[-3px] [&_i::before]:rounded-[2px_2px_0_0] [&_i::before]:[background:inherit] [&_i[data-used]]:bg-[#a385c4]",
-            )}
+            className="challenge-vote-studs gap-1.25 inline-flex"
             aria-hidden="true"
           >
             {[0, 1, 2].map((index) => (
               <i
+                className="relative block w-3.75 h-2.75 mt-0.75 rounded-xs bg-[#e3d9ed] before:[content:''] before:absolute before:w-1.75 before:h-0.75 before:left-1 before:-top-0.75 before:rounded-[2px_2px_0_0] before:[background:inherit] data-used:bg-[#a385c4]"
                 key={index}
                 data-used={(isAuthenticated && index < used) || undefined}
               />

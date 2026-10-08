@@ -117,24 +117,16 @@ function ProjectTitle({
 }) {
   const [value, setValue] = useState(title);
   return (
-    <label
-      className={cn(
-        "project-title-field [display:inline-grid] grid-cols-[minmax(0,_max-content)] flex-[0_1_auto] max-w-[100%] min-w-[0] [font-size:14px] font-[600] leading-[20px]",
-      )}
-    >
+    <label className="project-title-field inline-grid grid-cols-[minmax(0,max-content)] flex-[0_1_auto] max-w-full min-w-0 text-sm font-semibold leading-5">
       <span className="sr-only">Nom de la création</span>
       <span
-        className={cn(
-          "project-title-measure px-[2px] py-[5px] overflow-hidden border-[length:1px] border-solid border-[color:transparent] [grid-area:1_/_1] invisible [white-space:pre] pointer-events-none",
-        )}
+        className="project-title-measure px-0.5 py-1.25 overflow-hidden border border-solid border-transparent [grid-area:1/1] invisible whitespace-pre pointer-events-none"
         aria-hidden="true"
       >
         {value || "Nom de la création"}
       </span>
       <input
-        className={cn(
-          "project-title px-[2px] py-[5px] border-[length:1px] border-solid border-[color:transparent] [grid-area:1_/_1] w-[100%] min-w-[0] h-[32px] rounded-[0] bg-[transparent] [box-shadow:none] [outline:none] [font:inherit] text-[color:#26344c] text-ellipsis cursor-[text] [&:hover:not(:disabled)]:[border-bottom-color:#c4cddd] [&:focus]:bg-[transparent] [&:focus]:[border-top-color:transparent] [&:focus]:[border-right-color:transparent] [&:focus]:[border-bottom-color:#9aa6b6] [&:focus]:[border-left-color:transparent] [&:focus]:[box-shadow:none] [&:focus]:[outline:none] [&:disabled]:opacity-[0.5] [&:disabled]:cursor-[default]",
-        )}
+        className="outline-offset-3 project-title px-0.5 py-1.25 border border-solid border-transparent [grid-area:1/1] w-full min-w-0 h-8 rounded-none bg-transparent [box-shadow:none] outline-none [font:inherit] text-[#26344c] text-ellipsis cursor-text hover:enabled:border-b-[#c4cddd] focus:bg-transparent focus:border-t-transparent focus:border-r-transparent focus:border-b-[#9aa6b6] focus:border-l-transparent focus:[box-shadow:none] focus:outline-none disabled:opacity-50 disabled:cursor-default"
         aria-label="Nom du projet"
         title={value}
         placeholder="Nom de la création"
@@ -173,6 +165,7 @@ function Numeric({
 }) {
   return (
     <input
+      className="outline-offset-3 py-1.75 m-0 border border-solid border-[#e2e7ef] rounded-[5px] w-full pr-0.5 pl-4.5 text-sm! leading-[inherit]! [appearance:textfield] [&::-webkit-inner-spin-button]:hidden"
       aria-label={label}
       type="number"
       step="0.1"
@@ -533,13 +526,11 @@ export default function Editor({
           <div
             data-node-id={n.id}
             className={cn(
-              cn(
-                "tree-row gap-[5px] flex items-center h-[40px] pr-[12px] [touch-action:none] select-none [&[class~='group/selected']]:bg-[#edf3ff] [&[class~='group/selected']]:text-[color:#356ae6] [&_>_button:not([class~='group/tree-name'])]:text-[color:#9aa5b6] [&_>_button:not([class~='group/tree-name'])]:opacity-[0.85] [&_>_button[class~='group/tree-toggle']]:flex-[0_0_22px] [&_>_button[class~='group/tree-toggle']]:w-[22px] [&_>_button[class~='group/tree-toggle']]:h-[28px] [&_>_button[class~='group/tree-toggle']]:grid [&_>_button[class~='group/tree-toggle']]:[place-items:center] [&_>_button[class~='group/tree-toggle']]:text-[color:#68788e] [&_>_button[class~='group/tree-toggle']]:opacity-[1] [&_>_button[class~='group/tree-toggle']]:rounded-[5px] [&_button:focus-visible]:[outline:2px_solid_#356ae6] [&_button:focus-visible]:[outline-offset:2px] [&_button:focus-visible]:rounded-[4px] [&[class~='group/contains-selection']:not([class~='group/selected'])]:bg-[#f4f7fe] [&[class~='group/contains-selection']:not([class~='group/selected'])]:[box-shadow:inset_2px_0_#356ae6] [&_[class~='group/tree-name']]:cursor-[grab] [&[data-drag-source]]:bg-[#edf3ff] [&[data-drag-source]]:[outline:1px_dashed_#779bec] [&[data-drag-source]]:[outline-offset:-2px] [&[data-drag-source]]:text-[color:#356ae6] [&[data-drag-source]]:opacity-[0.65] [&[data-drop-inside]]:bg-[#e7efff] [&[data-drop-inside]]:[box-shadow:inset_3px_0_#356ae6]",
-                s.selection.includes(n.id) ? "selected group/selected" : "",
-                containsSelection
-                  ? "contains-selection group/contains-selection"
-                  : "",
-              ),
+              "tree-row gap-1.25 flex items-center h-10 pr-3 touch-none select-none [&[class~='group/selected']]:bg-[#edf3ff] [&[class~='group/selected']]:text-[#356ae6] [&[class~='group/contains-selection']:not([class~='group/selected'])]:bg-[#f4f7fe] [&[class~='group/contains-selection']:not([class~='group/selected'])]:[box-shadow:inset_2px_0_#356ae6] data-drag-source:bg-[#edf3ff] data-drag-source:[outline:1px_dashed_#779bec] data-drag-source:-outline-offset-2 data-drag-source:text-[#356ae6] data-drag-source:opacity-65 data-drop-inside:bg-[#e7efff] data-drop-inside:[box-shadow:inset_3px_0_#356ae6]",
+              s.selection.includes(n.id) ? "selected group/selected" : "",
+              containsSelection
+                ? "contains-selection group/contains-selection"
+                : "",
             )}
             style={{ paddingLeft: 8 + depth * 14 }}
             draggable={false}
@@ -552,9 +543,7 @@ export default function Editor({
           >
             {isGroup ? (
               <button
-                className={cn(
-                  "tree-toggle group/tree-toggle [&[aria-expanded='true']_svg]:[transform:rotate(90deg)] [&:hover]:bg-[#dfe9fb]",
-                )}
+                className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 tree-toggle group/tree-toggle hover:bg-[#dfe9fb] [&:not([class~='group/tree-name'])]:text-[#9aa5b6] [&:not([class~='group/tree-name'])]:opacity-85 flex-[0_0_22px] w-5.5 h-7 grid place-items-center text-[#68788e] opacity-100 rounded-[5px] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
                 aria-label={`${collapsed ? "Déplier" : "Replier"} ${n.name}`}
                 title={`${collapsed ? "Déplier" : "Replier"} ${n.name}`}
                 aria-expanded={!collapsed}
@@ -562,49 +551,45 @@ export default function Editor({
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => toggleGroup(n.id)}
               >
-                <ChevronRight size={14} aria-hidden="true" />
+                <ChevronRight
+                  className="shrink-0 group-aria-expanded/tree-toggle:transform-[rotate(90deg)]"
+                  size={14}
+                  aria-hidden="true"
+                />
               </button>
             ) : (
               <span
-                className={cn(
-                  "tree-toggle-spacer flex-[0_0_22px] w-[22px] h-[28px]",
-                )}
+                className="tree-toggle-spacer flex-[0_0_22px] w-5.5 h-7"
                 aria-hidden="true"
               />
             )}
             <button
-              className={cn(
-                "tree-name group/tree-name gap-[8px] flex items-center flex-[1] min-w-[0] [font-size:14px]! text-left [&_>_span:last-child]:overflow-hidden [&_>_span:last-child]:text-ellipsis [&_>_span:last-child]:whitespace-nowrap [&_>_svg]:shrink-[0]",
-              )}
+              className="disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 tree-name group/tree-name gap-2 flex items-center flex-1 min-w-0 text-sm! leading-[inherit]! text-left [&:not([class~='group/tree-name'])]:text-[#9aa5b6] [&:not([class~='group/tree-name'])]:opacity-85 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px] cursor-grab group-data-[dragging]/tree:cursor-grabbing"
               title={n.name}
               aria-pressed={s.selection.includes(n.id)}
               onClick={(e) => s.select(n.id, e.shiftKey)}
             >
               {isGroup ? (
-                <Layers size={15} aria-hidden="true" />
+                <Layers className="shrink-0" size={15} aria-hidden="true" />
               ) : (
                 <span
-                  className={cn(
-                    "part-dot border-[length:1px] border-solid border-[color:#0001] w-[11px] h-[11px] rounded-[3px] shrink-[0]",
-                  )}
+                  className="part-dot border border-solid border-[#0001] rounded-[3px] shrink-0 size-2.75 last:overflow-hidden last:text-ellipsis last:whitespace-nowrap"
                   style={{ background: n.color }}
                 />
               )}
-              <span>{n.name}</span>
+              <span className="last:overflow-hidden last:text-ellipsis last:whitespace-nowrap">
+                {n.name}
+              </span>
             </button>
             {isGroup && (
               <span
-                className={cn(
-                  "tree-count px-[5px] py-[1px] gap-[4px] inline-flex items-center shrink-[0] rounded-[5px] text-[color:#68788e] bg-[#f0f3f8] [font-size:11px] tabular-nums",
-                )}
+                className="tree-count px-1.25 py-px gap-1 inline-flex items-center shrink-0 rounded-[5px] text-[#68788e] bg-[#f0f3f8] text-[11px] tabular-nums"
                 title={`${countLabel} dans ce groupe${containsSelection ? " · contient la sélection" : ""}`}
                 aria-label={`${countLabel}${containsSelection ? ", contient la sélection" : ""}`}
               >
                 {containsSelection && (
                   <span
-                    className={cn(
-                      "tree-selection-dot w-[5px] h-[5px] rounded-[50%] bg-[#356ae6]",
-                    )}
+                    className="tree-selection-dot rounded-full bg-[#356ae6] size-1.25"
                     aria-hidden="true"
                   />
                 )}
@@ -612,26 +597,32 @@ export default function Editor({
               </span>
             )}
             <button
+              className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 [&:not([class~='group/tree-name'])]:text-[#9aa5b6] [&:not([class~='group/tree-name'])]:opacity-85 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
               title={n.hidden ? "Afficher" : "Masquer"}
               onClick={() => safe(() => s.patch(n.id, { hidden: !n.hidden }))}
             >
-              {n.hidden ? <EyeOff size={14} /> : <Eye size={14} />}
+              {n.hidden ? (
+                <EyeOff className="shrink-0" size={14} />
+              ) : (
+                <Eye className="shrink-0" size={14} />
+              )}
             </button>
             <button
+              className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 [&:not([class~='group/tree-name'])]:text-[#9aa5b6] [&:not([class~='group/tree-name'])]:opacity-85 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
               title={n.locked ? "Déverrouiller" : "Verrouiller"}
               onClick={() => safe(() => s.patch(n.id, { locked: !n.locked }))}
             >
               {n.locked ? (
-                <LockKeyhole size={14} />
+                <LockKeyhole className="shrink-0" size={14} />
               ) : (
-                <UnlockKeyhole size={14} />
+                <UnlockKeyhole className="shrink-0" size={14} />
               )}
             </button>
           </div>
           {isGroup && (
             <ul
               id={childrenId}
-              className={cn("tree-branch p-[0] m-[0] list-none")}
+              className="tree-branch p-0 m-0 list-none"
               hidden={collapsed}
             >
               {!collapsed && tree(n.id, depth + 1)}
@@ -642,13 +633,13 @@ export default function Editor({
     });
   if (projectId && !project.isLoading && !project.isAuthenticated)
     return (
-      <div
-        className={cn(
-          "empty-state px-[25px] py-[70px] gap-[20px] min-h-[300px] flex flex-col items-center justify-center text-center text-[color:#7d8ba0] [&_h1]:text-[color:#32445f] [&_h1]:[font-size:24px] [&_h1]:font-[700] [&_h2]:text-[color:#32445f] [&_h2]:[font-size:24px] [&_h2]:font-[700] [&_p]:max-w-[510px] [&_p]:leading-[1.8]",
-        )}
-      >
-        <h1>Retrouvez votre atelier</h1>
-        <p>Connectez-vous pour ouvrir ce projet privé.</p>
+      <div className="empty-state px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0]">
+        <h1 className="text-[#32445f] text-2xl leading-[inherit] font-bold">
+          Retrouvez votre atelier
+        </h1>
+        <p className="max-w-127.5 leading-[1.8]">
+          Connectez-vous pour ouvrir ce projet privé.
+        </p>
         <Link
           to="/sign-in"
           onClick={() =>
@@ -657,9 +648,7 @@ export default function Editor({
               window.location.pathname + window.location.search,
             )
           }
-          className={cn(
-            "primary-link group/primary-link px-[19px] py-[12px] gap-[10px] inline-flex items-center justify-center bg-[#356ae6] text-[color:#fff] rounded-[9px] [font-size:14px] font-[650] whitespace-nowrap [&:hover]:bg-[#2458ce]",
-          )}
+          className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 primary-link group/primary-link px-4.75 py-3 gap-2.5 inline-flex items-center justify-center bg-[#356ae6] text-white rounded-[9px] text-sm font-[650] whitespace-nowrap hover:bg-[#2458ce] leading-normal"
         >
           Se connecter
         </Link>
@@ -667,57 +656,37 @@ export default function Editor({
     );
   return (
     <>
-      <div
-        className={cn(
-          "mobile-editor empty-state px-[25px] py-[70px] gap-[20px] min-h-[300px] flex flex-col items-center justify-center text-center text-[color:#7d8ba0] [&_h1]:text-[color:#32445f] [&_h1]:[font-size:24px] [&_h1]:font-[700] [&_h2]:text-[color:#32445f] [&_h2]:[font-size:24px] [&_h2]:font-[700] [&_p]:max-w-[510px] [&_p]:leading-[1.8] hidden [@media(width<=850px)]:flex",
-        )}
-      >
+      <div className="mobile-editor empty-state px-6.25 py-17.5 gap-5 min-h-75 flex-col items-center justify-center text-center text-[#7d8ba0] hidden [@media(width<=850px)]:flex">
         <Box size={40} />
-        <h1>Un peu plus de place pour construire</h1>
-        <p>
+        <h1 className="text-[#32445f] text-2xl leading-[inherit] font-bold">
+          Un peu plus de place pour construire
+        </h1>
+        <p className="max-w-127.5 leading-[1.8]">
           L’atelier est disponible sur ordinateur. Explorez les créations depuis
           votre téléphone.
         </p>
         <Link
           to="/gallery"
-          className={cn(
-            "primary-link group/primary-link px-[19px] py-[12px] gap-[10px] inline-flex items-center justify-center bg-[#356ae6] text-[color:#fff] rounded-[9px] [font-size:14px] font-[650] whitespace-nowrap [&:hover]:bg-[#2458ce]",
-          )}
+          className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 primary-link group/primary-link px-4.75 py-3 gap-2.5 inline-flex items-center justify-center bg-[#356ae6] text-white rounded-[9px] text-sm font-[650] whitespace-nowrap hover:bg-[#2458ce] leading-normal"
         >
           Voir la galerie
         </Link>
       </div>
-      <main
-        className={cn(
-          "editor h-[100%] min-h-[600px] flex flex-col bg-[#fff] [@media(width<=850px)]:hidden",
-        )}
-      >
+      <main className="editor h-full min-h-150 flex flex-col bg-white [@media(width<=850px)]:hidden">
         <header
-          className={cn(
-            "editor-top px-[18px] py-[8px] gap-[16px] min-h-[52px] flex items-center [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:#ebeff5] shrink-[0] bg-[#fff] [@media(width<=1100px)]:px-[16px] [@media(width<=1100px)]:gap-[12px] [&_[class~='group/editor-primary-action']]:px-[11px] [&_[class~='group/editor-primary-action']]:py-[0] [&_[class~='group/editor-primary-action']]:gap-[6px] [&_[class~='group/editor-primary-action']]:inline-flex [&_[class~='group/editor-primary-action']]:items-center [&_[class~='group/editor-primary-action']]:justify-center [&_[class~='group/editor-primary-action']]:[font-size:11px] [&_[class~='group/editor-primary-action']]:h-[32px] [&_[class~='group/editor-primary-action']]:rounded-[6px] [&_[class~='group/editor-primary-action']]:whitespace-nowrap [&_[class~='group/editor-primary-action']]:[box-shadow:none] [&_[class~='group/editor-import-action']]:px-[9px] [&_[class~='group/editor-import-action']]:py-[0] [&_[class~='group/editor-import-action']]:gap-[6px] [&_[class~='group/editor-import-action']]:border-[length:1px] [&_[class~='group/editor-import-action']]:border-solid [&_[class~='group/editor-import-action']]:border-[color:transparent] [&_[class~='group/editor-import-action']]:h-[32px] [&_[class~='group/editor-import-action']]:rounded-[6px] [&_[class~='group/editor-import-action']]:bg-[transparent] [&_[class~='group/editor-import-action']]:[box-shadow:none] [&_[class~='group/editor-import-action']]:text-[color:#536888] [&_[class~='group/editor-import-action']]:[font-size:11px] [@media(width<=1100px)]:[&_[class~='group/editor-import-action']]:px-[0] [@media(width<=1100px)]:[&_[class~='group/editor-import-action']]:w-[32px] [&_[class~='group/editor-new-action']]:px-[9px] [&_[class~='group/editor-new-action']]:py-[0] [&_[class~='group/editor-new-action']]:gap-[6px] [&_[class~='group/editor-new-action']]:border-[length:1px] [&_[class~='group/editor-new-action']]:border-solid [&_[class~='group/editor-new-action']]:border-[color:transparent] [&_[class~='group/editor-new-action']]:h-[32px] [&_[class~='group/editor-new-action']]:rounded-[6px] [&_[class~='group/editor-new-action']]:bg-[transparent] [&_[class~='group/editor-new-action']]:[box-shadow:none] [&_[class~='group/editor-new-action']]:text-[color:#536888] [&_[class~='group/editor-new-action']]:[font-size:11px] [@media(width<=1100px)]:[&_[class~='group/editor-new-action']]:px-[0] [@media(width<=1100px)]:[&_[class~='group/editor-new-action']]:w-[32px] [&_[class~='group/editor-import-action']:hover:not(:disabled)]:border-[color:#e5ebf5] [&_[class~='group/editor-import-action']:hover:not(:disabled)]:bg-[#f3f6fb] [&_[class~='group/editor-import-action']:hover:not(:disabled)]:text-[color:#356ae6] [&_[class~='group/editor-new-action']:hover:not(:disabled)]:border-[color:#e5ebf5] [&_[class~='group/editor-new-action']:hover:not(:disabled)]:bg-[#f3f6fb] [&_[class~='group/editor-new-action']:hover:not(:disabled)]:text-[color:#356ae6] [@media(width<=1100px)]:[&_[class~='group/editor-import-action']_span]:hidden [@media(width<=1100px)]:[&_[class~='group/editor-new-action']_span]:hidden",
-          )}
+          className="editor-top px-4.5 py-2 gap-4 min-h-13 flex items-center border-b border-solid border-b-[#ebeff5] shrink-0 bg-white [@media(width<=1100px)]:px-4 [@media(width<=1100px)]:gap-3"
           aria-label="Projet et sauvegarde"
         >
-          <div
-            className={cn(
-              "editor-project gap-[12px] flex items-center flex-[1] min-w-[0]",
-            )}
-          >
+          <div className="editor-project gap-3 flex items-center flex-1 min-w-0">
             <ProjectTitle
               key={`${projectId}-${project.ready}-${s.title}`}
               title={s.title}
               disabled={!project.ready || closed || busy}
               onCommit={(title) => s.commit(s.scene, title)}
             />
-            <div
-              className={cn(
-                "project-metadata gap-[8px] flex items-center min-w-[0] shrink-[0] pl-[10px] [border-left-width:1px] [border-left-style:solid] [border-left-color:#e9edf4] [font-size:10px] leading-[16px] whitespace-nowrap [&_[class~='group/assembly-badge']]:px-[6px] [&_[class~='group/assembly-badge']]:py-[2px] [&_[class~='group/assembly-badge']]:[font-size:9px] [&_[class~='group/assembly-badge']]:leading-[14px]",
-              )}
-            >
+            <div className="project-metadata gap-2 flex items-center min-w-0 shrink-0 pl-2.5 border-l border-solid border-l-[#e9edf4] text-[10px] leading-4 whitespace-nowrap">
               <span
-                className={cn(
-                  "project-visibility gap-[5px] inline-flex items-center shrink-[0] text-[color:#68788e]",
-                )}
+                className="project-visibility gap-1.25 inline-flex items-center shrink-0 text-[#68788e]"
                 title={
                   projectId
                     ? "Ce projet reste privé jusqu’à sa publication."
@@ -732,25 +701,17 @@ export default function Editor({
                 {projectId ? "Projet privé" : "Création locale"}
               </span>
               {!!s.provenance.imports.length && (
-                <span
-                  className={cn(
-                    "assembly-badge group/assembly-badge px-[8px] py-[3px] border-[length:1px] border-solid border-[color:#c7dfdf] inline-flex w-[fit-content] items-center rounded-[6px] bg-[#edf7f5] text-[color:#37786b] [font-size:10px] font-[650] leading-[1.5] whitespace-nowrap",
-                  )}
-                >
+                <span className="assembly-badge group/assembly-badge border border-solid border-[#c7dfdf] inline-flex w-fit items-center rounded-[6px] bg-[#edf7f5] text-[#37786b] font-[650] whitespace-nowrap px-1.5 py-0.5 text-[9px] leading-3.5">
                   Assemblage
                 </span>
               )}
               <ProjectSources sources={projectSources(s.provenance)} />
             </div>
           </div>
-          <div
-            className={cn(
-              "editor-project-actions gap-[14px] flex items-center shrink-[0] pl-[16px] [border-left-width:1px] [border-left-style:solid] [border-left-color:#e9edf4] [@media(width<=1100px)]:gap-[10px] [@media(width<=1100px)]:pl-[12px]",
-            )}
-          >
+          <div className="editor-project-actions gap-3.5 flex items-center shrink-0 pl-4 border-l border-solid border-l-[#e9edf4] [@media(width<=1100px)]:gap-2.5 [@media(width<=1100px)]:pl-3">
             {onNewCreation && (
               <Button
-                className={cn("editor-new-action group/editor-new-action")}
+                className="editor-new-action group/editor-new-action px-2.25 py-0 gap-1.5 border border-solid border-transparent h-8 rounded-[6px] bg-transparent [box-shadow:none] text-[#536888] text-[11px] [@media(width<=1100px)]:px-0 [@media(width<=1100px)]:w-8 hover:enabled:border-[#e5ebf5] hover:enabled:bg-[#f3f6fb] hover:enabled:text-[#356ae6] leading-(--text-xs--line-height)"
                 variant="outline"
                 aria-label="Nouvelle création"
                 title="Démarrer une nouvelle création"
@@ -765,12 +726,18 @@ export default function Editor({
                 }
                 onClick={() => safe(startCreation)}
               >
-                <Plus size={16} aria-hidden="true" />
-                <span>Nouvelle création</span>
+                <Plus
+                  className="size-4 pointer-events-none shrink-0"
+                  size={16}
+                  aria-hidden="true"
+                />
+                <span className="[@media(width<=1100px)]:hidden">
+                  Nouvelle création
+                </span>
               </Button>
             )}
             <Button
-              className={cn("editor-import-action group/editor-import-action")}
+              className="editor-import-action group/editor-import-action px-2.25 py-0 gap-1.5 border border-solid border-transparent h-8 rounded-[6px] bg-transparent [box-shadow:none] text-[#536888] text-[11px] [@media(width<=1100px)]:px-0 [@media(width<=1100px)]:w-8 hover:enabled:border-[#e5ebf5] hover:enabled:bg-[#f3f6fb] hover:enabled:text-[#356ae6] leading-(--text-xs--line-height)"
               variant="outline"
               title={
                 s.challenge
@@ -790,13 +757,15 @@ export default function Editor({
               aria-label="Importer un projet"
               onClick={() => setImporting(true)}
             >
-              <Import size={16} aria-hidden="true" />
-              <span>Importer</span>
+              <Import
+                className="size-4 pointer-events-none shrink-0"
+                size={16}
+                aria-hidden="true"
+              />
+              <span className="[@media(width<=1100px)]:hidden">Importer</span>
             </Button>
             <div
-              className={cn(
-                "save-status gap-[6px] flex items-center text-[color:#68788e] [font-size:12px] max-w-[230px] leading-[1.4] [&_>_svg]:shrink-[0] [&[data-state='saved']_>_svg]:text-[color:#34906c] [&[data-state='offline']]:text-[color:#9b660c] [&[data-state='conflict']]:text-[color:#9b660c] [&[data-state='error']]:text-[color:#c33e42] [&[data-state='saving']_>_svg]:text-[color:#356ae6] [&[data-state='saving']_>_svg]:[animation:spin_1.5s_linear_infinite] motion-reduce:[&[data-state='saving']_>_svg]:[animation:none]",
-              )}
+              className="save-status gap-1.5 flex items-center text-[#68788e] text-xs max-w-57.5 leading-[1.4] data-[state=offline]:text-[#9b660c] data-[state=conflict]:text-[#9b660c] data-[state=error]:text-[#c33e42] group/save-status"
               data-state={saveState}
               role="status"
               aria-live="polite"
@@ -809,16 +778,18 @@ export default function Editor({
                     : "Sauvegarde sur cet appareil"
               }
             >
-              <SaveIcon size={14} aria-hidden="true" />
+              <SaveIcon
+                className="shrink-0 group-data-[state=saved]/save-status:text-[#34906c] group-data-[state=saving]/save-status:text-[#356ae6] group-data-[state=saving]/save-status:animate-[spin_1.5s_linear_infinite] motion-reduce:group-data-[state=saving]/save-status:animate-none"
+                size={14}
+                aria-hidden="true"
+              />
               <span>
                 {project.conflict ? "Conflit à résoudre" : project.status}
               </span>
             </div>
             {projectId ? (
               <Button
-                className={cn(
-                  "editor-primary-action group/editor-primary-action [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:3px]",
-                )}
+                className="editor-primary-action group/editor-primary-action focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 px-2.75 py-0 gap-1.5 inline-flex items-center justify-center text-[11px] h-8 rounded-[6px] whitespace-nowrap [box-shadow:none] leading-(--text-xs--line-height)"
                 disabled={
                   !project.ready || !!s.gesture || project.conflict || closed
                 }
@@ -827,7 +798,11 @@ export default function Editor({
                   setPublishing(true);
                 }}
               >
-                <Upload size={15} aria-hidden="true" />{" "}
+                <Upload
+                  className="size-4 pointer-events-none shrink-0"
+                  size={15}
+                  aria-hidden="true"
+                />{" "}
                 {project.challenge
                   ? project.publicationId
                     ? "Mettre à jour ma participation"
@@ -836,9 +811,7 @@ export default function Editor({
               </Button>
             ) : project.isAuthenticated ? (
               <Button
-                className={cn(
-                  "editor-primary-action group/editor-primary-action [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:3px]",
-                )}
+                className="editor-primary-action group/editor-primary-action focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 px-2.75 py-0 gap-1.5 inline-flex items-center justify-center text-[11px] h-8 rounded-[6px] whitespace-nowrap [box-shadow:none] leading-(--text-xs--line-height)"
                 disabled={!project.ready || !!s.gesture || busy}
                 onClick={() => safe(preserve)}
               >
@@ -846,10 +819,14 @@ export default function Editor({
                   <LoaderCircle
                     size={16}
                     aria-hidden="true"
-                    className="animate-spin"
+                    className="size-4 pointer-events-none shrink-0 animate-spin"
                   />
                 ) : (
-                  <CloudUpload size={16} aria-hidden="true" />
+                  <CloudUpload
+                    className="size-4 pointer-events-none shrink-0"
+                    size={16}
+                    aria-hidden="true"
+                  />
                 )}
                 {busy ? "Enregistrement…" : "Conserver le projet"}
               </Button>
@@ -862,9 +839,7 @@ export default function Editor({
                     window.location.pathname + window.location.search,
                   )
                 }
-                className={cn(
-                  "primary-link editor-primary-action group/editor-primary-action [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:3px] group/primary-link px-[19px] py-[12px] gap-[10px] inline-flex items-center justify-center bg-[#356ae6] text-[color:#fff] rounded-[9px] [font-size:14px] font-[650] whitespace-nowrap [&:hover]:bg-[#2458ce]",
-                )}
+                className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 primary-link editor-primary-action group/editor-primary-action focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 group/primary-link bg-[#356ae6] text-white font-[650] hover:bg-[#2458ce] px-2.75 py-0 gap-1.5 inline-flex items-center justify-center text-[11px] h-8 rounded-[6px] whitespace-nowrap [box-shadow:none]"
                 aria-label="Se connecter pour sauvegarder"
                 title="Se connecter pour retrouver ce projet sur vos autres appareils"
               >
@@ -874,12 +849,12 @@ export default function Editor({
           </div>
         </header>
         {project.challenge && (
-          <div
-            className={cn(
-              "challenge-editor-banner px-[22px] py-[9px] flex items-center flex-wrap gap-y-[10px] gap-x-[20px] bg-[#edf3ff] text-[color:#45658f] [font-size:12px] shrink-[0] [&_a]:font-[700] [&_a]:text-[color:#356ae6] [&_button]:ml-[auto] [&_button]:[text-decoration:underline]",
-            )}
-          >
-            <Link to="/challenges" search={{ date: project.challenge.day }}>
+          <div className="challenge-editor-banner px-5.5 py-2.25 flex items-center flex-wrap gap-y-2.5 gap-x-5 bg-[#edf3ff] text-[#45658f] text-xs leading-[inherit] shrink-0">
+            <Link
+              className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 font-bold text-[#356ae6]"
+              to="/challenges"
+              search={{ date: project.challenge.day }}
+            >
               Défi du {project.challenge.day} · UTC
             </Link>
             <span>
@@ -888,7 +863,11 @@ export default function Editor({
                 : `Clôture dans ${Math.max(0, Math.floor((project.challenge.closesAt - now - (s.challenge?.serverOffset ?? 0)) / 3600000))} h ${Math.max(0, Math.floor((project.challenge.closesAt - now - (s.challenge?.serverOffset ?? 0)) / 60000) % 60)} min`}
             </span>
             {closed && (
-              <button disabled={busy} onClick={() => safe(preserve)}>
+              <button
+                className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 ml-auto underline"
+                disabled={busy}
+                onClick={() => safe(preserve)}
+              >
                 Continuer dans une copie libre
               </button>
             )}
@@ -896,9 +875,7 @@ export default function Editor({
         )}
         {project.conflict && (
           <div
-            className={cn(
-              "conflict px-[20px] py-[10px] gap-[12px] bg-[#fff5db] text-[color:#725a24] flex items-center [font-size:13px]",
-            )}
+            className="conflict px-5 py-2.5 gap-3 bg-[#fff5db] text-[#725a24] flex items-center text-[13px]"
             role="alert"
           >
             Cette création a changé dans un autre onglet.{" "}
@@ -928,22 +905,14 @@ export default function Editor({
           </div>
         )}
         <div
-          className={cn(
-            "editor-body [--library-width:236px] [--inspector-width:264px] [--scene-min-width:300px] flex-[1] grid grid-cols-[var(--library-width)_minmax(var(--scene-min-width),_1fr)_var(--inspector-width)] min-h-[0] [@media(width<=1100px)]:[--library-width:210px] [@media(width<=1100px)]:[--inspector-width:230px] [@media(width<=1100px)]:[--scene-min-width:280px] [@media(width>=1500px)]:[--library-width:260px] [@media(width>=1500px)]:[--inspector-width:285px] [&[data-library-collapsed='true']]:[--library-width:0px] [&[data-inspector-collapsed='true']]:[--inspector-width:0px] [&[data-library-collapsed='true']_>_[class~='group/editor-side-left']]:border-[length:0] [&[data-library-collapsed='true']_>_[class~='group/editor-side-left']]:border-none [&[data-library-collapsed='true']_>_[class~='group/editor-side-left']]:border-[color:currentColor] [&[data-inspector-collapsed='true']_>_[class~='group/editor-side-right']]:border-[length:0] [&[data-inspector-collapsed='true']_>_[class~='group/editor-side-right']]:border-none [&[data-inspector-collapsed='true']_>_[class~='group/editor-side-right']]:border-[color:currentColor]",
-          )}
+          className="editor-body [--library-width:236px] [--inspector-width:264px] [--scene-min-width:300px] flex-1 grid grid-cols-[var(--library-width)_minmax(var(--scene-min-width),1fr)_var(--inspector-width)] min-h-0 [@media(width<=1100px)]:[--library-width:210px] [@media(width<=1100px)]:[--inspector-width:230px] [@media(width<=1100px)]:[--scene-min-width:280px] [@media(width>=1500px)]:[--library-width:260px] [@media(width>=1500px)]:[--inspector-width:285px] data-[library-collapsed=true]:[--library-width:0px] data-[inspector-collapsed=true]:[--inspector-width:0px] group/editor-body"
           inert={busy && !publishing}
           data-library-collapsed={libraryCollapsed}
           data-inspector-collapsed={inspectorCollapsed}
         >
-          <div
-            className={cn(
-              "editor-side editor-side-left relative min-w-[0] min-h-[0] bg-[#fff] [&_>_aside]:h-[100%] [&_>_aside[hidden]]:hidden [&_[class~='group/panel-heading-collapsible']]:py-[10px] [&_[class~='group/panel-heading-collapsible']]:pr-[46px] [&_[class~='group/panel-heading-collapsible']]:pl-[14px] [&_[class~='group/panel-heading-collapsible']]:min-h-[54px] group/editor-side-left [border-right-width:1px] [border-right-style:solid] [border-right-color:#e4e9f1] [&_[class~='group/side-panel-toggle'][aria-expanded='false']]:left-[12px] [&_[class~='group/side-panel-toggle'][aria-expanded='false']]:right-[auto]",
-            )}
-          >
+          <div className="editor-side editor-side-left relative min-w-0 min-h-0 bg-white group/editor-side-left border-r border-solid border-r-[#e4e9f1] group-data-[library-collapsed=true]/editor-body:border-0 group-data-[library-collapsed=true]/editor-body:border-none group-data-[library-collapsed=true]/editor-body:border-current">
             <button
-              className={cn(
-                "side-panel-toggle group/side-panel-toggle border-[length:1px] border-solid border-[color:#e4e9f1] absolute top-[12px] right-[8px] z-[4] grid [place-items:center] w-[30px] h-[30px] rounded-[7px] bg-[#fff] text-[color:#68788e] [&:hover]:border-[color:#cddcfa] [&:hover]:bg-[#edf3ff] [&:hover]:text-[color:#356ae6] [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:2px] [&[aria-expanded='false']]:top-[20px] [&[aria-expanded='false']]:right-[12px] [&[aria-expanded='false']]:[box-shadow:0_2px_8px_#23334d14]",
-              )}
+              className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 side-panel-toggle group/side-panel-toggle border border-solid border-[#e4e9f1] absolute top-3 right-2 z-4 grid place-items-center rounded-[7px] bg-white text-[#68788e] hover:border-[#cddcfa] hover:bg-[#edf3ff] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 aria-[expanded=false]:top-5 aria-[expanded=false]:[box-shadow:0_2px_8px_#23334d14] size-7.5 aria-[expanded=false]:left-3 aria-[expanded=false]:right-auto"
               aria-label={
                 libraryCollapsed
                   ? "Déplier la bibliothèque"
@@ -959,41 +928,39 @@ export default function Editor({
               onClick={() => setLibraryCollapsed((collapsed) => !collapsed)}
             >
               {libraryCollapsed ? (
-                <PanelLeftOpen size={17} aria-hidden="true" />
+                <PanelLeftOpen
+                  className="shrink-0"
+                  size={17}
+                  aria-hidden="true"
+                />
               ) : (
-                <PanelLeftClose size={17} aria-hidden="true" />
+                <PanelLeftClose
+                  className="shrink-0"
+                  size={17}
+                  aria-hidden="true"
+                />
               )}
             </button>
             <aside
               id={libraryId}
-              className={cn(
-                "library overflow-hidden flex flex-col min-h-[0] bg-[white] min-w-[0] [&&_[class~='group/panel-heading']]:px-[14px] [&&_[class~='group/panel-heading']]:gap-[8px] [&&_[class~='group/panel-heading']]:pt-[17px] [&&_[class~='group/panel-heading']]:pb-[12px] [&&_[class~='group/panel-heading']_>_span]:whitespace-nowrap [&_button:focus-visible]:[outline:2px_solid_#356ae6] [&_button:focus-visible]:[outline-offset:-2px] [&_[class~='group/piece-tabs']_button]:[font-size:12px] [&_[class~='group/piece-card']_>_span:last-child]:[font-size:13px]! [&_[class~='group/library-tip']_p]:[font-size:11px]",
-              )}
+              className="library overflow-hidden flex flex-col min-h-0 bg-white min-w-0 h-full [&[hidden]]:hidden"
               aria-label="Bibliothèque de pièces"
               hidden={libraryCollapsed}
             >
-              <div
-                className={cn(
-                  "library-header shrink-[0] [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:#edf0f5]",
-                )}
-              >
-                <div
-                  className={cn(
-                    "panel-heading panel-heading-collapsible group/panel-heading-collapsible [&_h2]:leading-[18px] [&_>_div_>_span]:block [&_>_div_>_span]:mt-[2px] [&_>_div_>_span]:text-[color:#68788e] [&_>_div_>_span]:[font-size:11px] [&_>_div_>_span]:leading-[14px] group/panel-heading px-[18px] flex items-center justify-between pt-[22px] pb-[16px] [&_h2]:[font-size:14px] [&_h2]:font-[750] [&_>_span]:[font-size:12px] [&_>_span]:text-[color:#68788e]",
-                  )}
-                >
+              <div className="library-header shrink-0 border-b border-solid border-b-[#edf0f5]">
+                <div className="panel-heading panel-heading-collapsible group/panel-heading-collapsible group/panel-heading flex items-center justify-between py-2.5 min-h-13.5 px-3.5 gap-2 pt-4.25 pb-3">
                   <div>
-                    <h2>Les pièces</h2>
-                    <span>
+                    <h2 className="text-sm font-[750] leading-4.5">
+                      Les pièces
+                    </h2>
+                    <span className="block mt-0.5 text-[#68788e] text-[11px] leading-3.5">
                       {visibleParts.length} modèle
                       {visibleParts.length === 1 ? "" : "s"}
                     </span>
                   </div>
                 </div>
                 <div
-                  className={cn(
-                    "piece-tabs group/piece-tabs px-[12px] gap-[5px] grid grid-cols-[repeat(2,_minmax(0,_1fr))] pt-[0] pb-[12px] [&_button]:px-[8px] [&_button]:py-[5px] [&_button]:gap-[4px] [&_button]:border-[length:1px] [&_button]:border-solid [&_button]:border-[color:transparent] [&_button]:flex [&_button]:items-center [&_button]:justify-between [&_button]:min-h-[32px] [&_button]:text-[color:#68788e] [&_button]:rounded-[7px] [&_button]:text-left [&_button:hover]:bg-[#f5f7fb] [&_button[class~='group/active']]:border-[color:#dce6fc] [&_button[class~='group/active']]:bg-[#edf2ff] [&_button[class~='group/active']]:text-[color:#356ae6] [&_button[class~='group/active']]:font-[650]",
-                  )}
+                  className="piece-tabs group/piece-tabs px-3 gap-1.25 grid grid-cols-2 pt-0 pb-3"
                   role="group"
                   aria-label="Catégories de pièces"
                 >
@@ -1001,7 +968,11 @@ export default function Editor({
                     <button
                       key={name}
                       className={cn(
+                        "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
+                        "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
+                        "outline-offset-3",
                         name === category ? "active group/active" : "",
+                        "focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:-outline-offset-2 text-xs leading-[inherit] px-2 py-1.25 gap-1 border border-solid border-transparent flex items-center justify-between min-h-8 text-[#68788e] rounded-[7px] text-left hover:bg-[#f5f7fb] [&[class~='group/active']]:border-[#dce6fc] [&[class~='group/active']]:bg-[#edf2ff] [&[class~='group/active']]:text-[#356ae6] [&[class~='group/active']]:font-[650]",
                       )}
                       aria-label={name}
                       aria-pressed={name === category}
@@ -1013,9 +984,7 @@ export default function Editor({
                     >
                       <span>{name}</span>
                       <span
-                        className={cn(
-                          "category-count [font-size:10px] tabular-nums opacity-[0.8]",
-                        )}
+                        className="category-count text-[10px] tabular-nums opacity-80"
                         aria-hidden="true"
                       >
                         {
@@ -1029,26 +998,22 @@ export default function Editor({
                 </div>
               </div>
               <div
-                className={cn(
-                  "library-scroll flex-[1] min-h-[0] overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:#c4cede_transparent] [overscroll-behavior:contain] [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:-2px]",
-                )}
+                className="library-scroll flex-1 min-h-0 overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:#c4cede_transparent] overscroll-contain focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:-outline-offset-2"
                 ref={libraryScroll}
                 role="region"
                 aria-label="Modèles de pièces"
                 tabIndex={0}
               >
-                <div
-                  className={cn(
-                    "piece-grid p-[12px] gap-[8px] grid grid-cols-[repeat(2,_minmax(0,_1fr))] [align-content:start]",
-                  )}
-                >
+                <div className="piece-grid p-3 gap-2 grid grid-cols-2 content-start">
                   {visibleParts.map(([id, p]) => (
                     <button
                       className={cn(
-                        cn(
-                          "piece-card group/piece-card px-[3px] py-[8px] gap-[5px] border-[length:1px] border-solid border-[color:#e7ebf1] [touch-action:none] select-none min-w-[0] min-h-[100px] rounded-[9px] flex flex-col items-center justify-center bg-[#fbfcfe] cursor-[grab] [@media(width>=1500px)]:min-h-[106px] [&:hover]:border-[color:#8dacf1] [&:hover]:bg-[#f0f5ff] [&[class~='group/active']]:border-[color:#8dacf1] [&[class~='group/active']]:bg-[#f0f5ff] [&:active]:cursor-[grabbing] [&:disabled]:cursor-[default] [&_>_span:last-child]:[font-size:13px]! [&_>_span:last-child]:leading-[1.4] [&_>_span:last-child]:text-[color:#65738a] [&_>_span:last-child]:[white-space:normal] [&_>_span:last-child]:max-w-[100%] [&_>_span:last-child]:[overflow-wrap:anywhere] [&_>_span:last-child]:text-center",
-                          s.pending === id ? "active group/active" : "",
-                        ),
+                        "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
+                        "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
+                        "outline-offset-3",
+                        "piece-card group/piece-card px-0.75 py-2 gap-1.25 border border-solid border-[#e7ebf1] touch-none select-none min-w-0 min-h-25 rounded-[9px] flex flex-col items-center justify-center bg-[#fbfcfe] cursor-grab [@media(width>=1500px)]:min-h-26.5 hover:border-[#8dacf1] hover:bg-[#f0f5ff] [&[class~='group/active']]:border-[#8dacf1] [&[class~='group/active']]:bg-[#f0f5ff] active:cursor-grabbing disabled:cursor-default",
+                        s.pending === id ? "active group/active" : "",
+                        "focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:-outline-offset-2",
                       )}
                       key={id}
                       draggable={false}
@@ -1084,28 +1049,16 @@ export default function Editor({
                       }}
                     >
                       {stock && (
-                        <span
-                          className={cn(
-                            "piece-stock block text-[color:#356ae6] [font-size:10px] leading-[1.3] mb-[3px]",
-                          )}
-                        >
+                        <span className="piece-stock block text-[#356ae6] text-[10px] leading-[1.3] mb-0.75 last:text-[13px]! last:leading-[1.4] last:text-[#65738a] last:whitespace-normal last:max-w-full last:wrap-anywhere last:text-center">
                           {remaining(id)} restante{remaining(id) > 1 ? "s" : ""}
                         </span>
                       )}
-                      <span
-                        className={cn(
-                          "piece-preview flex items-center justify-center w-[100%] h-[56px] shrink-[0] pointer-events-none",
-                        )}
-                      >
+                      <span className="piece-preview flex items-center justify-center w-full h-14 shrink-0 pointer-events-none last:text-[13px]! last:leading-[1.4] last:text-[#65738a] last:whitespace-normal last:max-w-full last:wrap-anywhere last:text-center">
                         <PartPreview type={id} color={s.color} />
                       </span>
-                      <span className="piece-name">
+                      <span className="piece-name last:text-[13px]! last:leading-[1.4] last:text-[#65738a] last:whitespace-normal last:max-w-full last:wrap-anywhere last:text-center">
                         {p.name.replace(/ \d.*$/, "")}
-                        <span
-                          className={cn(
-                            "piece-dimensions block whitespace-nowrap [font-size:11px] text-[color:#8290a4] mt-[2px]",
-                          )}
-                        >
+                        <span className="piece-dimensions block whitespace-nowrap text-[11px] text-[#8290a4] mt-0.5">
                           {p.name.match(/\d.*$/)?.[0]}
                         </span>
                       </span>
@@ -1113,17 +1066,11 @@ export default function Editor({
                   ))}
                 </div>
               </div>
-              <div
-                className={cn(
-                  "library-footer shrink-[0] [border-top-width:1px] [border-top-style:solid] [border-top-color:#e7ecf3] bg-[#fff]",
-                )}
-              >
-                <div className={cn("palette-section m-[0]")}>
+              <div className="library-footer shrink-0 border-t border-solid border-t-[#e7ecf3] bg-white">
+                <div className="palette-section m-0">
                   <h2>
                     <button
-                      className={cn(
-                        "palette-toggle px-[12px] py-[10px] gap-[6px] flex items-center w-[100%] min-h-[48px] text-left [font-size:13px] font-[650] text-[color:#34435c] [&:hover]:bg-[#f8faff] [&:hover]:text-[color:#356ae6] [&_>_svg]:shrink-[0] [&[aria-expanded='true']_>_svg]:[transform:rotate(90deg)]",
-                      )}
+                      className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 palette-toggle px-3 py-2.5 gap-1.5 flex items-center w-full min-h-12 text-left text-[13px] font-[650] text-[#34435c] hover:bg-[#f8faff] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:-outline-offset-2 group/palette-toggle"
                       aria-label={
                         paletteCollapsed
                           ? "Déplier les couleurs"
@@ -1135,14 +1082,15 @@ export default function Editor({
                         setPaletteCollapsed((collapsed) => !collapsed)
                       }
                     >
-                      <ChevronRight size={16} aria-hidden="true" />
+                      <ChevronRight
+                        className="shrink-0 group-aria-expanded/palette-toggle:transform-[rotate(90deg)]"
+                        size={16}
+                        aria-hidden="true"
+                      />
                       Couleurs
-                      <span
-                        className={cn(
-                          "palette-current px-[6px] py-[4px] gap-[5px] border-[length:1px] border-solid border-[color:#e7ecf3] inline-flex items-center ml-[auto] rounded-[6px] bg-[#fbfcfe] text-[color:#68788e] [font-size:11px] font-[500] whitespace-nowrap [&_>_span]:w-[10px] [&_>_span]:h-[10px] [&_>_span]:rounded-[50%] [&_>_span]:[box-shadow:inset_0_0_0_1px_#00000014]",
-                        )}
-                      >
+                      <span className="palette-current px-1.5 py-1 gap-1.25 border border-solid border-[#e7ecf3] inline-flex items-center ml-auto rounded-[6px] bg-[#fbfcfe] text-[#68788e] text-[11px] font-medium whitespace-nowrap">
                         <span
+                          className="rounded-full [box-shadow:inset_0_0_0_1px_#00000014] size-2.5"
                           style={{ background: s.color }}
                           aria-hidden="true"
                         />
@@ -1152,9 +1100,7 @@ export default function Editor({
                   </h2>
                   <div
                     id={paletteId}
-                    className={cn(
-                      "palette px-[12px] gap-[5px] grid grid-cols-[repeat(6,_minmax(0,_1fr))] pt-[0] pb-[12px] [&[hidden]]:hidden [&_button]:p-[3px] [&_button]:border-[length:1px] [&_button]:border-solid [&_button]:border-[color:transparent] [&_button]:min-w-[0] [&_button]:h-[33px] [&_button]:rounded-[8px] [&_button:hover]:border-[color:#d2ddef] [&_button:hover]:bg-[#f1f5fc] [&_button[class~='group/chosen']]:border-[color:#356ae6] [&_button[class~='group/chosen']]:bg-[#edf3ff] [&_button[class~='group/chosen']]:[box-shadow:0_0_0_1px_#356ae620]",
-                    )}
+                    className="palette px-3 gap-1.25 grid grid-cols-6 pt-0 pb-3 [&[hidden]]:hidden"
                     hidden={paletteCollapsed}
                     role="group"
                     aria-label="Choisir une couleur"
@@ -1166,7 +1112,11 @@ export default function Editor({
                         aria-label={COLOR_NAMES[i]}
                         aria-pressed={s.color === color}
                         className={cn(
+                          "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
+                          "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
+                          "outline-offset-3",
                           s.color === color ? "chosen group/chosen" : "",
+                          "focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:-outline-offset-2 p-0.75 border border-solid border-transparent min-w-0 h-8.25 rounded-[8px] hover:border-[#d2ddef] hover:bg-[#f1f5fc] [&[class~='group/chosen']]:border-[#356ae6] [&[class~='group/chosen']]:bg-[#edf3ff] [&[class~='group/chosen']]:[box-shadow:0_0_0_1px_#356ae620]",
                         )}
                         onClick={() => {
                           useEditor.setState({ color });
@@ -1202,9 +1152,7 @@ export default function Editor({
                         }}
                       >
                         <span
-                          className={cn(
-                            "palette-swatch grid [place-items:center] w-[100%] h-[100%] rounded-[5px] [box-shadow:inset_0_0_0_1px_#00000014]",
-                          )}
+                          className="palette-swatch grid place-items-center rounded-[5px] [box-shadow:inset_0_0_0_1px_#00000014] size-full"
                           style={{
                             background: color,
                             color: [2, 3, 4, 7, 9, 10].includes(i)
@@ -1214,6 +1162,7 @@ export default function Editor({
                         >
                           {s.color === color && (
                             <Check
+                              className="shrink-0"
                               size={15}
                               strokeWidth={3}
                               aria-hidden="true"
@@ -1224,13 +1173,9 @@ export default function Editor({
                     ))}
                   </div>
                 </div>
-                <div
-                  className={cn(
-                    "library-tip group/library-tip px-[14px] gap-[8px] pt-[8px] pb-[12px] flex items-center text-[color:#68788e] bg-[#f8faff] [&_>_svg]:shrink-[0] [&_p]:[font-size:12px] [&_p]:leading-[1.6]",
-                  )}
-                >
-                  <Grip size={16} aria-hidden="true" />
-                  <p>
+                <div className="library-tip group/library-tip px-3.5 gap-2 pt-2 pb-3 flex items-center text-[#68788e] bg-[#f8faff]">
+                  <Grip className="shrink-0" size={16} aria-hidden="true" />
+                  <p className="text-[11px] leading-[1.6]">
                     Clic : ajouter une pièce.
                     <br />
                     Glisser : choisir sa place.
@@ -1239,117 +1184,118 @@ export default function Editor({
               </div>
             </aside>
           </div>
-          <section
-            className={cn(
-              "viewport overflow-hidden relative bg-[#edf1f7] min-w-[0]",
-            )}
-          >
-            <div
-              className={cn(
-                "scene-toolbar p-[5px] gap-[3px] border-[length:1px] border-solid border-[color:#fff] absolute top-[20px] left-[50%] [transform:translateX(-50%)] z-[3] flex items-center bg-[#ffffffed] [box-shadow:0_4px_15px_#53668114] rounded-[10px] [&_button]:px-[7px] [&_button]:py-[0] [&_button]:gap-[6px] [&_button]:h-[33px] [&_button]:min-w-[34px] [&_button]:flex [&_button]:items-center [&_button]:justify-center [&_button]:rounded-[6px] [&_button]:text-[color:#7a879d] [&_button_span]:[font-size:14px]! [&_button_span]:whitespace-nowrap [@media(width<=1100px)]:[&_button_span]:hidden [&_button[class~='group/active']]:bg-[#eaf0ff] [&_button[class~='group/active']]:text-[color:#356ae6] [&_button:hover]:bg-[#f0f4fa]",
-              )}
-            >
-              <div
-                className={cn(
-                  "tool-group flex [border-right-width:1px] [border-right-style:solid] [border-right-color:#e7ecf2] pr-[4px] mr-[2px]",
-                )}
-              >
+          <section className="viewport overflow-hidden relative bg-[#edf1f7] min-w-0">
+            <div className="scene-toolbar p-1.25 gap-0.75 border border-solid border-white absolute top-5 left-1/2 transform-[translateX(-50%)] z-3 flex items-center bg-[#ffffffed] [box-shadow:0_4px_15px_#53668114] rounded-[10px]">
+              <div className="tool-group flex border-r border-solid border-r-[#e7ecf2] pr-1 mr-0.5">
                 <button
+                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] hover:bg-[#f0f4fa]"
                   title="Annuler (⌘/Ctrl Z)"
                   disabled={!s.past.length}
                   onClick={s.undo}
                 >
-                  <Undo2 size={18} />
+                  <Undo2 className="shrink-0" size={18} />
                 </button>
                 <button
+                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] hover:bg-[#f0f4fa]"
                   title="Rétablir"
                   disabled={!s.future.length}
                   onClick={s.redo}
                 >
-                  <Redo2 size={18} />
+                  <Redo2 className="shrink-0" size={18} />
                 </button>
               </div>
-              <div
-                className={cn(
-                  "tool-group flex [border-right-width:1px] [border-right-style:solid] [border-right-color:#e7ecf2] pr-[4px] mr-[2px]",
-                )}
-              >
+              <div className="tool-group flex border-r border-solid border-r-[#e7ecf2] pr-1 mr-0.5">
                 <button
                   title="Déplacer"
                   className={cn(
+                    "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
+                    "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
+                    "outline-offset-3",
                     s.tool === "translate" ? "active group/active" : "",
+                    "px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] [&[class~='group/active']]:bg-[#eaf0ff] [&[class~='group/active']]:text-[#356ae6] hover:bg-[#f0f4fa]",
                   )}
                   onClick={() => useEditor.setState({ tool: "translate" })}
                 >
-                  <Move3D size={19} />
+                  <Move3D className="shrink-0" size={19} />
                 </button>
                 <button
                   title="Tourner"
                   className={cn(
+                    "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
+                    "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
+                    "outline-offset-3",
                     s.tool === "rotate" ? "active group/active" : "",
+                    "px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] [&[class~='group/active']]:bg-[#eaf0ff] [&[class~='group/active']]:text-[#356ae6] hover:bg-[#f0f4fa]",
                   )}
                   onClick={() => useEditor.setState({ tool: "rotate" })}
                 >
-                  <Rotate3D size={19} />
+                  <Rotate3D className="shrink-0" size={19} />
                 </button>
               </div>
               <button
                 title="Aimantation"
                 aria-pressed={s.snap}
-                className={cn(s.snap ? "active group/active" : "")}
+                className={cn(
+                  "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
+                  "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
+                  "outline-offset-3",
+                  s.snap ? "active group/active" : "",
+                  "px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] [&[class~='group/active']]:bg-[#eaf0ff] [&[class~='group/active']]:text-[#356ae6] hover:bg-[#f0f4fa]",
+                )}
                 onClick={() => useEditor.setState({ snap: !s.snap })}
               >
-                <Magnet size={18} />
-                <span>Aimantation</span>
+                <Magnet className="shrink-0" size={18} />
+                <span className="text-sm! leading-[inherit]! whitespace-nowrap [@media(width<=1100px)]:hidden">
+                  Aimantation
+                </span>
               </button>
               <button
                 title={s.showGrid ? "Masquer la grille" : "Afficher la grille"}
                 aria-label="Grille"
                 aria-pressed={s.showGrid}
-                className={cn(s.showGrid ? "active group/active" : "")}
+                className={cn(
+                  "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
+                  "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
+                  "outline-offset-3",
+                  s.showGrid ? "active group/active" : "",
+                  "px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] [&[class~='group/active']]:bg-[#eaf0ff] [&[class~='group/active']]:text-[#356ae6] hover:bg-[#f0f4fa]",
+                )}
                 onClick={() => useEditor.setState({ showGrid: !s.showGrid })}
               >
-                <Grid2X2 size={18} />
-                <span>Grille</span>
+                <Grid2X2 className="shrink-0" size={18} />
+                <span className="text-sm! leading-[inherit]! whitespace-nowrap [@media(width<=1100px)]:hidden">
+                  Grille
+                </span>
               </button>
               <button
+                className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] hover:bg-[#f0f4fa]"
                 title="Cadrer la sélection (F)"
                 onClick={() => useEditor.setState({ frame: s.frame + 1 })}
               >
-                <Scan size={18} />
+                <Scan className="shrink-0" size={18} />
               </button>
             </div>
             {project.ready ? (
               <ClientScene scene={s.scene} editable={!closed} />
             ) : (
-              <div
-                className={cn(
-                  "empty-state px-[25px] py-[70px] gap-[20px] min-h-[300px] flex flex-col items-center justify-center text-center text-[color:#7d8ba0] [&_h1]:text-[color:#32445f] [&_h1]:[font-size:24px] [&_h1]:font-[700] [&_h2]:text-[color:#32445f] [&_h2]:[font-size:24px] [&_h2]:font-[700] [&_p]:max-w-[510px] [&_p]:leading-[1.8]",
-                )}
-              >
+              <div className="empty-state px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0]">
                 Chargement de la création…
               </div>
             )}
             {project.ready && !count && !s.pending && (
-              <div
-                className={cn(
-                  "canvas-empty absolute left-[50%] top-[46%] [transform:translate(-50%,_-50%)] pointer-events-none text-center w-[100%] text-[color:#8291a9] [&_>_span]:font-[700] [&_>_span]:[font-size:26px] [&_>_span]:tracking-[-0.7px] [&_>_span]:leading-[1.4] [&_p]:[font-size:12px] [&_p]:mt-[12px]",
-                )}
-              >
-                <span>
+              <div className="canvas-empty absolute left-1/2 top-[46%] transform-[translate(-50%,-50%)] pointer-events-none text-center w-full text-[#8291a9]">
+                <span className="font-bold text-[26px] tracking-[-0.7px] leading-[1.4]">
                   Une idée commence
                   <br />
                   par une brique.
                 </span>
-                <p>Choisissez votre première pièce à gauche.</p>
+                <p className="text-xs leading-[inherit] mt-3">
+                  Choisissez votre première pièce à gauche.
+                </p>
               </div>
             )}
-            <div
-              className={cn(
-                "viewport-bottom gap-[8px] absolute left-[18px] bottom-[15px] right-[18px] z-[3] flex items-center flex-wrap pointer-events-none [font-size:12px] text-[color:#8591a3] [&_>_span:first-child]:px-[9px] [&_>_span:first-child]:py-[6px] [&_>_span:first-child]:border-[length:1px] [&_>_span:first-child]:border-solid [&_>_span:first-child]:border-[color:#dce3ed] [&_>_span:first-child]:rounded-[6px] [&_>_span:first-child]:bg-[#ffffff91] [&_>_span:first-child]:text-[color:#6e7f96] [&_[class~='group/overlap']]:[font-size:10px] [&_[class~='group/overlap']]:text-[color:#956f21]",
-              )}
-            >
-              <span>
+            <div className="viewport-bottom gap-2 absolute left-4.5 bottom-3.75 right-4.5 z-3 flex items-center flex-wrap pointer-events-none text-xs leading-[inherit] text-[#8591a3]">
+              <span className="first:px-2.25 first:py-1.5 first:border first:border-solid first:border-[#dce3ed] first:rounded-[6px] first:bg-[#ffffff91] first:text-[#6e7f96]">
                 {count} /{" "}
                 {stock
                   ? stock.reduce((sum, item) => sum + item.quantity, 0)
@@ -1357,15 +1303,11 @@ export default function Editor({
                 pièces
               </span>
               {overlap && (
-                <span className={cn("overlap group/overlap")}>
+                <span className="overlap group/overlap first:px-2.25 first:py-1.5 first:border first:border-solid first:border-[#dce3ed] first:rounded-[6px] first:bg-[#ffffff91] first:text-[#6e7f96] text-[10px] text-[#956f21]">
                   Chevauchement existant à corriger
                 </span>
               )}
-              <div
-                className={cn(
-                  "view-select gap-[8px] ml-[auto] max-w-[100%] flex items-center justify-end flex-wrap pointer-events-none [&_>_*]:pointer-events-auto [&_[class~='group/scene-view-trigger']]:px-[10px] [&_[class~='group/scene-view-trigger']]:py-[0] [&_[class~='group/scene-view-trigger']]:border-[length:1px] [&_[class~='group/scene-view-trigger']]:border-solid [&_[class~='group/scene-view-trigger']]:border-[color:#dce5f0] [&_[class~='group/scene-view-trigger']]:h-[38px] [&_[class~='group/scene-view-trigger']]:w-[132px] [&_[class~='group/scene-view-trigger']]:[font-size:12px] [&_[class~='group/scene-view-trigger']]:bg-[#fffffff0] [&_[class~='group/scene-view-trigger']]:rounded-[8px] [&_[class~='group/scene-view-trigger']]:[box-shadow:0_2px_8px_#53668108] [&_[class~='group/scene-view-trigger']]:text-[color:#64758d]",
-                )}
-              >
+              <div className="view-select gap-2 ml-auto max-w-full flex items-center justify-end flex-wrap pointer-events-none">
                 <Select
                   items={cameraViews}
                   value={s.view}
@@ -1380,41 +1322,37 @@ export default function Editor({
                   }}
                 >
                   <SelectTrigger
-                    className={cn(
-                      "scene-view-trigger group/scene-view-trigger [&:hover]:border-[color:#b9cbed] [&:hover]:bg-[#fff] [&:hover]:text-[color:#356ae6] [&[aria-expanded='true']]:border-[color:#b9cbed] [&[aria-expanded='true']]:bg-[#fff] [&[aria-expanded='true']]:text-[color:#356ae6]",
-                    )}
+                    className="scene-view-trigger group/scene-view-trigger pointer-events-auto hover:border-[#b9cbed] hover:bg-white hover:text-[#356ae6] aria-expanded:border-[#b9cbed] aria-expanded:bg-white aria-expanded:text-[#356ae6] px-2.5 py-0 border border-solid border-[#dce5f0] h-9.5 w-33 text-xs bg-[#fffffff0] rounded-[8px] [box-shadow:0_2px_8px_#53668108] text-[#64758d] data-[size=default]:h-9.5"
                     aria-label="Vue de la caméra"
                   >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent
-                    className={cn(
-                      "scene-view-menu p-[5px] min-w-[152px] rounded-[10px] bg-[#fff] [box-shadow:0_8px_24px_#33476b24] [&_[data-slot='select-item']]:py-[7px] [&_[data-slot='select-item']]:min-h-[32px] [&_[data-slot='select-item']]:pr-[30px] [&_[data-slot='select-item']]:pl-[10px] [&_[data-slot='select-item']]:rounded-[6px] [&_[data-slot='select-item']]:text-[color:#536580] [&_[data-slot='select-item']]:[font-size:12px] [&_[data-slot='select-item']]:cursor-[pointer] [&_[data-slot='select-item'][data-highlighted]]:bg-[#eef3ff] [&_[data-slot='select-item'][data-highlighted]]:text-[color:#356ae6] [&_[data-slot='select-item'][data-selected]]:bg-[#eef3ff] [&_[data-slot='select-item'][data-selected]]:text-[color:#356ae6]",
-                    )}
+                    className="scene-view-menu p-1.25 min-w-38 rounded-[10px] bg-white [box-shadow:0_8px_24px_#33476b24]"
                     side="top"
                     align="end"
                     sideOffset={8}
                     alignItemWithTrigger={false}
                   >
                     {cameraViews.map((view) => (
-                      <SelectItem key={view.value} value={view.value}>
+                      <SelectItem
+                        className="py-1.75 min-h-8 pr-7.5 pl-2.5 rounded-[6px] text-[#536580] text-xs cursor-pointer data-highlighted:bg-[#eef3ff] data-highlighted:text-[#356ae6] data-selected:bg-[#eef3ff] data-selected:text-[#356ae6]"
+                        key={view.value}
+                        value={view.value}
+                      >
                         {view.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 <div
-                  className={cn(
-                    "scene-light-control py-[3px] gap-[10px] border-[length:1px] border-solid border-[color:#dce5f0] flex items-center h-[38px] pr-[8px] pl-[3px] rounded-[8px] bg-[#fffffff0] text-[color:#64758d] [box-shadow:0_2px_8px_#53668108] whitespace-nowrap [&_input]:p-[0] [&&_input]:m-[0] [&_input]:border-[length:0] [&_input]:border-none [&_input]:border-[color:currentColor] [&_input]:[appearance:none] [&_input]:[-webkit-appearance:none] [&_input]:w-[92px] [&_input]:h-[26px] [&_input]:rounded-[0] [&_input]:[background:repeating-linear-gradient(_to_right,_#cad4e3_0_1px,_transparent_1px_25%_)] [&_input]:[background-size:calc(100%_-_1px)_3px] [&_input]:[background-repeat:no-repeat] [&_input]:[background-position:center_bottom_2px] [&_input]:cursor-[ew-resize] [&_input::-webkit-slider-runnable-track]:h-[2px] [&_input::-webkit-slider-runnable-track]:rounded-[1px] [&_input::-webkit-slider-runnable-track]:[background:linear-gradient(_to_right,_#356ae6_var(--light-progress),_#dce3ef_var(--light-progress)_)] [&_input::-moz-range-track]:h-[2px] [&_input::-moz-range-track]:rounded-[1px] [&_input::-moz-range-track]:bg-[#dce3ef] [&_input::-moz-range-progress]:h-[2px] [&_input::-moz-range-progress]:bg-[#356ae6] [&_input::-webkit-slider-thumb]:border-[length:2px] [&_input::-webkit-slider-thumb]:border-solid [&_input::-webkit-slider-thumb]:border-[color:#fff] [&_input::-webkit-slider-thumb]:[appearance:none] [&_input::-webkit-slider-thumb]:[-webkit-appearance:none] [&_input::-webkit-slider-thumb]:box-border [&_input::-webkit-slider-thumb]:w-[9px] [&_input::-webkit-slider-thumb]:h-[14px] [&_input::-webkit-slider-thumb]:mt-[-6px] [&_input::-webkit-slider-thumb]:rounded-[3px] [&_input::-webkit-slider-thumb]:bg-[#356ae6] [&_input::-webkit-slider-thumb]:[box-shadow:0_0_0_1px_#b9cbed] [&_input::-moz-range-thumb]:border-[length:2px] [&_input::-moz-range-thumb]:border-solid [&_input::-moz-range-thumb]:border-[color:#fff] [&_input::-moz-range-thumb]:box-border [&_input::-moz-range-thumb]:w-[9px] [&_input::-moz-range-thumb]:h-[14px] [&_input::-moz-range-thumb]:rounded-[3px] [&_input::-moz-range-thumb]:bg-[#356ae6] [&_input::-moz-range-thumb]:[box-shadow:0_0_0_1px_#b9cbed] [&_input:enabled:hover::-webkit-slider-thumb]:[box-shadow:0_0_0_1px_#356ae6] [&_input:enabled:hover::-moz-range-thumb]:[box-shadow:0_0_0_1px_#356ae6] [&_input:focus-visible]:[outline:2px_solid_#356ae6] [&_input:focus-visible]:[outline-offset:3px] [&_input:focus-visible]:rounded-[3px] [&_input:disabled]:cursor-[not-allowed]",
-                  )}
+                  className="scene-light-control py-0.75 gap-2.5 border border-solid border-[#dce5f0] flex items-center h-9.5 pr-2 pl-0.75 rounded-[8px] bg-[#fffffff0] text-[#64758d] [box-shadow:0_2px_8px_#53668108] whitespace-nowrap pointer-events-auto"
                   role="group"
                   aria-label="Éclairage"
                 >
                   <button
                     type="button"
-                    className={cn(
-                      "scene-light-icon px-[10px] py-[0] gap-[7px] border-[length:1px] border-solid border-[color:#dce6fc] inline-flex items-center justify-center h-[30px] shrink-[0] rounded-[5px] bg-[#edf2ff] text-[color:#356ae6] [font-size:11px] font-[600] cursor-[pointer] [transition:background_150ms,_color_150ms,_border-color_150ms] [&:hover]:border-[color:#b8ccfc] [&:hover]:bg-[#dfe9ff] [&[aria-pressed='true']]:border-[color:#356ae6] [&[aria-pressed='true']]:bg-[#356ae6] [&[aria-pressed='true']]:text-[color:#fff] [&[aria-pressed='true']:hover]:border-[color:#2858c9] [&[aria-pressed='true']:hover]:bg-[#2858c9] [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:3px]",
-                    )}
+                    className="disabled:cursor-not-allowed disabled:opacity-40 outline-offset-3 scene-light-icon px-2.5 py-0 gap-1.75 border border-solid border-[#dce6fc] inline-flex items-center justify-center h-7.5 shrink-0 rounded-[5px] bg-[#edf2ff] text-[#356ae6] text-[11px] font-semibold cursor-pointer [transition:background_150ms,color_150ms,border-color_150ms] hover:border-[#b8ccfc] hover:bg-[#dfe9ff] aria-pressed:border-[#356ae6] aria-pressed:bg-[#356ae6] aria-pressed:text-white [&[aria-pressed='true']:hover]:border-[#2858c9] [&[aria-pressed='true']:hover]:bg-[#2858c9] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3"
                     aria-label="Tout éclairer"
                     aria-pressed={s.uniformLighting}
                     title={
@@ -1428,16 +1366,15 @@ export default function Editor({
                       })
                     }
                   >
-                    <Sun size={16} aria-hidden="true" />
+                    <Sun className="shrink-0" size={16} aria-hidden="true" />
                     <span>Tout éclairer</span>
                   </button>
                   <div
-                    className={cn(
-                      "scene-light-direction gap-[7px] flex items-center pl-[10px] [border-left-width:1px] [border-left-style:solid] [border-left-color:#e6ebf3] [&[data-disabled='true']]:opacity-[0.35]",
-                    )}
+                    className="scene-light-direction gap-1.75 flex items-center pl-2.5 border-l border-solid border-l-[#e6ebf3] data-[disabled=true]:opacity-35"
                     data-disabled={s.uniformLighting}
                   >
                     <input
+                      className="outline-offset-3 p-0 m-0 border-0 border-none border-current appearance-none [-webkit-appearance:none] w-23 h-6.5 rounded-none [background:repeating-linear-gradient(to_right,#cad4e3_0_1px,transparent_1px_25%)] bg-size-[calc(100%-1px)_3px] bg-no-repeat bg-position-[center_bottom_2px] cursor-ew-resize [&::-webkit-slider-runnable-track]:h-0.5 [&::-webkit-slider-runnable-track]:rounded-[1px] [&::-webkit-slider-runnable-track]:[background:linear-gradient(to_right,#356ae6_var(--light-progress),#dce3ef_var(--light-progress))] [&::-moz-range-track]:h-0.5 [&::-moz-range-track]:rounded-[1px] [&::-moz-range-track]:bg-[#dce3ef] [&::-moz-range-progress]:h-0.5 [&::-moz-range-progress]:bg-[#356ae6] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-solid [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:[-webkit-appearance:none] [&::-webkit-slider-thumb]:box-border [&::-webkit-slider-thumb]:w-2.25 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:-mt-1.5 [&::-webkit-slider-thumb]:rounded-[3px] [&::-webkit-slider-thumb]:bg-[#356ae6] [&::-webkit-slider-thumb]:[box-shadow:0_0_0_1px_#b9cbed] [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-solid [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:box-border [&::-moz-range-thumb]:w-2.25 [&::-moz-range-thumb]:h-3.5 [&::-moz-range-thumb]:rounded-[3px] [&::-moz-range-thumb]:bg-[#356ae6] [&::-moz-range-thumb]:[box-shadow:0_0_0_1px_#b9cbed] [&:enabled:hover::-webkit-slider-thumb]:[box-shadow:0_0_0_1px_#356ae6] [&:enabled:hover::-moz-range-thumb]:[box-shadow:0_0_0_1px_#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 focus-visible:rounded-[3px] disabled:cursor-not-allowed"
                       type="range"
                       aria-label="Angle de l’éclairage"
                       aria-valuetext={`${s.lightAngle} degrés`}
@@ -1463,9 +1400,7 @@ export default function Editor({
                       }
                     />
                     <output
-                      className={cn(
-                        "scene-light-angle min-w-[31px] text-[color:#64758d] [font-size:10px] text-right tabular-nums",
-                      )}
+                      className="scene-light-angle min-w-7.75 text-[#64758d] text-[10px] text-right tabular-nums"
                       aria-hidden="true"
                     >
                       {s.uniformLighting ? "—" : `${s.lightAngle}°`}
@@ -1475,15 +1410,9 @@ export default function Editor({
               </div>
             </div>
           </section>
-          <div
-            className={cn(
-              "editor-side editor-side-right relative min-w-[0] min-h-[0] bg-[#fff] [&_>_aside]:h-[100%] [&_>_aside[hidden]]:hidden [&_[class~='group/panel-heading-collapsible']]:py-[10px] [&_[class~='group/panel-heading-collapsible']]:pr-[46px] [&_[class~='group/panel-heading-collapsible']]:pl-[14px] [&_[class~='group/panel-heading-collapsible']]:min-h-[54px] group/editor-side-right [border-left-width:1px] [border-left-style:solid] [border-left-color:#e4e9f1]",
-            )}
-          >
+          <div className="editor-side editor-side-right relative min-w-0 min-h-0 bg-white group/editor-side-right border-l border-solid border-l-[#e4e9f1] group-data-[inspector-collapsed=true]/editor-body:border-0 group-data-[inspector-collapsed=true]/editor-body:border-none group-data-[inspector-collapsed=true]/editor-body:border-current">
             <button
-              className={cn(
-                "side-panel-toggle group/side-panel-toggle border-[length:1px] border-solid border-[color:#e4e9f1] absolute top-[12px] right-[8px] z-[4] grid [place-items:center] w-[30px] h-[30px] rounded-[7px] bg-[#fff] text-[color:#68788e] [&:hover]:border-[color:#cddcfa] [&:hover]:bg-[#edf3ff] [&:hover]:text-[color:#356ae6] [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:2px] [&[aria-expanded='false']]:top-[20px] [&[aria-expanded='false']]:right-[12px] [&[aria-expanded='false']]:[box-shadow:0_2px_8px_#23334d14]",
-              )}
+              className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 side-panel-toggle group/side-panel-toggle border border-solid border-[#e4e9f1] absolute top-3 right-2 z-4 grid place-items-center rounded-[7px] bg-white text-[#68788e] hover:border-[#cddcfa] hover:bg-[#edf3ff] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 aria-[expanded=false]:top-5 aria-[expanded=false]:right-3 aria-[expanded=false]:[box-shadow:0_2px_8px_#23334d14] size-7.5"
               aria-label={
                 inspectorCollapsed
                   ? "Déplier le panneau de construction"
@@ -1499,76 +1428,88 @@ export default function Editor({
               onClick={() => setInspectorCollapsed((collapsed) => !collapsed)}
             >
               {inspectorCollapsed ? (
-                <PanelRightOpen size={17} aria-hidden="true" />
+                <PanelRightOpen
+                  className="shrink-0"
+                  size={17}
+                  aria-hidden="true"
+                />
               ) : (
-                <PanelRightClose size={17} aria-hidden="true" />
+                <PanelRightClose
+                  className="shrink-0"
+                  size={17}
+                  aria-hidden="true"
+                />
               )}
             </button>
             <aside
               id={inspectorId}
-              className={cn(
-                "inspector overflow-auto flex flex-col min-h-[0] bg-[white] [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:#c4cede_transparent] [overscroll-behavior:contain]",
-              )}
+              className="inspector overflow-auto flex flex-col min-h-0 bg-white [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:#c4cede_transparent] overscroll-contain h-full [&[hidden]]:hidden"
               aria-label="Construction et propriétés"
               hidden={inspectorCollapsed}
             >
-              <div
-                className={cn(
-                  "panel-heading panel-heading-collapsible group/panel-heading-collapsible [&_h2]:leading-[18px] [&_>_div_>_span]:block [&_>_div_>_span]:mt-[2px] [&_>_div_>_span]:text-[color:#68788e] [&_>_div_>_span]:[font-size:11px] [&_>_div_>_span]:leading-[14px] group/panel-heading px-[18px] flex items-center justify-between pt-[22px] pb-[16px] [&_h2]:[font-size:14px] [&_h2]:font-[750] [&_>_span]:[font-size:12px] [&_>_span]:text-[color:#68788e]",
-                )}
-              >
+              <div className="panel-heading panel-heading-collapsible group/panel-heading-collapsible group/panel-heading px-4.5 flex items-center justify-between py-2.5 pr-11.5 pl-3.5 min-h-13.5">
                 <div>
-                  <h2>Construction</h2>
-                  <span>{count} pièces</span>
+                  <h2 className="text-sm font-[750] leading-4.5">
+                    Construction
+                  </h2>
+                  <span className="block mt-0.5 text-[#68788e] text-[11px] leading-3.5">
+                    {count} pièces
+                  </span>
                 </div>
               </div>
-              <div
-                className={cn(
-                  "tree-actions [&_button]:p-[0] [&_button]:gap-[6px] [&_button]:h-[33px] [&_button]:min-w-[0] [&_button]:flex [&_button]:items-center [&_button]:justify-center [&_button]:rounded-[6px] [&_button]:text-[color:#7a879d] [&_button]:flex-[0_1_30px] [&_button:hover]:bg-[#f0f4fa] px-[8px] gap-[3px] flex pt-[0] pb-[12px] [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:#edf0f5] [&_button:focus-visible]:[outline:2px_solid_#356ae6] [&_button:focus-visible]:[outline-offset:2px] [&_button:focus-visible]:rounded-[4px]",
-                )}
-              >
+              <div className="tree-actions px-2 gap-0.75 flex pt-0 pb-3 border-b border-solid border-b-[#edf0f5]">
                 <button
+                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
                   title="Tout sélectionner"
                   aria-label="Tout sélectionner"
                   disabled={!s.scene.nodes.length}
                   onClick={s.selectAll}
                 >
-                  <ListChecks size={17} aria-hidden="true" />
+                  <ListChecks
+                    className="shrink-0"
+                    size={17}
+                    aria-hidden="true"
+                  />
                 </button>
                 <button
+                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
                   title={s.selection.length ? "Grouper" : "Nouveau groupe"}
                   onClick={() => safe(s.group)}
                   disabled={
                     !project.ready || closed || !!s.gesture || !!s.pending
                   }
                 >
-                  <FolderPlus size={17} />
+                  <FolderPlus className="shrink-0" size={17} />
                 </button>
                 <button
+                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
                   title="Dissocier"
                   onClick={() => safe(s.ungroup)}
                   disabled={selected?.kind !== "group"}
                 >
-                  <Ungroup size={17} />
+                  <Ungroup className="shrink-0" size={17} />
                 </button>
                 <button
+                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
                   title="Dupliquer (D)"
                   aria-label="Dupliquer"
                   aria-keyshortcuts="d Control+d Meta+d"
                   onClick={() => safe(s.duplicate)}
                   disabled={!s.selection.length}
                 >
-                  <Copy size={17} />
+                  <Copy className="shrink-0" size={17} />
                 </button>
                 <button
+                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
                   title="Supprimer"
                   onClick={() => safe(s.remove)}
                   disabled={!s.selection.length}
                 >
-                  <Trash2 size={17} />
+                  <Trash2 className="shrink-0" size={17} />
                 </button>
-                <span className={cn("tree-actions-spacer flex-[1]")} />
+                <span className="tree-actions-spacer flex-1" />
                 <button
+                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
                   title="Tout replier"
                   aria-label="Tout replier"
                   disabled={
@@ -1580,9 +1521,10 @@ export default function Editor({
                     )
                   }
                 >
-                  <ChevronsDownUp size={17} />
+                  <ChevronsDownUp className="shrink-0" size={17} />
                 </button>
                 <button
+                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
                   title="Tout déplier"
                   aria-label="Tout déplier"
                   disabled={
@@ -1590,31 +1532,25 @@ export default function Editor({
                   }
                   onClick={() => setCollapsedGroups(new Set())}
                 >
-                  <ChevronsUpDown size={17} />
+                  <ChevronsUpDown className="shrink-0" size={17} />
                 </button>
               </div>
               <div
                 ref={treeDrag.container}
-                className={cn(
-                  "tree px-[0] py-[7px] overflow-auto [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:#c4cede_transparent] [overscroll-behavior:contain] flex-[1] min-h-[170px] [&[data-dragging]]:[overflow-anchor:none] [&[data-dragging]]:cursor-[grabbing] [&[data-dragging]_[class~='group/tree-name']]:cursor-[grabbing]",
-                )}
+                className="tree px-0 py-1.75 overflow-auto [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:#c4cede_transparent] overscroll-contain flex-1 min-h-42.5 data-dragging:[overflow-anchor:none] data-dragging:cursor-grabbing group/tree"
                 data-dragging={treeDrag.active || undefined}
                 onPointerDown={treeDrag.onPointerDown}
                 onDragStart={(event) => event.preventDefault()}
               >
                 {s.scene.nodes.length ? (
                   <ul
-                    className={cn("tree-branch p-[0] m-[0] list-none")}
+                    className="tree-branch p-0 m-0 list-none"
                     aria-label="Pièces et groupes"
                   >
                     {tree(null)}
                   </ul>
                 ) : (
-                  <div
-                    className={cn(
-                      "tree-empty px-[10px] py-[40px] gap-[10px] flex items-center justify-center flex-col text-[color:#a5afbd] text-center [font-size:12px]",
-                    )}
-                  >
+                  <div className="tree-empty px-2.5 py-10 gap-2.5 flex items-center justify-center flex-col text-[#a5afbd] text-center text-xs leading-[inherit]">
                     <Layers size={28} />
                     <p>
                       Votre construction
@@ -1627,21 +1563,11 @@ export default function Editor({
               <span className="sr-only" role="status" aria-live="polite">
                 {treeDrag.active ? treeDrag.target?.label : ""}
               </span>
-              <div
-                className={cn(
-                  "properties px-[17px] py-[0] [border-top-width:1px] [border-top-style:solid] [border-top-color:#e9edf3] shrink-[0] [&_[class~='group/panel-heading']]:px-[0] [&_[class~='group/panel-heading']]:py-[19px] [&_input]:mt-[5px] [&_input]:[font-size:14px]! [&_input]:min-w-[0] [&_select]:p-[7px] [&_select]:border-[length:1px] [&_select]:border-solid [&_select]:border-[color:#e1e6ee] [&_select]:block [&_select]:rounded-[6px] [&_select]:[font-size:14px]! [&_select]:mt-[5px] [&_select]:w-[100%]",
-                )}
-              >
-                <div
-                  className={cn(
-                    "panel-heading group/panel-heading px-[18px] flex items-center justify-between pt-[22px] pb-[16px] [&_h2]:[font-size:14px] [&_h2]:font-[750] [&_>_span]:[font-size:12px] [&_>_span]:text-[color:#68788e]",
-                  )}
-                >
-                  <h2>
+              <div className="properties px-4.25 py-0 border-t border-solid border-t-[#e9edf3] shrink-0">
+                <div className="panel-heading group/panel-heading flex items-center justify-between px-0 py-4.75">
+                  <h2 className="text-sm font-[750] leading-normal">
                     <button
-                      className={cn(
-                        "properties-toggle gap-[6px] [font-size:13px] font-[650] text-[color:#34435c] flex items-center rounded-[4px] [&:hover]:text-[color:#356ae6] [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:4px] [&[aria-expanded='true']_svg]:[transform:rotate(90deg)]",
-                      )}
+                      className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 properties-toggle gap-1.5 text-[13px] font-[650] text-[#34435c] flex items-center rounded-[4px] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-4 group/properties-toggle"
                       aria-label={
                         propertiesCollapsed
                           ? "Déplier les propriétés"
@@ -1658,11 +1584,15 @@ export default function Editor({
                         setPropertiesCollapsed((collapsed) => !collapsed)
                       }
                     >
-                      <ChevronRight size={16} aria-hidden="true" />
+                      <ChevronRight
+                        className="shrink-0 group-aria-expanded/properties-toggle:transform-[rotate(90deg)]"
+                        size={16}
+                        aria-hidden="true"
+                      />
                       Propriétés
                     </button>
                   </h2>
-                  <span>
+                  <span className="text-xs leading-[inherit] text-[#68788e]">
                     {s.selection.length > 1
                       ? `${s.selection.length} éléments`
                       : ""}
@@ -1670,16 +1600,15 @@ export default function Editor({
                 </div>
                 <div
                   id={propertiesId}
-                  className={cn(
-                    "properties-content pb-[20px] [&_>_label]:[font-size:14px]! [&_>_label]:text-[color:#7c899d] [&_>_label]:block [&_>_label]:mb-[12px]",
-                  )}
+                  className="properties-content pb-5"
                   hidden={propertiesCollapsed}
                 >
                   {selected ? (
                     <>
-                      <label>
+                      <label className="text-sm! leading-[inherit]! text-[#7c899d] block mb-3">
                         Nom
                         <Input
+                          className="mt-1.25 text-sm! min-w-0"
                           key={selected.id + selected.name}
                           defaultValue={selected.name}
                           maxLength={100}
@@ -1692,9 +1621,10 @@ export default function Editor({
                           }
                         />
                       </label>
-                      <label>
+                      <label className="text-sm! leading-[inherit]! text-[#7c899d] block mb-3">
                         Groupe parent
                         <select
+                          className="outline-offset-3 p-1.75 border border-solid border-[#e1e6ee] block rounded-[6px] text-sm! leading-[inherit]! mt-1.25 w-full"
                           value={
                             selectionParents.size > 1
                               ? "mixed"
@@ -1732,9 +1662,7 @@ export default function Editor({
                       </label>
                       {(["position", "rotation"] as const).map((field) => (
                         <div
-                          className={cn(
-                            "transform-fields mt-[17px] [font-size:14px]! text-[color:#7c899d] [&_>_div]:gap-[6px] [&_>_div]:grid [&_>_div]:grid-cols-[repeat(3,_1fr)] [&_>_div]:mt-[7px] [&_>_div_>_label]:relative [&_input]:py-[7px] [&&_input]:m-[0] [&_input]:border-[length:1px] [&_input]:border-solid [&_input]:border-[color:#e2e7ef] [&_input]:rounded-[5px] [&_input]:w-[100%] [&_input]:pr-[2px] [&_input]:pl-[18px] [&_input]:[font-size:14px]! [&_input]:[appearance:textfield] [&_input::-webkit-inner-spin-button]:hidden [&_label_>_span]:absolute [&_label_>_span]:top-[9px] [&_label_>_span]:left-[6px] [&_label_>_span]:[font-size:10px]",
-                          )}
+                          className="transform-fields mt-4.25 text-sm! leading-[inherit]! text-[#7c899d]"
                           key={field}
                         >
                           <label>
@@ -1742,17 +1670,15 @@ export default function Editor({
                               ? "Position"
                               : "Rotation · degrés"}
                           </label>
-                          <div>
+                          <div className="gap-1.5 grid grid-cols-3 mt-1.75">
                             {["X", "Y", "Z"].map((axis, i) => (
-                              <label key={axis}>
+                              <label className="relative" key={axis}>
                                 <span
                                   className={cn(
-                                    axis === "X" &&
-                                      "axis-X text-[color:#d66d76]",
-                                    axis === "Y" &&
-                                      "axis-Y text-[color:#62a27d]",
-                                    axis === "Z" &&
-                                      "axis-Z text-[color:#5b8dce]",
+                                    axis === "X" && "axis-X text-[#d66d76]",
+                                    axis === "Y" && "axis-Y text-[#62a27d]",
+                                    axis === "Z" && "axis-Z text-[#5b8dce]",
+                                    "absolute top-2.25 left-1.5 text-[10px]",
                                   )}
                                 >
                                   {axis}
@@ -1778,22 +1704,14 @@ export default function Editor({
                           </div>
                         </div>
                       ))}
-                      <p
-                        className={cn(
-                          "property-hint text-[color:#68788e] [font-size:12px] leading-[1.8] mt-[8px]",
-                        )}
-                      >
+                      <p className="property-hint text-[#68788e] text-xs leading-[1.8] mt-2">
                         {s.selection.length > 1
                           ? "Le groupe parent s’applique à toute la sélection. Le nom, la position et la rotation concernent le premier élément."
                           : "Dimensions fixes · positions relatives au groupe"}
                       </p>
                     </>
                   ) : (
-                    <p
-                      className={cn(
-                        "property-hint text-[color:#68788e] [font-size:12px] leading-[1.8] mt-[8px]",
-                      )}
-                    >
+                    <p className="property-hint text-[#68788e] text-xs leading-[1.8] mt-2">
                       Sélectionnez une pièce pour la modifier. Maintenez Maj
                       pour en sélectionner plusieurs.
                     </p>
@@ -1803,22 +1721,14 @@ export default function Editor({
             </aside>
           </div>
         </div>
-        <footer
-          className={cn(
-            "editor-footer px-[19px] py-[6px] gap-[8px] min-h-[33px] [border-top-width:1px] [border-top-style:solid] [border-top-color:#e5e9f0] flex items-center justify-between flex-wrap shrink-[0] [font-size:12px] text-[color:#98a2b2] [&_>_span]:flex [&_>_span]:items-center [&_>_span]:gap-y-[6px] [&_>_span]:gap-x-[12px] [&_>_span]:flex-wrap",
-          )}
-        >
-          <span>
-            <span
-              className={cn(
-                "brand-mini [font-size:17px] tracking-[-1px] font-[800] text-[color:#8998ad]",
-              )}
-            >
+        <footer className="editor-footer px-4.75 py-1.5 gap-2 min-h-8.25 border-t border-solid border-t-[#e5e9f0] flex items-center justify-between flex-wrap shrink-0 text-xs leading-[inherit] text-[#98a2b2]">
+          <span className="flex items-center gap-y-1.5 gap-x-3 flex-wrap">
+            <span className="brand-mini text-[17px] tracking-[-1px] font-extrabold text-[#8998ad]">
               clik
             </span>{" "}
             L’atelier des possibles
           </span>
-          <span>
+          <span className="flex items-center gap-y-1.5 gap-x-3 flex-wrap">
             Glisser / flèches : déplacer · Maj + ↑ / ↓ : hauteur · Espace +
             glisser / clic droit : caméra · Maj + clic : sélection multiple{" "}
             <ChevronRight size={12} /> D : dupliquer <ChevronRight size={12} />{" "}

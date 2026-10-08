@@ -87,29 +87,31 @@ export function AuthField({
     "aria-describedby": describedBy,
   };
   return (
-    <div
-      className={cn(
-        "auth-field min-w-[0] [&&_input]:px-[13px] [&&_input]:py-[11px] [&&_input]:border-[length:1px] [&&_input]:border-solid [&&_input]:border-[color:#dce4f0] [&&_input]:h-[46px] [&&_input]:[font-size:15px] [&&_input]:rounded-[10px] [&&_input]:bg-[#f9fbfe] [&&_input]:[box-shadow:none] [@media(width<=440px)]:[&&_input]:[font-size:16px] [&&_input::placeholder]:text-[color:#8997ab] [&&_input:hover:not(:disabled)]:border-[color:#b6c8e4] [&&_input:focus-visible]:border-[color:#356ae6] [&&_input:focus-visible]:[outline:3px_solid_#e7eeff] [&&_input:focus-visible]:[outline-offset:1px] [&&_input:focus-visible]:bg-[#fff] [&&_input[aria-invalid='true']]:border-[color:#cf5361] [&&_[class~='group/password-field']_input]:pr-[46px] [&_[class~='group/password-toggle']]:w-[38px] [&_[class~='group/password-toggle']]:h-[38px]",
-      )}
-    >
-      <div
-        className={cn(
-          "auth-label-row flex flex-wrap items-baseline justify-between gap-y-[6px] gap-x-[12px] mb-[8px] [&_label]:text-[color:#34425b] [&_label]:[font-size:13px] [&_label]:font-[650] [&_a]:[font-size:11px] [&_a]:text-[color:#356ae6]",
-        )}
-      >
-        <label htmlFor={props.id}>{label}</label>
+    <div className="auth-field min-w-0">
+      <div className="auth-label-row flex flex-wrap items-baseline justify-between gap-y-1.5 gap-x-3 mb-2">
+        <label
+          className="text-[#34425b] text-[13px] font-[650]"
+          htmlFor={props.id}
+        >
+          {label}
+        </label>
         {action}
       </div>
       {props.type === "password" ? (
-        <PasswordInput {...input} />
+        <PasswordInput
+          toggleClassName="size-9.5"
+          className="px-3.25 py-2.75 border border-solid border-[#dce4f0] h-11.5 text-[15px] rounded-[10px] bg-[#f9fbfe] [box-shadow:none] [@media(width<=440px)]:text-base placeholder:text-[#8997ab] hover:enabled:border-[#b6c8e4] focus-visible:border-[#356ae6] focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#e7eeff] focus-visible:outline-offset-1 focus-visible:bg-white aria-invalid:border-[#cf5361] pr-11.5 leading-(--text-xs--line-height) focus-visible:shadow-none aria-invalid:shadow-none focus-visible:ring-0 aria-invalid:ring-0"
+          {...input}
+        />
       ) : (
-        <Input {...input} />
+        <Input
+          className="px-3.25 py-2.75 border border-solid border-[#dce4f0] h-11.5 text-[15px] rounded-[10px] bg-[#f9fbfe] [box-shadow:none] [@media(width<=440px)]:text-base placeholder:text-[#8997ab] hover:enabled:border-[#b6c8e4] focus-visible:border-[#356ae6] focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#e7eeff] focus-visible:outline-offset-1 focus-visible:bg-white aria-invalid:border-[#cf5361] leading-(--text-xs--line-height) focus-visible:shadow-none aria-invalid:shadow-none focus-visible:ring-0 aria-invalid:ring-0"
+          {...input}
+        />
       )}
       {hint && (
         <p
-          className={cn(
-            "auth-hint mt-[7px] [font-size:11px] leading-[1.6] text-[color:#75849b]",
-          )}
+          className="auth-hint mt-1.75 text-[11px] leading-[1.6] text-[#75849b]"
           id={`${props.id}-hint`}
         >
           {hint}
@@ -117,9 +119,7 @@ export function AuthField({
       )}
       {error && (
         <p
-          className={cn(
-            "auth-field-error mt-[7px] [font-size:11px] leading-[1.6] text-[color:#b13948]",
-          )}
+          className="auth-field-error mt-1.75 text-[11px] leading-[1.6] text-[#b13948]"
           id={`${props.id}-error`}
         >
           {error}
@@ -129,15 +129,22 @@ export function AuthField({
   );
 }
 
-export function AuthError({ children }: { children?: ReactNode }) {
+export function AuthError({
+  children,
+  className,
+}: {
+  children?: ReactNode;
+  className?: string;
+}) {
   return children ? (
     <div
       className={cn(
-        "auth-error group/auth-error p-[12px] gap-[9px] border-[length:1px] border-solid border-[color:#f1d4d8] flex items-start rounded-[10px] bg-[#fff5f6] text-[color:#a63244] [font-size:12px] leading-[1.65] [overflow-wrap:anywhere] [&_svg]:shrink-[0] [&_svg]:mt-[2px] [&_a]:block [&_a]:mt-[6px] [&_a]:[text-decoration:underline] [&_a]:font-[600]",
+        "auth-error group/auth-error p-3 gap-2.25 border border-solid border-[#f1d4d8] flex items-start rounded-[10px] bg-[#fff5f6] text-[#a63244] text-xs leading-[1.65] wrap-anywhere",
+        className,
       )}
       role="alert"
     >
-      <AlertCircle size={18} aria-hidden="true" />
+      <AlertCircle className="shrink-0 mt-0.5" size={18} aria-hidden="true" />
       <div>{children}</div>
     </div>
   ) : null;
@@ -154,9 +161,7 @@ export function AuthSubmit({
 }) {
   return (
     <button
-      className={cn(
-        "auth-submit group/auth-submit px-[16px] py-[12px] gap-[10px] border-[length:1px] border-solid border-[color:#356ae6] flex items-center justify-center w-[100%] min-h-[46px] rounded-[10px] text-[color:#fff] bg-[#356ae6] [font-size:13px] leading-[1.5] font-[650] text-center [&:hover:not(:disabled)]:border-[color:#2458ce] [&:hover:not(:disabled)]:bg-[#2458ce] [&:disabled]:opacity-[0.65]",
-      )}
+      className="cursor-pointer disabled:cursor-not-allowed [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 auth-submit group/auth-submit px-4 py-3 gap-2.5 border border-solid border-[#356ae6] flex items-center justify-center w-full min-h-11.5 rounded-[10px] text-white bg-[#356ae6] text-[13px] leading-normal font-[650] text-center hover:enabled:border-[#2458ce] hover:enabled:bg-[#2458ce] disabled:opacity-65"
       type="submit"
       disabled={busy}
     >
@@ -164,9 +169,7 @@ export function AuthSubmit({
         <>
           <LoaderCircle
             size={18}
-            className={cn(
-              "auth-spinner [animation:spin_1s_linear_infinite] motion-reduce:[animation:none]",
-            )}
+            className="shrink-0 auth-spinner animate-spin motion-reduce:animate-none"
             aria-hidden="true"
           />
           {pending}
@@ -174,7 +177,7 @@ export function AuthSubmit({
       ) : (
         <>
           {children}
-          <ArrowRight size={17} aria-hidden="true" />
+          <ArrowRight className="shrink-0" size={17} aria-hidden="true" />
         </>
       )}
     </button>

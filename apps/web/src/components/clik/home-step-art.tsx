@@ -35,13 +35,16 @@ function MiniBrick({
 /** Decorative, static SVGs: no preview renderer or image request is needed. */
 export default function HomeStepArt({
   step,
+  className,
 }: {
   step: "build" | "play" | "share";
+  className?: string;
 }) {
   return (
     <svg
       className={cn(
-        "home-step-art block w-[148px] max-w-[calc(100%_-_38px)] h-[112px] shrink-[0] [@media(width<=520px)]:w-[132px] [@media(width<=520px)]:h-[100px]",
+        "home-step-art block w-37 max-w-[calc(100%-38px)] h-28 shrink-0 [@media(width<=520px)]:w-33 [@media(width<=520px)]:h-25",
+        className,
       )}
       viewBox="0 0 160 120"
       fill="none"

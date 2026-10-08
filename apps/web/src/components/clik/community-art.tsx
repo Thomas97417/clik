@@ -37,13 +37,16 @@ function Brick({
 /** Small, static illustrations shared by the community sections. */
 export default function CommunityArt({
   kind,
+  className,
 }: {
   kind: "remixes" | "comments";
+  className?: string;
 }) {
   return (
     <svg
       className={cn(
-        "community-art group/community-art block w-[112px] h-[86px] shrink-[0]",
+        "community-art group/community-art block w-28 h-21.5 shrink-0",
+        className,
       )}
       viewBox="0 0 130 100"
       fill="none"

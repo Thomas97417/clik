@@ -21,7 +21,12 @@ export default function PublicMore({
       className={className}
       nativeButton={false}
       role={hydrated ? "button" : "link"}
-      render={<a href={href} />}
+      render={
+        <a
+          className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3"
+          href={href}
+        />
+      }
       disabled={loading}
       onClick={(event) => {
         if (

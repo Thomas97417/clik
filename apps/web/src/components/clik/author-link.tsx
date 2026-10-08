@@ -8,16 +8,19 @@ export default function AuthorLink({
   name,
   avatar,
   showAvatar = true,
+  className,
 }: {
   id: string;
   name: string;
   avatar?: AvatarDescriptor;
   showAvatar?: boolean;
+  className?: string;
 }) {
   return (
     <Link
       className={cn(
-        "author-link group/author-link gap-[6px] inline-flex items-center max-w-[100%] [vertical-align:middle] text-[color:inherit] font-[600] [overflow-wrap:anywhere] [&:hover]:text-[color:#356ae6] [&:hover]:[text-decoration:underline] [&:hover]:underline-offset-[3px] [&_>_span]:min-w-[0]",
+        "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 author-link group/author-link gap-1.5 inline-flex items-center max-w-full align-middle text-inherit font-semibold wrap-anywhere hover:text-[#356ae6] hover:underline hover:underline-offset-3",
+        className,
       )}
       to="/gallery/user/$userId"
       params={{ userId: id }}
@@ -25,7 +28,7 @@ export default function AuthorLink({
       {showAvatar && (
         <BrickAvatar avatar={avatar ?? defaultAvatar(id)} size={24} />
       )}
-      <span>{name}</span>
+      <span className="min-w-0">{name}</span>
     </Link>
   );
 }

@@ -11,6 +11,12 @@ export default function CreationPreview({
   interactive = false,
   initialZoom = 1,
   poster,
+  imageClassName,
+  canvasClassName,
+  placeholderClassName,
+  controlsClassName,
+  controlsButtonClassName,
+  className,
 }: {
   scene: SceneDocument | string;
   cacheKey: string;
@@ -18,6 +24,12 @@ export default function CreationPreview({
   interactive?: boolean;
   initialZoom?: number;
   poster?: string;
+  imageClassName?: string;
+  canvasClassName?: string;
+  placeholderClassName?: string;
+  controlsClassName?: string;
+  controlsButtonClassName?: string;
+  className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const surface = useRef<HTMLDivElement>(null);
@@ -96,7 +108,8 @@ export default function CreationPreview({
     <div
       ref={ref}
       className={cn(
-        "creation-preview group/creation-preview inset-[0] absolute [&_img]:object-contain",
+        "creation-preview group/creation-preview inset-0 absolute",
+        className,
       )}
       aria-busy={!current}
     >
@@ -105,10 +118,9 @@ export default function CreationPreview({
           <div
             ref={surface}
             className={cn(
-              cn(
-                "creation-preview-surface inset-[0] absolute [&[class~='group/is-interactive']]:cursor-[grab] [&[class~='group/is-interactive']]:select-none [&[class~='group/is-interactive']]:rounded-[14px] [&[data-dragging='true']]:cursor-[grabbing] [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:-4px] [&_canvas]:inset-[0] [&_canvas]:absolute [&_canvas]:w-[100%] [&_canvas]:h-[100%] [&_canvas]:object-contain [&_canvas]:pointer-events-none [&[data-live='true']_img]:opacity-[0]",
-                interactiveReady ? "is-interactive group/is-interactive" : "",
-              ),
+              "creation-preview-surface inset-0 absolute [&[class~='group/is-interactive']]:cursor-grab [&[class~='group/is-interactive']]:select-none [&[class~='group/is-interactive']]:rounded-[14px] data-[dragging=true]:cursor-grabbing focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:-outline-offset-4",
+              interactiveReady ? "is-interactive group/is-interactive" : "",
+              "group/creation-preview-surface",
             )}
             tabIndex={interactiveReady ? 0 : undefined}
             role={interactiveReady ? "group" : undefined}
@@ -116,6 +128,10 @@ export default function CreationPreview({
             aria-describedby={interactiveReady ? instructionsId : undefined}
           >
             <img
+              className={cn(
+                "object-contain group-data-[live=true]/creation-preview-surface:opacity-0",
+                imageClassName,
+              )}
               src={current.url}
               width={640}
               height={480}
@@ -129,12 +145,23 @@ export default function CreationPreview({
                   : { transform: `scale(${initialZoom})` }
               }
             />
-            {interactive && <canvas ref={canvas} hidden aria-hidden="true" />}
+            {interactive && (
+              <canvas
+                className={cn(
+                  "inset-0 absolute object-contain pointer-events-none size-full",
+                  canvasClassName,
+                )}
+                ref={canvas}
+                hidden
+                aria-hidden="true"
+              />
+            )}
           </div>
           {interactiveReady && (
             <div
               className={cn(
-                "creation-preview-controls group/creation-preview-controls gap-[3px] absolute bottom-[5px] right-[5px] flex items-center text-[color:#626b8d] [&_button]:grid [&_button]:[place-items:center] [&_button]:w-[30px] [&_button]:h-[30px] [&_button]:rounded-[8px] [&_button]:bg-[#ffffffcf] [&_button:hover]:bg-[white] [&_button:hover]:text-[color:#356ae6] [&_button:focus-visible]:[outline:2px_solid_#356ae6]",
+                "creation-preview-controls group/creation-preview-controls gap-0.75 absolute bottom-1.25 right-1.25 flex items-center text-[#626b8d]",
+                controlsClassName,
               )}
             >
               <span id={instructionsId} className="sr-only">
@@ -143,36 +170,46 @@ export default function CreationPreview({
                 pour zoomer, Début pour réinitialiser.
               </span>
               <span
-                className={cn(
-                  "creation-preview-hint [font-size:11px] mr-[6px] [@media(width<=360px)]:hidden",
-                )}
+                className="creation-preview-hint text-[11px] mr-1.5 [@media(width<=360px)]:hidden"
                 aria-hidden="true"
               >
                 Glisser pour tourner
               </span>
               <button
+                className={cn(
+                  "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 grid place-items-center rounded-[8px] bg-[#ffffffcf] hover:bg-white hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] size-7.5",
+                  controlsButtonClassName,
+                )}
                 type="button"
                 title="Dézoomer l’aperçu"
                 aria-label="Dézoomer l’aperçu"
                 onClick={() => controls.current?.zoom(-1)}
               >
-                <Minus size={15} />
+                <Minus className="shrink-0" size={15} />
               </button>
               <button
+                className={cn(
+                  "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 grid place-items-center rounded-[8px] bg-[#ffffffcf] hover:bg-white hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] size-7.5",
+                  controlsButtonClassName,
+                )}
                 type="button"
                 title="Zoomer l’aperçu"
                 aria-label="Zoomer l’aperçu"
                 onClick={() => controls.current?.zoom(1)}
               >
-                <Plus size={15} />
+                <Plus className="shrink-0" size={15} />
               </button>
               <button
+                className={cn(
+                  "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 grid place-items-center rounded-[8px] bg-[#ffffffcf] hover:bg-white hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] size-7.5",
+                  controlsButtonClassName,
+                )}
                 type="button"
                 title="Réinitialiser la vue"
                 aria-label="Réinitialiser la vue"
                 onClick={() => controls.current?.reset()}
               >
-                <RotateCcw size={15} />
+                <RotateCcw className="shrink-0" size={15} />
               </button>
             </div>
           )}
@@ -180,10 +217,9 @@ export default function CreationPreview({
       ) : (
         <div
           className={cn(
-            cn(
-              "creation-preview-placeholder group/creation-preview-placeholder gap-[12px] flex h-[100%] items-center justify-center flex-col text-[color:#7184a0] [font-size:12px] [&[class~='group/is-loading']]:opacity-[0.65]",
-              current ? "" : "is-loading group/is-loading",
-            ),
+            "creation-preview-placeholder group/creation-preview-placeholder gap-3 flex h-full items-center justify-center flex-col text-[#7184a0] text-xs leading-[inherit] [&[class~='group/is-loading']]:opacity-65",
+            current ? "" : "is-loading group/is-loading",
+            placeholderClassName,
           )}
         >
           {current?.error ? (

@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import {
   useCallback,
   useEffect,
@@ -448,13 +447,11 @@ export default function Scene({
   });
   if (!supported)
     return (
-      <div
-        className={cn(
-          "empty-state px-[25px] py-[70px] gap-[20px] min-h-[300px] flex flex-col items-center justify-center text-center text-[color:#7d8ba0] [&_h1]:text-[color:#32445f] [&_h1]:[font-size:24px] [&_h1]:font-[700] [&_h2]:text-[color:#32445f] [&_h2]:[font-size:24px] [&_h2]:font-[700] [&_p]:max-w-[510px] [&_p]:leading-[1.8]",
-        )}
-      >
-        <h2>La 3D n’est pas disponible</h2>
-        <p>
+      <div className="empty-state px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0]">
+        <h2 className="text-[#32445f] text-2xl leading-[inherit] font-bold">
+          La 3D n’est pas disponible
+        </h2>
+        <p className="max-w-127.5 leading-[1.8]">
           Activez WebGL et l’accélération graphique dans votre navigateur pour
           ouvrir cette scène.
         </p>
@@ -477,35 +474,36 @@ export default function Scene({
       </Canvas>
       {showViewControls && !editable && viewActions && (
         <div
-          className={cn(
-            "creation-preview-controls group/creation-preview-controls gap-[3px] absolute bottom-[5px] right-[5px] flex items-center text-[color:#626b8d] [&_button]:grid [&_button]:[place-items:center] [&_button]:w-[30px] [&_button]:h-[30px] [&_button]:rounded-[8px] [&_button]:bg-[#ffffffcf] [&_button:hover]:bg-[white] [&_button:hover]:text-[color:#356ae6] [&_button:focus-visible]:[outline:2px_solid_#356ae6]",
-          )}
+          className="creation-preview-controls group/creation-preview-controls gap-0.75 absolute bottom-1.25 right-1.25 flex items-center text-[#626b8d]"
           role="group"
           aria-label="Contrôles de la vue 3D"
         >
           <button
+            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 grid place-items-center rounded-[8px] bg-[#ffffffcf] hover:bg-white hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] size-7.5"
             type="button"
             title="Dézoomer l’aperçu"
             aria-label="Dézoomer l’aperçu"
             onClick={() => viewActions.zoom(-1)}
           >
-            <Minus size={15} aria-hidden="true" />
+            <Minus className="shrink-0" size={15} aria-hidden="true" />
           </button>
           <button
+            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 grid place-items-center rounded-[8px] bg-[#ffffffcf] hover:bg-white hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] size-7.5"
             type="button"
             title="Zoomer l’aperçu"
             aria-label="Zoomer l’aperçu"
             onClick={() => viewActions.zoom(1)}
           >
-            <Plus size={15} aria-hidden="true" />
+            <Plus className="shrink-0" size={15} aria-hidden="true" />
           </button>
           <button
+            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 grid place-items-center rounded-[8px] bg-[#ffffffcf] hover:bg-white hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] size-7.5"
             type="button"
             title="Réinitialiser la vue"
             aria-label="Réinitialiser la vue"
             onClick={viewActions.reset}
           >
-            <RotateCcw size={15} aria-hidden="true" />
+            <RotateCcw className="shrink-0" size={15} aria-hidden="true" />
           </button>
         </div>
       )}

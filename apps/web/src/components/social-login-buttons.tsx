@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
 import { useRef, useState } from "react";
 import { LoaderCircle } from "lucide-react";
@@ -80,23 +79,14 @@ export default function SocialLoginButtons({
     }
   };
   return (
-    <div
-      className={cn("auth-social [&_[class~='group/auth-error']]:mt-[14px]")}
-    >
-      <div
-        className={cn(
-          "auth-divider mx-[0] gap-[12px] flex items-center mt-[22px] mb-[16px] text-[color:#8190a6] [font-size:11px] [&::before]:[content:''] [&::before]:flex-[1] [&::before]:h-[1px] [&::before]:bg-[#e7edf5] [&::after]:[content:''] [&::after]:flex-[1] [&::after]:h-[1px] [&::after]:bg-[#e7edf5]",
-        )}
-      >
+    <div className="auth-social">
+      <div className="auth-divider mx-0 gap-3 flex items-center mt-5.5 mb-4 text-[#8190a6] text-[11px] before:[content:''] before:flex-1 before:h-px before:bg-[#e7edf5] after:[content:''] after:flex-1 after:h-px after:bg-[#e7edf5]">
         <span>ou continuer avec</span>
       </div>
-      <div
-        className={cn(
-          "auth-social-buttons gap-[12px] grid grid-cols-[1fr_1fr] [&_button]:gap-[9px] [&_button]:border-[length:1px] [&_button]:border-solid [&_button]:border-[color:#dfe6f0] [&_button]:flex [&_button]:items-center [&_button]:justify-center [&_button]:h-[44px] [&_button]:rounded-[10px] [&_button]:bg-[#fff] [&_button]:text-[color:#41516d] [&_button]:[font-size:13px] [&_button]:font-[600] [&_button:hover:not(:disabled)]:border-[color:#bdcfea] [&_button:hover:not(:disabled)]:bg-[#f5f8ff]",
-        )}
-      >
+      <div className="auth-social-buttons gap-3 grid grid-cols-[1fr_1fr]">
         {(["google", "github"] as const).map((provider) => (
           <button
+            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 gap-2.25 border border-solid border-[#dfe6f0] flex items-center justify-center h-11 rounded-[10px] bg-white text-[#41516d] text-[13px] font-semibold hover:enabled:border-[#bdcfea] hover:enabled:bg-[#f5f8ff]"
             key={provider}
             type="button"
             disabled={disabled || !!pending}
@@ -105,9 +95,7 @@ export default function SocialLoginButtons({
             {pending === provider ? (
               <LoaderCircle
                 size={17}
-                className={cn(
-                  "auth-spinner [animation:spin_1s_linear_infinite] motion-reduce:[animation:none]",
-                )}
+                className="shrink-0 auth-spinner animate-spin motion-reduce:animate-none"
                 aria-hidden="true"
               />
             ) : provider === "google" ? (
@@ -119,7 +107,7 @@ export default function SocialLoginButtons({
           </button>
         ))}
       </div>
-      <AuthError>{error}</AuthError>
+      <AuthError className="mt-3.5">{error}</AuthError>
     </div>
   );
 }

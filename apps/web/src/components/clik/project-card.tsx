@@ -195,70 +195,52 @@ export default function ProjectCard({
         ? Globe2
         : LogIn;
   return (
-    <article
-      className={cn(
-        "creation-card project-card group/creation-card overflow-hidden border-[length:1px] border-solid border-[color:#e4eaf2] rounded-[14px] bg-[white] [a&:hover_[class~='group/card-arrow']]:bg-[#356ae6] [a&:hover_[class~='group/card-arrow']]:text-[color:white] [&_>_a:hover_[class~='group/card-arrow']]:bg-[#356ae6] [&_>_a:hover_[class~='group/card-arrow']]:text-[color:white] relative flex flex-col min-w-[0] [&:nth-child(3n_+_2)_[class~='group/project-thumbnail']]:[background:radial-gradient(ellipse_at_50%_65%,_#e4e6f1,_#f6f4fa_70%)] [&:nth-child(3n_+_3)_[class~='group/project-thumbnail']]:[background:radial-gradient(ellipse_at_50%_65%,_#dcebe7,_#f1f8f5_70%)] [&_[class~='group/card-meta']]:px-[18px] [&_[class~='group/card-meta']]:pt-[18px] [&_[class~='group/card-meta']]:pb-[20px] [&_[class~='group/card-meta']_h2]:overflow-hidden [&_[class~='group/card-meta']_h2]:whitespace-nowrap [&_[class~='group/card-meta']_h2]:text-ellipsis [&_[class~='group/card-meta']_p]:text-[color:#73829a] [&_[class~='group/card-meta']_[class~='group/project-description']]:overflow-hidden [&_[class~='group/card-meta']_[class~='group/project-description']]:[display:-webkit-box] [&_[class~='group/card-meta']_[class~='group/project-description']]:[-webkit-box-orient:vertical] [&_[class~='group/card-meta']_[class~='group/project-description']]:[-webkit-line-clamp:2] [&_[class~='group/card-meta']_[class~='group/project-description']]:[overflow-wrap:anywhere] [&_[class~='group/card-meta']_[class~='group/project-description']]:[white-space:pre-line] [&_[class~='group/card-meta']_[class~='group/project-description']]:mt-[8px] [&_[class~='group/card-meta']_[class~='group/project-description']]:mb-[10px] [&_[class~='group/card-meta']_[class~='group/project-description']]:text-[color:#536581] [&_[class~='group/card-meta']_[class~='group/project-description']]:leading-[1.6] [&_[class~='group/card-meta']_[class~='group/project-updated']]:[font-size:11px] [&_[class~='group/project-origin']]:overflow-hidden [&_[class~='group/project-origin']]:whitespace-nowrap [&_[class~='group/project-origin']]:text-ellipsis [&_[class~='group/project-origin']]:[font-size:11px] [&_[class~='group/creation-kind-badge']]:top-[14px] [&_[class~='group/creation-kind-badge']]:right-[14px] [&_[class~='group/creation-kind-badge']]:left-[auto]",
-      )}
-    >
+    <article className="creation-card project-card group/creation-card overflow-hidden border border-solid border-[#e4eaf2] rounded-[14px] bg-white relative flex flex-col min-w-0 group/creation-card">
       <Link
         {...target}
-        className={cn(
-          "project-card-open block [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:-2px] [&:focus-visible]:rounded-[13px]",
-        )}
+        className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 project-card-open block focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:-outline-offset-2 focus-visible:rounded-[13px] group/card-link"
         aria-label={`Ouvrir ${creation.title}`}
       >
-        <div
-          className={cn(
-            "thumbnail project-thumbnail group/thumbnail [aspect-ratio:4/3] bg-[#eef2f8] relative [&_img]:w-[100%] [&_img]:h-[100%] [&_img]:object-cover group/project-thumbnail [background:radial-gradient(ellipse_at_50%_65%,_#dfe9f7,_#f1f5fb_70%)] [&_[class~='group/project-challenge-badge']]:px-[9px] [&_[class~='group/project-challenge-badge']]:py-[6px] [&_[class~='group/project-challenge-badge']]:m-[0] [&_[class~='group/project-challenge-badge']]:absolute [&_[class~='group/project-challenge-badge']]:bottom-[16px] [&_[class~='group/project-challenge-badge']]:left-[14px] [&_[class~='group/project-challenge-badge']]:max-w-[calc(100%_-_76px)] [&_[class~='group/project-challenge-badge']]:rounded-[6px] [&_[class~='group/project-challenge-badge']]:bg-[#f5f0ffed] [&_[class~='group/project-challenge-badge']]:text-[color:#765aa8] [&_[class~='group/project-challenge-badge']]:font-[600]",
-          )}
-        >
+        <div className="thumbnail project-thumbnail group/thumbnail aspect-4/3 bg-[#eef2f8] relative group/project-thumbnail [background:radial-gradient(ellipse_at_50%_65%,#dfe9f7,#f1f5fb_70%)] group-nth-[3n+2]/creation-card:[background:radial-gradient(ellipse_at_50%_65%,#e4e6f1,#f6f4fa_70%)] group-nth-[3n+3]/creation-card:[background:radial-gradient(ellipse_at_50%_65%,#dcebe7,#f1f8f5_70%)]">
           <CreationPreview
+            imageClassName="object-cover size-full"
             scene={creation.scene}
             cacheKey={creation.cacheKey}
             title={creation.title}
           />
           {creation.challenge && (
-            <span
-              className={cn(
-                "challenge-badge project-challenge-badge group/project-challenge-badge px-[7px] py-[4px] block w-[fit-content] mb-[8px] bg-[#eaf0ff] rounded-[5px] text-[color:#356ae6] [font-size:10px]",
-              )}
-            >
+            <span className="challenge-badge project-challenge-badge group/project-challenge-badge block w-fit text-[10px] px-2.25 py-1.5 m-0 absolute bottom-4 left-3.5 max-w-[calc(100%-76px)] rounded-[6px] bg-[#f5f0ffed] text-[#765aa8] font-semibold">
               Défi du {creation.challenge.day}
             </span>
           )}
           {!!creation.provenance?.imports.length && (
-            <span
-              className={cn(
-                "assembly-badge creation-kind-badge group/assembly-badge px-[8px] py-[3px] border-[length:1px] border-solid border-[color:#c7dfdf] inline-flex w-[fit-content] items-center rounded-[6px] bg-[#edf7f5] text-[color:#37786b] [font-size:10px] font-[650] leading-[1.5] whitespace-nowrap group/creation-kind-badge absolute left-[12px] top-[12px] z-[2] pointer-events-none",
-              )}
-            >
+            <span className="assembly-badge creation-kind-badge group/assembly-badge px-2 py-0.75 border border-solid border-[#c7dfdf] inline-flex w-fit items-center rounded-[6px] bg-[#edf7f5] text-[#37786b] text-[10px] font-[650] leading-normal whitespace-nowrap group/creation-kind-badge absolute z-2 pointer-events-none top-3.5 right-3.5 left-auto">
               Assemblage
             </span>
           )}
           <span
-            className={cn(
-              "card-arrow group/card-arrow absolute bottom-[15px] right-[15px] bg-[#ffffffde] rounded-[50%] h-[32px] w-[32px] grid [place-items:center] text-[color:#356ae6] [transition:background_150ms]",
-            )}
+            className="card-arrow group/card-arrow absolute bottom-3.75 right-3.75 bg-[#ffffffde] rounded-full grid place-items-center text-[#356ae6] [transition:background_150ms] size-8 group-hover/card-link:bg-[#356ae6] group-hover/card-link:text-white"
             aria-hidden="true"
           >
             <ArrowUpRight size={19} />
           </span>
         </div>
-        <div
-          className={cn(
-            "card-meta group/card-meta px-[20px] py-[18px] [&_h2]:[font-size:16px] [&_h2]:font-[700] [&_p]:[font-size:12px] [&_p]:text-[color:#8a97aa] [&_p]:mt-[6px]",
-          )}
-        >
-          <h2 title={creation.title}>{creation.title}</h2>
+        <div className="card-meta group/card-meta py-4.5 px-4.5 pt-4.5 pb-5">
+          <h2
+            className="overflow-hidden whitespace-nowrap text-ellipsis text-base leading-[inherit] font-bold"
+            title={creation.title}
+          >
+            {creation.title}
+          </h2>
           {description && (
             <p
-              className={cn("project-description group/project-description")}
+              className="project-description group/project-description overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] wrap-anywhere whitespace-pre-line mb-2.5 text-xs text-[#8a97aa] mt-1.5"
               title={description}
             >
               {description}
             </p>
           )}
-          <p className={cn("project-updated group/project-updated")}>
+          <p className="project-updated group/project-updated text-xs leading-[inherit] text-[#8a97aa] mt-1.5">
             {creation.updatedAt ? (
               <>
                 Modifiée le{" "}
@@ -276,7 +258,7 @@ export default function ProjectCard({
           </p>
           {creation.origin && (
             <p
-              className={cn("project-origin group/project-origin")}
+              className="project-origin group/project-origin overflow-hidden whitespace-nowrap text-ellipsis text-xs leading-[inherit] text-[#8a97aa] mt-1.5"
               title={`D’après « ${creation.origin.title} » de ${creation.origin.author}`}
             >
               D’après « {creation.origin.title} » de {creation.origin.author}
@@ -288,10 +270,9 @@ export default function ProjectCard({
         <DropdownMenuTrigger
           ref={visibilityTrigger}
           className={cn(
-            cn(
-              "project-visibility-badge project-visibility-trigger px-[9px] py-[6px] gap-[6px] [font-size:10px] font-[650] leading-[15px] absolute top-[14px] left-[14px] inline-flex items-center rounded-[6px] text-[color:#596d8b] bg-[#ffffffed] [box-shadow:0_1px_4px_#33476b08] [&[class~='group/is-published']]:text-[color:#267453] [&[class~='group/is-published']]:bg-[#f0fcf6ed] cursor-[pointer] [&:hover]:bg-[#fff] [&:hover]:text-[color:#356ae6] [&[data-popup-open]]:bg-[#fff] [&[data-popup-open]]:text-[color:#356ae6] [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:3px] [&[class~='group/is-published']:hover]:text-[color:#267453] [&[class~='group/is-published']:hover]:bg-[#f0fcf6] [&[class~='group/is-published'][data-popup-open]]:text-[color:#267453] [&[class~='group/is-published'][data-popup-open]]:bg-[#f0fcf6] [&[data-popup-open]_>_svg:last-child]:[transform:rotate(180deg)] [&:disabled]:cursor-[wait]",
-              published ? "is-published group/is-published" : "",
-            ),
+            "project-visibility-badge project-visibility-trigger px-2.25 py-1.5 gap-1.5 text-[10px] font-[650] leading-3.75 absolute top-3.5 left-3.5 inline-flex items-center rounded-[6px] text-[#596d8b] bg-[#ffffffed] [box-shadow:0_1px_4px_#33476b08] [&[class~='group/is-published']]:text-[#267453] [&[class~='group/is-published']]:bg-[#f0fcf6ed] cursor-pointer hover:bg-white hover:text-[#356ae6] data-popup-open:bg-white data-popup-open:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 [&[class~='group/is-published']:hover]:text-[#267453] [&[class~='group/is-published']:hover]:bg-[#f0fcf6] [&[class~='group/is-published'][data-popup-open]]:text-[#267453] [&[class~='group/is-published'][data-popup-open]]:bg-[#f0fcf6] disabled:cursor-wait",
+            published ? "is-published group/is-published" : "",
+            "group/project-visibility-badge",
           )}
           aria-label={`Visibilité de ${creation.title} : ${visibility}`}
           disabled={busy}
@@ -299,17 +280,20 @@ export default function ProjectCard({
         >
           <VisibilityIcon size={12} aria-hidden="true" />
           {visibility}
-          <ChevronDown size={12} aria-hidden="true" />
+          <ChevronDown
+            className="shrink-0 group-data-[popup-open]/project-visibility-badge:last:transform-[rotate(180deg)]"
+            size={12}
+            aria-hidden="true"
+          />
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="start"
           sideOffset={6}
-          className={cn(
-            "project-visibility-menu [&_[role='menuitem']]:px-[9px] [&_[role='menuitem']]:py-[6px] [&_[role='menuitem']]:gap-[6px] [&_[role='menuitem']]:[font-size:10px] [&_[role='menuitem']]:font-[650] [&_[role='menuitem']]:leading-[15px] [&_[role='menuitem']]:min-h-[27px] [&_[role='menuitem']]:w-[100%] [&_[role='menuitem']]:rounded-[0] [&_[role='menuitem']]:whitespace-nowrap [&_[role='menuitem']]:cursor-[pointer] p-[0] border-[length:1px] border-solid border-[color:#dfe7f3] min-w-[var(--anchor-width)] w-[max-content] max-w-[calc(100vw_-_24px)] rounded-[6px] text-[color:#596d8b] bg-[#fff] [box-shadow:0_10px_28px_#20396220] [&_[role='menuitem']_>_svg]:w-[12px] [&_[role='menuitem']_>_svg]:h-[12px] [&_[role='menuitem']_>_svg]:text-[color:currentColor] [&_[data-slot='dropdown-menu-separator']]:m-[0] [&_[data-slot='dropdown-menu-separator']]:bg-[#edf0f5] [&_[role='menuitem'][data-highlighted]]:text-[color:#356ae6] [&_[role='menuitem'][data-highlighted]]:bg-[#f0f4ff] [&_[data-variant='destructive']]:text-[color:#b43b47] [&_[data-variant='destructive'][data-highlighted]]:text-[color:#9d2632] [&_[data-variant='destructive'][data-highlighted]]:bg-[#fff0f1] [&_[role='menuitem'][data-disabled]]:cursor-[default]",
-          )}
+          className="project-visibility-menu p-0 border border-solid border-[#dfe7f3] min-w-(--anchor-width) w-max max-w-[calc(100vw-24px)] rounded-[6px] text-[#596d8b] bg-white [box-shadow:0_10px_28px_#20396220]"
           finalFocus={publication || deleting ? false : undefined}
         >
           <DropdownMenuItem
+            className="data-[variant=destructive]:text-[#b43b47] [&[data-variant='destructive'][data-highlighted]]:text-[#9d2632] [&[data-variant='destructive'][data-highlighted]]:bg-[#fff0f1] px-2.25 py-1.5 gap-1.5 text-[10px] font-[650] leading-3.75 min-h-6.75 w-full rounded-none whitespace-nowrap cursor-pointer data-highlighted:text-[#356ae6] data-highlighted:bg-[#f0f4ff] data-disabled:cursor-default"
             disabled={busy || isLoading || publicationClosed}
             onClick={() => {
               if (published) void makePrivate();
@@ -328,7 +312,11 @@ export default function ProjectCard({
                 });
             }}
           >
-            <PublicationIcon size={12} aria-hidden="true" />
+            <PublicationIcon
+              className="data-[variant=destructive]:text-[#b43b47] [&[data-variant='destructive'][data-highlighted]]:text-[#9d2632] [&[data-variant='destructive'][data-highlighted]]:bg-[#fff0f1]"
+              size={12}
+              aria-hidden="true"
+            />
             {published
               ? "Passer en privé"
               : publicationClosed
@@ -337,8 +325,9 @@ export default function ProjectCard({
                   ? "Se connecter pour publier"
                   : "Publier"}
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="m-0 bg-[#edf0f5] data-[variant=destructive]:text-[#b43b47] [&[data-variant='destructive'][data-highlighted]]:text-[#9d2632] [&[data-variant='destructive'][data-highlighted]]:bg-[#fff0f1]" />
           <DropdownMenuItem
+            className="data-[variant=destructive]:text-[#b43b47] [&[data-variant='destructive'][data-highlighted]]:text-[#9d2632] [&[data-variant='destructive'][data-highlighted]]:bg-[#fff0f1] px-2.25 py-1.5 gap-1.5 text-[10px] font-[650] leading-3.75 min-h-6.75 w-full rounded-none whitespace-nowrap cursor-pointer data-highlighted:text-[#356ae6] data-highlighted:bg-[#f0f4ff] data-disabled:cursor-default"
             variant="destructive"
             disabled={busy}
             onClick={() => {
@@ -346,17 +335,17 @@ export default function ProjectCard({
               setDeleting(true);
             }}
           >
-            <Trash2 size={12} aria-hidden="true" />
+            <Trash2
+              className="pointer-events-none shrink-0 data-[variant=destructive]:text-[#b43b47] [&[data-variant='destructive'][data-highlighted]]:text-[#9d2632] [&[data-variant='destructive'][data-highlighted]]:bg-[#fff0f1] text-current size-3"
+              size={12}
+              aria-hidden="true"
+            />
             Supprimer
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <div
-        className={cn(
-          "project-card-footer px-[18px] py-[12px] gap-[8px] flex items-center justify-between flex-wrap mt-[auto] [border-top-width:1px] [border-top-style:solid] [border-top-color:#edf0f5] min-h-[52px] [font-size:11px] text-[color:#71819a] [&_>_span]:gap-[6px] [&_>_span]:inline-flex [&_>_span]:items-center [&_[class~='group/project-private-note']]:[font-size:10px] [&_[class~='group/project-private-note']]:text-[color:#7b889b]",
-        )}
-      >
-        <span>
+      <div className="project-card-footer px-4.5 py-3 gap-2 flex items-center justify-between flex-wrap mt-auto border-t border-solid border-t-[#edf0f5] min-h-13 text-[11px] text-[#71819a]">
+        <span className="gap-1.5 inline-flex items-center">
           {online ? (
             <Cloud size={14} aria-hidden="true" />
           ) : (
@@ -365,12 +354,9 @@ export default function ProjectCard({
           {online ? "En ligne" : "Enregistrement local"}
         </span>
         {published ? (
-          <div
-            className={cn(
-              "project-publication-actions gap-[6px] inline-flex items-center [&_>_a]:gap-[6px] [&_>_a]:inline-flex [&_>_a]:items-center [&_>_a]:text-[color:#356ae6] [&_>_a]:font-[600] [&_>_a:hover]:[text-decoration:underline] [&_>_a:hover]:underline-offset-[3px]",
-            )}
-          >
+          <div className="project-publication-actions gap-1.5 inline-flex items-center">
             <Link
+              className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 gap-1.5 inline-flex items-center text-[#356ae6] font-semibold hover:underline hover:underline-offset-3 group/card-link"
               to="/creations/$publicationId"
               params={{ publicationId: published }}
             >
@@ -378,9 +364,7 @@ export default function ProjectCard({
             </Link>
           </div>
         ) : (
-          <span
-            className={cn("project-private-note group/project-private-note")}
-          >
+          <span className="project-private-note group/project-private-note gap-1.5 inline-flex items-center text-[10px] text-[#7b889b]">
             {online
               ? "Visible uniquement par vous"
               : "Disponible dans ce navigateur"}
@@ -394,15 +378,15 @@ export default function ProjectCard({
         }}
       >
         <DialogContent
-          className={cn(
-            "project-delete-dialog [&[data-slot='dialog-content']]:p-[24px] [&[data-slot='dialog-content']]:gap-[18px] [&[data-slot='dialog-content']]:max-w-[min(440px,_calc(100%_-_32px))] [&[data-slot='dialog-content']]:rounded-[18px] [&[data-slot='dialog-content']]:bg-[#fff] [&[data-slot='dialog-content']]:[box-shadow:0_20px_80px_#223a6026] [&_[data-slot='dialog-title']]:[font-size:19px] [&_[data-slot='dialog-title']]:font-[700] [&_[data-slot='dialog-title']]:tracking-[-0.5px] [&_[data-slot='dialog-description']]:[font-size:13px] [&_[data-slot='dialog-description']]:leading-[1.7] [&_[data-slot='dialog-description']]:[overflow-wrap:anywhere] [&_button]:min-h-[36px] [&_button]:rounded-[8px]",
-          )}
+          className="project-delete-dialog data-[slot=dialog-content]:p-6 data-[slot=dialog-content]:gap-4.5 data-[slot=dialog-content]:max-w-[min(440px,calc(100%-32px))] data-[slot=dialog-content]:rounded-[18px] data-[slot=dialog-content]:bg-white data-[slot=dialog-content]:[box-shadow:0_20px_80px_#223a6026]"
           showCloseButton={false}
           initialFocus={cancelDelete}
           finalFocus={visibilityTrigger}
         >
-          <DialogTitle>Supprimer cette création ?</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-[19px] font-bold tracking-[-0.5px]">
+            Supprimer cette création ?
+          </DialogTitle>
+          <DialogDescription className="text-[13px] leading-[1.7] wrap-anywhere">
             « {creation.title} » sera définitivement supprimée
             {published
               ? " et sa publication retirée de la galerie et des défis"
@@ -414,9 +398,7 @@ export default function ProjectCard({
           </DialogDescription>
           {deleteError && (
             <p
-              className={cn(
-                "project-delete-error text-[color:#b43b47] [font-size:12px]",
-              )}
+              className="project-delete-error text-[#b43b47] text-xs leading-[inherit]"
               role="alert"
             >
               {deleteError}
@@ -424,6 +406,7 @@ export default function ProjectCard({
           )}
           <DialogFooter>
             <Button
+              className="min-h-9 rounded-[8px]"
               ref={cancelDelete}
               variant="outline"
               onClick={() => setDeleting(false)}
@@ -432,6 +415,7 @@ export default function ProjectCard({
               Annuler
             </Button>
             <Button
+              className="min-h-9 rounded-[8px]"
               variant="destructive"
               onClick={() => void doDelete()}
               disabled={busy}

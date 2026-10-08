@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 /** A little workbench: each brick is another part of your identity. */
 export default function SettingsArt() {
   return (
@@ -7,9 +6,7 @@ export default function SettingsArt() {
       fill="none"
       aria-hidden="true"
       focusable="false"
-      className={cn(
-        "settings-art w-[280px] shrink-[0] [@media(width<=370px)]:w-[104px] [@media(width<=370px)]:mt-[34px] [@media(width<=370px)]:hidden [@media(370px<width<=640px)]:w-[104px] [@media(370px<width<=640px)]:mt-[34px]",
-      )}
+      className="settings-art w-70 shrink-0 [@media(width<=370px)]:w-26 [@media(width<=370px)]:mt-8.5 [@media(width<=370px)]:hidden [@media(370px<width<=640px)]:w-26 [@media(370px<width<=640px)]:mt-8.5"
     >
       <ellipse
         cx="166"
