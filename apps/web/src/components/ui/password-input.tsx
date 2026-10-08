@@ -9,7 +9,12 @@ export default function PasswordInput({
 }: ComponentProps<typeof Input> & { id: string }) {
   const [visible, setVisible] = useState(false);
   return (
-    <div className={cn("relative w-full password-field", className)}>
+    <div
+      className={cn(
+        "relative w-full password-field group/password-field",
+        className,
+      )}
+    >
       <Input
         {...props}
         required={props.required ?? true}
@@ -18,7 +23,9 @@ export default function PasswordInput({
       />
       <button
         type="button"
-        className="password-toggle"
+        className={cn(
+          "password-toggle group/password-toggle grid [place-items:center] absolute top-[50%] right-[3px] [transform:translateY(-50%)] w-[32px] h-[30px] rounded-[7px] text-[color:#7787a0] [&:hover]:text-[color:#356ae6] [&:hover]:bg-[#eaf0fc]",
+        )}
         aria-label={
           visible ? "Masquer le mot de passe" : "Afficher le mot de passe"
         }

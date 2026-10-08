@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Eye, ShieldCheck } from "lucide-react";
 import LegalPage, {
@@ -48,7 +49,11 @@ const sections: LegalSection[] = [
         <p>
           Les informations dépendent de la manière dont vous utilisez l’atelier.
         </p>
-        <div className="legal-table-wrap">
+        <div
+          className={cn(
+            "legal-table-wrap mx-[0] overflow-hidden border-[length:1px] border-solid border-[color:#e0e7f1] mt-[18px] mb-[22px] rounded-[12px] [&_table]:[border-collapse:collapse] [&_table]:w-[100%] [&_table]:[font-size:12px] [&_table]:leading-[1.8] [@media(width<=760px)]:[&_table]:[font-size:11px] [&_caption]:px-[16px] [&_caption]:py-[12px] [&_caption]:text-left [&_caption]:bg-[#fff] [&_caption]:[font-size:11px] [&_caption]:text-[color:#677b96] [&_thead]:bg-[#edf2f9] [&_thead]:text-[color:#435b7e] [&_th]:px-[16px] [&_th]:py-[13px] [&_th]:text-left [&_th]:[vertical-align:top] [&_th]:font-[650] [@media(width<=760px)]:[&_th]:px-[10px] [@media(width<=760px)]:[&_th]:py-[12px] [&_td]:px-[16px] [&_td]:py-[13px] [&_td]:text-left [&_td]:[vertical-align:top] [@media(width<=760px)]:[&_td]:px-[10px] [@media(width<=760px)]:[&_td]:py-[12px] [&_tbody_th]:w-[27%] [&_tbody_th]:text-[color:#435772] [@media(width<=760px)]:[&_tbody_th]:w-[28%] [&_tbody_tr]:bg-[#fff9] [&_tbody_tr]:[border-top-width:1px] [&_tbody_tr]:[border-top-style:solid] [&_tbody_tr]:[border-top-color:#e5ebf3] print:[&&]:[&_tr]:[break-inside:avoid]",
+          )}
+        >
           <table>
             <caption>Données utilisées selon votre activité</caption>
             <thead>
@@ -124,7 +129,11 @@ const sections: LegalSection[] = [
           connecter. Elles ne sont ni vendues ni utilisées pour de la publicité
           ciblée ou l’entraînement de modèles d’intelligence artificielle.
         </p>
-        <div className="legal-callout">
+        <div
+          className={cn(
+            "legal-callout px-[20px] py-[18px] mx-[0] my-[22px] gap-[12px] border-[length:1px] border-solid border-[color:#dce7f8] flex items-start rounded-[12px] bg-[#edf3fd] text-[color:#4f678a] [@media(width<=760px)]:p-[15px] [@media(width<=760px)]:gap-[10px] [&_>_svg]:shrink-[0] [&_>_svg]:mt-[3px] [&_>_svg]:text-[color:#668dcb] [&_p]:m-[0] [&_p]:[font-size:13px] [&_p]:leading-[1.85] [@media(width<=760px)]:[&_p]:[font-size:12px] print:[&&]:[break-inside:avoid]",
+          )}
+        >
           <ShieldCheck size={20} aria-hidden="true" />
           <p>
             Clik n’accède pas à vos emails Gmail, à votre Google Drive ou à vos
@@ -212,7 +221,11 @@ const sections: LegalSection[] = [
           moteurs de recherche. Votre adresse email et vos jetons de connexion
           ne sont pas affichés dans la galerie.
         </p>
-        <div className="legal-callout">
+        <div
+          className={cn(
+            "legal-callout px-[20px] py-[18px] mx-[0] my-[22px] gap-[12px] border-[length:1px] border-solid border-[color:#dce7f8] flex items-start rounded-[12px] bg-[#edf3fd] text-[color:#4f678a] [@media(width<=760px)]:p-[15px] [@media(width<=760px)]:gap-[10px] [&_>_svg]:shrink-[0] [&_>_svg]:mt-[3px] [&_>_svg]:text-[color:#668dcb] [&_p]:m-[0] [&_p]:[font-size:13px] [&_p]:leading-[1.85] [@media(width<=760px)]:[&_p]:[font-size:12px] print:[&&]:[break-inside:avoid]",
+          )}
+        >
           <Eye size={20} aria-hidden="true" />
           <p>
             Publier permet aussi à d’autres personnes de reprendre une création
@@ -296,7 +309,11 @@ const sections: LegalSection[] = [
           est disponible dans <Link to="/settings">les paramètres</Link> et met
           fin à votre accès à ce compte.
         </p>
-        <div className="legal-callout legal-callout-peach">
+        <div
+          className={cn(
+            "legal-callout legal-callout-peach px-[20px] py-[18px] mx-[0] my-[22px] gap-[12px] border-[length:1px] border-solid border-[color:#dce7f8] flex items-start rounded-[12px] bg-[#edf3fd] text-[color:#4f678a] [@media(width<=760px)]:p-[15px] [@media(width<=760px)]:gap-[10px] [&_>_svg]:shrink-[0] [&_>_svg]:mt-[3px] [&_>_svg]:text-[color:#668dcb] [&_p]:m-[0] [&_p]:[font-size:13px] [&_p]:leading-[1.85] [@media(width<=760px)]:[&_p]:[font-size:12px] print:[&&]:[break-inside:avoid] border-[color:#eee2d7] bg-[#fbf3ec] text-[color:#806047] [&_strong]:text-[color:#785538]",
+          )}
+        >
           <p>
             <strong>Avant de supprimer votre compte :</strong> supprimez ou
             dépubliez les créations que vous souhaitez retirer. La suppression

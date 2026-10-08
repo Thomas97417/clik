@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Palette } from "lucide-react";
 import LegalPage, {
@@ -93,7 +94,11 @@ const sections: LegalSection[] = [
           l’afficher selon la visibilité choisie. Cette autorisation sert au
           fonctionnement de l’atelier et de la galerie.
         </p>
-        <div className="legal-callout">
+        <div
+          className={cn(
+            "legal-callout px-[20px] py-[18px] mx-[0] my-[22px] gap-[12px] border-[length:1px] border-solid border-[color:#dce7f8] flex items-start rounded-[12px] bg-[#edf3fd] text-[color:#4f678a] [@media(width<=760px)]:p-[15px] [@media(width<=760px)]:gap-[10px] [&_>_svg]:shrink-[0] [&_>_svg]:mt-[3px] [&_>_svg]:text-[color:#668dcb] [&_p]:m-[0] [&_p]:[font-size:13px] [&_p]:leading-[1.85] [@media(width<=760px)]:[&_p]:[font-size:12px] print:[&&]:[break-inside:avoid]",
+          )}
+        >
           <Palette size={20} aria-hidden="true" />
           <p>
             En publiant une création, vous permettez aux autres utilisateurs de

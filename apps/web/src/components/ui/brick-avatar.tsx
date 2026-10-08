@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { memo, useMemo } from "react";
 import AvatarFrame from "./avatar-frame";
 import {
@@ -147,7 +148,7 @@ const BrickAvatar = memo(function BrickAvatar({
   const ring = RINGS.find((r) => r.id === avatar.ring);
   return (
     <svg
-      className="brick-avatar"
+      className={cn("brick-avatar group/brick-avatar block shrink-[0]")}
       width={size}
       height={size}
       viewBox="0 0 100 100"

@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 
@@ -43,14 +44,18 @@ export default function DeleteAccountCard() {
   };
 
   return (
-    <SettingsCard className="settings-danger-card">
+    <SettingsCard className={cn("settings-danger-card h-[auto]")}>
       <SettingsCardContent>
         <SettingsCardHeader
           title="Supprimer mon compte"
           description="Vous souhaitez quitter Clik ? La suppression de votre compte est définitive."
         />
       </SettingsCardContent>
-      <SettingsCardFooter className="settings-danger-footer">
+      <SettingsCardFooter
+        className={cn(
+          "settings-danger-footer [border-top-color:#f1e5e0] border-[color:#f1e5e0] flex-row items-center justify-between bg-[#fffaf8] [@media(width<=640px)]:flex-col [@media(width<=640px)]:items-start [&_button]:shrink-[0]",
+        )}
+      >
         <p className="text-sm text-muted-foreground">
           Cette action est irréversible.
         </p>

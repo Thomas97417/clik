@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
 import { useRef, useState } from "react";
 import { LoaderCircle } from "lucide-react";
@@ -79,11 +80,21 @@ export default function SocialLoginButtons({
     }
   };
   return (
-    <div className="auth-social">
-      <div className="auth-divider">
+    <div
+      className={cn("auth-social [&_[class~='group/auth-error']]:mt-[14px]")}
+    >
+      <div
+        className={cn(
+          "auth-divider mx-[0] gap-[12px] flex items-center mt-[22px] mb-[16px] text-[color:#8190a6] [font-size:11px] [&::before]:[content:''] [&::before]:flex-[1] [&::before]:h-[1px] [&::before]:bg-[#e7edf5] [&::after]:[content:''] [&::after]:flex-[1] [&::after]:h-[1px] [&::after]:bg-[#e7edf5]",
+        )}
+      >
         <span>ou continuer avec</span>
       </div>
-      <div className="auth-social-buttons">
+      <div
+        className={cn(
+          "auth-social-buttons gap-[12px] grid grid-cols-[1fr_1fr] [&_button]:gap-[9px] [&_button]:border-[length:1px] [&_button]:border-solid [&_button]:border-[color:#dfe6f0] [&_button]:flex [&_button]:items-center [&_button]:justify-center [&_button]:h-[44px] [&_button]:rounded-[10px] [&_button]:bg-[#fff] [&_button]:text-[color:#41516d] [&_button]:[font-size:13px] [&_button]:font-[600] [&_button:hover:not(:disabled)]:border-[color:#bdcfea] [&_button:hover:not(:disabled)]:bg-[#f5f8ff]",
+        )}
+      >
         {(["google", "github"] as const).map((provider) => (
           <button
             key={provider}
@@ -94,7 +105,9 @@ export default function SocialLoginButtons({
             {pending === provider ? (
               <LoaderCircle
                 size={17}
-                className="auth-spinner"
+                className={cn(
+                  "auth-spinner [animation:spin_1s_linear_infinite] motion-reduce:[animation:none]",
+                )}
                 aria-hidden="true"
               />
             ) : provider === "google" ? (

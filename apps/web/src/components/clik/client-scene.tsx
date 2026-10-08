@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import {
   Component,
   lazy,
@@ -18,7 +19,11 @@ class SceneBoundary extends Component<
   }
   render() {
     return this.state.error ? (
-      <div className="empty-state">
+      <div
+        className={cn(
+          "empty-state px-[25px] py-[70px] gap-[20px] min-h-[300px] flex flex-col items-center justify-center text-center text-[color:#7d8ba0] [&_h1]:text-[color:#32445f] [&_h1]:[font-size:24px] [&_h1]:font-[700] [&_h2]:text-[color:#32445f] [&_h2]:[font-size:24px] [&_h2]:font-[700] [&_p]:max-w-[510px] [&_p]:leading-[1.8]",
+        )}
+      >
         <h2>La scène 3D n’a pas pu démarrer</h2>
         <p>
           Vérifiez WebGL et rechargez la page. Votre création enregistrée est
@@ -40,7 +45,9 @@ export default function ClientScene(props: {
 }) {
   const placeholder = props.poster ? (
     <img
-      className="public-scene-poster"
+      className={cn(
+        "public-scene-poster w-[100%] h-[100%] object-contain bg-[#edf1f7]",
+      )}
       src={props.poster}
       alt={`Aperçu de ${props.title || "la création"}`}
       width={640}
@@ -48,7 +55,13 @@ export default function ClientScene(props: {
       fetchPriority="high"
     />
   ) : (
-    <div className="empty-state">Ouverture de la scène…</div>
+    <div
+      className={cn(
+        "empty-state px-[25px] py-[70px] gap-[20px] min-h-[300px] flex flex-col items-center justify-center text-center text-[color:#7d8ba0] [&_h1]:text-[color:#32445f] [&_h1]:[font-size:24px] [&_h1]:font-[700] [&_h2]:text-[color:#32445f] [&_h2]:[font-size:24px] [&_h2]:font-[700] [&_p]:max-w-[510px] [&_p]:leading-[1.8]",
+      )}
+    >
+      Ouverture de la scène…
+    </div>
   );
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);

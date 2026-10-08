@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { useEffect, useRef, type ReactNode } from "react";
 import { Cloud, FolderHeart, Globe } from "lucide-react";
 
@@ -16,22 +17,43 @@ function StoryCube({
 }) {
   return (
     <g
-      className={`auth-cube auth-cube-${tone}`}
+      className={cn(
+        "auth-cube [--cube-top:#7ba5ff] [--cube-left:#4c7ee8] [--cube-right:#3562c4]",
+        tone === "blue" && "auth-cube-blue",
+        tone === "sky" &&
+          "auth-cube-sky [--cube-top:#d7e7ff] [--cube-left:#a9c6f4] [--cube-right:#84a9e0]",
+        tone === "peach" &&
+          "auth-cube-peach [--cube-top:#ffd0b4] [--cube-left:#f2ab87] [--cube-right:#d88866]",
+        tone === "cream" &&
+          "auth-cube-cream [--cube-top:#fffaf0] [--cube-left:#eae0cd] [--cube-right:#d1c4ad]",
+      )}
       transform={`translate(${x} ${y}) rotate(${rotation}) scale(${scale})`}
       strokeLinejoin="round"
     >
-      <path className="auth-cube-left" d="M-32 0 0 18V56L-32 38Z" />
-      <path className="auth-cube-right" d="M0 18 32 0V38L0 56Z" />
-      <path className="auth-cube-top" d="m0-18 32 18-32 18-32-18Z" />
+      <path
+        className={cn("auth-cube-left fill-[var(--cube-left)]")}
+        d="M-32 0 0 18V56L-32 38Z"
+      />
+      <path
+        className={cn("auth-cube-right fill-[var(--cube-right)]")}
+        d="M0 18 32 0V38L0 56Z"
+      />
+      <path
+        className={cn("auth-cube-top fill-[var(--cube-top)]")}
+        d="m0-18 32 18-32 18-32-18Z"
+      />
       <path
         d="M-32 0 0 18 32 0M0 18V56"
         fill="none"
         stroke="#fff"
         strokeOpacity=".2"
       />
-      <path className="auth-cube-right" d="M-11-6V0a11 6 0 0 0 22 0V-6Z" />
+      <path
+        className={cn("auth-cube-right fill-[var(--cube-right)]")}
+        d="M-11-6V0a11 6 0 0 0 22 0V-6Z"
+      />
       <ellipse
-        className="auth-cube-top"
+        className={cn("auth-cube-top fill-[var(--cube-top)]")}
         cy="-6"
         rx="11"
         ry="6"
@@ -45,7 +67,7 @@ function StoryCube({
 function StoryConstruction() {
   return (
     <svg
-      className="auth-construction"
+      className={cn("auth-construction block w-[100%] h-[auto] max-h-[320px]")}
       viewBox="0 0 480 320"
       fill="none"
       aria-hidden="true"
@@ -108,9 +130,22 @@ export default function AuthLayout({
     previousTitle.current = title;
   }, [title]);
   return (
-    <main className="auth-page">
-      <div className="auth-layout">
-        <aside className="auth-story" aria-label="Votre espace Clik">
+    <main
+      className={cn(
+        "auth-page px-[40px] mx-[auto] my-[0] max-w-[1240px] pt-[56px] pb-[28px] [@media(width<=440px)]:px-[14px] [@media(width<=440px)]:py-[22px] [@media(width<=440px)]:max-w-[540px] [@media(440px<width<=800px)]:px-[22px] [@media(440px<width<=800px)]:max-w-[540px] [@media(440px<width<=800px)]:pt-[30px] [@media(440px<width<=800px)]:pb-[24px] [@media(800px<width<=1000px)]:px-[28px] [@media(800px<width<=1000px)]:pt-[36px] [@media(800px<width<=1000px)]:pb-[24px]",
+      )}
+    >
+      <div
+        className={cn(
+          "auth-layout overflow-hidden border-[length:1px] border-solid border-[color:#dfe7f4] grid grid-cols-[minmax(0,_1.08fr)_minmax(0,_1fr)] rounded-[26px] [background:radial-gradient(ellipse_at_35%_40%,_#fff9ef_0%,_transparent_50%),_linear-gradient(145deg,_#f0f5ff,_#f8faff_65%,_#edf3ff)] [box-shadow:0_16px_48px_#233f750c] [@media(width<=440px)]:block [@media(width<=440px)]:grid-cols-[repeat(2,_minmax(0,_1fr))] [@media(width<=440px)]:rounded-[17px] [@media(440px<width<=800px)]:block [@media(440px<width<=800px)]:grid-cols-[repeat(2,_minmax(0,_1fr))] [@media(800px<width<=1000px)]:grid-cols-[repeat(2,_minmax(0,_1fr))]",
+        )}
+      >
+        <aside
+          className={cn(
+            "auth-story px-[36px] overflow-hidden flex flex-col min-w-[0] pt-[40px] pb-[32px] [@media(width<=800px)]:px-[22px] [@media(width<=800px)]:hidden [@media(width<=800px)]:pt-[26px] [@media(width<=800px)]:pb-[22px] [@media(800px<width<=1000px)]:px-[22px] [@media(800px<width<=1000px)]:pt-[26px] [@media(800px<width<=1000px)]:pb-[22px] [&_h2]:mx-[0] [&_h2]:mt-[24px] [&_h2]:mb-[16px] [&_h2]:[font-size:clamp(32px,_3.4vw,_44px)] [&_h2]:font-[850] [&_h2]:tracking-[-1.8px] [&_h2]:leading-[1.14] [@media(width<=1000px)]:[&_h2]:[font-size:32px] [@media(width<=1000px)]:[&_h2]:tracking-[-1.3px] [&_h2_em]:not-italic [&_h2_em]:text-[color:#356ae6] [&_>_p]:m-[0] [&_>_p]:max-w-[355px] [&_>_p]:text-[color:#617594] [&_>_p]:leading-[1.75] [&_>_p]:[font-size:14px]",
+          )}
+          aria-label="Votre espace Clik"
+        >
           <h2>
             De petites briques.
             <br />
@@ -120,13 +155,25 @@ export default function AuthLayout({
             Assemblez, recommencez, inventez. Votre prochain monde commence par
             une idée, et quelques briques.
           </p>
-          <div className="auth-story-art">
+          <div
+            className={cn(
+              "auth-story-art mx-[-20px] flex-[1] [align-content:center] mt-[2px] mb-[27px]",
+            )}
+          >
             <StoryConstruction />
-            <p className="auth-story-caption">
+            <p
+              className={cn(
+                "auth-story-caption mx-[20px] mt-[-6px] mb-[0] text-center text-[color:#6b7e9b] [font-size:11px]",
+              )}
+            >
               Un peu d’imagination. Et tout prend forme.
             </p>
           </div>
-          <ul className="auth-benefits">
+          <ul
+            className={cn(
+              "auth-benefits px-[0] m-[0] gap-[14px] grid grid-cols-[repeat(3,_minmax(0,_1fr))] pt-[22px] pb-[0] [border-top-width:1px] [border-top-style:solid] [border-top-color:#dce5f3] list-none [@media(width<=1000px)]:gap-[9px] [&_li]:gap-[9px] [&_li]:flex [&_li]:flex-col [&_li]:items-start [&_li]:[font-size:11px] [&_li]:leading-[1.6] [&_li]:text-[color:#617594] [&_strong]:block [&_strong]:mb-[1px] [&_strong]:text-[color:#344d73] [&_strong]:[font-size:12px] [&_strong]:font-[650] [&_svg]:text-[color:#527dc9] [&_svg]:shrink-[0]",
+            )}
+          >
             <li>
               <Cloud size={18} aria-hidden="true" />
               <span>
@@ -147,8 +194,17 @@ export default function AuthLayout({
             </li>
           </ul>
         </aside>
-        <section className="auth-card" aria-labelledby="auth-title">
-          <div className="auth-card-heading">
+        <section
+          className={cn(
+            "auth-card px-[clamp(32px,_4vw,_56px)] py-[40px] flex flex-col justify-center min-w-[0] [border-left-width:1px] [border-left-style:solid] [border-left-color:#e1e8f5] bg-[#ffffffb3] [@media(width<=440px)]:px-[21px] [@media(width<=440px)]:py-[25px] [@media(width<=440px)]:[border-left-width:0] [@media(width<=440px)]:[border-left-style:none] [@media(width<=440px)]:[border-left-color:currentColor] [@media(440px<width<=800px)]:px-[26px] [@media(440px<width<=800px)]:py-[32px] [@media(440px<width<=800px)]:[border-left-width:0] [@media(440px<width<=800px)]:[border-left-style:none] [@media(440px<width<=800px)]:[border-left-color:currentColor] [@media(800px<width<=1000px)]:px-[26px] [@media(800px<width<=1000px)]:py-[32px] [&_h1]:mx-[0] [&_h1]:mt-[0] [&_h1]:mb-[13px] [&_h1]:[font-size:32px] [&_h1]:font-[800] [&_h1]:tracking-[-1.1px] [&_h1]:leading-[1.16] [&_h1]:[outline:none] [@media(width<=440px)]:[&_h1]:[font-size:29px] [&_h1_>_span]:text-[color:#356ae6] [&_a:not([class~='group/auth-submit']):hover]:text-[color:#2458ce] [&_a:not([class~='group/auth-submit']):hover]:[text-decoration:underline] [&_a:not([class~='group/auth-submit']):hover]:underline-offset-[3px]",
+          )}
+          aria-labelledby="auth-title"
+        >
+          <div
+            className={cn(
+              "auth-card-heading [&_>_p]:text-[color:#6b7b94] [&_>_p]:[font-size:14px] [&_>_p]:leading-[1.75] mb-[27px] [@media(width<=440px)]:mb-[23px]",
+            )}
+          >
             <h1 ref={heading} id="auth-title" tabIndex={-1}>
               {title}
               {!/[?!]$/.test(title) && <span>.</span>}

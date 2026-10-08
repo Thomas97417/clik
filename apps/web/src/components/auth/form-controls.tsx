@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import {
   useRef,
   useState,
@@ -86,8 +87,16 @@ export function AuthField({
     "aria-describedby": describedBy,
   };
   return (
-    <div className="auth-field">
-      <div className="auth-label-row">
+    <div
+      className={cn(
+        "auth-field min-w-[0] [&&_input]:px-[13px] [&&_input]:py-[11px] [&&_input]:border-[length:1px] [&&_input]:border-solid [&&_input]:border-[color:#dce4f0] [&&_input]:h-[46px] [&&_input]:[font-size:15px] [&&_input]:rounded-[10px] [&&_input]:bg-[#f9fbfe] [&&_input]:[box-shadow:none] [@media(width<=440px)]:[&&_input]:[font-size:16px] [&&_input::placeholder]:text-[color:#8997ab] [&&_input:hover:not(:disabled)]:border-[color:#b6c8e4] [&&_input:focus-visible]:border-[color:#356ae6] [&&_input:focus-visible]:[outline:3px_solid_#e7eeff] [&&_input:focus-visible]:[outline-offset:1px] [&&_input:focus-visible]:bg-[#fff] [&&_input[aria-invalid='true']]:border-[color:#cf5361] [&&_[class~='group/password-field']_input]:pr-[46px] [&_[class~='group/password-toggle']]:w-[38px] [&_[class~='group/password-toggle']]:h-[38px]",
+      )}
+    >
+      <div
+        className={cn(
+          "auth-label-row flex flex-wrap items-baseline justify-between gap-y-[6px] gap-x-[12px] mb-[8px] [&_label]:text-[color:#34425b] [&_label]:[font-size:13px] [&_label]:font-[650] [&_a]:[font-size:11px] [&_a]:text-[color:#356ae6]",
+        )}
+      >
         <label htmlFor={props.id}>{label}</label>
         {action}
       </div>
@@ -97,12 +106,22 @@ export function AuthField({
         <Input {...input} />
       )}
       {hint && (
-        <p className="auth-hint" id={`${props.id}-hint`}>
+        <p
+          className={cn(
+            "auth-hint mt-[7px] [font-size:11px] leading-[1.6] text-[color:#75849b]",
+          )}
+          id={`${props.id}-hint`}
+        >
           {hint}
         </p>
       )}
       {error && (
-        <p className="auth-field-error" id={`${props.id}-error`}>
+        <p
+          className={cn(
+            "auth-field-error mt-[7px] [font-size:11px] leading-[1.6] text-[color:#b13948]",
+          )}
+          id={`${props.id}-error`}
+        >
           {error}
         </p>
       )}
@@ -112,7 +131,12 @@ export function AuthField({
 
 export function AuthError({ children }: { children?: ReactNode }) {
   return children ? (
-    <div className="auth-error" role="alert">
+    <div
+      className={cn(
+        "auth-error group/auth-error p-[12px] gap-[9px] border-[length:1px] border-solid border-[color:#f1d4d8] flex items-start rounded-[10px] bg-[#fff5f6] text-[color:#a63244] [font-size:12px] leading-[1.65] [overflow-wrap:anywhere] [&_svg]:shrink-[0] [&_svg]:mt-[2px] [&_a]:block [&_a]:mt-[6px] [&_a]:[text-decoration:underline] [&_a]:font-[600]",
+      )}
+      role="alert"
+    >
       <AlertCircle size={18} aria-hidden="true" />
       <div>{children}</div>
     </div>
@@ -129,10 +153,22 @@ export function AuthSubmit({
   pending?: string;
 }) {
   return (
-    <button className="auth-submit" type="submit" disabled={busy}>
+    <button
+      className={cn(
+        "auth-submit group/auth-submit px-[16px] py-[12px] gap-[10px] border-[length:1px] border-solid border-[color:#356ae6] flex items-center justify-center w-[100%] min-h-[46px] rounded-[10px] text-[color:#fff] bg-[#356ae6] [font-size:13px] leading-[1.5] font-[650] text-center [&:hover:not(:disabled)]:border-[color:#2458ce] [&:hover:not(:disabled)]:bg-[#2458ce] [&:disabled]:opacity-[0.65]",
+      )}
+      type="submit"
+      disabled={busy}
+    >
       {busy ? (
         <>
-          <LoaderCircle size={18} className="auth-spinner" aria-hidden="true" />
+          <LoaderCircle
+            size={18}
+            className={cn(
+              "auth-spinner [animation:spin_1s_linear_infinite] motion-reduce:[animation:none]",
+            )}
+            aria-hidden="true"
+          />
           {pending}
         </>
       ) : (

@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import {
   useCallback,
   useEffect,
@@ -447,7 +448,11 @@ export default function Scene({
   });
   if (!supported)
     return (
-      <div className="empty-state">
+      <div
+        className={cn(
+          "empty-state px-[25px] py-[70px] gap-[20px] min-h-[300px] flex flex-col items-center justify-center text-center text-[color:#7d8ba0] [&_h1]:text-[color:#32445f] [&_h1]:[font-size:24px] [&_h1]:font-[700] [&_h2]:text-[color:#32445f] [&_h2]:[font-size:24px] [&_h2]:font-[700] [&_p]:max-w-[510px] [&_p]:leading-[1.8]",
+        )}
+      >
         <h2>La 3D n’est pas disponible</h2>
         <p>
           Activez WebGL et l’accélération graphique dans votre navigateur pour
@@ -472,7 +477,9 @@ export default function Scene({
       </Canvas>
       {showViewControls && !editable && viewActions && (
         <div
-          className="creation-preview-controls"
+          className={cn(
+            "creation-preview-controls group/creation-preview-controls gap-[3px] absolute bottom-[5px] right-[5px] flex items-center text-[color:#626b8d] [&_button]:grid [&_button]:[place-items:center] [&_button]:w-[30px] [&_button]:h-[30px] [&_button]:rounded-[8px] [&_button]:bg-[#ffffffcf] [&_button:hover]:bg-[white] [&_button:hover]:text-[color:#356ae6] [&_button:focus-visible]:[outline:2px_solid_#356ae6]",
+          )}
           role="group"
           aria-label="Contrôles de la vue 3D"
         >

@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 const tones = {
   blue: ["#8cb2ff", "#5787eb", "#3866c7"],
   peach: ["#ffd5bb", "#f3b18e", "#d88c6d"],
@@ -39,7 +40,9 @@ export default function HomeStepArt({
 }) {
   return (
     <svg
-      className="home-step-art"
+      className={cn(
+        "home-step-art block w-[148px] max-w-[calc(100%_-_38px)] h-[112px] shrink-[0] [@media(width<=520px)]:w-[132px] [@media(width<=520px)]:h-[100px]",
+      )}
       viewBox="0 0 160 120"
       fill="none"
       aria-hidden="true"

@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useRef, useState, useId } from "react";
 import { useTreeDrag } from "./use-tree-drag";
 import PublishDialog from "./publish-dialog";
@@ -116,13 +117,24 @@ function ProjectTitle({
 }) {
   const [value, setValue] = useState(title);
   return (
-    <label className="project-title-field">
+    <label
+      className={cn(
+        "project-title-field [display:inline-grid] grid-cols-[minmax(0,_max-content)] flex-[0_1_auto] max-w-[100%] min-w-[0] [font-size:14px] font-[600] leading-[20px]",
+      )}
+    >
       <span className="sr-only">Nom de la création</span>
-      <span className="project-title-measure" aria-hidden="true">
+      <span
+        className={cn(
+          "project-title-measure px-[2px] py-[5px] overflow-hidden border-[length:1px] border-solid border-[color:transparent] [grid-area:1_/_1] invisible [white-space:pre] pointer-events-none",
+        )}
+        aria-hidden="true"
+      >
         {value || "Nom de la création"}
       </span>
       <input
-        className="project-title"
+        className={cn(
+          "project-title px-[2px] py-[5px] border-[length:1px] border-solid border-[color:transparent] [grid-area:1_/_1] w-[100%] min-w-[0] h-[32px] rounded-[0] bg-[transparent] [box-shadow:none] [outline:none] [font:inherit] text-[color:#26344c] text-ellipsis cursor-[text] [&:hover:not(:disabled)]:[border-bottom-color:#c4cddd] [&:focus]:bg-[transparent] [&:focus]:[border-top-color:transparent] [&:focus]:[border-right-color:transparent] [&:focus]:[border-bottom-color:#9aa6b6] [&:focus]:[border-left-color:transparent] [&:focus]:[box-shadow:none] [&:focus]:[outline:none] [&:disabled]:opacity-[0.5] [&:disabled]:cursor-[default]",
+        )}
         aria-label="Nom du projet"
         title={value}
         placeholder="Nom de la création"
@@ -520,7 +532,15 @@ export default function Editor({
         <li key={n.id}>
           <div
             data-node-id={n.id}
-            className={`tree-row ${s.selection.includes(n.id) ? "selected" : ""} ${containsSelection ? "contains-selection" : ""}`}
+            className={cn(
+              cn(
+                "tree-row gap-[5px] flex items-center h-[40px] pr-[12px] [touch-action:none] select-none [&[class~='group/selected']]:bg-[#edf3ff] [&[class~='group/selected']]:text-[color:#356ae6] [&_>_button:not([class~='group/tree-name'])]:text-[color:#9aa5b6] [&_>_button:not([class~='group/tree-name'])]:opacity-[0.85] [&_>_button[class~='group/tree-toggle']]:flex-[0_0_22px] [&_>_button[class~='group/tree-toggle']]:w-[22px] [&_>_button[class~='group/tree-toggle']]:h-[28px] [&_>_button[class~='group/tree-toggle']]:grid [&_>_button[class~='group/tree-toggle']]:[place-items:center] [&_>_button[class~='group/tree-toggle']]:text-[color:#68788e] [&_>_button[class~='group/tree-toggle']]:opacity-[1] [&_>_button[class~='group/tree-toggle']]:rounded-[5px] [&_button:focus-visible]:[outline:2px_solid_#356ae6] [&_button:focus-visible]:[outline-offset:2px] [&_button:focus-visible]:rounded-[4px] [&[class~='group/contains-selection']:not([class~='group/selected'])]:bg-[#f4f7fe] [&[class~='group/contains-selection']:not([class~='group/selected'])]:[box-shadow:inset_2px_0_#356ae6] [&_[class~='group/tree-name']]:cursor-[grab] [&[data-drag-source]]:bg-[#edf3ff] [&[data-drag-source]]:[outline:1px_dashed_#779bec] [&[data-drag-source]]:[outline-offset:-2px] [&[data-drag-source]]:text-[color:#356ae6] [&[data-drag-source]]:opacity-[0.65] [&[data-drop-inside]]:bg-[#e7efff] [&[data-drop-inside]]:[box-shadow:inset_3px_0_#356ae6]",
+                s.selection.includes(n.id) ? "selected group/selected" : "",
+                containsSelection
+                  ? "contains-selection group/contains-selection"
+                  : "",
+              ),
+            )}
             style={{ paddingLeft: 8 + depth * 14 }}
             draggable={false}
             data-drag-source={treeDrag.ids.includes(n.id) || undefined}
@@ -532,7 +552,9 @@ export default function Editor({
           >
             {isGroup ? (
               <button
-                className="tree-toggle"
+                className={cn(
+                  "tree-toggle group/tree-toggle [&[aria-expanded='true']_svg]:[transform:rotate(90deg)] [&:hover]:bg-[#dfe9fb]",
+                )}
                 aria-label={`${collapsed ? "Déplier" : "Replier"} ${n.name}`}
                 title={`${collapsed ? "Déplier" : "Replier"} ${n.name}`}
                 aria-expanded={!collapsed}
@@ -543,10 +565,17 @@ export default function Editor({
                 <ChevronRight size={14} aria-hidden="true" />
               </button>
             ) : (
-              <span className="tree-toggle-spacer" aria-hidden="true" />
+              <span
+                className={cn(
+                  "tree-toggle-spacer flex-[0_0_22px] w-[22px] h-[28px]",
+                )}
+                aria-hidden="true"
+              />
             )}
             <button
-              className="tree-name"
+              className={cn(
+                "tree-name group/tree-name gap-[8px] flex items-center flex-[1] min-w-[0] [font-size:14px]! text-left [&_>_span:last-child]:overflow-hidden [&_>_span:last-child]:text-ellipsis [&_>_span:last-child]:whitespace-nowrap [&_>_svg]:shrink-[0]",
+              )}
               title={n.name}
               aria-pressed={s.selection.includes(n.id)}
               onClick={(e) => s.select(n.id, e.shiftKey)}
@@ -554,18 +583,30 @@ export default function Editor({
               {isGroup ? (
                 <Layers size={15} aria-hidden="true" />
               ) : (
-                <span className="part-dot" style={{ background: n.color }} />
+                <span
+                  className={cn(
+                    "part-dot border-[length:1px] border-solid border-[color:#0001] w-[11px] h-[11px] rounded-[3px] shrink-[0]",
+                  )}
+                  style={{ background: n.color }}
+                />
               )}
               <span>{n.name}</span>
             </button>
             {isGroup && (
               <span
-                className="tree-count"
+                className={cn(
+                  "tree-count px-[5px] py-[1px] gap-[4px] inline-flex items-center shrink-[0] rounded-[5px] text-[color:#68788e] bg-[#f0f3f8] [font-size:11px] tabular-nums",
+                )}
                 title={`${countLabel} dans ce groupe${containsSelection ? " · contient la sélection" : ""}`}
                 aria-label={`${countLabel}${containsSelection ? ", contient la sélection" : ""}`}
               >
                 {containsSelection && (
-                  <span className="tree-selection-dot" aria-hidden="true" />
+                  <span
+                    className={cn(
+                      "tree-selection-dot w-[5px] h-[5px] rounded-[50%] bg-[#356ae6]",
+                    )}
+                    aria-hidden="true"
+                  />
                 )}
                 {partCount}
               </span>
@@ -588,7 +629,11 @@ export default function Editor({
             </button>
           </div>
           {isGroup && (
-            <ul id={childrenId} className="tree-branch" hidden={collapsed}>
+            <ul
+              id={childrenId}
+              className={cn("tree-branch p-[0] m-[0] list-none")}
+              hidden={collapsed}
+            >
               {!collapsed && tree(n.id, depth + 1)}
             </ul>
           )}
@@ -597,7 +642,11 @@ export default function Editor({
     });
   if (projectId && !project.isLoading && !project.isAuthenticated)
     return (
-      <div className="empty-state">
+      <div
+        className={cn(
+          "empty-state px-[25px] py-[70px] gap-[20px] min-h-[300px] flex flex-col items-center justify-center text-center text-[color:#7d8ba0] [&_h1]:text-[color:#32445f] [&_h1]:[font-size:24px] [&_h1]:font-[700] [&_h2]:text-[color:#32445f] [&_h2]:[font-size:24px] [&_h2]:font-[700] [&_p]:max-w-[510px] [&_p]:leading-[1.8]",
+        )}
+      >
         <h1>Retrouvez votre atelier</h1>
         <p>Connectez-vous pour ouvrir ce projet privé.</p>
         <Link
@@ -608,7 +657,9 @@ export default function Editor({
               window.location.pathname + window.location.search,
             )
           }
-          className="primary-link"
+          className={cn(
+            "primary-link group/primary-link px-[19px] py-[12px] gap-[10px] inline-flex items-center justify-center bg-[#356ae6] text-[color:#fff] rounded-[9px] [font-size:14px] font-[650] whitespace-nowrap [&:hover]:bg-[#2458ce]",
+          )}
         >
           Se connecter
         </Link>
@@ -616,29 +667,57 @@ export default function Editor({
     );
   return (
     <>
-      <div className="mobile-editor empty-state">
+      <div
+        className={cn(
+          "mobile-editor empty-state px-[25px] py-[70px] gap-[20px] min-h-[300px] flex flex-col items-center justify-center text-center text-[color:#7d8ba0] [&_h1]:text-[color:#32445f] [&_h1]:[font-size:24px] [&_h1]:font-[700] [&_h2]:text-[color:#32445f] [&_h2]:[font-size:24px] [&_h2]:font-[700] [&_p]:max-w-[510px] [&_p]:leading-[1.8] hidden [@media(width<=850px)]:flex",
+        )}
+      >
         <Box size={40} />
         <h1>Un peu plus de place pour construire</h1>
         <p>
           L’atelier est disponible sur ordinateur. Explorez les créations depuis
           votre téléphone.
         </p>
-        <Link to="/gallery" className="primary-link">
+        <Link
+          to="/gallery"
+          className={cn(
+            "primary-link group/primary-link px-[19px] py-[12px] gap-[10px] inline-flex items-center justify-center bg-[#356ae6] text-[color:#fff] rounded-[9px] [font-size:14px] font-[650] whitespace-nowrap [&:hover]:bg-[#2458ce]",
+          )}
+        >
           Voir la galerie
         </Link>
       </div>
-      <main className="editor">
-        <header className="editor-top" aria-label="Projet et sauvegarde">
-          <div className="editor-project">
+      <main
+        className={cn(
+          "editor h-[100%] min-h-[600px] flex flex-col bg-[#fff] [@media(width<=850px)]:hidden",
+        )}
+      >
+        <header
+          className={cn(
+            "editor-top px-[18px] py-[8px] gap-[16px] min-h-[52px] flex items-center [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:#ebeff5] shrink-[0] bg-[#fff] [@media(width<=1100px)]:px-[16px] [@media(width<=1100px)]:gap-[12px] [&_[class~='group/editor-primary-action']]:px-[11px] [&_[class~='group/editor-primary-action']]:py-[0] [&_[class~='group/editor-primary-action']]:gap-[6px] [&_[class~='group/editor-primary-action']]:inline-flex [&_[class~='group/editor-primary-action']]:items-center [&_[class~='group/editor-primary-action']]:justify-center [&_[class~='group/editor-primary-action']]:[font-size:11px] [&_[class~='group/editor-primary-action']]:h-[32px] [&_[class~='group/editor-primary-action']]:rounded-[6px] [&_[class~='group/editor-primary-action']]:whitespace-nowrap [&_[class~='group/editor-primary-action']]:[box-shadow:none] [&_[class~='group/editor-import-action']]:px-[9px] [&_[class~='group/editor-import-action']]:py-[0] [&_[class~='group/editor-import-action']]:gap-[6px] [&_[class~='group/editor-import-action']]:border-[length:1px] [&_[class~='group/editor-import-action']]:border-solid [&_[class~='group/editor-import-action']]:border-[color:transparent] [&_[class~='group/editor-import-action']]:h-[32px] [&_[class~='group/editor-import-action']]:rounded-[6px] [&_[class~='group/editor-import-action']]:bg-[transparent] [&_[class~='group/editor-import-action']]:[box-shadow:none] [&_[class~='group/editor-import-action']]:text-[color:#536888] [&_[class~='group/editor-import-action']]:[font-size:11px] [@media(width<=1100px)]:[&_[class~='group/editor-import-action']]:px-[0] [@media(width<=1100px)]:[&_[class~='group/editor-import-action']]:w-[32px] [&_[class~='group/editor-new-action']]:px-[9px] [&_[class~='group/editor-new-action']]:py-[0] [&_[class~='group/editor-new-action']]:gap-[6px] [&_[class~='group/editor-new-action']]:border-[length:1px] [&_[class~='group/editor-new-action']]:border-solid [&_[class~='group/editor-new-action']]:border-[color:transparent] [&_[class~='group/editor-new-action']]:h-[32px] [&_[class~='group/editor-new-action']]:rounded-[6px] [&_[class~='group/editor-new-action']]:bg-[transparent] [&_[class~='group/editor-new-action']]:[box-shadow:none] [&_[class~='group/editor-new-action']]:text-[color:#536888] [&_[class~='group/editor-new-action']]:[font-size:11px] [@media(width<=1100px)]:[&_[class~='group/editor-new-action']]:px-[0] [@media(width<=1100px)]:[&_[class~='group/editor-new-action']]:w-[32px] [&_[class~='group/editor-import-action']:hover:not(:disabled)]:border-[color:#e5ebf5] [&_[class~='group/editor-import-action']:hover:not(:disabled)]:bg-[#f3f6fb] [&_[class~='group/editor-import-action']:hover:not(:disabled)]:text-[color:#356ae6] [&_[class~='group/editor-new-action']:hover:not(:disabled)]:border-[color:#e5ebf5] [&_[class~='group/editor-new-action']:hover:not(:disabled)]:bg-[#f3f6fb] [&_[class~='group/editor-new-action']:hover:not(:disabled)]:text-[color:#356ae6] [@media(width<=1100px)]:[&_[class~='group/editor-import-action']_span]:hidden [@media(width<=1100px)]:[&_[class~='group/editor-new-action']_span]:hidden",
+          )}
+          aria-label="Projet et sauvegarde"
+        >
+          <div
+            className={cn(
+              "editor-project gap-[12px] flex items-center flex-[1] min-w-[0]",
+            )}
+          >
             <ProjectTitle
               key={`${projectId}-${project.ready}-${s.title}`}
               title={s.title}
               disabled={!project.ready || closed || busy}
               onCommit={(title) => s.commit(s.scene, title)}
             />
-            <div className="project-metadata">
+            <div
+              className={cn(
+                "project-metadata gap-[8px] flex items-center min-w-[0] shrink-[0] pl-[10px] [border-left-width:1px] [border-left-style:solid] [border-left-color:#e9edf4] [font-size:10px] leading-[16px] whitespace-nowrap [&_[class~='group/assembly-badge']]:px-[6px] [&_[class~='group/assembly-badge']]:py-[2px] [&_[class~='group/assembly-badge']]:[font-size:9px] [&_[class~='group/assembly-badge']]:leading-[14px]",
+              )}
+            >
               <span
-                className="project-visibility"
+                className={cn(
+                  "project-visibility gap-[5px] inline-flex items-center shrink-[0] text-[color:#68788e]",
+                )}
                 title={
                   projectId
                     ? "Ce projet reste privé jusqu’à sa publication."
@@ -653,15 +732,25 @@ export default function Editor({
                 {projectId ? "Projet privé" : "Création locale"}
               </span>
               {!!s.provenance.imports.length && (
-                <span className="assembly-badge">Assemblage</span>
+                <span
+                  className={cn(
+                    "assembly-badge group/assembly-badge px-[8px] py-[3px] border-[length:1px] border-solid border-[color:#c7dfdf] inline-flex w-[fit-content] items-center rounded-[6px] bg-[#edf7f5] text-[color:#37786b] [font-size:10px] font-[650] leading-[1.5] whitespace-nowrap",
+                  )}
+                >
+                  Assemblage
+                </span>
               )}
               <ProjectSources sources={projectSources(s.provenance)} />
             </div>
           </div>
-          <div className="editor-project-actions">
+          <div
+            className={cn(
+              "editor-project-actions gap-[14px] flex items-center shrink-[0] pl-[16px] [border-left-width:1px] [border-left-style:solid] [border-left-color:#e9edf4] [@media(width<=1100px)]:gap-[10px] [@media(width<=1100px)]:pl-[12px]",
+            )}
+          >
             {onNewCreation && (
               <Button
-                className="editor-new-action"
+                className={cn("editor-new-action group/editor-new-action")}
                 variant="outline"
                 aria-label="Nouvelle création"
                 title="Démarrer une nouvelle création"
@@ -681,7 +770,7 @@ export default function Editor({
               </Button>
             )}
             <Button
-              className="editor-import-action"
+              className={cn("editor-import-action group/editor-import-action")}
               variant="outline"
               title={
                 s.challenge
@@ -705,7 +794,9 @@ export default function Editor({
               <span>Importer</span>
             </Button>
             <div
-              className="save-status"
+              className={cn(
+                "save-status gap-[6px] flex items-center text-[color:#68788e] [font-size:12px] max-w-[230px] leading-[1.4] [&_>_svg]:shrink-[0] [&[data-state='saved']_>_svg]:text-[color:#34906c] [&[data-state='offline']]:text-[color:#9b660c] [&[data-state='conflict']]:text-[color:#9b660c] [&[data-state='error']]:text-[color:#c33e42] [&[data-state='saving']_>_svg]:text-[color:#356ae6] [&[data-state='saving']_>_svg]:[animation:spin_1.5s_linear_infinite] motion-reduce:[&[data-state='saving']_>_svg]:[animation:none]",
+              )}
               data-state={saveState}
               role="status"
               aria-live="polite"
@@ -725,7 +816,9 @@ export default function Editor({
             </div>
             {projectId ? (
               <Button
-                className="editor-primary-action"
+                className={cn(
+                  "editor-primary-action group/editor-primary-action [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:3px]",
+                )}
                 disabled={
                   !project.ready || !!s.gesture || project.conflict || closed
                 }
@@ -743,7 +836,9 @@ export default function Editor({
               </Button>
             ) : project.isAuthenticated ? (
               <Button
-                className="editor-primary-action"
+                className={cn(
+                  "editor-primary-action group/editor-primary-action [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:3px]",
+                )}
                 disabled={!project.ready || !!s.gesture || busy}
                 onClick={() => safe(preserve)}
               >
@@ -767,7 +862,9 @@ export default function Editor({
                     window.location.pathname + window.location.search,
                   )
                 }
-                className="primary-link editor-primary-action"
+                className={cn(
+                  "primary-link editor-primary-action group/editor-primary-action [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:3px] group/primary-link px-[19px] py-[12px] gap-[10px] inline-flex items-center justify-center bg-[#356ae6] text-[color:#fff] rounded-[9px] [font-size:14px] font-[650] whitespace-nowrap [&:hover]:bg-[#2458ce]",
+                )}
                 aria-label="Se connecter pour sauvegarder"
                 title="Se connecter pour retrouver ce projet sur vos autres appareils"
               >
@@ -777,7 +874,11 @@ export default function Editor({
           </div>
         </header>
         {project.challenge && (
-          <div className="challenge-editor-banner">
+          <div
+            className={cn(
+              "challenge-editor-banner px-[22px] py-[9px] flex items-center flex-wrap gap-y-[10px] gap-x-[20px] bg-[#edf3ff] text-[color:#45658f] [font-size:12px] shrink-[0] [&_a]:font-[700] [&_a]:text-[color:#356ae6] [&_button]:ml-[auto] [&_button]:[text-decoration:underline]",
+            )}
+          >
             <Link to="/challenges" search={{ date: project.challenge.day }}>
               Défi du {project.challenge.day} · UTC
             </Link>
@@ -794,7 +895,12 @@ export default function Editor({
           </div>
         )}
         {project.conflict && (
-          <div className="conflict" role="alert">
+          <div
+            className={cn(
+              "conflict px-[20px] py-[10px] gap-[12px] bg-[#fff5db] text-[color:#725a24] flex items-center [font-size:13px]",
+            )}
+            role="alert"
+          >
             Cette création a changé dans un autre onglet.{" "}
             <Button
               variant="outline"
@@ -822,14 +928,22 @@ export default function Editor({
           </div>
         )}
         <div
-          className="editor-body"
+          className={cn(
+            "editor-body [--library-width:236px] [--inspector-width:264px] [--scene-min-width:300px] flex-[1] grid grid-cols-[var(--library-width)_minmax(var(--scene-min-width),_1fr)_var(--inspector-width)] min-h-[0] [@media(width<=1100px)]:[--library-width:210px] [@media(width<=1100px)]:[--inspector-width:230px] [@media(width<=1100px)]:[--scene-min-width:280px] [@media(width>=1500px)]:[--library-width:260px] [@media(width>=1500px)]:[--inspector-width:285px] [&[data-library-collapsed='true']]:[--library-width:0px] [&[data-inspector-collapsed='true']]:[--inspector-width:0px] [&[data-library-collapsed='true']_>_[class~='group/editor-side-left']]:border-[length:0] [&[data-library-collapsed='true']_>_[class~='group/editor-side-left']]:border-none [&[data-library-collapsed='true']_>_[class~='group/editor-side-left']]:border-[color:currentColor] [&[data-inspector-collapsed='true']_>_[class~='group/editor-side-right']]:border-[length:0] [&[data-inspector-collapsed='true']_>_[class~='group/editor-side-right']]:border-none [&[data-inspector-collapsed='true']_>_[class~='group/editor-side-right']]:border-[color:currentColor]",
+          )}
           inert={busy && !publishing}
           data-library-collapsed={libraryCollapsed}
           data-inspector-collapsed={inspectorCollapsed}
         >
-          <div className="editor-side editor-side-left">
+          <div
+            className={cn(
+              "editor-side editor-side-left relative min-w-[0] min-h-[0] bg-[#fff] [&_>_aside]:h-[100%] [&_>_aside[hidden]]:hidden [&_[class~='group/panel-heading-collapsible']]:py-[10px] [&_[class~='group/panel-heading-collapsible']]:pr-[46px] [&_[class~='group/panel-heading-collapsible']]:pl-[14px] [&_[class~='group/panel-heading-collapsible']]:min-h-[54px] group/editor-side-left [border-right-width:1px] [border-right-style:solid] [border-right-color:#e4e9f1] [&_[class~='group/side-panel-toggle'][aria-expanded='false']]:left-[12px] [&_[class~='group/side-panel-toggle'][aria-expanded='false']]:right-[auto]",
+            )}
+          >
             <button
-              className="side-panel-toggle"
+              className={cn(
+                "side-panel-toggle group/side-panel-toggle border-[length:1px] border-solid border-[color:#e4e9f1] absolute top-[12px] right-[8px] z-[4] grid [place-items:center] w-[30px] h-[30px] rounded-[7px] bg-[#fff] text-[color:#68788e] [&:hover]:border-[color:#cddcfa] [&:hover]:bg-[#edf3ff] [&:hover]:text-[color:#356ae6] [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:2px] [&[aria-expanded='false']]:top-[20px] [&[aria-expanded='false']]:right-[12px] [&[aria-expanded='false']]:[box-shadow:0_2px_8px_#23334d14]",
+              )}
               aria-label={
                 libraryCollapsed
                   ? "Déplier la bibliothèque"
@@ -852,12 +966,22 @@ export default function Editor({
             </button>
             <aside
               id={libraryId}
-              className="library"
+              className={cn(
+                "library overflow-hidden flex flex-col min-h-[0] bg-[white] min-w-[0] [&&_[class~='group/panel-heading']]:px-[14px] [&&_[class~='group/panel-heading']]:gap-[8px] [&&_[class~='group/panel-heading']]:pt-[17px] [&&_[class~='group/panel-heading']]:pb-[12px] [&&_[class~='group/panel-heading']_>_span]:whitespace-nowrap [&_button:focus-visible]:[outline:2px_solid_#356ae6] [&_button:focus-visible]:[outline-offset:-2px] [&_[class~='group/piece-tabs']_button]:[font-size:12px] [&_[class~='group/piece-card']_>_span:last-child]:[font-size:13px]! [&_[class~='group/library-tip']_p]:[font-size:11px]",
+              )}
               aria-label="Bibliothèque de pièces"
               hidden={libraryCollapsed}
             >
-              <div className="library-header">
-                <div className="panel-heading panel-heading-collapsible">
+              <div
+                className={cn(
+                  "library-header shrink-[0] [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:#edf0f5]",
+                )}
+              >
+                <div
+                  className={cn(
+                    "panel-heading panel-heading-collapsible group/panel-heading-collapsible [&_h2]:leading-[18px] [&_>_div_>_span]:block [&_>_div_>_span]:mt-[2px] [&_>_div_>_span]:text-[color:#68788e] [&_>_div_>_span]:[font-size:11px] [&_>_div_>_span]:leading-[14px] group/panel-heading px-[18px] flex items-center justify-between pt-[22px] pb-[16px] [&_h2]:[font-size:14px] [&_h2]:font-[750] [&_>_span]:[font-size:12px] [&_>_span]:text-[color:#68788e]",
+                  )}
+                >
                   <div>
                     <h2>Les pièces</h2>
                     <span>
@@ -867,14 +991,18 @@ export default function Editor({
                   </div>
                 </div>
                 <div
-                  className="piece-tabs"
+                  className={cn(
+                    "piece-tabs group/piece-tabs px-[12px] gap-[5px] grid grid-cols-[repeat(2,_minmax(0,_1fr))] pt-[0] pb-[12px] [&_button]:px-[8px] [&_button]:py-[5px] [&_button]:gap-[4px] [&_button]:border-[length:1px] [&_button]:border-solid [&_button]:border-[color:transparent] [&_button]:flex [&_button]:items-center [&_button]:justify-between [&_button]:min-h-[32px] [&_button]:text-[color:#68788e] [&_button]:rounded-[7px] [&_button]:text-left [&_button:hover]:bg-[#f5f7fb] [&_button[class~='group/active']]:border-[color:#dce6fc] [&_button[class~='group/active']]:bg-[#edf2ff] [&_button[class~='group/active']]:text-[color:#356ae6] [&_button[class~='group/active']]:font-[650]",
+                  )}
                   role="group"
                   aria-label="Catégories de pièces"
                 >
                   {pieceCategories.map(({ name, prefix }) => (
                     <button
                       key={name}
-                      className={name === category ? "active" : ""}
+                      className={cn(
+                        name === category ? "active group/active" : "",
+                      )}
                       aria-label={name}
                       aria-pressed={name === category}
                       onClick={() => {
@@ -884,7 +1012,12 @@ export default function Editor({
                       }}
                     >
                       <span>{name}</span>
-                      <span className="category-count" aria-hidden="true">
+                      <span
+                        className={cn(
+                          "category-count [font-size:10px] tabular-nums opacity-[0.8]",
+                        )}
+                        aria-hidden="true"
+                      >
                         {
                           availableCatalog.filter(([id]) =>
                             id.startsWith(prefix),
@@ -896,16 +1029,27 @@ export default function Editor({
                 </div>
               </div>
               <div
-                className="library-scroll"
+                className={cn(
+                  "library-scroll flex-[1] min-h-[0] overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:#c4cede_transparent] [overscroll-behavior:contain] [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:-2px]",
+                )}
                 ref={libraryScroll}
                 role="region"
                 aria-label="Modèles de pièces"
                 tabIndex={0}
               >
-                <div className="piece-grid">
+                <div
+                  className={cn(
+                    "piece-grid p-[12px] gap-[8px] grid grid-cols-[repeat(2,_minmax(0,_1fr))] [align-content:start]",
+                  )}
+                >
                   {visibleParts.map(([id, p]) => (
                     <button
-                      className={`piece-card ${s.pending === id ? "active" : ""}`}
+                      className={cn(
+                        cn(
+                          "piece-card group/piece-card px-[3px] py-[8px] gap-[5px] border-[length:1px] border-solid border-[color:#e7ebf1] [touch-action:none] select-none min-w-[0] min-h-[100px] rounded-[9px] flex flex-col items-center justify-center bg-[#fbfcfe] cursor-[grab] [@media(width>=1500px)]:min-h-[106px] [&:hover]:border-[color:#8dacf1] [&:hover]:bg-[#f0f5ff] [&[class~='group/active']]:border-[color:#8dacf1] [&[class~='group/active']]:bg-[#f0f5ff] [&:active]:cursor-[grabbing] [&:disabled]:cursor-[default] [&_>_span:last-child]:[font-size:13px]! [&_>_span:last-child]:leading-[1.4] [&_>_span:last-child]:text-[color:#65738a] [&_>_span:last-child]:[white-space:normal] [&_>_span:last-child]:max-w-[100%] [&_>_span:last-child]:[overflow-wrap:anywhere] [&_>_span:last-child]:text-center",
+                          s.pending === id ? "active group/active" : "",
+                        ),
+                      )}
                       key={id}
                       draggable={false}
                       disabled={
@@ -940,16 +1084,28 @@ export default function Editor({
                       }}
                     >
                       {stock && (
-                        <span className="piece-stock">
+                        <span
+                          className={cn(
+                            "piece-stock block text-[color:#356ae6] [font-size:10px] leading-[1.3] mb-[3px]",
+                          )}
+                        >
                           {remaining(id)} restante{remaining(id) > 1 ? "s" : ""}
                         </span>
                       )}
-                      <span className="piece-preview">
+                      <span
+                        className={cn(
+                          "piece-preview flex items-center justify-center w-[100%] h-[56px] shrink-[0] pointer-events-none",
+                        )}
+                      >
                         <PartPreview type={id} color={s.color} />
                       </span>
                       <span className="piece-name">
                         {p.name.replace(/ \d.*$/, "")}
-                        <span className="piece-dimensions">
+                        <span
+                          className={cn(
+                            "piece-dimensions block whitespace-nowrap [font-size:11px] text-[color:#8290a4] mt-[2px]",
+                          )}
+                        >
                           {p.name.match(/\d.*$/)?.[0]}
                         </span>
                       </span>
@@ -957,11 +1113,17 @@ export default function Editor({
                   ))}
                 </div>
               </div>
-              <div className="library-footer">
-                <div className="palette-section">
+              <div
+                className={cn(
+                  "library-footer shrink-[0] [border-top-width:1px] [border-top-style:solid] [border-top-color:#e7ecf3] bg-[#fff]",
+                )}
+              >
+                <div className={cn("palette-section m-[0]")}>
                   <h2>
                     <button
-                      className="palette-toggle"
+                      className={cn(
+                        "palette-toggle px-[12px] py-[10px] gap-[6px] flex items-center w-[100%] min-h-[48px] text-left [font-size:13px] font-[650] text-[color:#34435c] [&:hover]:bg-[#f8faff] [&:hover]:text-[color:#356ae6] [&_>_svg]:shrink-[0] [&[aria-expanded='true']_>_svg]:[transform:rotate(90deg)]",
+                      )}
                       aria-label={
                         paletteCollapsed
                           ? "Déplier les couleurs"
@@ -975,7 +1137,11 @@ export default function Editor({
                     >
                       <ChevronRight size={16} aria-hidden="true" />
                       Couleurs
-                      <span className="palette-current">
+                      <span
+                        className={cn(
+                          "palette-current px-[6px] py-[4px] gap-[5px] border-[length:1px] border-solid border-[color:#e7ecf3] inline-flex items-center ml-[auto] rounded-[6px] bg-[#fbfcfe] text-[color:#68788e] [font-size:11px] font-[500] whitespace-nowrap [&_>_span]:w-[10px] [&_>_span]:h-[10px] [&_>_span]:rounded-[50%] [&_>_span]:[box-shadow:inset_0_0_0_1px_#00000014]",
+                        )}
+                      >
                         <span
                           style={{ background: s.color }}
                           aria-hidden="true"
@@ -986,7 +1152,9 @@ export default function Editor({
                   </h2>
                   <div
                     id={paletteId}
-                    className="palette"
+                    className={cn(
+                      "palette px-[12px] gap-[5px] grid grid-cols-[repeat(6,_minmax(0,_1fr))] pt-[0] pb-[12px] [&[hidden]]:hidden [&_button]:p-[3px] [&_button]:border-[length:1px] [&_button]:border-solid [&_button]:border-[color:transparent] [&_button]:min-w-[0] [&_button]:h-[33px] [&_button]:rounded-[8px] [&_button:hover]:border-[color:#d2ddef] [&_button:hover]:bg-[#f1f5fc] [&_button[class~='group/chosen']]:border-[color:#356ae6] [&_button[class~='group/chosen']]:bg-[#edf3ff] [&_button[class~='group/chosen']]:[box-shadow:0_0_0_1px_#356ae620]",
+                    )}
                     hidden={paletteCollapsed}
                     role="group"
                     aria-label="Choisir une couleur"
@@ -997,7 +1165,9 @@ export default function Editor({
                         title={COLOR_NAMES[i]}
                         aria-label={COLOR_NAMES[i]}
                         aria-pressed={s.color === color}
-                        className={s.color === color ? "chosen" : ""}
+                        className={cn(
+                          s.color === color ? "chosen group/chosen" : "",
+                        )}
                         onClick={() => {
                           useEditor.setState({ color });
                           const ids = new Set(
@@ -1032,7 +1202,9 @@ export default function Editor({
                         }}
                       >
                         <span
-                          className="palette-swatch"
+                          className={cn(
+                            "palette-swatch grid [place-items:center] w-[100%] h-[100%] rounded-[5px] [box-shadow:inset_0_0_0_1px_#00000014]",
+                          )}
                           style={{
                             background: color,
                             color: [2, 3, 4, 7, 9, 10].includes(i)
@@ -1052,7 +1224,11 @@ export default function Editor({
                     ))}
                   </div>
                 </div>
-                <div className="library-tip">
+                <div
+                  className={cn(
+                    "library-tip group/library-tip px-[14px] gap-[8px] pt-[8px] pb-[12px] flex items-center text-[color:#68788e] bg-[#f8faff] [&_>_svg]:shrink-[0] [&_p]:[font-size:12px] [&_p]:leading-[1.6]",
+                  )}
+                >
                   <Grip size={16} aria-hidden="true" />
                   <p>
                     Clic : ajouter une pièce.
@@ -1063,9 +1239,21 @@ export default function Editor({
               </div>
             </aside>
           </div>
-          <section className="viewport">
-            <div className="scene-toolbar">
-              <div className="tool-group">
+          <section
+            className={cn(
+              "viewport overflow-hidden relative bg-[#edf1f7] min-w-[0]",
+            )}
+          >
+            <div
+              className={cn(
+                "scene-toolbar p-[5px] gap-[3px] border-[length:1px] border-solid border-[color:#fff] absolute top-[20px] left-[50%] [transform:translateX(-50%)] z-[3] flex items-center bg-[#ffffffed] [box-shadow:0_4px_15px_#53668114] rounded-[10px] [&_button]:px-[7px] [&_button]:py-[0] [&_button]:gap-[6px] [&_button]:h-[33px] [&_button]:min-w-[34px] [&_button]:flex [&_button]:items-center [&_button]:justify-center [&_button]:rounded-[6px] [&_button]:text-[color:#7a879d] [&_button_span]:[font-size:14px]! [&_button_span]:whitespace-nowrap [@media(width<=1100px)]:[&_button_span]:hidden [&_button[class~='group/active']]:bg-[#eaf0ff] [&_button[class~='group/active']]:text-[color:#356ae6] [&_button:hover]:bg-[#f0f4fa]",
+              )}
+            >
+              <div
+                className={cn(
+                  "tool-group flex [border-right-width:1px] [border-right-style:solid] [border-right-color:#e7ecf2] pr-[4px] mr-[2px]",
+                )}
+              >
                 <button
                   title="Annuler (⌘/Ctrl Z)"
                   disabled={!s.past.length}
@@ -1081,17 +1269,25 @@ export default function Editor({
                   <Redo2 size={18} />
                 </button>
               </div>
-              <div className="tool-group">
+              <div
+                className={cn(
+                  "tool-group flex [border-right-width:1px] [border-right-style:solid] [border-right-color:#e7ecf2] pr-[4px] mr-[2px]",
+                )}
+              >
                 <button
                   title="Déplacer"
-                  className={s.tool === "translate" ? "active" : ""}
+                  className={cn(
+                    s.tool === "translate" ? "active group/active" : "",
+                  )}
                   onClick={() => useEditor.setState({ tool: "translate" })}
                 >
                   <Move3D size={19} />
                 </button>
                 <button
                   title="Tourner"
-                  className={s.tool === "rotate" ? "active" : ""}
+                  className={cn(
+                    s.tool === "rotate" ? "active group/active" : "",
+                  )}
                   onClick={() => useEditor.setState({ tool: "rotate" })}
                 >
                   <Rotate3D size={19} />
@@ -1100,7 +1296,7 @@ export default function Editor({
               <button
                 title="Aimantation"
                 aria-pressed={s.snap}
-                className={s.snap ? "active" : ""}
+                className={cn(s.snap ? "active group/active" : "")}
                 onClick={() => useEditor.setState({ snap: !s.snap })}
               >
                 <Magnet size={18} />
@@ -1110,7 +1306,7 @@ export default function Editor({
                 title={s.showGrid ? "Masquer la grille" : "Afficher la grille"}
                 aria-label="Grille"
                 aria-pressed={s.showGrid}
-                className={s.showGrid ? "active" : ""}
+                className={cn(s.showGrid ? "active group/active" : "")}
                 onClick={() => useEditor.setState({ showGrid: !s.showGrid })}
               >
                 <Grid2X2 size={18} />
@@ -1126,10 +1322,20 @@ export default function Editor({
             {project.ready ? (
               <ClientScene scene={s.scene} editable={!closed} />
             ) : (
-              <div className="empty-state">Chargement de la création…</div>
+              <div
+                className={cn(
+                  "empty-state px-[25px] py-[70px] gap-[20px] min-h-[300px] flex flex-col items-center justify-center text-center text-[color:#7d8ba0] [&_h1]:text-[color:#32445f] [&_h1]:[font-size:24px] [&_h1]:font-[700] [&_h2]:text-[color:#32445f] [&_h2]:[font-size:24px] [&_h2]:font-[700] [&_p]:max-w-[510px] [&_p]:leading-[1.8]",
+                )}
+              >
+                Chargement de la création…
+              </div>
             )}
             {project.ready && !count && !s.pending && (
-              <div className="canvas-empty">
+              <div
+                className={cn(
+                  "canvas-empty absolute left-[50%] top-[46%] [transform:translate(-50%,_-50%)] pointer-events-none text-center w-[100%] text-[color:#8291a9] [&_>_span]:font-[700] [&_>_span]:[font-size:26px] [&_>_span]:tracking-[-0.7px] [&_>_span]:leading-[1.4] [&_p]:[font-size:12px] [&_p]:mt-[12px]",
+                )}
+              >
                 <span>
                   Une idée commence
                   <br />
@@ -1138,7 +1344,11 @@ export default function Editor({
                 <p>Choisissez votre première pièce à gauche.</p>
               </div>
             )}
-            <div className="viewport-bottom">
+            <div
+              className={cn(
+                "viewport-bottom gap-[8px] absolute left-[18px] bottom-[15px] right-[18px] z-[3] flex items-center flex-wrap pointer-events-none [font-size:12px] text-[color:#8591a3] [&_>_span:first-child]:px-[9px] [&_>_span:first-child]:py-[6px] [&_>_span:first-child]:border-[length:1px] [&_>_span:first-child]:border-solid [&_>_span:first-child]:border-[color:#dce3ed] [&_>_span:first-child]:rounded-[6px] [&_>_span:first-child]:bg-[#ffffff91] [&_>_span:first-child]:text-[color:#6e7f96] [&_[class~='group/overlap']]:[font-size:10px] [&_[class~='group/overlap']]:text-[color:#956f21]",
+              )}
+            >
               <span>
                 {count} /{" "}
                 {stock
@@ -1147,11 +1357,15 @@ export default function Editor({
                 pièces
               </span>
               {overlap && (
-                <span className="overlap">
+                <span className={cn("overlap group/overlap")}>
                   Chevauchement existant à corriger
                 </span>
               )}
-              <div className="view-select">
+              <div
+                className={cn(
+                  "view-select gap-[8px] ml-[auto] max-w-[100%] flex items-center justify-end flex-wrap pointer-events-none [&_>_*]:pointer-events-auto [&_[class~='group/scene-view-trigger']]:px-[10px] [&_[class~='group/scene-view-trigger']]:py-[0] [&_[class~='group/scene-view-trigger']]:border-[length:1px] [&_[class~='group/scene-view-trigger']]:border-solid [&_[class~='group/scene-view-trigger']]:border-[color:#dce5f0] [&_[class~='group/scene-view-trigger']]:h-[38px] [&_[class~='group/scene-view-trigger']]:w-[132px] [&_[class~='group/scene-view-trigger']]:[font-size:12px] [&_[class~='group/scene-view-trigger']]:bg-[#fffffff0] [&_[class~='group/scene-view-trigger']]:rounded-[8px] [&_[class~='group/scene-view-trigger']]:[box-shadow:0_2px_8px_#53668108] [&_[class~='group/scene-view-trigger']]:text-[color:#64758d]",
+                )}
+              >
                 <Select
                   items={cameraViews}
                   value={s.view}
@@ -1166,13 +1380,17 @@ export default function Editor({
                   }}
                 >
                   <SelectTrigger
-                    className="scene-view-trigger"
+                    className={cn(
+                      "scene-view-trigger group/scene-view-trigger [&:hover]:border-[color:#b9cbed] [&:hover]:bg-[#fff] [&:hover]:text-[color:#356ae6] [&[aria-expanded='true']]:border-[color:#b9cbed] [&[aria-expanded='true']]:bg-[#fff] [&[aria-expanded='true']]:text-[color:#356ae6]",
+                    )}
                     aria-label="Vue de la caméra"
                   >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent
-                    className="scene-view-menu"
+                    className={cn(
+                      "scene-view-menu p-[5px] min-w-[152px] rounded-[10px] bg-[#fff] [box-shadow:0_8px_24px_#33476b24] [&_[data-slot='select-item']]:py-[7px] [&_[data-slot='select-item']]:min-h-[32px] [&_[data-slot='select-item']]:pr-[30px] [&_[data-slot='select-item']]:pl-[10px] [&_[data-slot='select-item']]:rounded-[6px] [&_[data-slot='select-item']]:text-[color:#536580] [&_[data-slot='select-item']]:[font-size:12px] [&_[data-slot='select-item']]:cursor-[pointer] [&_[data-slot='select-item'][data-highlighted]]:bg-[#eef3ff] [&_[data-slot='select-item'][data-highlighted]]:text-[color:#356ae6] [&_[data-slot='select-item'][data-selected]]:bg-[#eef3ff] [&_[data-slot='select-item'][data-selected]]:text-[color:#356ae6]",
+                    )}
                     side="top"
                     align="end"
                     sideOffset={8}
@@ -1186,13 +1404,17 @@ export default function Editor({
                   </SelectContent>
                 </Select>
                 <div
-                  className="scene-light-control"
+                  className={cn(
+                    "scene-light-control py-[3px] gap-[10px] border-[length:1px] border-solid border-[color:#dce5f0] flex items-center h-[38px] pr-[8px] pl-[3px] rounded-[8px] bg-[#fffffff0] text-[color:#64758d] [box-shadow:0_2px_8px_#53668108] whitespace-nowrap [&_input]:p-[0] [&&_input]:m-[0] [&_input]:border-[length:0] [&_input]:border-none [&_input]:border-[color:currentColor] [&_input]:[appearance:none] [&_input]:[-webkit-appearance:none] [&_input]:w-[92px] [&_input]:h-[26px] [&_input]:rounded-[0] [&_input]:[background:repeating-linear-gradient(_to_right,_#cad4e3_0_1px,_transparent_1px_25%_)] [&_input]:[background-size:calc(100%_-_1px)_3px] [&_input]:[background-repeat:no-repeat] [&_input]:[background-position:center_bottom_2px] [&_input]:cursor-[ew-resize] [&_input::-webkit-slider-runnable-track]:h-[2px] [&_input::-webkit-slider-runnable-track]:rounded-[1px] [&_input::-webkit-slider-runnable-track]:[background:linear-gradient(_to_right,_#356ae6_var(--light-progress),_#dce3ef_var(--light-progress)_)] [&_input::-moz-range-track]:h-[2px] [&_input::-moz-range-track]:rounded-[1px] [&_input::-moz-range-track]:bg-[#dce3ef] [&_input::-moz-range-progress]:h-[2px] [&_input::-moz-range-progress]:bg-[#356ae6] [&_input::-webkit-slider-thumb]:border-[length:2px] [&_input::-webkit-slider-thumb]:border-solid [&_input::-webkit-slider-thumb]:border-[color:#fff] [&_input::-webkit-slider-thumb]:[appearance:none] [&_input::-webkit-slider-thumb]:[-webkit-appearance:none] [&_input::-webkit-slider-thumb]:box-border [&_input::-webkit-slider-thumb]:w-[9px] [&_input::-webkit-slider-thumb]:h-[14px] [&_input::-webkit-slider-thumb]:mt-[-6px] [&_input::-webkit-slider-thumb]:rounded-[3px] [&_input::-webkit-slider-thumb]:bg-[#356ae6] [&_input::-webkit-slider-thumb]:[box-shadow:0_0_0_1px_#b9cbed] [&_input::-moz-range-thumb]:border-[length:2px] [&_input::-moz-range-thumb]:border-solid [&_input::-moz-range-thumb]:border-[color:#fff] [&_input::-moz-range-thumb]:box-border [&_input::-moz-range-thumb]:w-[9px] [&_input::-moz-range-thumb]:h-[14px] [&_input::-moz-range-thumb]:rounded-[3px] [&_input::-moz-range-thumb]:bg-[#356ae6] [&_input::-moz-range-thumb]:[box-shadow:0_0_0_1px_#b9cbed] [&_input:enabled:hover::-webkit-slider-thumb]:[box-shadow:0_0_0_1px_#356ae6] [&_input:enabled:hover::-moz-range-thumb]:[box-shadow:0_0_0_1px_#356ae6] [&_input:focus-visible]:[outline:2px_solid_#356ae6] [&_input:focus-visible]:[outline-offset:3px] [&_input:focus-visible]:rounded-[3px] [&_input:disabled]:cursor-[not-allowed]",
+                  )}
                   role="group"
                   aria-label="Éclairage"
                 >
                   <button
                     type="button"
-                    className="scene-light-icon"
+                    className={cn(
+                      "scene-light-icon px-[10px] py-[0] gap-[7px] border-[length:1px] border-solid border-[color:#dce6fc] inline-flex items-center justify-center h-[30px] shrink-[0] rounded-[5px] bg-[#edf2ff] text-[color:#356ae6] [font-size:11px] font-[600] cursor-[pointer] [transition:background_150ms,_color_150ms,_border-color_150ms] [&:hover]:border-[color:#b8ccfc] [&:hover]:bg-[#dfe9ff] [&[aria-pressed='true']]:border-[color:#356ae6] [&[aria-pressed='true']]:bg-[#356ae6] [&[aria-pressed='true']]:text-[color:#fff] [&[aria-pressed='true']:hover]:border-[color:#2858c9] [&[aria-pressed='true']:hover]:bg-[#2858c9] [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:3px]",
+                    )}
                     aria-label="Tout éclairer"
                     aria-pressed={s.uniformLighting}
                     title={
@@ -1210,7 +1432,9 @@ export default function Editor({
                     <span>Tout éclairer</span>
                   </button>
                   <div
-                    className="scene-light-direction"
+                    className={cn(
+                      "scene-light-direction gap-[7px] flex items-center pl-[10px] [border-left-width:1px] [border-left-style:solid] [border-left-color:#e6ebf3] [&[data-disabled='true']]:opacity-[0.35]",
+                    )}
                     data-disabled={s.uniformLighting}
                   >
                     <input
@@ -1238,7 +1462,12 @@ export default function Editor({
                         })
                       }
                     />
-                    <output className="scene-light-angle" aria-hidden="true">
+                    <output
+                      className={cn(
+                        "scene-light-angle min-w-[31px] text-[color:#64758d] [font-size:10px] text-right tabular-nums",
+                      )}
+                      aria-hidden="true"
+                    >
                       {s.uniformLighting ? "—" : `${s.lightAngle}°`}
                     </output>
                   </div>
@@ -1246,9 +1475,15 @@ export default function Editor({
               </div>
             </div>
           </section>
-          <div className="editor-side editor-side-right">
+          <div
+            className={cn(
+              "editor-side editor-side-right relative min-w-[0] min-h-[0] bg-[#fff] [&_>_aside]:h-[100%] [&_>_aside[hidden]]:hidden [&_[class~='group/panel-heading-collapsible']]:py-[10px] [&_[class~='group/panel-heading-collapsible']]:pr-[46px] [&_[class~='group/panel-heading-collapsible']]:pl-[14px] [&_[class~='group/panel-heading-collapsible']]:min-h-[54px] group/editor-side-right [border-left-width:1px] [border-left-style:solid] [border-left-color:#e4e9f1]",
+            )}
+          >
             <button
-              className="side-panel-toggle"
+              className={cn(
+                "side-panel-toggle group/side-panel-toggle border-[length:1px] border-solid border-[color:#e4e9f1] absolute top-[12px] right-[8px] z-[4] grid [place-items:center] w-[30px] h-[30px] rounded-[7px] bg-[#fff] text-[color:#68788e] [&:hover]:border-[color:#cddcfa] [&:hover]:bg-[#edf3ff] [&:hover]:text-[color:#356ae6] [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:2px] [&[aria-expanded='false']]:top-[20px] [&[aria-expanded='false']]:right-[12px] [&[aria-expanded='false']]:[box-shadow:0_2px_8px_#23334d14]",
+              )}
               aria-label={
                 inspectorCollapsed
                   ? "Déplier le panneau de construction"
@@ -1271,17 +1506,27 @@ export default function Editor({
             </button>
             <aside
               id={inspectorId}
-              className="inspector"
+              className={cn(
+                "inspector overflow-auto flex flex-col min-h-[0] bg-[white] [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:#c4cede_transparent] [overscroll-behavior:contain]",
+              )}
               aria-label="Construction et propriétés"
               hidden={inspectorCollapsed}
             >
-              <div className="panel-heading panel-heading-collapsible">
+              <div
+                className={cn(
+                  "panel-heading panel-heading-collapsible group/panel-heading-collapsible [&_h2]:leading-[18px] [&_>_div_>_span]:block [&_>_div_>_span]:mt-[2px] [&_>_div_>_span]:text-[color:#68788e] [&_>_div_>_span]:[font-size:11px] [&_>_div_>_span]:leading-[14px] group/panel-heading px-[18px] flex items-center justify-between pt-[22px] pb-[16px] [&_h2]:[font-size:14px] [&_h2]:font-[750] [&_>_span]:[font-size:12px] [&_>_span]:text-[color:#68788e]",
+                )}
+              >
                 <div>
                   <h2>Construction</h2>
                   <span>{count} pièces</span>
                 </div>
               </div>
-              <div className="tree-actions">
+              <div
+                className={cn(
+                  "tree-actions [&_button]:p-[0] [&_button]:gap-[6px] [&_button]:h-[33px] [&_button]:min-w-[0] [&_button]:flex [&_button]:items-center [&_button]:justify-center [&_button]:rounded-[6px] [&_button]:text-[color:#7a879d] [&_button]:flex-[0_1_30px] [&_button:hover]:bg-[#f0f4fa] px-[8px] gap-[3px] flex pt-[0] pb-[12px] [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:#edf0f5] [&_button:focus-visible]:[outline:2px_solid_#356ae6] [&_button:focus-visible]:[outline-offset:2px] [&_button:focus-visible]:rounded-[4px]",
+                )}
+              >
                 <button
                   title="Tout sélectionner"
                   aria-label="Tout sélectionner"
@@ -1322,7 +1567,7 @@ export default function Editor({
                 >
                   <Trash2 size={17} />
                 </button>
-                <span className="tree-actions-spacer" />
+                <span className={cn("tree-actions-spacer flex-[1]")} />
                 <button
                   title="Tout replier"
                   aria-label="Tout replier"
@@ -1350,17 +1595,26 @@ export default function Editor({
               </div>
               <div
                 ref={treeDrag.container}
-                className="tree"
+                className={cn(
+                  "tree px-[0] py-[7px] overflow-auto [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:#c4cede_transparent] [overscroll-behavior:contain] flex-[1] min-h-[170px] [&[data-dragging]]:[overflow-anchor:none] [&[data-dragging]]:cursor-[grabbing] [&[data-dragging]_[class~='group/tree-name']]:cursor-[grabbing]",
+                )}
                 data-dragging={treeDrag.active || undefined}
                 onPointerDown={treeDrag.onPointerDown}
                 onDragStart={(event) => event.preventDefault()}
               >
                 {s.scene.nodes.length ? (
-                  <ul className="tree-branch" aria-label="Pièces et groupes">
+                  <ul
+                    className={cn("tree-branch p-[0] m-[0] list-none")}
+                    aria-label="Pièces et groupes"
+                  >
                     {tree(null)}
                   </ul>
                 ) : (
-                  <div className="tree-empty">
+                  <div
+                    className={cn(
+                      "tree-empty px-[10px] py-[40px] gap-[10px] flex items-center justify-center flex-col text-[color:#a5afbd] text-center [font-size:12px]",
+                    )}
+                  >
                     <Layers size={28} />
                     <p>
                       Votre construction
@@ -1373,11 +1627,21 @@ export default function Editor({
               <span className="sr-only" role="status" aria-live="polite">
                 {treeDrag.active ? treeDrag.target?.label : ""}
               </span>
-              <div className="properties">
-                <div className="panel-heading">
+              <div
+                className={cn(
+                  "properties px-[17px] py-[0] [border-top-width:1px] [border-top-style:solid] [border-top-color:#e9edf3] shrink-[0] [&_[class~='group/panel-heading']]:px-[0] [&_[class~='group/panel-heading']]:py-[19px] [&_input]:mt-[5px] [&_input]:[font-size:14px]! [&_input]:min-w-[0] [&_select]:p-[7px] [&_select]:border-[length:1px] [&_select]:border-solid [&_select]:border-[color:#e1e6ee] [&_select]:block [&_select]:rounded-[6px] [&_select]:[font-size:14px]! [&_select]:mt-[5px] [&_select]:w-[100%]",
+                )}
+              >
+                <div
+                  className={cn(
+                    "panel-heading group/panel-heading px-[18px] flex items-center justify-between pt-[22px] pb-[16px] [&_h2]:[font-size:14px] [&_h2]:font-[750] [&_>_span]:[font-size:12px] [&_>_span]:text-[color:#68788e]",
+                  )}
+                >
                   <h2>
                     <button
-                      className="properties-toggle"
+                      className={cn(
+                        "properties-toggle gap-[6px] [font-size:13px] font-[650] text-[color:#34435c] flex items-center rounded-[4px] [&:hover]:text-[color:#356ae6] [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:4px] [&[aria-expanded='true']_svg]:[transform:rotate(90deg)]",
+                      )}
                       aria-label={
                         propertiesCollapsed
                           ? "Déplier les propriétés"
@@ -1406,7 +1670,9 @@ export default function Editor({
                 </div>
                 <div
                   id={propertiesId}
-                  className="properties-content"
+                  className={cn(
+                    "properties-content pb-[20px] [&_>_label]:[font-size:14px]! [&_>_label]:text-[color:#7c899d] [&_>_label]:block [&_>_label]:mb-[12px]",
+                  )}
                   hidden={propertiesCollapsed}
                 >
                   {selected ? (
@@ -1465,7 +1731,12 @@ export default function Editor({
                         </select>
                       </label>
                       {(["position", "rotation"] as const).map((field) => (
-                        <div className="transform-fields" key={field}>
+                        <div
+                          className={cn(
+                            "transform-fields mt-[17px] [font-size:14px]! text-[color:#7c899d] [&_>_div]:gap-[6px] [&_>_div]:grid [&_>_div]:grid-cols-[repeat(3,_1fr)] [&_>_div]:mt-[7px] [&_>_div_>_label]:relative [&_input]:py-[7px] [&&_input]:m-[0] [&_input]:border-[length:1px] [&_input]:border-solid [&_input]:border-[color:#e2e7ef] [&_input]:rounded-[5px] [&_input]:w-[100%] [&_input]:pr-[2px] [&_input]:pl-[18px] [&_input]:[font-size:14px]! [&_input]:[appearance:textfield] [&_input::-webkit-inner-spin-button]:hidden [&_label_>_span]:absolute [&_label_>_span]:top-[9px] [&_label_>_span]:left-[6px] [&_label_>_span]:[font-size:10px]",
+                          )}
+                          key={field}
+                        >
                           <label>
                             {field === "position"
                               ? "Position"
@@ -1474,7 +1745,18 @@ export default function Editor({
                           <div>
                             {["X", "Y", "Z"].map((axis, i) => (
                               <label key={axis}>
-                                <span className={`axis-${axis}`}>{axis}</span>
+                                <span
+                                  className={cn(
+                                    axis === "X" &&
+                                      "axis-X text-[color:#d66d76]",
+                                    axis === "Y" &&
+                                      "axis-Y text-[color:#62a27d]",
+                                    axis === "Z" &&
+                                      "axis-Z text-[color:#5b8dce]",
+                                  )}
+                                >
+                                  {axis}
+                                </span>
                                 <Numeric
                                   label={`${field} ${axis}`}
                                   value={
@@ -1496,14 +1778,22 @@ export default function Editor({
                           </div>
                         </div>
                       ))}
-                      <p className="property-hint">
+                      <p
+                        className={cn(
+                          "property-hint text-[color:#68788e] [font-size:12px] leading-[1.8] mt-[8px]",
+                        )}
+                      >
                         {s.selection.length > 1
                           ? "Le groupe parent s’applique à toute la sélection. Le nom, la position et la rotation concernent le premier élément."
                           : "Dimensions fixes · positions relatives au groupe"}
                       </p>
                     </>
                   ) : (
-                    <p className="property-hint">
+                    <p
+                      className={cn(
+                        "property-hint text-[color:#68788e] [font-size:12px] leading-[1.8] mt-[8px]",
+                      )}
+                    >
                       Sélectionnez une pièce pour la modifier. Maintenez Maj
                       pour en sélectionner plusieurs.
                     </p>
@@ -1513,9 +1803,20 @@ export default function Editor({
             </aside>
           </div>
         </div>
-        <footer className="editor-footer">
+        <footer
+          className={cn(
+            "editor-footer px-[19px] py-[6px] gap-[8px] min-h-[33px] [border-top-width:1px] [border-top-style:solid] [border-top-color:#e5e9f0] flex items-center justify-between flex-wrap shrink-[0] [font-size:12px] text-[color:#98a2b2] [&_>_span]:flex [&_>_span]:items-center [&_>_span]:gap-y-[6px] [&_>_span]:gap-x-[12px] [&_>_span]:flex-wrap",
+          )}
+        >
           <span>
-            <span className="brand-mini">clik</span> L’atelier des possibles
+            <span
+              className={cn(
+                "brand-mini [font-size:17px] tracking-[-1px] font-[800] text-[color:#8998ad]",
+              )}
+            >
+              clik
+            </span>{" "}
+            L’atelier des possibles
           </span>
           <span>
             Glisser / flèches : déplacer · Maj + ↑ / ↓ : hauteur · Espace +

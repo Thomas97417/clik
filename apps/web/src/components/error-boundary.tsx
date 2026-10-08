@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import type { ErrorComponentProps } from "@tanstack/react-router";
 import { Link, useRouter } from "@tanstack/react-router";
 import { Button } from "./ui/button";
@@ -18,7 +19,11 @@ export default function ErrorBoundary({ error, reset }: ErrorComponentProps) {
           Une erreur temporaire est survenue. Réessayez dans un instant.
         </p>
         {import.meta.env.DEV && error instanceof Error && (
-          <pre className="mt-4 max-w-lg overflow-auto rounded-lg border bg-muted/50 p-4 text-left text-xs text-destructive">
+          <pre
+            className={cn(
+              "mt-4 max-w-lg overflow-auto rounded-lg border bg-muted/50 p-4 text-left text-xs text-destructive group/text-xs",
+            )}
+          >
             {error.message}
           </pre>
         )}

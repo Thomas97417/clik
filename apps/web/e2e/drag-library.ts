@@ -11,7 +11,7 @@ export async function dragLibrary(
   await card.hover();
   await page.mouse.down();
   await page.mouse.move(x, y, { steps: 12 });
-  await expect(card).toHaveClass(/active/);
+  await expect(card).toHaveClass(/(?:^|\s)active(?:\s|$)/);
   const canvas = page.locator("canvas").first();
   const frame = Number(await canvas.getAttribute("data-frames"));
   await expect

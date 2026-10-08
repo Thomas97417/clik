@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 function ModelCard({
   variant = false,
   dark = false,
@@ -54,7 +55,9 @@ export default function HomeNextArt({ kind }: { kind: "fork" | "collection" }) {
   if (kind === "collection")
     return (
       <svg
-        className="home-collection-art"
+        className={cn(
+          "home-collection-art [align-self:flex-end] w-[128px] h-[94px] mt-[-6px] mr-[-6px] mb-[8px] ml-[0] [@media(width<=520px)]:w-[110px] [@media(width<=520px)]:h-[81px] [@media(width<=520px)]:[position:static] [@media(width<=520px)]:right-[28px] [@media(width<=520px)]:top-[28px] [@media(520px<width<=850px)]:absolute [@media(520px<width<=850px)]:right-[28px] [@media(520px<width<=850px)]:top-[28px]",
+        )}
         viewBox="0 0 170 125"
         fill="none"
         aria-hidden="true"
@@ -94,7 +97,9 @@ export default function HomeNextArt({ kind }: { kind: "fork" | "collection" }) {
     );
   return (
     <svg
-      className="home-gallery-art"
+      className={cn(
+        "home-gallery-art block w-[100%] max-w-[270px] h-[auto] [justify-self:end] [@media(width<=520px)]:w-[220px] [@media(width<=520px)]:[justify-self:center] [&_text]:font-[family-name:var(--font-sans)]",
+      )}
       viewBox="0 0 270 282"
       fill="none"
       aria-hidden="true"

@@ -166,7 +166,9 @@ test("repli des groupes imbriqués, sélection conservée et aucun historique", 
     .getByRole("button", { name: "Replier Châssis", exact: true })
     .click();
   await expect(page.locator(".tree-name")).toHaveCount(3);
-  await expect(row(page, "Châssis")).toHaveClass(/contains-selection/);
+  await expect(row(page, "Châssis")).toHaveClass(
+    /(?:^|\s)contains-selection(?:\s|$)/,
+  );
   await expect(page.getByLabel("Nom", { exact: true })).toHaveValue(
     "Brique 2 × 2",
   );

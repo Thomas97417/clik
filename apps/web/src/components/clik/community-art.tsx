@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 function Brick({
   x,
   y,
@@ -41,7 +42,9 @@ export default function CommunityArt({
 }) {
   return (
     <svg
-      className="community-art"
+      className={cn(
+        "community-art group/community-art block w-[112px] h-[86px] shrink-[0]",
+      )}
       viewBox="0 0 130 100"
       fill="none"
       aria-hidden="true"

@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -126,7 +127,12 @@ export default function SessionsCard() {
             sessions.map((session) => {
               const isCurrent = session.id === currentSessionId;
               return (
-                <div key={session.token} className="settings-session">
+                <div
+                  key={session.token}
+                  className={cn(
+                    "settings-session p-[12px] gap-[8px] border-[length:1px] border-solid border-[color:#e1e7f0] flex items-center justify-between rounded-[9px] [&_>_div]:min-w-[0] [&_>_div_>_div]:min-w-[0] [&_span]:[overflow-wrap:anywhere] [&_[class~='group/text-xs']]:leading-[1.6] [&_[class~='group/text-xs']]:[font-size:10px] [&_button]:min-w-[30px] [&_button]:min-h-[30px] [&_button]:rounded-[6px]",
+                  )}
+                >
                   <div className="flex items-center gap-3">
                     <div className="text-muted-foreground">
                       {getDeviceIcon(session.userAgent)}
@@ -140,7 +146,11 @@ export default function SessionsCard() {
                           </span>
                         )}
                       </div>
-                      <span className="text-xs text-muted-foreground">
+                      <span
+                        className={cn(
+                          "text-xs text-muted-foreground group/text-xs",
+                        )}
+                      >
                         Dernière activité :{" "}
                         {new Date(session.updatedAt).toLocaleDateString(
                           "fr-FR",
@@ -161,7 +171,7 @@ export default function SessionsCard() {
                           <Button
                             variant="ghost"
                             size="icon-xs"
-                            className="hover:cursor-pointer text-muted-foreground hover:text-destructive"
+                            className="hover:cursor-pointer text-muted-foreground hover:text-destructive group/text-xs"
                             aria-label="Se déconnecter de cet appareil"
                             disabled={revokingId === session.token}
                           />

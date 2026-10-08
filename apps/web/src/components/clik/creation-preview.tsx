@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { useEffect, useId, useRef, useState } from "react";
 import { Box, ImageOff, Minus, Plus, RotateCcw } from "lucide-react";
 import { validateScene, type SceneDocument } from "@clik/scene";
@@ -92,12 +93,23 @@ export default function CreationPreview({
     };
   }, [interactive, visible, current?.url, scene, cacheKey, initialZoom]);
   return (
-    <div ref={ref} className="creation-preview" aria-busy={!current}>
+    <div
+      ref={ref}
+      className={cn(
+        "creation-preview group/creation-preview inset-[0] absolute [&_img]:object-contain",
+      )}
+      aria-busy={!current}
+    >
       {current?.url ? (
         <>
           <div
             ref={surface}
-            className={`creation-preview-surface ${interactiveReady ? "is-interactive" : ""}`}
+            className={cn(
+              cn(
+                "creation-preview-surface inset-[0] absolute [&[class~='group/is-interactive']]:cursor-[grab] [&[class~='group/is-interactive']]:select-none [&[class~='group/is-interactive']]:rounded-[14px] [&[data-dragging='true']]:cursor-[grabbing] [&:focus-visible]:[outline:2px_solid_#356ae6] [&:focus-visible]:[outline-offset:-4px] [&_canvas]:inset-[0] [&_canvas]:absolute [&_canvas]:w-[100%] [&_canvas]:h-[100%] [&_canvas]:object-contain [&_canvas]:pointer-events-none [&[data-live='true']_img]:opacity-[0]",
+                interactiveReady ? "is-interactive group/is-interactive" : "",
+              ),
+            )}
             tabIndex={interactiveReady ? 0 : undefined}
             role={interactiveReady ? "group" : undefined}
             aria-label={interactiveReady ? `Manipuler ${title}` : undefined}
@@ -120,13 +132,22 @@ export default function CreationPreview({
             {interactive && <canvas ref={canvas} hidden aria-hidden="true" />}
           </div>
           {interactiveReady && (
-            <div className="creation-preview-controls">
+            <div
+              className={cn(
+                "creation-preview-controls group/creation-preview-controls gap-[3px] absolute bottom-[5px] right-[5px] flex items-center text-[color:#626b8d] [&_button]:grid [&_button]:[place-items:center] [&_button]:w-[30px] [&_button]:h-[30px] [&_button]:rounded-[8px] [&_button]:bg-[#ffffffcf] [&_button:hover]:bg-[white] [&_button:hover]:text-[color:#356ae6] [&_button:focus-visible]:[outline:2px_solid_#356ae6]",
+              )}
+            >
               <span id={instructionsId} className="sr-only">
                 Glissez pour tourner. Cliquez sur l’aperçu puis utilisez la
                 molette pour zoomer. Au clavier : flèches pour tourner, + et −
                 pour zoomer, Début pour réinitialiser.
               </span>
-              <span className="creation-preview-hint" aria-hidden="true">
+              <span
+                className={cn(
+                  "creation-preview-hint [font-size:11px] mr-[6px] [@media(width<=360px)]:hidden",
+                )}
+                aria-hidden="true"
+              >
                 Glisser pour tourner
               </span>
               <button
@@ -158,7 +179,12 @@ export default function CreationPreview({
         </>
       ) : (
         <div
-          className={`creation-preview-placeholder ${current ? "" : "is-loading"}`}
+          className={cn(
+            cn(
+              "creation-preview-placeholder group/creation-preview-placeholder gap-[12px] flex h-[100%] items-center justify-center flex-col text-[color:#7184a0] [font-size:12px] [&[class~='group/is-loading']]:opacity-[0.65]",
+              current ? "" : "is-loading group/is-loading",
+            ),
+          )}
         >
           {current?.error ? (
             <ImageOff size={30} aria-hidden="true" />

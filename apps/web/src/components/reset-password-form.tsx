@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Link, useSearch } from "@tanstack/react-router";
 import z from "zod";
@@ -56,10 +57,19 @@ export default function ResetPasswordForm() {
         title="Ce lien n’est plus valide"
         description="Le lien est incomplet ou a expiré. Demandez-en un nouveau pour retrouver votre atelier."
       >
-        <Link className="auth-submit" to="/forgot-password">
+        <Link
+          className={cn(
+            "auth-submit group/auth-submit px-[16px] py-[12px] gap-[10px] border-[length:1px] border-solid border-[color:#356ae6] flex items-center justify-center w-[100%] min-h-[46px] rounded-[10px] text-[color:#fff] bg-[#356ae6] [font-size:13px] leading-[1.5] font-[650] text-center [&:hover:not(:disabled)]:border-[color:#2458ce] [&:hover:not(:disabled)]:bg-[#2458ce] [&:disabled]:opacity-[0.65]",
+          )}
+          to="/forgot-password"
+        >
           Demander un nouveau lien
         </Link>
-        <p className="auth-switch">
+        <p
+          className={cn(
+            "auth-switch pt-[23px] mt-[23px] [border-top-width:1px] [border-top-style:solid] [border-top-color:#e9edf4] text-center [font-size:12px] text-[color:#7b899e] leading-[1.7] [&_a]:gap-[6px] [&_a]:inline-flex [&_a]:items-center [&_a]:text-[color:#356ae6] [&_a]:font-[650]",
+          )}
+        >
           <Link to="/sign-in">Retour à la connexion</Link>
         </p>
       </AuthLayout>
@@ -70,10 +80,20 @@ export default function ResetPasswordForm() {
         title="Mot de passe modifié"
         description="Vous pouvez maintenant vous connecter avec votre nouveau mot de passe."
       >
-        <div className="auth-confirmation" role="status">
+        <div
+          className={cn(
+            "auth-confirmation p-[18px] border-[length:1px] border-solid border-[color:#cce8db] mb-[20px] rounded-[12px] bg-[#f1faf6] text-[color:#316e55] [font-size:13px] leading-[1.8] [overflow-wrap:anywhere] [&_strong]:block [&_strong]:mb-[7px] [&_strong]:font-[650]",
+          )}
+          role="status"
+        >
           Votre nouveau mot de passe a bien été enregistré.
         </div>
-        <Link className="auth-submit" to="/sign-in">
+        <Link
+          className={cn(
+            "auth-submit group/auth-submit px-[16px] py-[12px] gap-[10px] border-[length:1px] border-solid border-[color:#356ae6] flex items-center justify-center w-[100%] min-h-[46px] rounded-[10px] text-[color:#fff] bg-[#356ae6] [font-size:13px] leading-[1.5] font-[650] text-center [&:hover:not(:disabled)]:border-[color:#2458ce] [&:hover:not(:disabled)]:bg-[#2458ce] [&:disabled]:opacity-[0.65]",
+          )}
+          to="/sign-in"
+        >
           Se connecter
         </Link>
       </AuthLayout>
@@ -84,7 +104,9 @@ export default function ResetPasswordForm() {
       description="Choisissez un mot de passe, puis saisissez-le une seconde fois pour le confirmer."
     >
       <form
-        className="auth-form"
+        className={cn(
+          "auth-form gap-[19px] grid min-w-[0] [&_fieldset]:p-[0] [&_fieldset]:m-[0] [&_fieldset]:gap-[19px] [&_fieldset]:border-[length:0] [&_fieldset]:border-none [&_fieldset]:border-[color:currentColor] [&_fieldset]:grid [&_fieldset]:min-w-[0]",
+        )}
         noValidate
         onSubmit={form.submit}
         aria-busy={form.busy}
@@ -119,7 +141,11 @@ export default function ResetPasswordForm() {
           Enregistrer le mot de passe
         </AuthSubmit>
       </form>
-      <p className="auth-switch">
+      <p
+        className={cn(
+          "auth-switch pt-[23px] mt-[23px] [border-top-width:1px] [border-top-style:solid] [border-top-color:#e9edf4] text-center [font-size:12px] text-[color:#7b899e] leading-[1.7] [&_a]:gap-[6px] [&_a]:inline-flex [&_a]:items-center [&_a]:text-[color:#356ae6] [&_a]:font-[650]",
+        )}
+      >
         <Link to="/sign-in">Retour à la connexion</Link>
       </p>
     </AuthLayout>

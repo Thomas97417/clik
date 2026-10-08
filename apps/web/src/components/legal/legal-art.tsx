@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 type Tone = "blue" | "peach" | "cream";
 
 const tones = {
@@ -36,7 +37,9 @@ function Brick({
 export default function LegalArt({ kind }: { kind: "privacy" | "terms" }) {
   return (
     <svg
-      className="legal-art"
+      className={cn(
+        "legal-art block w-[100%] max-w-[420px] h-[auto] [justify-self:end] [@media(width<=760px)]:w-[300px] [@media(width<=760px)]:max-w-[100%] [@media(width<=760px)]:[justify-self:center] [@media(width<=760px)]:mt-[12px] print:[&&]:hidden!",
+      )}
       viewBox="0 0 420 310"
       fill="none"
       aria-hidden="true"

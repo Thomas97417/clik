@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { Box } from "lucide-react";
 import type { PartType } from "@clik/scene";
@@ -21,7 +22,14 @@ export default function PartPreview({
     };
   }, [type, color]);
   return url ? (
-    <img className="part-preview" src={url} alt="" draggable={false} />
+    <img
+      className={cn(
+        "part-preview group/part-preview h-[55px] w-[100%] object-contain pointer-events-none",
+      )}
+      src={url}
+      alt=""
+      draggable={false}
+    />
   ) : (
     <Box size={36} color={color} />
   );
