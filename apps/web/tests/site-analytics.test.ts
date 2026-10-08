@@ -134,6 +134,7 @@ it.each([
         api_host: "https://eu.i.posthog.com",
         autocapture: false,
         capture_pageview: false,
+        request_batching: mode === "production",
         advanced_disable_flags: true,
         save_campaign_params: false,
         save_referrer: false,
@@ -179,6 +180,20 @@ it("attend que le Provider soit initialisé avant de capturer une visite", async
   expect(client.capture).not.toHaveBeenCalled();
   await act(async () => client.init.mock.calls[0][1].loaded(client));
   expect(client.capture).toHaveBeenCalledWith("$pageview", expect.any(Object));
+});
+
+it("reprend les visites après un remontage du Provider avec un SDK déjà initialisé", async () => {
+  await render();
+  await act(async () => root.unmount());
+  root = createRoot(element);
+  // Comme le SDK réel, init ne rappelle pas loaded quand le client est déjà chargé.
+  client.init.mockImplementation(() => client);
+  client.capture.mockClear();
+  await render();
+  expect(client.capture).toHaveBeenCalledWith(
+    "$pageview",
+    expect.objectContaining({ $pathname: "/" }),
+  );
 });
 
 it("suit les navigations sans réinitialiser le client ni transmettre les identifiants ou paramètres", async () => {

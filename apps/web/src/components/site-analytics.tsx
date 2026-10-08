@@ -5,20 +5,22 @@ import { analyticsPathname } from "../lib/analytics";
 
 export default function SiteAnalytics({ ready }: { ready: boolean }) {
   const client = usePostHog();
+  // Le SDK survit au rechargement à chaud, et ne rappelle pas loaded au remontage.
+  const initialized = ready || client.__loaded;
   const pathname = useLocation({ select: (location) => location.pathname });
   const route = analyticsPathname(pathname);
 
   useEffect(() => {
-    if (!ready) return;
+    if (!initialized) return;
     client.capture("$pageview", {
       environment: import.meta.env.MODE,
       $current_url: `${location.origin}${route}`,
       $pathname: route,
     });
-  }, [client, ready, route]);
+  }, [client, initialized, route]);
 
   useEffect(() => {
-    if (!ready) return;
+    if (!initialized) return;
     let active = true;
     let cancelIdle: (() => void) | undefined;
     const initialRoute = analyticsPathname(location.pathname);
@@ -68,6 +70,6 @@ export default function SiteAnalytics({ ready }: { ready: boolean }) {
       window.removeEventListener("load", schedule);
       cancelIdle?.();
     };
-  }, [client, ready]);
+  }, [client, initialized]);
   return null;
 }

@@ -18,6 +18,7 @@ export default function SiteAnalyticsProvider({
       autocapture: false,
       capture_pageview: false,
       capture_pageleave: false,
+      request_batching: import.meta.env.PROD,
       advanced_disable_flags: true,
       save_campaign_params: false,
       save_referrer: false,
