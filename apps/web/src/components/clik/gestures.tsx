@@ -378,6 +378,11 @@ export function Gestures({
       release();
     };
     const keydown = (e: KeyboardEvent) => {
+      if (
+        e.target instanceof HTMLElement &&
+        e.target.closest('[role="separator"]')
+      )
+        return;
       if (e.key === "Escape") {
         cancel();
         return;

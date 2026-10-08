@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useRef, useState, useId } from "react";
 import { useTreeDrag } from "./use-tree-drag";
+import EditorPanels from "./editor-panels";
 import PublishDialog from "./publish-dialog";
 import ImportProjectDialog from "./import-project-dialog";
 import ProjectSources from "./project-sources";
@@ -340,7 +341,7 @@ export default function Editor({
         return;
       if (
         (e.target as HTMLElement)?.closest(
-          'input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"]',
+          'input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"],[role="separator"]',
         )
       )
         return;
@@ -902,11 +903,12 @@ export default function Editor({
             )}
           </div>
         )}
-        <div
-          className="editor-body [--library-width:236px] [--inspector-width:264px] [--scene-min-width:300px] flex-1 grid grid-cols-[var(--library-width)_minmax(var(--scene-min-width),1fr)_var(--inspector-width)] min-h-0 max-xl-narrow:[--library-width:210px] max-xl-narrow:[--inspector-width:230px] max-xl-narrow:[--scene-min-width:280px] 2xl-narrow:[--library-width:260px] 2xl-narrow:[--inspector-width:285px] data-[library-collapsed=true]:[--library-width:0px] data-[inspector-collapsed=true]:[--inspector-width:0px] group/editor-body"
+        <EditorPanels
           inert={busy && !publishing}
-          data-library-collapsed={libraryCollapsed}
-          data-inspector-collapsed={inspectorCollapsed}
+          libraryCollapsed={libraryCollapsed}
+          inspectorCollapsed={inspectorCollapsed}
+          libraryId={libraryId}
+          inspectorId={inspectorId}
         >
           <div className="editor-side editor-side-left relative min-w-0 min-h-0 bg-white group/editor-side-left border-r border-solid border-r-[#e4e9f1] group-data-[library-collapsed=true]/editor-body:border-0 group-data-[library-collapsed=true]/editor-body:border-none group-data-[library-collapsed=true]/editor-body:border-current">
             <button
@@ -1718,7 +1720,7 @@ export default function Editor({
               </div>
             </aside>
           </div>
-        </div>
+        </EditorPanels>
         <footer className="editor-footer px-4.75 py-1.5 gap-2 min-h-8.25 border-t border-solid border-t-[#e5e9f0] flex items-center justify-between flex-wrap shrink-0 text-xs leading-[inherit] text-[#98a2b2]">
           <span className="flex items-center gap-y-1.5 gap-x-3 flex-wrap">
             <span className="brand-mini text-[17px] tracking-[-1px] font-extrabold text-[#8998ad]">
