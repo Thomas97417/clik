@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { listLocalCreations } from "@/lib/clik/local";
 import ProjectCard, { type CreationItem } from "@/components/clik/project-card";
+import CreationGridSkeleton from "@/components/clik/creation-grid-skeleton";
 
 const sortOptions = [
   { value: "recent", label: "Les plus récentes" },
@@ -41,8 +42,12 @@ export const Route = createFileRoute("/projects")({
     sort: search.sort === "oldest" ? "oldest" : undefined,
   }),
   component: Projects,
+  pendingComponent: () => <Projects pending />,
+  codeSplitGroupings: [["component", "pendingComponent"]],
+  pendingMs: 0,
+  pendingMinMs: 0,
 });
-function Projects() {
+function Projects({ pending = false }: { pending?: boolean } = {}) {
   const { sort = "recent" } = Route.useSearch();
   const [filter, setFilter] = useState<
     "all" | "online" | "local" | "published"
@@ -51,7 +56,7 @@ function Projects() {
   const { isAuthenticated, isLoading } = useConvexAuth();
   const { results, status, loadMore } = usePaginatedQuery(
     api.projects.list,
-    isAuthenticated ? { sort } : "skip",
+    !pending && isAuthenticated ? { sort } : "skip",
     { initialNumItems: 12 },
   );
   const navigate = useNavigate();
@@ -60,6 +65,7 @@ function Projects() {
   const [localError, setLocalError] = useState(false);
   const [retry, setRetry] = useState(0);
   useEffect(() => {
+    if (pending) return;
     let version = 0;
     const refresh = async () => {
       const request = ++version;
@@ -93,21 +99,22 @@ function Projects() {
       version++;
       window.removeEventListener("focus", refresh);
     };
-  }, [retry]);
-  const remote: CreationItem[] = isAuthenticated
-    ? results.map((p) => ({
-        ...p,
-        id: p._id,
-        projectId: p._id,
-        location: "online",
-        cacheKey: `project:${p._id}:${p.revision}`,
-        provenance: {
-          origin: p.origin,
-          originReceiptId: p.originReceiptId,
-          imports: p.imports ?? [],
-        },
-      }))
-    : [];
+  }, [retry, pending]);
+  const remote: CreationItem[] =
+    !pending && isAuthenticated
+      ? results.map((p) => ({
+          ...p,
+          id: p._id,
+          projectId: p._id,
+          location: "online",
+          cacheKey: `project:${p._id}:${p.revision}`,
+          provenance: {
+            origin: p.origin,
+            originReceiptId: p.originReceiptId,
+            imports: p.imports ?? [],
+          },
+        }))
+      : [];
   const creations = [...remote, ...local]
     .filter((p) =>
       filter === "published"
@@ -133,6 +140,7 @@ function Projects() {
   }, [loadingPublished, status, loadMore]);
   const includesLocal = filter === "all" || filter === "local";
   const loading =
+    pending ||
     (includesLocal && localLoading) ||
     (filter !== "local" &&
       (isLoading || (isAuthenticated && status === "LoadingFirstPage"))) ||
@@ -165,7 +173,7 @@ function Projects() {
           Nouvelle création
         </Button>
       </div>
-      {!isLoading && !isAuthenticated && (
+      {!pending && !isLoading && !isAuthenticated && (
         <div className="projects-account-note px-6 py-5 gap-4 border border-solid border-[#e0e8fa] flex items-center bg-[#f3f6fd] rounded-[12px] mb-8 max-lg-narrow:p-4.5 max-lg-narrow:flex-wrap">
           <span className="projects-note-icon grid place-items-center shrink-0 rounded-[12px] text-[#356ae6] bg-white size-11">
             <Cloud size={22} aria-hidden="true" />
@@ -208,6 +216,7 @@ function Projects() {
               className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-3.5 py-2.25 gap-1.75 flex items-center rounded-[7px] text-[#697a94] text-xs leading-[inherit] font-semibold whitespace-nowrap max-sm-narrow:px-2.25 max-sm-narrow:text-[11px] max-sm-narrow:justify-center hover:text-[#356ae6] aria-pressed:text-[#356ae6] aria-pressed:bg-white aria-pressed:[box-shadow:0_2px_5px_#31476b10]"
               key={value}
               aria-pressed={filter === value}
+              disabled={pending}
               onClick={() => setFilter(value)}
             >
               {Icon && (
@@ -238,6 +247,7 @@ function Projects() {
               Trier par
             </label>
             <Select
+              disabled={pending}
               items={sortOptions}
               value={sort}
               onValueChange={(value) => {
@@ -289,23 +299,10 @@ function Projects() {
         </div>
       )}
       {loading ? (
-        <div
-          className="creation-grid projects-skeletons group/creation-grid gap-6.5 grid grid-cols-3 max-sm-narrow:gap-3.75 max-sm-narrow:grid-cols-1 min-sm-narrow:max-lg-narrow:gap-3.75 min-sm-narrow:max-lg-narrow:grid-cols-2"
-          role="status"
-          aria-label="Chargement des créations"
-        >
-          {Array.from({ length: 6 }, (_, i) => (
-            <div
-              className="project-skeleton overflow-hidden border border-solid border-[#e4eaf2] rounded-[14px] pb-5"
-              key={i}
-              aria-hidden="true"
-            >
-              <div className="aspect-4/3 bg-[#edf2f8]" />
-              <span className="mx-4.5 block w-3/5 h-3.5 bg-[#edf2f8] mt-5 mb-0 rounded-[4px] last:w-[40%] last:h-2.5 last:mt-2.5" />
-              <span className="mx-4.5 block w-3/5 h-3.5 bg-[#edf2f8] mt-5 mb-0 rounded-[4px] last:w-[40%] last:h-2.5 last:mt-2.5" />
-            </div>
-          ))}
-        </div>
+        <CreationGridSkeleton
+          variant="project"
+          className="projects-skeletons"
+        />
       ) : creations.length ? (
         <div className="creation-grid projects-grid group/creation-grid gap-6.5 grid grid-cols-3 max-sm-narrow:gap-3.75 max-sm-narrow:grid-cols-1 min-sm-narrow:max-lg-narrow:gap-3.75 min-sm-narrow:max-lg-narrow:grid-cols-2">
           {creations.map((creation) => (
@@ -377,7 +374,8 @@ function Projects() {
           )}
         </div>
       )}
-      {isAuthenticated &&
+      {!pending &&
+        isAuthenticated &&
         filter !== "local" &&
         (status === "CanLoadMore" || status === "LoadingMore") && (
           <div className="projects-pagination gap-4.5 flex items-center justify-center mt-8 before:[content:''] before:h-px before:flex-1 before:max-w-27.5 before:bg-[#e0e7f2] max-sm-narrow:before:hidden after:[content:''] after:h-px after:flex-1 after:max-w-27.5 after:bg-[#e0e7f2] max-sm-narrow:after:hidden">

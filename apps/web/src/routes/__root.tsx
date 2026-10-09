@@ -82,6 +82,9 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
   }),
 
   component: RootDocument,
+  // Keep the shared layout visible and let the destination show its pending UI
+  // while a client navigation is still checking the session.
+  pendingMs: 0,
   beforeLoad: async (
     ctx,
   ): Promise<{ isAuthenticated: boolean; token: string | undefined }> => {

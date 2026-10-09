@@ -35,6 +35,8 @@ export function getRouter() {
     scrollToTopSelectors: [".page-scroll"],
     defaultPreload: "intent",
     defaultPendingComponent: () => <Loader />,
+    // Replace loading placeholders as soon as the destination is ready.
+    defaultPendingMinMs: 0,
     defaultNotFoundComponent: NotFound,
     context: {
       queryClient,

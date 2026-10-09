@@ -12,6 +12,8 @@ import { defaultAvatar } from "@clik/avatars";
 import { Box } from "lucide-react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import PublicCreationCard from "@/components/clik/public-creation-card";
+import CreationGridSkeleton from "@/components/clik/creation-grid-skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import GallerySortSelect, {
   validateGallerySearch,
 } from "@/components/clik/gallery-sort";
@@ -29,6 +31,10 @@ export const Route = createFileRoute("/gallery/user/$userId")({
     return data;
   },
   component: CreatorPage,
+  pendingComponent: () => <CreatorPage pending />,
+  codeSplitGroupings: [["component", "pendingComponent"]],
+  pendingMs: 0,
+  pendingMinMs: 0,
   head: ({ loaderData, params, match }) => {
     const name = loaderData?.creator?.name || "Créateur introuvable",
       path = `/gallery/user/${encodeURIComponent(params.userId)}`;
@@ -66,32 +72,38 @@ export const Route = createFileRoute("/gallery/user/$userId")({
     </main>
   ),
 });
-function CreatorPage() {
+function CreatorPage({ pending = false }: { pending?: boolean } = {}) {
   const { userId } = Route.useParams();
-  return <CreatorGallery key={userId} userId={userId} />;
+  return <CreatorGallery key={userId} userId={userId} pending={pending} />;
 }
-function CreatorGallery({ userId }: { userId: string }) {
+function CreatorGallery({
+  userId,
+  pending,
+}: {
+  userId: string;
+  pending: boolean;
+}) {
   const { sort = "recent", cursor } = Route.useSearch();
   const navigate = Route.useNavigate();
   const initial = Route.useLoaderData();
-  const liveCreator = useQuery(api.projects.creator, { userId });
-  const creator = liveCreator === undefined ? initial.creator : liveCreator;
+  const liveCreator = useQuery(
+    api.projects.creator,
+    pending ? "skip" : { userId },
+  );
+  const creator = pending
+    ? undefined
+    : liveCreator === undefined
+      ? initial.creator
+      : liveCreator;
   const { results, status, loadMore, nextCursor } = usePublicPagination(
     api.projects.gallery,
     creator ? { ownerId: userId, sort } : "skip",
-    initial.gallery,
+    pending ? undefined : initial.gallery,
     cursor,
   );
   return (
     <main className="collection-page creator-page px-[5%] py-16 m-auto max-w-330 max-lg-narrow:pt-10">
-      {creator === undefined ? (
-        <div
-          className="empty-state px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0]"
-          role="status"
-        >
-          Chargement du créateur…
-        </div>
-      ) : !creator ? (
+      {creator === null ? (
         <div className="empty-state px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0]">
           <h1 className="text-[#32445f] text-2xl leading-[inherit] font-bold">
             Utilisateur introuvable.
@@ -104,17 +116,33 @@ function CreatorGallery({ userId }: { userId: string }) {
         <>
           <div className="page-heading creator-heading group/page-heading flex items-center mb-11.25 max-lg-narrow:items-start max-lg-narrow:flex-col gap-6 justify-start max-sm:gap-4.5 max-sm:items-start">
             <div className="creator-avatar overflow-hidden grid place-items-center flex-[0_0_96px] rounded-2xl bg-[#f1f5fc] text-[#356ae6] text-[38px] font-[750] max-sm:rounded-[12px] max-sm:text-3xl max-sm:leading-[inherit] max-sm:basis-18 size-24 max-sm:size-18">
-              <BrickAvatar
-                className="object-cover size-full"
-                avatar={creator.avatar ?? defaultAvatar(creator.id)}
-                size={96}
-                label={`Avatar de ${creator.name}`}
-              />
+              {creator ? (
+                <BrickAvatar
+                  className="object-cover size-full"
+                  avatar={creator.avatar ?? defaultAvatar(creator.id)}
+                  size={96}
+                  label={`Avatar de ${creator.name}`}
+                />
+              ) : (
+                <Skeleton className="size-full" aria-hidden="true" />
+              )}
             </div>
-            <div className="creator-identity min-w-0">
+            <div className="creator-identity min-w-0 max-w-full">
               <h1 className="mx-0 my-3 text-5xl leading-[inherit] tracking-[-2px] font-extrabold max-lg-narrow:text-[40px] wrap-anywhere mb-0">
-                {creator.name}
-                <span className="text-[#356ae6]">.</span>
+                {creator ? (
+                  <>
+                    {creator.name}
+                    <span className="text-[#356ae6]">.</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="sr-only">La galerie du créateur</span>
+                    <Skeleton
+                      className="h-14 w-64 max-w-full rounded-[6px] max-lg-narrow:h-12"
+                      aria-hidden="true"
+                    />
+                  </>
+                )}
               </h1>
               <p className="text-[#7b889b] text-[15px]">
                 Ses idées prennent forme. Explorez ses créations publiques.
@@ -126,6 +154,7 @@ function CreatorGallery({ userId }: { userId: string }) {
               Créations publiques
             </span>
             <GallerySortSelect
+              disabled={pending}
               value={sort}
               onValueChange={(value) => {
                 void navigate({
@@ -135,13 +164,8 @@ function CreatorGallery({ userId }: { userId: string }) {
               }}
             />
           </div>
-          {status === "LoadingFirstPage" ? (
-            <div
-              className="empty-state px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0]"
-              role="status"
-            >
-              Chargement des créations…
-            </div>
+          {pending || status === "LoadingFirstPage" ? (
+            <CreationGridSkeleton />
           ) : !results.length ? (
             <div className="creator-empty empty-state px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0]">
               <Box

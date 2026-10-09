@@ -13,6 +13,7 @@ import GallerySortSelect, {
 } from "@/components/clik/gallery-sort";
 import PublicCreationCard from "@/components/clik/public-creation-card";
 import GalleryArt from "@/components/clik/gallery-art";
+import CreationGridSkeleton from "@/components/clik/creation-grid-skeleton";
 
 export const Route = createFileRoute("/gallery/")({
   validateSearch: validateGallerySearch,
@@ -27,14 +28,19 @@ export const Route = createFileRoute("/gallery/")({
       schema: collection("La galerie", "/gallery"),
     }),
   component: Gallery,
+  pendingComponent: () => <Gallery pending />,
+  codeSplitGroupings: [["component", "pendingComponent"]],
+  pendingMs: 0,
+  pendingMinMs: 0,
 });
-function Gallery() {
+function Gallery({ pending = false }: { pending?: boolean } = {}) {
   const { sort = "recent", cursor } = Route.useSearch();
   const navigate = Route.useNavigate();
+  const initial = Route.useLoaderData();
   const { results, status, loadMore, nextCursor } = usePublicPagination(
     api.projects.gallery,
-    { sort },
-    Route.useLoaderData(),
+    pending ? "skip" : { sort },
+    pending ? undefined : initial,
     cursor,
   );
   return (
@@ -73,6 +79,7 @@ function Gallery() {
             </p>
           </div>
           <GallerySortSelect
+            disabled={pending}
             value={sort}
             onValueChange={(value) => {
               void navigate({
@@ -82,25 +89,8 @@ function Gallery() {
             }}
           />
         </div>
-        {status === "LoadingFirstPage" ? (
-          <div role="status" aria-label="Chargement des créations">
-            <span className="sr-only">Ouverture de la galerie…</span>
-            <div
-              className="creation-grid group/creation-grid gap-6.5 grid grid-cols-3 max-sm-narrow:gap-3.75 max-sm-narrow:grid-cols-1 min-sm-narrow:max-lg-narrow:gap-3.75 min-sm-narrow:max-lg-narrow:grid-cols-2"
-              aria-hidden="true"
-            >
-              {Array.from({ length: 6 }, (_, i) => (
-                <div
-                  key={i}
-                  className="gallery-skeleton overflow-hidden border border-solid border-[#e4eaf2] pb-5.5 rounded-[14px] bg-white"
-                >
-                  <div className="aspect-4/3 bg-[#eef2f8]" />
-                  <span className="mx-5 block w-3/5 h-3.5 mt-4.5 mb-0 bg-[#eef2f8] rounded-[4px] last:w-[35%] last:h-2.5 last:mt-3" />
-                  <span className="mx-5 block w-3/5 h-3.5 mt-4.5 mb-0 bg-[#eef2f8] rounded-[4px] last:w-[35%] last:h-2.5 last:mt-3" />
-                </div>
-              ))}
-            </div>
-          </div>
+        {pending || status === "LoadingFirstPage" ? (
+          <CreationGridSkeleton />
         ) : !results.length ? (
           <div className="empty-state gallery-empty px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0] border border-dashed border-[#cfdaec] rounded-2xl bg-[#f3f6fc]">
             <h2 className="text-[#32445f] text-2xl leading-[inherit] font-bold">

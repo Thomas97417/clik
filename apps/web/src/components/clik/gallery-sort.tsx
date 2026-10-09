@@ -36,9 +36,11 @@ export function validateGallerySearch(search: Record<string, unknown>): {
 export default function GallerySortSelect({
   value,
   onValueChange,
+  disabled = false,
 }: {
   value: GallerySort;
   onValueChange: (value: GallerySort) => void;
+  disabled?: boolean;
 }) {
   const id = useId();
   const hydrated = useHydrated();
@@ -46,7 +48,7 @@ export default function GallerySortSelect({
     <div className="collection-sort group/collection-sort gap-2.5 flex items-center shrink-0 text-xs leading-[inherit] text-[#71839c]">
       <label htmlFor={id}>Trier par</label>
       <Select
-        disabled={!hydrated}
+        disabled={disabled || !hydrated}
         items={options}
         value={value}
         onValueChange={(next) => {
