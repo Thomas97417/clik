@@ -103,7 +103,7 @@ export async function creatorsFixture(page: Page, authenticated = false) {
   });
   const b64 = (value: unknown) =>
     Buffer.from(JSON.stringify(value)).toString("base64url");
-  const token = `${b64({ alg: "RS256" })}.${b64({ sub: "viewer", exp: Math.floor(now / 1000) + 3600, iat: Math.floor(now / 1000) })}.signature`;
+  const token = `${b64({ alg: "RS256" })}.${b64({ sub: "viewer", sessionId: "test-session", exp: Math.floor(now / 1000) + 3600, iat: Math.floor(now / 1000) })}.signature`;
   await page.route("**/api/auth/get-session*", (route) =>
     route.fulfill({
       json: authenticated

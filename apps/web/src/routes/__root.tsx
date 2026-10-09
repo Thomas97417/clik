@@ -3,6 +3,8 @@ import SiteAnalyticsProvider from "@/components/site-analytics-provider";
 import SiteFooter from "@/components/site-footer";
 import type { ConvexQueryClient } from "@convex-dev/react-query";
 import type { QueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import type { RouteSessionCache } from "@/lib/auth-session";
 
 import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
 import {
@@ -19,7 +21,7 @@ import { getRequestHeaders } from "@tanstack/react-start/server";
 import { getSessionCookie } from "better-auth/cookies";
 
 import { Toaster } from "@/components/ui/sonner";
-import { authClient } from "@/lib/auth-client";
+import { authClient, observeRouteSession } from "@/lib/auth-client";
 import { getToken } from "@/lib/auth-server";
 
 import Header from "../components/header";
@@ -39,6 +41,7 @@ const getAuth = createServerFn({ method: "GET" }).handler(async () => {
 export interface RouterAppContext {
   queryClient: QueryClient;
   convexQueryClient: ConvexQueryClient;
+  routeSession: RouteSessionCache;
 }
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
@@ -92,7 +95,14 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
         ?.context.token;
       return { isAuthenticated: !!token, token };
     }
-    const token = await getAuth();
+    const session =
+      typeof window === "undefined"
+        ? { token: await getAuth() }
+        : await ctx.context.routeSession.resolve(
+            ctx.location.pathname,
+            getAuth,
+          );
+    const { token } = session;
     if (token) {
       ctx.context.convexQueryClient.serverHttpClient?.setAuth(token);
     }
@@ -107,6 +117,10 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 
 function RootDocument() {
   const context = useRouteContext({ from: Route.id });
+  useEffect(() => {
+    context.routeSession.prime(context.token);
+    return observeRouteSession(context.routeSession);
+  }, [context.routeSession]);
   const isEditor = useLocation({
     select: ({ pathname }) =>
       pathname === "/editor" || pathname.startsWith("/editor/"),

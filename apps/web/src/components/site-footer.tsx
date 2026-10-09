@@ -24,12 +24,14 @@ export default function SiteFooter() {
         <Link
           className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#a7c0f2] focus-visible:outline-offset-4 focus-visible:rounded-[5px] aria-[current=page]:font-bold hover:text-[#356ae6]"
           to="/privacy"
+          preload="viewport"
         >
           Confidentialité
         </Link>
         <Link
           className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-[#a7c0f2] focus-visible:outline-offset-4 focus-visible:rounded-[5px] aria-[current=page]:font-bold hover:text-[#356ae6]"
           to="/terms"
+          preload="viewport"
         >
           Conditions d’utilisation
         </Link>

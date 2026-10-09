@@ -8,6 +8,7 @@ import NotFound from "./components/not-found";
 import Loader from "./components/loader";
 import "./index.css";
 import { routeTree } from "./routeTree.gen";
+import { RouteSessionCache } from "./lib/auth-session";
 
 export function getRouter() {
   const convexUrl = env.VITE_CONVEX_URL;
@@ -35,7 +36,11 @@ export function getRouter() {
     defaultPreload: "intent",
     defaultPendingComponent: () => <Loader />,
     defaultNotFoundComponent: NotFound,
-    context: { queryClient, convexQueryClient },
+    context: {
+      queryClient,
+      convexQueryClient,
+      routeSession: new RouteSessionCache(),
+    },
   });
 
   setupRouterSsrQueryIntegration({
