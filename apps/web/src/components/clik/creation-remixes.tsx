@@ -2,20 +2,35 @@ import { usePublicPagination } from "@/lib/clik/use-public-pagination";
 import type { PublicData } from "@/lib/seo/public-data";
 import { useId, useState } from "react";
 import { useHydrated } from "@tanstack/react-router";
-
-import { ChevronDown, Plus } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronDown,
+  GitBranch,
+  LoaderCircle,
+  Plus,
+} from "lucide-react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { SignInTo } from "@/components/challenges/shared";
 import PublicCreationCard from "./public-creation-card";
-import CommunityArt from "./community-art";
+
+const gridClass =
+  "creation-grid grid grid-cols-3 gap-3 max-xl-narrow:grid-cols-2 max-md-narrow:grid-cols-1";
 
 export default function CreationRemixes({
   publicationId,
   initial,
+  isAuthenticated,
+  creatingVersion,
+  onCreateVersion,
 }: {
   publicationId: Id<"publications">;
   initial?: PublicData["creation"]["remixes"];
+  isAuthenticated: boolean;
+  creatingVersion: boolean;
+  onCreateVersion: () => Promise<void>;
 }) {
   const [expanded, setExpanded] = useState(true);
   const hydrated = useHydrated();
@@ -29,79 +44,147 @@ export default function CreationRemixes({
   );
   return (
     <section
-      className="creation-remixes group/creation-remixes px-7 mt-11 pt-5 pb-7 rounded-3xl bg-[#f2eef8] max-md-narrow:p-4 max-md-narrow:rounded-[20px] peer-[&]/creation-challenge:mt-6"
+      className="creation-remixes mt-10 border-t border-[#e4eaf2] pt-6 peer-[&]/creation-challenge:mt-7"
       aria-labelledby={`${id}-title`}
     >
       <h2 id={`${id}-title`}>
         <button
-          className="disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 creation-remixes-toggle gap-4.5 flex items-center w-full text-left cursor-pointer rounded-[14px] max-md-narrow:gap-2.5 max-md-narrow:grid max-md-narrow:grid-cols-[54px_minmax(0,1fr)_32px] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#8c6ab2] focus-visible:outline-offset-5 group/creation-remixes-toggle"
+          className="creation-remixes-toggle group/creation-remixes-toggle flex w-full cursor-pointer items-center gap-3 rounded-lg text-left text-[#25354e] transition-colors hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-[#356ae6] focus-visible:outline-offset-5 disabled:cursor-not-allowed max-xs:gap-2.5"
           type="button"
           disabled={!hydrated}
           aria-expanded={expanded}
           aria-controls={`${id}-content`}
           onClick={() => setExpanded((value) => !value)}
         >
-          <CommunityArt
-            className="max-md-narrow:w-13.5 max-md-narrow:h-14"
-            kind="remixes"
-          />
-          <span className="creation-remixes-title max-w-112.5 text-[clamp(21px,_2.3vw,_29px)] font-[750] tracking-[-0.8px] leading-[1.2] text-[#403657] max-md-narrow:text-xl max-md-narrow:flex-1 max-md-narrow:min-w-0">
-            À partir de cette création
-          </span>
           <span
-            className="creation-remixes-action group/creation-remixes-action px-3 py-2.25 gap-2 border border-solid border-[#ded5eb] inline-flex items-center shrink-0 ml-auto rounded-[20px] bg-[#ffffff80] text-xs leading-[inherit] font-medium text-[#766387] max-md-narrow:p-0 max-md-narrow:gap-0 max-md-narrow:text-[0px] max-md-narrow:justify-center max-md-narrow:size-8 group-hover/creation-remixes-toggle:border-[#baa5d4] group-hover/creation-remixes-toggle:bg-white group-hover/creation-remixes-toggle:text-[#594170]"
+            className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#edf3ff] text-[#356ae6]"
             aria-hidden="true"
           >
-            {expanded ? "Replier" : "Déplier"}
+            <GitBranch size={18} />
+          </span>
+          <span className="creation-remixes-title min-w-0 text-xl leading-snug font-bold tracking-[-0.4px] max-xs:text-lg">
+            À partir de cette création
+          </span>
+          {!!results.length && (
+            <span
+              className="shrink-0 rounded-md bg-[#eef2f8] px-2 py-1 text-xs font-medium text-[#63758f] tabular-nums max-xs:hidden"
+              aria-hidden="true"
+              title="Versions affichées"
+            >
+              {results.length}
+              {status === "CanLoadMore" || status === "LoadingMore" ? "+" : ""}
+            </span>
+          )}
+          <span
+            className="creation-remixes-action ml-auto inline-flex min-h-9 shrink-0 items-center gap-2 rounded-lg px-2 text-xs font-medium text-[#71839c] group-hover/creation-remixes-toggle:bg-[#edf3ff] group-hover/creation-remixes-toggle:text-[#356ae6]"
+            aria-hidden="true"
+          >
+            <span className="max-sm:hidden">
+              {expanded ? "Replier" : "Déplier"}
+            </span>
             <ChevronDown
-              className="shrink-0 group-aria-expanded/creation-remixes-toggle:transform-[rotate(180deg)]"
+              className="transition-transform group-aria-expanded/creation-remixes-toggle:rotate-180 motion-reduce:transition-none"
               size={16}
             />
           </span>
         </button>
       </h2>
       <div id={`${id}-content`} hidden={!expanded}>
-        <p className="creation-remixes-intro -mt-1.75 mr-27.5 mb-7 ml-32.5 text-[#80718f] text-[13px] leading-[1.8] max-md-narrow:mx-0 max-md-narrow:mt-4 max-md-narrow:mb-5.5 max-md-narrow:text-xs">
-          Tout commence avec une idée. Voici les chemins qu’elle a inspirés.
+        <p className="creation-remixes-intro mt-2 mb-5 text-[13px] leading-relaxed text-[#71839c]">
+          Les reprises et assemblages inspirés par cette idée.
         </p>
         {status === "LoadingFirstPage" ? (
-          <p
-            className="creation-remixes-empty px-6 py-6.5 mt-4.5 border-t border-t-[#d8cce5] text-[#655279] text-base leading-[1.6] max-md-narrow:px-0 max-md-narrow:pt-5 max-md-narrow:pb-2 border-dashed"
+          <div
             role="status"
+            aria-label="Chargement des reprises et assemblages"
           >
-            Chargement des reprises et assemblages…
-          </p>
+            <span className="sr-only">
+              Chargement des reprises et assemblages…
+            </span>
+            <div className={gridClass} aria-hidden="true">
+              {Array.from({ length: 6 }, (_, index) => (
+                <div
+                  key={index}
+                  className="flex gap-3 rounded-xl border border-[#e4eaf2] bg-white p-3"
+                >
+                  <Skeleton className="size-20 shrink-0 rounded-lg bg-[#eef2f8] max-xs:size-18" />
+                  <div className="flex-1 space-y-2 pt-1">
+                    <Skeleton className="h-4 w-3/4 rounded bg-[#eef2f8]" />
+                    <Skeleton className="h-3 w-1/2 rounded bg-[#eef2f8]" />
+                    <Skeleton className="mt-4 h-3 w-1/3 rounded bg-[#eef2f8]" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         ) : results.length ? (
-          <div className="creation-grid group/creation-grid grid grid-cols-3 max-sm-narrow:gap-3.75 max-sm-narrow:grid-cols-1 min-sm-narrow:max-lg-narrow:gap-3.75 min-md-narrow:max-lg-narrow:grid-cols-2 gap-5 max-md-narrow:grid-cols-1">
+          <div className={gridClass}>
             {results.map((creation) => (
               <PublicCreationCard
-                className="border-[#e5deee] rounded-2xl"
+                compact
                 key={creation._id}
                 creation={creation}
               />
             ))}
           </div>
         ) : (
-          <div className="creation-remixes-empty px-6 py-6.5 mt-4.5 border-t border-t-[#d8cce5] text-[#655279] text-base leading-[1.6] max-md-narrow:px-0 max-md-narrow:pt-5 max-md-narrow:pb-2 border-dashed">
-            <p>La prochaine version pourrait être la vôtre.</p>
-            <span className="block max-w-130 mt-2 text-[#867792] text-[13px]">
-              Pour l’instant, cette idée attend sa première nouvelle branche.
-              Les reprises et assemblages publiés trouveront leur place ici.
-            </span>
+          <div className="creation-remixes-empty flex flex-wrap items-center justify-between gap-x-6 gap-y-4 rounded-xl border border-[#e4eaf2] bg-[#f8fafc] p-5 max-xs:p-4">
+            <div>
+              <p className="text-sm font-medium text-[#526885]">
+                La prochaine version pourrait être la vôtre.
+              </p>
+              <p className="mt-1 text-[13px] leading-relaxed text-[#71839c]">
+                Reprenez cette idée et apportez-y votre touche.
+              </p>
+            </div>
+            {isAuthenticated ? (
+              <Button
+                variant="outline"
+                className="creation-remixes-create min-h-10 gap-2 rounded-lg border-[#dce6f7] bg-white px-3 text-xs font-semibold text-[#356ae6] hover:border-[#b4c6e5] hover:bg-[#edf3ff]"
+                disabled={!hydrated || creatingVersion}
+                aria-busy={creatingVersion}
+                onClick={onCreateVersion}
+              >
+                {creatingVersion ? (
+                  <LoaderCircle
+                    className="animate-spin motion-reduce:animate-none"
+                    size={14}
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <ArrowRight size={14} aria-hidden="true" />
+                )}
+                {creatingVersion
+                  ? "Création de votre version…"
+                  : "Créer votre version"}
+              </Button>
+            ) : (
+              <SignInTo
+                className="creation-remixes-create min-h-10 gap-2 rounded-lg border border-[#dce6f7] bg-white px-3 hover:border-[#b4c6e5] hover:bg-[#edf3ff]"
+                title="Connectez-vous pour créer votre version"
+              >
+                Créer votre version <ArrowRight size={14} aria-hidden="true" />
+              </SignInTo>
+            )}
           </div>
         )}
         {(status === "CanLoadMore" || status === "LoadingMore") && (
           <Button
-            className="creation-remixes-more px-4.5 py-2 mx-auto gap-2 border border-solid border-[#d9cde6] flex mt-6 mb-0 min-h-10 rounded-[20px] text-[#705488] bg-[#ffffffb3]"
+            className="creation-remixes-more mx-auto mt-5 flex min-h-10 gap-2 rounded-lg border-[#dfe5ef] bg-white px-4 text-[#526885] hover:border-[#b4c6e5] hover:bg-[#edf3ff] hover:text-[#356ae6]"
             variant="outline"
             disabled={!hydrated || status === "LoadingMore"}
+            aria-busy={status === "LoadingMore"}
             onClick={() => loadMore(6)}
           >
-            <Plus
-              className="size-4 pointer-events-none shrink-0"
-              size={15}
-              aria-hidden="true"
-            />
+            {status === "LoadingMore" ? (
+              <LoaderCircle
+                className="animate-spin motion-reduce:animate-none"
+                size={15}
+                aria-hidden="true"
+              />
+            ) : (
+              <Plus size={15} aria-hidden="true" />
+            )}
             {status === "LoadingMore" ? "Chargement…" : "Voir plus de versions"}
           </Button>
         )}

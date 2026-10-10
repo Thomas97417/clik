@@ -67,6 +67,7 @@ export async function challengeFixture(page: Page) {
     updatedAt?: number;
   }[] = [];
   let nextComment = 1;
+  let failedComment: "add" | "edit" | "remove" | null = null;
   const b64 = (value: unknown) =>
     Buffer.from(JSON.stringify(value)).toString("base64url");
   const token = `${b64({ alg: "RS256" })}.${b64({ sub: "viewer", exp: Math.floor(Date.now() / 1000) + 3600, iat: Math.floor(Date.now() / 1000) })}.signature`;
@@ -209,6 +210,21 @@ export async function challengeFixture(page: Page) {
         );
       } else if (message.type === "Mutation") {
         const a = message.args[0];
+        if (failedComment && message.udfPath === `comments:${failedComment}`) {
+          failedComment = null;
+          seq++;
+          ws.send(
+            JSON.stringify({
+              type: "MutationResponse",
+              requestId: message.requestId,
+              success: false,
+              result: "Opération temporairement indisponible",
+              ts: ts(),
+              logLines: [],
+            }),
+          );
+          return;
+        }
         let result: unknown = null;
         if (message.udfPath === "challenges:ensureToday")
           result = challenge._id;
@@ -282,5 +298,10 @@ export async function challengeFixture(page: Page) {
       }
     });
   });
-  return { uploads };
+  return {
+    uploads,
+    failNextComment: (operation: "add" | "edit" | "remove") => {
+      failedComment = operation;
+    },
+  };
 }

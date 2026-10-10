@@ -7,6 +7,7 @@ import {
   notFound,
 } from "@tanstack/react-router";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
+import { ConvexError } from "convex/values";
 import { useMemo, useState } from "react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
@@ -18,6 +19,7 @@ import { CreationChallenge } from "@/components/challenges/shared";
 import AuthorLink from "@/components/clik/author-link";
 import ClientScene from "@/components/clik/client-scene";
 import CreationRemixes from "@/components/clik/creation-remixes";
+import { formatDate, formatDateTime } from "@/lib/format-date";
 export const Route = createFileRoute("/creations/$publicationId")({
   loader: async ({ params }) => {
     const data = await loadPublic({
@@ -124,6 +126,25 @@ function CreationDetail({
         </Link>
       </div>
     );
+  const createVersion = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const id = await remix({ id: publicationId, versionId: p._id });
+      await navigate({
+        to: "/editor/$projectId",
+        params: { projectId: id },
+      });
+    } catch (e) {
+      toast.error(
+        e instanceof ConvexError && typeof e.data === "string"
+          ? e.data
+          : "Votre version n’a pas pu être créée. Réessayez.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
   return (
     <main className="creation-page px-[5%] m-auto max-w-350 pt-8.75 pb-16">
       <div className="creation-layout gap-9 grid grid-cols-[minmax(0,1.8fr)_minmax(300px,1fr)] items-start max-lg-narrow:gap-6.25 max-lg-narrow:grid-cols-1 lg-start:max-xl-narrow:gap-6 lg-start:max-xl-narrow:grid-cols-[minmax(0,1.4fr)_minmax(280px,1fr)]">
@@ -171,11 +192,7 @@ function CreationDetail({
           <p className="publication-date mx-0 text-xs leading-[inherit] text-[#96a2b5] mt-3 mb-5.5">
             Publiée le{" "}
             <time dateTime={new Date(p.createdAt).toISOString()}>
-              {new Date(p.createdAt).toLocaleDateString("fr-FR", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
+              {formatDate(p.createdAt, "long")}
             </time>
           </p>
           {p.description && (
@@ -227,8 +244,8 @@ function CreationDetail({
             p.submittedAt &&
             p.updatedAt > p.submittedAt && (
               <p className="publication-date mx-0 text-xs leading-[inherit] text-[#96a2b5] mt-3 mb-5.5">
-                Mise à jour le {new Date(p.updatedAt).toLocaleString("fr-FR")}.
-                Les votes sont conservés.
+                Mise à jour le {formatDateTime(p.updatedAt)}. Les votes sont
+                conservés.
               </p>
             )}
           <div className="creation-fork p-5 border border-solid border-[#dce6f7] mt-7 rounded-2xl bg-[#f0f5fd] lg-start:max-xl-narrow:p-4">
@@ -300,23 +317,8 @@ function CreationDetail({
               <Button
                 className="creation-fork-button p-3 gap-2 flex justify-center w-full min-h-11 h-auto rounded-[10px] bg-[#356ae6] text-white text-xs font-[650] whitespace-normal leading-normal hover:bg-[#2859cd]"
                 disabled={busy}
-                onClick={async () => {
-                  setBusy(true);
-                  try {
-                    const id = await remix({
-                      id: publicationId,
-                      versionId: p._id,
-                    });
-                    await navigate({
-                      to: "/editor/$projectId",
-                      params: { projectId: id },
-                    });
-                  } catch (e) {
-                    toast.error(String(e));
-                  } finally {
-                    setBusy(false);
-                  }
-                }}
+                aria-busy={busy}
+                onClick={createVersion}
               >
                 <GitBranch
                   className="size-4 pointer-events-none shrink-0"
@@ -365,6 +367,9 @@ function CreationDetail({
       <CreationRemixes
         initial={initial.remixes}
         publicationId={publicationId}
+        isAuthenticated={isAuthenticated}
+        creatingVersion={busy}
+        onCreateVersion={createVersion}
       />
       <Comments
         initial={initial.comments}

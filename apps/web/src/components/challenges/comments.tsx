@@ -3,17 +3,53 @@ import type { PublicData } from "@/lib/seo/public-data";
 import { defaultAvatar, type AvatarDescriptor } from "@clik/avatars";
 import BrickAvatar from "@/components/ui/brick-avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
+import { ConvexError } from "convex/values";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type {
   Doc,
   Id,
 } from "@my-better-t-app/backend/convex/_generated/dataModel";
-import { ArrowUpRight } from "lucide-react";
+import {
+  ArrowRight,
+  LoaderCircle,
+  MessageCircle,
+  Pencil,
+  Send,
+  Trash2,
+} from "lucide-react";
 import { SignInTo } from "./shared";
 import AuthorLink from "@/components/clik/author-link";
-import CommunityArt from "@/components/clik/community-art";
+import { formatDate, formatDateTime } from "@/lib/format-date";
+
+const inputClass =
+  "w-full min-h-26 max-h-90 resize-y rounded-lg border-[#dfe5ef] bg-[#fafbfd] p-3 text-sm leading-[1.7] text-[#2e405b] placeholder:text-[#8392a8] focus-visible:border-[#356ae6] focus-visible:ring-[#356ae6]/20 md:text-sm md:leading-[1.7]";
+const controlClass =
+  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 disabled:cursor-not-allowed disabled:opacity-40";
+const primaryClass = `${controlClass} min-h-10 bg-[#356ae6] text-white hover:bg-[#2458ce]`;
+const actionClass = `${controlClass} min-h-9 text-[#63758f] hover:bg-[#eef2f8] hover:text-[#25354e]`;
+const errorClass =
+  "mt-3 rounded-lg border border-[#efd5db] bg-[#fff4f6] px-3 py-2.5 text-[13px] leading-relaxed text-[#9d3d50] wrap-anywhere";
+
+function submitOnShortcut(event: KeyboardEvent<HTMLTextAreaElement>) {
+  if (
+    event.key === "Enter" &&
+    (event.ctrlKey || event.metaKey) &&
+    !event.nativeEvent.isComposing
+  ) {
+    event.preventDefault();
+    event.currentTarget.form?.requestSubmit();
+  }
+}
+
+function commentError(error: unknown, fallback: string) {
+  return error instanceof ConvexError && typeof error.data === "string"
+    ? error.data
+    : fallback;
+}
+
 export default function Comments({
   publicationId,
   initial,
@@ -27,8 +63,8 @@ export default function Comments({
     if (window.location.hash === "#comments")
       document.getElementById("comments")?.scrollIntoView();
   }, [publicationId]);
-  const { isAuthenticated } = useConvexAuth(),
-    me = useQuery(api.auth.getCurrentUser, isAuthenticated ? {} : "skip");
+  const { isAuthenticated, isLoading } = useConvexAuth();
+  const me = useQuery(api.auth.getCurrentUser, isAuthenticated ? {} : "skip");
   const { results, status, loadMore } = usePublicPagination(
     api.comments.list,
     { publicationId },
@@ -36,310 +72,491 @@ export default function Comments({
     undefined,
     20,
   );
-  const add = useMutation(api.comments.add),
-    [body, setBody] = useState(""),
-    [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
+  const add = useMutation(api.comments.add);
+  const [body, setBody] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [announcement, setAnnouncement] = useState("");
+  const composer = useRef<HTMLTextAreaElement>(null);
+  const restoreComposerFocus = useRef(false);
+  useEffect(() => {
+    if (!busy && restoreComposerFocus.current) {
+      composer.current?.focus();
+      restoreComposerFocus.current = false;
+    }
+  }, [busy]);
+
   return (
     <section
       id="comments"
-      className="creation-comments px-0 gap-12 grid grid-cols-[240px_minmax(0,1fr)] items-start scroll-mt-25 mt-14 pt-3 pb-5 max-md-narrow:gap-4 max-md-narrow:grid-cols-1 max-md-narrow:mt-9.5 min-md-narrow:max-lg-wide:gap-7 min-md-narrow:max-lg-wide:grid-cols-[200px_minmax(0,1fr)]"
+      className="creation-comments mt-10 grid scroll-mt-25 grid-cols-[220px_minmax(0,1fr)] items-start gap-8 border-t border-[#e4eaf2] pt-6 pb-5 max-lg-narrow:grid-cols-1 max-lg-narrow:gap-5"
       aria-labelledby="comments-title"
     >
-      <header className="comments-heading pt-1 max-md-narrow:px-0 max-md-narrow:pt-3 max-md-narrow:relative max-md-narrow:pb-0">
-        <CommunityArt
-          className="w-31.25 h-24 mt-0 mr-0 mb-4 -ml-3 max-md-narrow:w-16.5 max-md-narrow:h-13.75 max-md-narrow:mb-0 max-md-narrow:ml-0 max-md-narrow:absolute max-md-narrow:right-0 max-md-narrow:top-1"
-          kind="comments"
-        />
-        <h2
-          className="text-[27px] font-extrabold tracking-[-0.8px] text-[#25354e] max-md-narrow:text-[21px] max-md-narrow:pr-17.5 min-md-narrow:max-lg-wide:text-[23px]"
-          id="comments-title"
-        >
-          Commentaires
-          <span className="px-1.75 py-0 inline-flex align-middle items-center justify-center min-w-6.75 h-6.75 ml-2 rounded-[8px_8px_8px_2px] bg-[#f7e7d9] text-xs leading-[inherit] text-[#9e714b] font-semibold">
-            {" "}
-            {count}
+      <header className="comments-heading">
+        <div className="flex items-center gap-3">
+          <span
+            className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#edf3ff] text-[#356ae6]"
+            aria-hidden="true"
+          >
+            <MessageCircle size={18} />
           </span>
-        </h2>
-        <p className="mt-3.5 text-[#7d8798] text-[13px] leading-[1.9] max-w-77.5 max-md-narrow:mt-2.5 max-md-narrow:text-xs max-md-narrow:max-w-95 max-md-narrow:pr-19.5">
-          Les idées s’assemblent aussi à plusieurs. Un petit mot peut donner
-          envie d’aller plus loin.
+          <h2
+            className="text-xl leading-snug font-bold tracking-[-0.4px] text-[#25354e] max-xs:text-lg"
+            id="comments-title"
+          >
+            Commentaires
+            <span
+              className="ml-2 inline-flex min-w-6 items-center justify-center rounded-md bg-[#eef2f8] px-1.5 py-1 align-middle text-xs font-medium text-[#63758f] tabular-nums"
+              aria-hidden="true"
+            >
+              {count}
+            </span>
+          </h2>
+        </div>
+        <p className="mt-3 text-[13px] leading-relaxed text-[#71839c] max-lg-narrow:mt-2">
+          Un détail qui vous plaît, une idée pour la suite ? Partagez votre
+          regard.
         </p>
       </header>
       <div className="comments-thread min-w-0">
-        {isAuthenticated ? (
+        {isLoading ? (
+          <div
+            className="mb-5 rounded-xl border border-[#e4eaf2] bg-white p-4"
+            role="status"
+          >
+            <span className="sr-only">
+              Chargement du formulaire de commentaire…
+            </span>
+            <div aria-hidden="true">
+              <Skeleton className="mb-3 h-4 w-36 rounded bg-[#eef2f8]" />
+              <Skeleton className="h-26 rounded-lg bg-[#eef2f8]" />
+              <Skeleton className="mt-3 ml-auto h-10 w-44 rounded-lg bg-[#eef2f8]" />
+            </div>
+          </div>
+        ) : isAuthenticated ? (
           <form
-            className="comment-form p-5.5 mx-0 border border-solid border-[#e6ded6] relative mt-3 mb-7.5 rounded-[8px_20px_20px_20px] bg-[#fffefc] [box-shadow:0_5px_0_#eee6dc66] max-sm:p-3.75 before:[content:''] before:absolute before:w-13.5 before:h-3.75 before:-top-2 before:right-6.5 before:bg-[#f1d9bcbb] before:transform-[rotate(4deg)] before:pointer-events-none"
-            onSubmit={async (e) => {
-              e.preventDefault();
+            className="comment-form mb-5 rounded-xl border border-[#e4eaf2] bg-white p-4.5 max-xs:p-3.5"
+            aria-busy={busy}
+            onSubmit={async (event) => {
+              event.preventDefault();
               if (busy || !body.trim()) return;
               setBusy(true);
               setError("");
+              setAnnouncement("");
               try {
                 await add({ publicationId, body });
                 setBody("");
-              } catch (e) {
-                setError(String(e));
+                setAnnouncement("Commentaire publié.");
+              } catch (error) {
+                setError(
+                  commentError(
+                    error,
+                    "Votre commentaire n’a pas pu être publié. Réessayez.",
+                  ),
+                );
               } finally {
+                restoreComposerFocus.current = true;
                 setBusy(false);
               }
             }}
           >
-            <div className="comment-composer-heading gap-2.5 flex items-center mb-3.5">
+            <div className="comment-composer-heading mb-3 flex items-center gap-2.5">
               {me && (
                 <BrickAvatar
                   avatar={me.avatar ?? defaultAvatar(me._id)}
-                  size={30}
+                  size={26}
                 />
               )}
               <label
-                className="block text-[13px] text-[#536580] font-semibold"
+                className="text-[13px] font-semibold text-[#536580]"
                 htmlFor="new-comment"
               >
                 Votre commentaire
               </label>
             </div>
             <Textarea
-              className="p-3.25 border border-solid w-full resize-y min-h-27.5 max-h-90 rounded-[10px] text-sm leading-[1.7] text-[#2e405b] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 border-[#eee7df] bg-transparent"
+              ref={composer}
+              className={inputClass}
               id="new-comment"
               value={body}
-              onChange={(e) => setBody(e.target.value)}
+              onChange={(event) => {
+                setBody(event.target.value);
+                setError("");
+              }}
+              onKeyDown={submitOnShortcut}
               maxLength={1000}
-              aria-describedby="comment-length"
+              aria-describedby={
+                error ? "comment-length comment-error" : "comment-length"
+              }
               rows={3}
               placeholder="Un détail que vous aimez, une idée pour la suite…"
               disabled={busy}
               required
             />
-            <div className="comment-composer-footer gap-3 flex items-center justify-between flex-wrap mt-3.5">
-              <span
-                className="text-[11px] tabular-nums text-[#9398a2]"
-                id="comment-length"
-              >
-                {body.length} / 1 000
-              </span>
+            <div className="comment-composer-footer mt-3 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3 text-[11px] text-[#71839c]">
+                <span className="tabular-nums" id="comment-length">
+                  {body.length} / 1 000
+                </span>
+                <span className="max-sm:hidden">
+                  Ctrl / ⌘ + Entrée pour publier
+                </span>
+              </div>
               <button
-                className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 primary-link group/primary-link inline-flex items-center justify-center bg-[#356ae6] text-white font-[650] whitespace-nowrap hover:bg-[#2458ce] px-3.5 py-2.5 gap-2.5 rounded-[10px] min-h-10 text-xs leading-[inherit]"
+                className={`${primaryClass} ml-auto max-xs:w-full`}
                 disabled={busy || !body.trim()}
               >
+                {busy ? (
+                  <LoaderCircle
+                    className="animate-spin motion-reduce:animate-none"
+                    size={14}
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <Send size={14} aria-hidden="true" />
+                )}
                 {busy ? "Envoi…" : "Publier le commentaire"}
-                <ArrowUpRight
-                  className="shrink-0"
-                  size={16}
-                  aria-hidden="true"
-                />
               </button>
             </div>
+            {error && (
+              <p id="comment-error" className={errorClass} role="alert">
+                {error}
+              </p>
+            )}
           </form>
         ) : (
-          <div className="comments-signin p-6.5 mx-0 border border-solid border-[#ede0d2] mt-3 mb-7 bg-[#fcf5ed] rounded-[8px_20px_20px_20px] max-md-narrow:p-5">
-            <p className="text-[#755d49] text-base font-[650] leading-[1.6]">
-              Votre regard fait aussi partie de la création.
+          <div className="comments-signin mb-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 rounded-xl border border-[#e4eaf2] bg-white p-4.5 max-xs:p-4">
+            <p className="text-[13px] leading-relaxed text-[#63758f]">
+              Connectez-vous pour partager vos idées avec l’auteur.
             </p>
-            <span className="mx-0 block text-[#9b8775] text-[13px] leading-[1.8] mt-2 mb-4.5">
-              Rejoignez la conversation pour partager vos idées avec son auteur.
-            </span>
-            <SignInTo>Se connecter pour commenter</SignInTo>
+            <SignInTo
+              returnHash="comments"
+              className="min-h-10 gap-2 rounded-lg border border-[#dce6f7] px-3 hover:border-[#b4c6e5] hover:bg-[#edf3ff]"
+            >
+              Se connecter pour commenter{" "}
+              <ArrowRight size={14} aria-hidden="true" />
+            </SignInTo>
           </div>
         )}
-        {error && (
-          <p
-            className="challenge-error px-3.75 py-3 gap-2.5 border border-solid border-[#efd5db] flex flex-wrap rounded-[9px] bg-[#fff4f6] text-[#9d3d50] text-[13px] leading-[1.8] wrap-anywhere"
-            role="alert"
-          >
-            {error}
-          </p>
-        )}
-        <div className="comments-list">
-          {results.map((comment) => (
-            <Comment
-              key={comment._id}
-              comment={comment}
-              mine={comment.owner === me?._id}
-            />
-          ))}
-        </div>
-        {!results.length && (
-          <p
-            className="comments-empty px-0 pt-5.5 pb-3 text-center text-[13px] leading-[1.8] text-[#8a94a5]"
+        <span className="sr-only" role="status" aria-live="polite">
+          {announcement}
+        </span>
+        {status === "LoadingFirstPage" ? (
+          <div
+            className="rounded-xl border border-[#e4eaf2] bg-white"
             role="status"
           >
-            {status === "LoadingFirstPage"
-              ? "Chargement des commentaires…"
-              : "Tout est encore à dire. Et si vous laissiez le premier mot ?"}
+            <span className="sr-only">Chargement des commentaires…</span>
+            <div aria-hidden="true" className="divide-y divide-[#e4eaf2]">
+              {[0, 1].map((index) => (
+                <div key={index} className="flex gap-3 p-4.5">
+                  <Skeleton className="size-8 shrink-0 rounded-lg bg-[#eef2f8]" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-3 w-28 rounded bg-[#eef2f8]" />
+                    <Skeleton className="mt-4 h-3 w-4/5 rounded bg-[#eef2f8]" />
+                    <Skeleton className="h-3 w-1/2 rounded bg-[#eef2f8]" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : results.length ? (
+          <div className="comments-list divide-y divide-[#e4eaf2] rounded-xl border border-[#e4eaf2] bg-white">
+            {results.map((comment) => (
+              <Comment
+                key={comment._id}
+                comment={comment}
+                mine={comment.owner === me?._id}
+                onDeleted={() => {
+                  setAnnouncement("Commentaire supprimé.");
+                  composer.current?.focus();
+                }}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="comments-empty rounded-xl border border-dashed border-[#dfe5ef] px-5 py-7 text-center text-[13px] leading-relaxed text-[#71839c]">
+            Tout est encore à dire. Et si vous laissiez le premier mot ?
           </p>
         )}
-        {status === "CanLoadMore" && (
+        {(status === "CanLoadMore" || status === "LoadingMore") && (
           <button
-            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 load-more group/load-more mx-auto my-8.75 block px-4 py-2.5 border border-solid border-[#dfe5ef] rounded-[20px] text-xs leading-[inherit] text-[#637997] bg-white"
+            className={`${actionClass} mx-auto mt-5 flex min-h-10 gap-2 border border-[#dfe5ef] bg-white`}
+            disabled={status === "LoadingMore"}
+            aria-busy={status === "LoadingMore"}
             onClick={() => loadMore(20)}
           >
-            Voir les commentaires précédents
+            {status === "LoadingMore" && (
+              <LoaderCircle
+                className="animate-spin motion-reduce:animate-none"
+                size={14}
+                aria-hidden="true"
+              />
+            )}
+            {status === "LoadingMore"
+              ? "Chargement…"
+              : "Voir les commentaires précédents"}
           </button>
         )}
-        {status === "LoadingMore" && <p role="status">Chargement…</p>}
       </div>
     </section>
   );
 }
+
 function Comment({
   comment,
   mine,
+  onDeleted,
 }: {
   comment: Doc<"comments"> & { avatar?: AvatarDescriptor };
   mine: boolean;
+  onDeleted: () => void;
 }) {
-  const [editing, setEditing] = useState(false),
-    [confirm, setConfirm] = useState(false),
-    [body, setBody] = useState(comment.body),
-    [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
-  const edit = useMutation(api.comments.edit),
-    remove = useMutation(api.comments.remove);
-  const perform = async (action: () => Promise<unknown>) => {
+  const [editing, setEditing] = useState(false);
+  const [confirm, setConfirm] = useState(false);
+  const [body, setBody] = useState(comment.body);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [announcement, setAnnouncement] = useState("");
+  const editButton = useRef<HTMLButtonElement>(null);
+  const removeButton = useRef<HTMLButtonElement>(null);
+  const editingField = useRef<HTMLTextAreaElement>(null);
+  const confirmButton = useRef<HTMLButtonElement>(null);
+  const focusRequest = useRef<"edit" | "remove" | "draft" | "confirm" | null>(
+    null,
+  );
+  useEffect(() => {
+    if (busy || !focusRequest.current) return;
+    const target = {
+      edit: editButton,
+      remove: removeButton,
+      draft: editingField,
+      confirm: confirmButton,
+    }[focusRequest.current];
+    if (target.current) {
+      target.current.focus();
+      focusRequest.current = null;
+    }
+  }, [editing, confirm, busy]);
+  const edit = useMutation(api.comments.edit);
+  const remove = useMutation(api.comments.remove);
+  const perform = async (
+    action: () => Promise<unknown>,
+    fallback: string,
+    onSuccess: () => void,
+  ) => {
+    if (busy) return;
     setBusy(true);
     setError("");
+    setAnnouncement("");
     try {
       await action();
       setEditing(false);
       setConfirm(false);
-    } catch (e) {
-      setError(String(e));
+      onSuccess();
+    } catch (error) {
+      setError(commentError(error, fallback));
+      focusRequest.current = editing ? "draft" : "confirm";
     } finally {
       setBusy(false);
     }
   };
+
   return (
     <article
-      className="comment p-0 gap-3 flex mt-5 group/comment"
+      className="comment flex gap-3 p-4.5 max-xs:gap-2.5 max-xs:p-3.5"
       data-mine={mine || undefined}
     >
-      <div
-        className="comment-avatar grid place-items-center mt-3 shrink-0 rounded-[10px] bg-[#eaf0fc] [&:has([class~='group/brick-avatar'])]:bg-transparent [&:has([class~='group/brick-avatar'])]:rounded-[6px] size-8.5"
-        aria-hidden="true"
-      >
+      <div className="comment-avatar mt-0.5 shrink-0" aria-hidden="true">
         <BrickAvatar
           avatar={comment.avatar ?? defaultAvatar(comment.owner)}
           size={32}
         />
       </div>
-      <div className="comment-content group/comment-content px-5 py-4.5 border border-solid border-[#e6ebf3] flex-1 min-w-0 bg-white rounded-[4px_18px_18px_18px] max-md-narrow:p-3.5 group-data-[mine]/comment:border-[#dbe5f8] group-data-[mine]/comment:bg-[#f4f7fd]">
-        <header className="flex items-baseline flex-wrap gap-y-1.5 gap-x-3.5 mb-2.5">
-          <strong className="text-[13px] wrap-anywhere">
+      <div className="comment-content min-w-0 flex-1">
+        <header className="mb-2 flex flex-wrap items-center gap-x-2.5 gap-y-1">
+          <strong className="text-[13px] text-[#334a6d] wrap-anywhere">
             <AuthorLink
               id={comment.owner}
               name={comment.author}
               showAvatar={false}
             />
           </strong>
+          {mine && (
+            <span className="rounded bg-[#eef2f8] px-1.5 py-0.5 text-[10px] font-medium text-[#63758f]">
+              Vous
+            </span>
+          )}
           <time
-            className="text-[11px] text-[#95a0b1] ml-auto max-md-narrow:ml-0"
+            className="ml-auto text-[11px] text-[#71839c] max-sm:ml-0"
             dateTime={new Date(comment.createdAt).toISOString()}
+            title={formatDateTime(comment.createdAt)}
           >
-            {new Date(comment.createdAt).toLocaleDateString("fr-FR", {
-              day: "numeric",
-              month: "short",
-              year: "numeric",
-            })}
+            {formatDate(comment.createdAt)}
             {comment.updatedAt ? " · modifié" : ""}
           </time>
         </header>
         {editing ? (
           <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              void perform(() => edit({ id: comment._id, body }));
+            aria-busy={busy}
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (busy || !body.trim() || body.trim() === comment.body.trim())
+                return;
+              void perform(
+                () => edit({ id: comment._id, body }),
+                "Votre commentaire n’a pas pu être modifié. Réessayez.",
+                () => {
+                  focusRequest.current = "edit";
+                  setAnnouncement("Commentaire modifié.");
+                },
+              );
             }}
           >
             <label
-              className="block text-[13px] text-[#536580] font-semibold mb-2.5"
+              className="mb-2 block text-[13px] font-semibold text-[#536580]"
               htmlFor={`edit-${comment._id}`}
             >
               Modifier votre commentaire
             </label>
             <Textarea
+              ref={editingField}
+              className={inputClass}
               id={`edit-${comment._id}`}
               autoFocus
               maxLength={1000}
               value={body}
-              onChange={(e) => setBody(e.target.value)}
+              onChange={(event) => {
+                setBody(event.target.value);
+                setError("");
+              }}
+              onKeyDown={submitOnShortcut}
+              aria-describedby={`edit-length-${comment._id}${error ? ` error-${comment._id}` : ""}`}
               disabled={busy}
               rows={3}
               required
             />
-            <div className="comment-actions flex flex-wrap items-center gap-y-1 gap-x-2 mt-3 text-[11px] text-[#6b82a6]">
-              <button
-                className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 px-2 py-1.5 min-h-7.5 rounded-[6px] hover:text-[#356ae6] hover:bg-[#e8effb] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2"
-                disabled={busy || !body.trim()}
+            <div className="comment-actions mt-3 flex flex-wrap items-center gap-2">
+              <span
+                className="mr-auto text-[11px] text-[#71839c] tabular-nums max-sm:w-full"
+                id={`edit-length-${comment._id}`}
               >
-                Enregistrer
+                {body.length} / 1 000
+              </span>
+              <button
+                className={primaryClass}
+                disabled={
+                  busy || !body.trim() || body.trim() === comment.body.trim()
+                }
+              >
+                {busy && (
+                  <LoaderCircle
+                    className="animate-spin motion-reduce:animate-none"
+                    size={14}
+                    aria-hidden="true"
+                  />
+                )}
+                {busy ? "Enregistrement…" : "Enregistrer"}
               </button>
               <button
-                className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 px-2 py-1.5 min-h-7.5 rounded-[6px] hover:text-[#356ae6] hover:bg-[#e8effb] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2"
+                className={actionClass}
                 type="button"
                 disabled={busy}
-                onClick={() => setEditing(false)}
+                onClick={() => {
+                  focusRequest.current = "edit";
+                  setBody(comment.body);
+                  setError("");
+                  setEditing(false);
+                }}
               >
                 Annuler
               </button>
             </div>
           </form>
         ) : (
-          <p className="whitespace-pre-wrap wrap-anywhere text-sm leading-[1.8] text-[#526885]">
+          <p className="text-sm leading-[1.8] whitespace-pre-wrap text-[#526885] wrap-anywhere">
             {comment.body}
           </p>
         )}
         {mine && !editing && (
-          <div className="comment-actions flex flex-wrap items-center gap-y-1 gap-x-2 mt-3 text-[11px] text-[#6b82a6]">
+          <div className="comment-actions mt-2.5">
             {confirm ? (
-              <>
-                <span>Supprimer ce commentaire ?</span>
+              <div className="flex flex-wrap items-center gap-2 rounded-lg border border-[#efd5db] bg-[#fff8f9] p-2.5">
+                <span
+                  className="mr-auto text-xs leading-relaxed text-[#9d3d50]"
+                  id={`delete-${comment._id}`}
+                >
+                  Supprimer ce commentaire ?
+                </span>
                 <button
-                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 px-2 py-1.5 min-h-7.5 rounded-[6px] hover:text-[#356ae6] hover:bg-[#e8effb] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2"
+                  ref={confirmButton}
+                  className={`${controlClass} min-h-9 bg-[#b43e53] text-white hover:bg-[#9d3044]`}
                   disabled={busy}
+                  aria-describedby={`delete-${comment._id}`}
                   onClick={() =>
-                    void perform(() => remove({ id: comment._id }))
+                    void perform(
+                      () => remove({ id: comment._id }),
+                      "Votre commentaire n’a pas pu être supprimé. Réessayez.",
+                      onDeleted,
+                    )
                   }
                 >
-                  Confirmer la suppression
+                  {busy ? "Suppression…" : "Confirmer la suppression"}
                 </button>
                 <button
-                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 px-2 py-1.5 min-h-7.5 rounded-[6px] hover:text-[#356ae6] hover:bg-[#e8effb] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2"
+                  className={actionClass}
                   disabled={busy}
-                  onClick={() => setConfirm(false)}
+                  onClick={() => {
+                    focusRequest.current = "remove";
+                    setConfirm(false);
+                    setError("");
+                  }}
                 >
                   Annuler
                 </button>
-              </>
+              </div>
             ) : (
-              <>
+              <div className="-ml-2 flex flex-wrap items-center gap-1">
                 <button
-                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 px-2 py-1.5 min-h-7.5 rounded-[6px] hover:text-[#356ae6] hover:bg-[#e8effb] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2"
+                  ref={editButton}
+                  className={actionClass}
+                  disabled={busy}
                   onClick={() => {
                     setBody(comment.body);
+                    setError("");
+                    setAnnouncement("");
                     setEditing(true);
                   }}
                 >
+                  <Pencil size={13} aria-hidden="true" />
                   Modifier
                 </button>
                 <button
-                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 px-2 py-1.5 min-h-7.5 rounded-[6px] hover:text-[#356ae6] hover:bg-[#e8effb] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2"
-                  onClick={() => setConfirm(true)}
+                  ref={removeButton}
+                  className={`${controlClass} min-h-9 text-[#63758f] hover:bg-[#fff4f6] hover:text-[#9d3d50]`}
+                  disabled={busy}
+                  onClick={() => {
+                    focusRequest.current = "confirm";
+                    setError("");
+                    setAnnouncement("");
+                    setConfirm(true);
+                  }}
                 >
+                  <Trash2 size={13} aria-hidden="true" />
                   Supprimer
                 </button>
-              </>
+              </div>
             )}
           </div>
         )}
         {error && (
-          <p
-            className="challenge-error px-3.75 py-3 gap-2.5 border border-solid border-[#efd5db] flex flex-wrap rounded-[9px] bg-[#fff4f6] whitespace-pre-wrap wrap-anywhere text-sm leading-[1.8] text-[#526885]"
-            role="alert"
-          >
+          <p id={`error-${comment._id}`} className={errorClass} role="alert">
             {error}
           </p>
         )}
+        <span className="sr-only" role="status" aria-live="polite">
+          {announcement}
+        </span>
       </div>
     </article>
   );

@@ -153,8 +153,9 @@ function RootDocument() {
             >
               <div className="grid h-svh grid-rows-[auto_1fr] print:block print:h-auto group/h-svh">
                 <Header />
+                {/* Contain positioned accessibility messages within the scroll surface. */}
                 <div
-                  className={`page-scroll${isEditor ? "" : " site-blueprint"} overflow-y-auto print:[&&]:overflow-visible! print:[&&]:h-auto! flex flex-col min-h-0 [scrollbar-gutter:stable]`}
+                  className={`page-scroll relative${isEditor ? "" : " site-blueprint"} overflow-y-auto print:[&&]:overflow-visible! print:[&&]:h-auto! flex flex-col min-h-0 [scrollbar-gutter:stable]`}
                 >
                   <div className="page-content print:[&&]:block print:[&&]:h-auto flex-[1_0_auto] only:h-full">
                     <Outlet />

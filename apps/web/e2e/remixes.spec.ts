@@ -1,6 +1,102 @@
 import { test, expect } from "@playwright/test";
 import { creatorsFixture } from "./fixtures/creators";
 
+test("créer sa version : connexion directe et page d’origine conservée", async ({
+  page,
+}) => {
+  await creatorsFixture(page);
+  await page.goto("/creations/creation-0");
+  const create = page.getByRole("link", {
+    name: "Créer votre version",
+    exact: true,
+  });
+  await expect(create).toHaveAttribute("href", "/sign-in");
+  await expect(page.locator(".creation-remixes-toggle")).toBeEnabled();
+  await page
+    .locator(".site-header")
+    .evaluate((element) =>
+      element.setAttribute("data-remix-check", "retained"),
+    );
+  await create.click();
+  await expect(page).toHaveURL(/\/sign-in$/);
+  await expect(
+    page.getByRole("heading", { name: "Heureux de vous retrouver" }),
+  ).toBeVisible();
+  await expect(page.locator(".site-header")).toHaveAttribute(
+    "data-remix-check",
+    "retained",
+  );
+  await expect(page.locator(".site-header")).toBeInViewport();
+  expect(
+    await page.evaluate(() => sessionStorage.getItem("clik-return-to")),
+  ).toBe("/creations/creation-0");
+});
+
+test("créer sa version : copie directe, erreur récupérable et header stable", async ({
+  page,
+}) => {
+  const fixture = await creatorsFixture(page, true);
+  await page.goto("/creations/creation-0");
+  const create = page
+    .locator(".creation-remixes")
+    .getByRole("button", { name: "Créer votre version", exact: true });
+  const mainCreate = page.locator(".creation-fork-button");
+  const header = page.locator(".site-header");
+  await expect(create).toBeEnabled();
+  await header.evaluate((element) =>
+    element.setAttribute("data-remix-check", "retained"),
+  );
+  fixture.failRemix(true);
+  await create.click();
+  await expect(
+    page.getByText("Votre version n’a pas pu être créée. Réessayez.", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/creations\/creation-0$/);
+  await expect(create).toBeEnabled();
+  await expect(mainCreate).toBeEnabled();
+  await expect(header).toBeInViewport();
+
+  fixture.failRemix(false);
+  fixture.holdRemix(true);
+  await page.setViewportSize({ width: 390, height: 950 });
+  await create.click();
+  await expect(page.locator(".creation-remixes-create")).toHaveAttribute(
+    "aria-busy",
+    "true",
+  );
+  await expect(page.locator(".creation-remixes-create")).toBeDisabled();
+  await expect(mainCreate).toBeDisabled();
+  await expect(mainCreate).toHaveText("Création de votre version…");
+  expect(fixture.remixCalls).toEqual([
+    { id: "creation-0", versionId: "version-creation-0" },
+    { id: "creation-0", versionId: "version-creation-0" },
+  ]);
+  await mainCreate.evaluate((element: HTMLButtonElement) => element.click());
+  expect(fixture.remixCalls).toHaveLength(2);
+  await expect(header).toHaveAttribute("data-remix-check", "retained");
+  await expect(header).toBeInViewport();
+  expect(await page.evaluate(() => scrollY)).toBe(0);
+
+  fixture.holdRemix(false);
+  await expect(page).toHaveURL(/\/editor\/remixed-project$/);
+  await expect(page.getByLabel("Nom du projet")).toHaveValue(
+    "La maison bleue 1 · reprise",
+  );
+  await expect(page.getByLabel("Nom du projet")).toBeEnabled();
+  await expect(page.locator(".tree-row")).toHaveCount(1);
+  await expect(header).toHaveAttribute("data-remix-check", "retained");
+  await expect(header).toBeInViewport();
+  await page.setViewportSize({ width: 1440, height: 950 });
+  await page.locator(".project-sources summary").click();
+  await expect(
+    page
+      .locator(".project-sources")
+      .getByRole("link", { name: "« La maison bleue 1 » par Alice" }),
+  ).toHaveAttribute("href", "/creations/creation-0");
+});
+
 test("reprises : pagination, repli au clavier, retrait et navigation", async ({
   page,
 }, info) => {

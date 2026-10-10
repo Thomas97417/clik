@@ -27,11 +27,13 @@ export function SignInTo({
   className = "",
   title,
   label,
+  returnHash,
 }: {
   children: React.ReactNode;
   className?: string;
   title?: string;
   label?: string;
+  returnHash?: string;
 }) {
   return (
     <Link
@@ -47,7 +49,9 @@ export function SignInTo({
       onClick={() =>
         sessionStorage.setItem(
           "clik-return-to",
-          window.location.pathname + window.location.search,
+          window.location.pathname +
+            window.location.search +
+            (returnHash ? `#${returnHash}` : ""),
         )
       }
     >

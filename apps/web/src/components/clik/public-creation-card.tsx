@@ -8,8 +8,10 @@ import AuthorLink from "./author-link";
 export default function PublicCreationCard({
   className,
   creation,
+  compact = false,
 }: {
   className?: string;
+  compact?: boolean;
   creation: {
     _id: Id<"publications">;
     owner: string;
@@ -27,6 +29,74 @@ export default function PublicCreationCard({
     to: "/creations/$publicationId" as const,
     params: { publicationId: creation._id },
   };
+  if (compact)
+    return (
+      <article
+        className={cn(
+          "creation-card public-creation-card creation-remix-card group/creation-card flex items-start gap-3 rounded-xl border border-[#e4eaf2] bg-white p-3 transition-colors hover:border-[#c7d5eb] max-xs:gap-2.5 max-xs:p-2.5",
+          className,
+        )}
+      >
+        <Link
+          {...target}
+          className="thumbnail block size-20 shrink-0 overflow-hidden rounded-lg bg-[#eef2f8] max-xs:size-18"
+          tabIndex={-1}
+          aria-hidden="true"
+        >
+          {creation.thumbnailUrl ? (
+            <img
+              className="size-full object-cover"
+              src={creation.thumbnailUrl}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              width={160}
+              height={160}
+            />
+          ) : (
+            <div className="grid h-full place-items-center text-[#91a3be]">
+              <Box size={25} />
+            </div>
+          )}
+        </Link>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <Link
+            {...target}
+            className="public-creation-open rounded-sm text-[#25354e] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-[#356ae6] focus-visible:outline-offset-3"
+            aria-label={`Voir ${creation.title}`}
+          >
+            <h3 className="line-clamp-2 text-sm leading-snug font-semibold wrap-anywhere">
+              {creation.title}
+            </h3>
+          </Link>
+          <p className="public-card-author mt-1 text-xs leading-normal text-[#73829a]">
+            par{" "}
+            <AuthorLink
+              id={creation.owner}
+              name={creation.author}
+              showAvatar={false}
+            />
+          </p>
+          <div className="public-card-footer mt-1 flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+            <span className="creation-kind-badge text-[11px] leading-normal text-[#71839c]">
+              {creation.isAssembly || creation.relationship === "assembly"
+                ? "Assemblage"
+                : "Reprise"}
+              {creation.challenge && ` · Défi du ${creation.challenge.day}`}
+            </span>
+            <Link
+              {...target}
+              hash="comments"
+              className="public-card-comments -mr-1 inline-flex min-h-8 min-w-8 shrink-0 items-center justify-center gap-1 rounded-md px-1.5 text-[11px] text-[#71839c] tabular-nums hover:bg-[#edf3ff] hover:text-[#2458ce] focus-visible:outline-2 focus-visible:outline-[#356ae6] focus-visible:outline-offset-2"
+              aria-label={`${creation.commentCount ?? 0} commentaire${(creation.commentCount ?? 0) === 1 ? "" : "s"} sur ${creation.title}`}
+            >
+              <MessageCircle size={13} aria-hidden="true" />
+              <span>{creation.commentCount ?? 0}</span>
+            </Link>
+          </div>
+        </div>
+      </article>
+    );
   return (
     <article
       className={cn(

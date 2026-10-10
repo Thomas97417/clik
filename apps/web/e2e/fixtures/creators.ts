@@ -15,8 +15,12 @@ import {
 } from "@clik/scene";
 
 // Browser transport only. The real visibility rules are tested with Convex functions.
-export async function creatorsFixture(page: Page, authenticated = false) {
-  const now = Date.now(),
+export async function creatorsFixture(
+  page: Page,
+  authenticated = false,
+  options: { now?: number } = {},
+) {
+  const now = options.now ?? Date.now(),
     day = challengeDay(now),
     start = challengeStart(day);
   const challenge = {
@@ -90,6 +94,24 @@ export async function creatorsFixture(page: Page, authenticated = false) {
       available: boolean;
     }[],
   }));
+  const remixCalls: { id: string; versionId: string }[] = [];
+  let remixFailure = false;
+  let remixHeld = false;
+  const pendingRemixes: (() => void)[] = [];
+  let remixed = false;
+  const remixedProject = {
+    _id: "remixed-project",
+    owner: user._id,
+    title: "",
+    scene: JSON.stringify(emptyScene()),
+    revision: 0,
+    updatedAt: now,
+    challenge: null,
+    publicationId: null,
+    origin: { publicationId: "", versionId: "", title: "", author: "" },
+    originReceiptId: "remix-receipt",
+    imports: [],
+  };
   await page.route("https://images.example.test/**", (route) => {
     if (route.request().url().includes("broken"))
       return route.fulfill({ status: 404, body: "Missing" });
@@ -214,6 +236,15 @@ export async function creatorsFixture(page: Page, authenticated = false) {
       };
     if (path === "auth:getCurrentUser")
       return authenticated ? { ...user, avatar: avatarFor(user._id) } : null;
+    if (path === "projects:get")
+      return remixed && args.id === remixedProject._id
+        ? { ...remixedProject, serverNow: Date.now() }
+        : null;
+    if (path === "projects:sourcesAvailable")
+      return args.ids.map((id: string) => ({
+        id,
+        available: !!publications.find((p) => p._id === id)?.active,
+      }));
     if (path === "projects:creator") {
       const profile = profiles.get(args.userId);
       return profile ? { ...profile, avatar: avatarFor(args.userId) } : null;
@@ -349,6 +380,43 @@ export async function creatorsFixture(page: Page, authenticated = false) {
       } else if (message.type === "Authenticate")
         transition({ ...version, identity: message.baseVersion + 1 });
       else if (message.type === "Mutation") {
+        if (message.udfPath === "projects:remix") {
+          const args = message.args[0];
+          remixCalls.push(args);
+          const finish = () => {
+            if (!remixFailure) {
+              const source = publications.find((p) => p._id === args.id)!;
+              remixed = true;
+              Object.assign(remixedProject, {
+                title: `${source.title} · reprise`,
+                scene: query("projects:creation", { id: args.id })!.scene,
+                origin: {
+                  publicationId: source._id,
+                  versionId: args.versionId,
+                  title: source.title,
+                  author: source.author,
+                },
+              });
+            }
+            seq++;
+            ws.send(
+              JSON.stringify({
+                type: "MutationResponse",
+                requestId: message.requestId,
+                success: !remixFailure,
+                result: remixFailure
+                  ? "Création temporairement indisponible"
+                  : remixedProject._id,
+                ts: ts(),
+                logLines: [],
+              }),
+            );
+            transition();
+          };
+          if (remixHeld) pendingRemixes.push(finish);
+          else finish();
+          return;
+        }
         const savingAvatar = message.udfPath === "avatars:save";
         const failed = savingAvatar && avatarFailure;
         if (savingAvatar) {
@@ -389,6 +457,14 @@ export async function creatorsFixture(page: Page, authenticated = false) {
     });
   });
   return {
+    remixCalls,
+    failRemix: (value: boolean) => {
+      remixFailure = value;
+    },
+    holdRemix: (value: boolean) => {
+      remixHeld = value;
+      if (!value) pendingRemixes.splice(0).forEach((finish) => finish());
+    },
     setAssembly: (id: string, sourceIds: string[]) => {
       const publication = publications.find((p) => p._id === id)!;
       publication.isAssembly = true;
