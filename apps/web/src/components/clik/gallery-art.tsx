@@ -17,6 +17,7 @@ function Brick({
   depth = 7,
   tone,
   studs = 2,
+  showTop = true,
 }: {
   x: number;
   y: number;
@@ -25,6 +26,7 @@ function Brick({
   depth?: number;
   tone: keyof typeof tones;
   studs?: number;
+  showTop?: boolean;
 }) {
   const [top, front, side] = tones[tone];
   const rise = depth * 0.55;
@@ -35,10 +37,12 @@ function Brick({
         d={`M${width} 0l${depth} ${-rise}v${height}l${-depth} ${rise}Z`}
         fill={side}
       />
-      <path
-        d={`M0 0l${depth} ${-rise}h${width}l${-depth} ${rise}Z`}
-        fill={top}
-      />
+      {showTop && (
+        <path
+          d={`M0 0l${depth} ${-rise}h${width}l${-depth} ${rise}Z`}
+          fill={top}
+        />
+      )}
       <path
         d={`M0 .4h${width}l${depth} ${-rise}M${width} .4v${height - 0.4}`}
         stroke="#fff"
@@ -201,6 +205,7 @@ function House() {
         tone="blue"
         depth={12}
         studs={0}
+        showTop={false}
       />
       <Brick
         x={23}
