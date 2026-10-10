@@ -28,12 +28,12 @@ export default function UserMenu() {
         render={
           <Button
             variant="outline"
-            className="header-user-trigger focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-4 py-0.75 gap-2.25 border border-solid border-transparent inline-flex items-center justify-center h-10 max-w-full rounded-3xl text-xs font-medium whitespace-nowrap [box-shadow:none] [transition:background_150ms,color_150ms] pr-2.5 pl-0.75 bg-[#f6f8fc] text-[#344964] max-sm-wide:p-1.25 max-sm-wide:h-11 max-sm-wide:min-w-11 hover:bg-[#e4edff] hover:text-[#2458be] aria-expanded:bg-[#e4edff] aria-expanded:text-[#2458be]"
+            className="header-user-trigger [--avatar-radius:6px] [--avatar-spacing:4px] rounded-[calc(var(--avatar-radius)+var(--avatar-spacing))] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-4 py-0.75 gap-2.25 border border-solid border-transparent inline-flex items-center justify-center h-10 max-w-full text-xs font-medium whitespace-nowrap [box-shadow:none] [transition:background_150ms,color_150ms] pr-2.5 pl-0.75 bg-[#f6f8fc] text-[#344964] max-sm-wide:[--avatar-spacing:6px] max-sm-wide:p-1.25 max-sm-wide:h-11 max-sm-wide:min-w-11 hover:bg-[#e4edff] hover:text-[#2458be] aria-expanded:bg-[#e4edff] aria-expanded:text-[#2458be]"
           />
         }
       >
         <span
-          className="header-avatar grid place-items-center shrink-0 rounded-full bg-[#e7edfa] text-[#356ae6] text-[13px] font-semibold [&:has([class~='group/brick-avatar'])]:bg-transparent [&:has([class~='group/brick-avatar'])]:rounded-[6px] size-8"
+          className="header-avatar grid place-items-center shrink-0 overflow-hidden rounded-(--avatar-radius) bg-[#e7edfa] text-[#356ae6] text-[13px] font-semibold [&:has([class~='group/brick-avatar'])]:bg-transparent size-8"
           aria-hidden="true"
         >
           {user && (
