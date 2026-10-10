@@ -16,6 +16,7 @@ import type * as crons from "../crons.js";
 import type * as env from "../env.js";
 import type * as healthCheck from "../healthCheck.js";
 import type * as http from "../http.js";
+import type * as lib_authorNames from "../lib/authorNames.js";
 import type * as lib_avatars from "../lib/avatars.js";
 import type * as lib_rewards from "../lib/rewards.js";
 import type * as privateData from "../privateData.js";
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   env: typeof env;
   healthCheck: typeof healthCheck;
   http: typeof http;
+  "lib/authorNames": typeof lib_authorNames;
   "lib/avatars": typeof lib_avatars;
   "lib/rewards": typeof lib_rewards;
   privateData: typeof privateData;

@@ -13,6 +13,7 @@ import { api, internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { authComponent } from "./auth";
 import { readAvatar, readAvatars } from "./lib/avatars";
+import { readAuthorName, readAuthorNames } from "./lib/authorNames";
 import {
   validateScene,
   validateChallengeStock,
@@ -74,12 +75,22 @@ async function resolveImports(
 }
 
 async function sourceAvailability(ctx: QueryCtx, sources: Source[]) {
-  return Promise.all(
-    uniqueSources(sources).map(async (source) => ({
-      ...source,
-      available: !!(await ctx.db.get(source.publicationId))?.active,
-    })),
+  const unique = uniqueSources(sources);
+  const publications = await Promise.all(
+    unique.map((source) => ctx.db.get(source.publicationId)),
   );
+  const names = await readAuthorNames(
+    ctx,
+    publications.flatMap((p) => (p ? [p.owner] : [])),
+  );
+  return unique.map((source, index) => {
+    const publication = publications[index];
+    return {
+      ...source,
+      author: (publication && names.get(publication.owner)) ?? source.author,
+      available: !!publication?.active,
+    };
+  });
 }
 
 async function syncPublicationSources(
@@ -560,16 +571,17 @@ export const remove = mutation({
 });
 
 async function publicCards(ctx: QueryCtx, publications: Doc<"publications">[]) {
-  const avatars = await readAvatars(
-    ctx,
-    publications.map((p) => p.owner),
-  );
+  const owners = publications.map((p) => p.owner);
+  const [avatars, names] = await Promise.all([
+    readAvatars(ctx, owners),
+    readAuthorNames(ctx, owners),
+  ]);
   return Promise.all(
     publications.map(async (p) => ({
       _id: p._id,
       owner: p.owner,
       title: p.title,
-      author: p.author,
+      author: names.get(p.owner) ?? p.author,
       avatar: avatars.get(p.owner)!,
       publishedAt: p.publishedAt,
       challenge: p.challengeId ? await ctx.db.get(p.challengeId) : null,
@@ -692,23 +704,12 @@ export const gallery = query({
 export const creator = query({
   args: { userId: v.string() },
   handler: async (ctx, { userId }) => {
-    if (!userId || userId.length > 128) return null;
-    let account;
-    try {
-      account = await authComponent.getAnyUserById(ctx, userId);
-    } catch (error) {
-      // The adapter uses db.get, which rejects malformed IDs instead of returning null.
-      if (
-        /invalid.*(?:id|document)|(?:id|document).*invalid/i.test(String(error))
-      )
-        return null;
-      throw error;
-    }
-    if (!account || typeof account.name !== "string") return null;
+    const name = await readAuthorName(ctx, userId);
+    if (name === undefined) return null;
     return {
-      id: account._id,
-      name: account.name?.trim() || "Créateur Clik",
-      avatar: await readAvatar(ctx, account._id),
+      id: userId,
+      name,
+      avatar: await readAvatar(ctx, userId),
     };
   },
 });
@@ -722,18 +723,36 @@ export const creation = query({
     const version = await ctx.db.get(a.versionId ?? p.versionId!);
     if (!version || version.publicationId !== p._id) return null;
     const { imports, ...publicVersion } = version;
-    return {
-      ...publicVersion,
-      isAssembly: !!imports?.length,
-      sources: await sourceAvailability(
+    const [name, avatar, sources] = await Promise.all([
+      readAuthorName(ctx, p.owner),
+      readAvatar(ctx, p.owner),
+      sourceAvailability(
         ctx,
         [
           ...(version.origin ? [version.origin] : []),
           ...(imports ?? []).flatMap((item) => item.sources),
         ].filter((source) => source.publicationId !== p._id),
       ),
+    ]);
+    return {
+      ...publicVersion,
+      author: name ?? version.author,
+      ...(version.origin
+        ? {
+            origin: {
+              ...version.origin,
+              author:
+                sources.find(
+                  (source) =>
+                    source.publicationId === version.origin!.publicationId,
+                )?.author ?? version.origin.author,
+            },
+          }
+        : {}),
+      isAssembly: !!imports?.length,
+      sources,
       owner: p.owner,
-      avatar: await readAvatar(ctx, p.owner),
+      avatar,
       challenge: p.challengeId ? await ctx.db.get(p.challengeId) : null,
       voteCount: p.voteCount ?? 0,
       commentCount: p.commentCount ?? 0,
@@ -754,7 +773,7 @@ export const remix = mutation({
     const origin = {
       publicationId: p._id,
       versionId: version._id,
-      author: version.author,
+      author: (await readAuthorName(ctx, p.owner)) ?? version.author,
       title: version.title,
     };
     assertSourceLimit([

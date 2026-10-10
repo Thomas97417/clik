@@ -1,4 +1,5 @@
 import { readAvatars } from "./lib/avatars";
+import { readAuthorNames } from "./lib/authorNames";
 import { ConvexError, v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import { query, mutation } from "./_generated/server";
@@ -29,13 +30,18 @@ export const list = query({
         ...args.paginationOpts,
         numItems: Math.min(20, args.paginationOpts.numItems),
       });
-    const avatars = await readAvatars(
-      ctx,
-      results.page.map((c) => c.owner),
-    );
+    const owners = results.page.map((c) => c.owner);
+    const [avatars, names] = await Promise.all([
+      readAvatars(ctx, owners),
+      readAuthorNames(ctx, owners),
+    ]);
     return {
       ...results,
-      page: results.page.map((c) => ({ ...c, avatar: avatars.get(c.owner)! })),
+      page: results.page.map((c) => ({
+        ...c,
+        author: names.get(c.owner) ?? c.author,
+        avatar: avatars.get(c.owner)!,
+      })),
     };
   },
 });
@@ -62,25 +68,38 @@ export const replies = query({
         ...args.paginationOpts,
         numItems: Math.min(20, args.paginationOpts.numItems),
       });
-    const avatars = await readAvatars(
-      ctx,
-      results.page.map((c) => c.owner),
+    const targets = await Promise.all(
+      results.page.map((c) => (c.replyToId ? ctx.db.get(c.replyToId) : null)),
     );
+    const [avatars, names] = await Promise.all([
+      readAvatars(
+        ctx,
+        results.page.map((c) => c.owner),
+      ),
+      readAuthorNames(ctx, [
+        ...results.page.map((c) => c.owner),
+        ...targets.flatMap((c) =>
+          c && c.deletedAt === undefined ? [c.owner] : [],
+        ),
+      ]),
+    ]);
     return {
       ...results,
-      page: await Promise.all(
-        results.page.map(async (c) => {
-          const target = c.replyToId ? await ctx.db.get(c.replyToId) : null;
-          return {
-            ...c,
-            avatar: avatars.get(c.owner)!,
-            replyTo:
-              target && target.deletedAt === undefined
-                ? { _id: target._id, author: target.author }
-                : null,
-          };
-        }),
-      ),
+      page: results.page.map((c, index) => {
+        const target = targets[index];
+        return {
+          ...c,
+          author: names.get(c.owner) ?? c.author,
+          avatar: avatars.get(c.owner)!,
+          replyTo:
+            target && target.deletedAt === undefined
+              ? {
+                  _id: target._id,
+                  author: names.get(target.owner) ?? target.author,
+                }
+              : null,
+        };
+      }),
     };
   },
 });

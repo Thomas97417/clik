@@ -1,6 +1,7 @@
 import { activateRewards } from "./lib/rewards";
 import { internal } from "./_generated/api";
 import { readAvatars } from "./lib/avatars";
+import { readAuthorNames } from "./lib/authorNames";
 import { ConvexError, v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import {
@@ -181,10 +182,11 @@ export const entries = query({
               ...args.paginationOpts,
               numItems: Math.min(24, args.paginationOpts.numItems),
             });
-    const avatars = await readAvatars(
-      ctx,
-      results.page.map((p) => p.owner),
-    );
+    const owners = results.page.map((p) => p.owner);
+    const [avatars, names] = await Promise.all([
+      readAvatars(ctx, owners),
+      readAuthorNames(ctx, owners),
+    ]);
     return {
       ...results,
       page: await Promise.all(
@@ -192,7 +194,7 @@ export const entries = query({
           _id: p._id,
           owner: p.owner,
           title: p.title,
-          author: p.author,
+          author: names.get(p.owner) ?? p.author,
           avatar: avatars.get(p.owner)!,
           voteCount: p.voteCount ?? 0,
           commentCount: p.commentCount ?? 0,

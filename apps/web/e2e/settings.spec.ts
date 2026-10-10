@@ -148,3 +148,56 @@ test("paramètres : validation et enregistrement du nom public", async ({
   await expect(save).toBeDisabled();
   expect(names).toEqual(["Camille Clik"]);
 });
+
+test("le changement de pseudo se retrouve sur les créations déjà publiées", async ({
+  page,
+}) => {
+  const fixture = await creatorsFixture(page, true, { ownPublication: true });
+  await page.goto("/gallery/user/viewer");
+  const card = page.locator(".public-creation-card");
+  await expect(card).toHaveCount(1);
+  await expect(card.locator(".public-card-author")).toHaveText("par Camille");
+  await page
+    .getByRole("button", { name: "Compte de Camille", exact: true })
+    .click();
+  await page.getByRole("menuitem", { name: "Paramètres", exact: true }).click();
+  const input = page.getByLabel("Nom public", { exact: true });
+  const form = page.locator("form").filter({ has: input });
+  await input.fill("  Camille bâtisseuse  ");
+  await form.getByRole("button", { name: "Enregistrer", exact: true }).click();
+  await expect(input).toHaveValue("Camille bâtisseuse");
+  await expect(
+    page.getByRole("button", {
+      name: "Compte de Camille bâtisseuse",
+      exact: true,
+    }),
+  ).toBeVisible();
+  expect(fixture.nameUpdates).toEqual(["Camille bâtisseuse"]);
+  await page.getByRole("link", { name: "Voir ma page publique" }).click();
+  await expect(page).toHaveURL(/\/gallery\/user\/viewer$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Camille bâtisseuse.",
+  );
+  await expect(card).toHaveCount(1);
+  await expect(
+    card.getByRole("link", { name: "Camille bâtisseuse", exact: true }),
+  ).toHaveAttribute("href", "/gallery/user/viewer");
+  await card.locator(".public-creation-open").click();
+  await expect(page).toHaveURL(/\/creations\/creation-0$/);
+  await expect(
+    page
+      .locator(".author")
+      .getByRole("link", { name: "Camille bâtisseuse", exact: true }),
+  ).toHaveAttribute("href", "/gallery/user/viewer");
+  await page.reload();
+  await expect(page.locator(".author")).toContainText("Camille bâtisseuse");
+  await page
+    .getByRole("navigation", { name: "Navigation principale" })
+    .getByRole("link", { name: "La galerie" })
+    .click();
+  await expect(
+    page
+      .locator(".public-card-author")
+      .filter({ hasText: "Camille bâtisseuse" }),
+  ).toHaveCount(1);
+});

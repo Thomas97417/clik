@@ -9,6 +9,7 @@ import {
   settleBatch,
 } from "./lib/rewards";
 import { readAvatars } from "./lib/avatars";
+import { readAuthorNames } from "./lib/authorNames";
 
 export const mine = query({
   args: {},
@@ -56,10 +57,11 @@ export const podium = query({
         ...args.paginationOpts,
         numItems: Math.min(args.paginationOpts.numItems, 24),
       });
-    const avatars = await readAvatars(
-      ctx,
-      result.page.flatMap((a) => (a.owner ? [a.owner] : [])),
-    );
+    const owners = result.page.flatMap((a) => (a.owner ? [a.owner] : []));
+    const [avatars, names] = await Promise.all([
+      readAvatars(ctx, owners),
+      readAuthorNames(ctx, owners),
+    ]);
     return {
       ...result,
       page: await Promise.all(
@@ -80,7 +82,7 @@ export const podium = query({
             publicationId: visible ? award.publicationId : null,
             title: visible ? entry.title : "Création retirée",
             owner: visible ? award.owner : null,
-            author: visible ? entry.author : null,
+            author: visible ? (names.get(award.owner!) ?? entry.author) : null,
             avatar: visible ? avatars.get(award.owner!) : null,
           };
         }),

@@ -6,6 +6,7 @@ import { api, internal } from "../convex/_generated/api";
 import type { Id } from "../convex/_generated/dataModel";
 vi.mock("../convex/auth", () => ({
   authComponent: {
+    getAnyUserById: async () => null,
     safeGetAuthUser: async (ctx: any) => {
       const identity = await ctx.auth.getUserIdentity();
       return identity

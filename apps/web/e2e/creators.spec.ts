@@ -36,6 +36,9 @@ test("galerie publique : nom, avatar, pagination, défis et retrait réactif", a
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "Alice et ses petites constructions.",
   );
+  await expect(page.locator(".public-card-author")).toContainText(
+    Array(15).fill("Alice et ses petites constructions"),
+  );
   await expect(page).toHaveURL(/\/gallery\/user\/alice$/);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.locator(".creator-heading").scrollIntoViewIfNeeded();

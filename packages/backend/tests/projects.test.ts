@@ -11,6 +11,7 @@ import {
 } from "@clik/scene";
 vi.mock("../convex/auth", () => ({
   authComponent: {
+    getAnyUserById: async () => null,
     safeGetAuthUser: async (ctx: any) => {
       const id = await ctx.auth.getUserIdentity();
       return id ? { _id: id.subject, name: id.name ?? "Auteur" } : null;

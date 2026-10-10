@@ -18,7 +18,7 @@ import {
 export async function creatorsFixture(
   page: Page,
   authenticated = false,
-  options: { now?: number } = {},
+  options: { now?: number; ownPublication?: boolean } = {},
 ) {
   const now = options.now ?? Date.now(),
     day = challengeDay(now),
@@ -69,10 +69,14 @@ export async function creatorsFixture(
       },
     ],
   ]);
+  const authorFor = (owner: string, fallback: string) =>
+    profiles.get(owner)?.name ?? fallback;
   const publications = Array.from({ length: 17 }, (_, i) => ({
     _id: `creation-${i}`,
-    owner: i < 15 ? "alice" : "bob",
-    author: i < 15 ? "Alice" : "Bob",
+    owner:
+      options.ownPublication && i === 0 ? user._id : i < 15 ? "alice" : "bob",
+    author:
+      options.ownPublication && i === 0 ? user.name : i < 15 ? "Alice" : "Bob",
     title:
       ["La maison bleue", "Le petit phare", "Le pont des idées"][i % 3] +
       ` ${i + 1}`,
@@ -126,6 +130,8 @@ export async function creatorsFixture(
   const b64 = (value: unknown) =>
     Buffer.from(JSON.stringify(value)).toString("base64url");
   const token = `${b64({ alg: "RS256" })}.${b64({ sub: "viewer", sessionId: "test-session", exp: Math.floor(now / 1000) + 3600, iat: Math.floor(now / 1000) })}.signature`;
+  const refreshers = new Set<() => void>();
+  const nameUpdates: string[] = [];
   await page.route("**/api/auth/get-session*", (route) =>
     route.fulfill({
       json: authenticated
@@ -145,6 +151,14 @@ export async function creatorsFixture(
     route.fulfill({ json: { token: authenticated ? token : null } }),
   );
   if (authenticated) {
+    await page.route("**/api/auth/update-user", async (route) => {
+      const name = route.request().postDataJSON().name as string;
+      nameUpdates.push(name);
+      user.name = name;
+      profiles.get(user._id)!.name = name;
+      refreshers.forEach((refresh) => refresh());
+      await route.fulfill({ json: { status: true } });
+    });
     // The server-side auth guard uses this RPC during client navigation.
     // Only mock getAuth; never use or create a real server session.
     await page.route("**/_serverFn/**", (route) => {
@@ -184,7 +198,6 @@ export async function creatorsFixture(
       }),
     );
   }
-  const refreshers = new Set<() => void>();
   const query = (path: string, args: any) => {
     if (path === "rewards:mine")
       return authenticated
@@ -207,7 +220,7 @@ export async function creatorsFixture(
             publicationId: "creation-1",
             title: "Le phare couronné",
             owner: "alice",
-            author: "Alice",
+            author: authorFor("alice", "Alice"),
             avatar: avatarFor("alice"),
           },
           {
@@ -227,7 +240,7 @@ export async function creatorsFixture(
             publicationId: "creation-2",
             title: "Le pont de bronze",
             owner: "bob",
-            author: "Bob",
+            author: authorFor("bob", "Bob"),
             avatar: avatarFor("bob"),
           },
         ],
@@ -271,9 +284,11 @@ export async function creatorsFixture(
       const from = Number(args.paginationOpts.cursor || 0),
         end = from + args.paginationOpts.numItems;
       return {
-        page: rows
-          .slice(from, end)
-          .map((p) => ({ ...p, avatar: avatarFor(p.owner) })),
+        page: rows.slice(from, end).map((p) => ({
+          ...p,
+          author: authorFor(p.owner, p.author),
+          avatar: avatarFor(p.owner),
+        })),
         isDone: end >= rows.length,
         continueCursor: String(Math.min(end, rows.length)),
       };
@@ -283,6 +298,7 @@ export async function creatorsFixture(
       return p
         ? {
             ...p,
+            author: authorFor(p.owner, p.author),
             avatar: avatarFor(p.owner),
             _id: `version-${p._id}`,
             publicationId: p._id,
@@ -309,7 +325,7 @@ export async function creatorsFixture(
             _creationTime: now,
             publicationId: args.publicationId,
             owner: "bob",
-            author: "Bob",
+            author: authorFor("bob", "Bob"),
             avatar: avatarFor("bob"),
             body: "Une très belle idée !",
             createdAt: now,
@@ -333,7 +349,11 @@ export async function creatorsFixture(
       return {
         page: publications
           .filter((p) => p.active && p.challenge)
-          .map((p) => ({ ...p, avatar: avatarFor(p.owner) })),
+          .map((p) => ({
+            ...p,
+            author: authorFor(p.owner, p.author),
+            avatar: avatarFor(p.owner),
+          })),
         isDone: true,
         continueCursor: "",
       };
@@ -459,6 +479,7 @@ export async function creatorsFixture(
     });
   });
   return {
+    nameUpdates,
     remixCalls,
     failRemix: (value: boolean) => {
       remixFailure = value;
