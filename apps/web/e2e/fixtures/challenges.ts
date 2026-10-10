@@ -65,9 +65,55 @@ export async function challengeFixture(page: Page) {
     body: string;
     createdAt: number;
     updatedAt?: number;
+    threadId?: string;
+    replyToId?: string;
+    replyCount?: number;
+    deletedAt?: number;
   }[] = [];
   let nextComment = 1;
+  const refreshers = new Set<() => void>();
+  const replyRequests: string[] = [];
+  let heldReplies = false;
+  const pendingReplies: (() => void)[] = [];
   let failedComment: "add" | "edit" | "remove" | null = null;
+  function insertComment(input: {
+    publicationId?: string;
+    body: string;
+    owner?: string;
+    author?: string;
+    replyToId?: string;
+  }) {
+    const parent = comments.find((c) => c._id === input.replyToId);
+    const threadId = parent ? (parent.threadId ?? parent._id) : undefined;
+    const comment = {
+      _id: `comment-${nextComment++}`,
+      _creationTime: Date.now(),
+      publicationId: input.publicationId ?? "entry-0",
+      body: input.body,
+      owner: input.owner ?? user._id,
+      author: input.author ?? user.name,
+      createdAt: Date.now(),
+      ...(threadId ? { threadId, replyToId: parent!._id } : {}),
+    };
+    if (threadId) {
+      const root = comments.find((c) => c._id === threadId)!;
+      root.replyCount = (root.replyCount ?? 0) + 1;
+    }
+    comments.unshift(comment);
+    refreshers.forEach((refresh) => refresh());
+    return comment._id;
+  }
+  function paginate(rows: typeof comments, args: any) {
+    const from = Number(args.paginationOpts.cursor ?? 0);
+    const end = args.paginationOpts.endCursor
+      ? Number(args.paginationOpts.endCursor)
+      : from + Math.min(20, args.paginationOpts.numItems);
+    return {
+      page: rows.slice(from, end),
+      isDone: end >= rows.length,
+      continueCursor: String(Math.min(end, rows.length)),
+    };
+  }
   const b64 = (value: unknown) =>
     Buffer.from(JSON.stringify(value)).toString("base64url");
   const token = `${b64({ alg: "RS256" })}.${b64({ sub: "viewer", exp: Math.floor(Date.now() / 1000) + 3600, iat: Math.floor(Date.now() / 1000) })}.signature`;
@@ -141,16 +187,40 @@ export async function challengeFixture(page: Page) {
                   ...emptyScene(),
                   nodes: [makePart("brick-2x4", "#4079e8")],
                 }),
-          commentCount: comments.filter((c) => c.publicationId === e._id)
-            .length,
+          commentCount: comments.filter(
+            (c) => c.publicationId === e._id && c.deletedAt === undefined,
+          ).length,
         };
       }
       case "comments:list":
+        return paginate(
+          comments.filter(
+            (c) => c.publicationId === a.publicationId && !c.threadId,
+          ),
+          a,
+        );
+      case "comments:replies": {
+        replyRequests.push(a.threadId);
+        const result = paginate(
+          comments.filter((c) => c.threadId === a.threadId),
+          a,
+        );
         return {
-          page: comments.filter((c) => c.publicationId === a.publicationId),
-          isDone: true,
-          continueCursor: "",
+          ...result,
+          page: result.page.map((c) => {
+            const target = comments.find(
+              (target) => target._id === c.replyToId,
+            );
+            return {
+              ...c,
+              replyTo:
+                target && target.deletedAt === undefined
+                  ? { _id: target._id, author: target.author }
+                  : null,
+            };
+          }),
         };
+      }
       default:
         return null;
     }
@@ -184,6 +254,7 @@ export async function challengeFixture(page: Page) {
       );
       version = endVersion;
     }
+    refreshers.add(() => transition());
     ws.onMessage((raw) => {
       const message = JSON.parse(String(raw));
       if (message.type === "ModifyQuerySet") {
@@ -210,6 +281,24 @@ export async function challengeFixture(page: Page) {
         );
       } else if (message.type === "Mutation") {
         const a = message.args[0];
+        if (heldReplies && message.udfPath === "comments:add" && a.replyToId) {
+          pendingReplies.push(() => {
+            const result = insertComment(a);
+            seq++;
+            ws.send(
+              JSON.stringify({
+                type: "MutationResponse",
+                requestId: message.requestId,
+                success: true,
+                result,
+                ts: ts(),
+                logLines: [],
+              }),
+            );
+            transition();
+          });
+          return;
+        }
         if (failedComment && message.udfPath === `comments:${failedComment}`) {
           failedComment = null;
           seq++;
@@ -266,23 +355,27 @@ export async function challengeFixture(page: Page) {
           }
         }
         if (message.udfPath === "comments:add") {
-          result = `comment-${nextComment++}`;
-          comments.unshift({
-            _id: String(result),
-            _creationTime: Date.now(),
-            publicationId: a.publicationId,
-            owner: "viewer",
-            author: "Camille",
-            body: a.body,
-            createdAt: Date.now(),
-          });
+          result = insertComment(a);
         }
         if (message.udfPath === "comments:edit")
           comments = comments.map((c) =>
             c._id === a.id ? { ...c, body: a.body, updatedAt: Date.now() } : c,
           );
-        if (message.udfPath === "comments:remove")
-          comments = comments.filter((c) => c._id !== a.id);
+        if (message.udfPath === "comments:remove") {
+          const removed = comments.find((c) => c._id === a.id)!;
+          if (!removed.threadId && removed.replyCount) {
+            removed.body = "";
+            removed.deletedAt = Date.now();
+          } else {
+            comments = comments.filter((c) => c._id !== a.id);
+            if (removed.threadId) {
+              const root = comments.find((c) => c._id === removed.threadId)!;
+              root.replyCount = Math.max(0, (root.replyCount ?? 0) - 1);
+              if (!root.replyCount && root.deletedAt !== undefined)
+                comments = comments.filter((c) => c._id !== root._id);
+            }
+          }
+        }
         seq++;
         ws.send(
           JSON.stringify({
@@ -300,6 +393,12 @@ export async function challengeFixture(page: Page) {
   });
   return {
     uploads,
+    seedComment: insertComment,
+    replyRequests,
+    holdReplies: (value: boolean) => {
+      heldReplies = value;
+      if (!value) pendingReplies.splice(0).forEach((finish) => finish());
+    },
     failNextComment: (operation: "add" | "edit" | "remove") => {
       failedComment = operation;
     },

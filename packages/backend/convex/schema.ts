@@ -125,12 +125,19 @@ export default defineSchema({
   }).index("by_owner_challenge", ["owner", "challengeId"]),
   comments: defineTable({
     publicationId: v.id("publications"),
+    threadId: v.optional(v.id("comments")),
+    replyToId: v.optional(v.id("comments")),
+    replyCount: v.optional(v.number()),
+    deletedAt: v.optional(v.number()),
     owner: v.string(),
     author: v.string(),
     body: v.string(),
     createdAt: v.number(),
     updatedAt: v.optional(v.number()),
-  }).index("by_publication", ["publicationId", "createdAt"]),
+  })
+    .index("by_publication", ["publicationId", "createdAt"])
+    .index("by_publication_thread", ["publicationId", "threadId", "createdAt"])
+    .index("by_thread", ["threadId", "createdAt"]),
   projects: defineTable({
     localSourceId: v.optional(v.string()),
     owner: v.string(),

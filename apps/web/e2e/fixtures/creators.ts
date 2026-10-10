@@ -318,6 +318,8 @@ export async function creatorsFixture(
         isDone: true,
         continueCursor: "",
       };
+    if (path === "comments:replies")
+      return { page: [], isDone: true, continueCursor: "" };
     if (path === "challenges:day")
       return {
         challenge: args.day && args.day !== day ? null : challenge,

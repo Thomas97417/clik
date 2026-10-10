@@ -1,54 +1,24 @@
 import { usePublicPagination } from "@/lib/clik/use-public-pagination";
 import type { PublicData } from "@/lib/seo/public-data";
-import { defaultAvatar, type AvatarDescriptor } from "@clik/avatars";
+import { defaultAvatar } from "@clik/avatars";
 import BrickAvatar from "@/components/ui/brick-avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
-import { ConvexError } from "convex/values";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
-import type {
-  Doc,
-  Id,
-} from "@my-better-t-app/backend/convex/_generated/dataModel";
-import {
-  ArrowRight,
-  LoaderCircle,
-  MessageCircle,
-  Pencil,
-  Send,
-  Trash2,
-} from "lucide-react";
+import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
+import { ArrowRight, LoaderCircle, MessageCircle, Send } from "lucide-react";
 import { SignInTo } from "./shared";
-import AuthorLink from "@/components/clik/author-link";
-import { formatDate, formatDateTime } from "@/lib/format-date";
-
-const inputClass =
-  "w-full min-h-26 max-h-90 resize-y rounded-lg border-[#dfe5ef] bg-[#fafbfd] p-3 text-sm leading-[1.7] text-[#2e405b] placeholder:text-[#8392a8] focus-visible:border-[#356ae6] focus-visible:ring-[#356ae6]/20 md:text-sm md:leading-[1.7]";
-const controlClass =
-  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 disabled:cursor-not-allowed disabled:opacity-40";
-const primaryClass = `${controlClass} min-h-10 bg-[#356ae6] text-white hover:bg-[#2458ce]`;
-const actionClass = `${controlClass} min-h-9 text-[#63758f] hover:bg-[#eef2f8] hover:text-[#25354e]`;
-const errorClass =
-  "mt-3 rounded-lg border border-[#efd5db] bg-[#fff4f6] px-3 py-2.5 text-[13px] leading-relaxed text-[#9d3d50] wrap-anywhere";
-
-function submitOnShortcut(event: KeyboardEvent<HTMLTextAreaElement>) {
-  if (
-    event.key === "Enter" &&
-    (event.ctrlKey || event.metaKey) &&
-    !event.nativeEvent.isComposing
-  ) {
-    event.preventDefault();
-    event.currentTarget.form?.requestSubmit();
-  }
-}
-
-function commentError(error: unknown, fallback: string) {
-  return error instanceof ConvexError && typeof error.data === "string"
-    ? error.data
-    : fallback;
-}
+import CommentDiscussion from "./comment-discussion";
+import {
+  actionClass,
+  primaryClass,
+  inputClass,
+  errorClass,
+  commentError,
+  submitOnShortcut,
+} from "./comment-controls";
 
 export default function Comments({
   publicationId,
@@ -263,10 +233,12 @@ export default function Comments({
         ) : results.length ? (
           <div className="comments-list divide-y divide-[#e4eaf2] rounded-xl border border-[#e4eaf2] bg-white">
             {results.map((comment) => (
-              <Comment
+              <CommentDiscussion
                 key={comment._id}
                 comment={comment}
-                mine={comment.owner === me?._id}
+                meId={me?._id}
+                isAuthenticated={isAuthenticated}
+                authLoading={isLoading}
                 onDeleted={() => {
                   setAnnouncement("Commentaire supprimé.");
                   composer.current?.focus();
@@ -300,264 +272,5 @@ export default function Comments({
         )}
       </div>
     </section>
-  );
-}
-
-function Comment({
-  comment,
-  mine,
-  onDeleted,
-}: {
-  comment: Doc<"comments"> & { avatar?: AvatarDescriptor };
-  mine: boolean;
-  onDeleted: () => void;
-}) {
-  const [editing, setEditing] = useState(false);
-  const [confirm, setConfirm] = useState(false);
-  const [body, setBody] = useState(comment.body);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [announcement, setAnnouncement] = useState("");
-  const editButton = useRef<HTMLButtonElement>(null);
-  const removeButton = useRef<HTMLButtonElement>(null);
-  const editingField = useRef<HTMLTextAreaElement>(null);
-  const confirmButton = useRef<HTMLButtonElement>(null);
-  const focusRequest = useRef<"edit" | "remove" | "draft" | "confirm" | null>(
-    null,
-  );
-  useEffect(() => {
-    if (busy || !focusRequest.current) return;
-    const target = {
-      edit: editButton,
-      remove: removeButton,
-      draft: editingField,
-      confirm: confirmButton,
-    }[focusRequest.current];
-    if (target.current) {
-      target.current.focus();
-      focusRequest.current = null;
-    }
-  }, [editing, confirm, busy]);
-  const edit = useMutation(api.comments.edit);
-  const remove = useMutation(api.comments.remove);
-  const perform = async (
-    action: () => Promise<unknown>,
-    fallback: string,
-    onSuccess: () => void,
-  ) => {
-    if (busy) return;
-    setBusy(true);
-    setError("");
-    setAnnouncement("");
-    try {
-      await action();
-      setEditing(false);
-      setConfirm(false);
-      onSuccess();
-    } catch (error) {
-      setError(commentError(error, fallback));
-      focusRequest.current = editing ? "draft" : "confirm";
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <article
-      className="comment flex gap-3 p-4.5 max-xs:gap-2.5 max-xs:p-3.5"
-      data-mine={mine || undefined}
-    >
-      <div className="comment-avatar mt-0.5 shrink-0" aria-hidden="true">
-        <BrickAvatar
-          avatar={comment.avatar ?? defaultAvatar(comment.owner)}
-          size={32}
-        />
-      </div>
-      <div className="comment-content min-w-0 flex-1">
-        <header className="mb-2 flex flex-wrap items-center gap-x-2.5 gap-y-1">
-          <strong className="text-[13px] text-[#334a6d] wrap-anywhere">
-            <AuthorLink
-              id={comment.owner}
-              name={comment.author}
-              showAvatar={false}
-            />
-          </strong>
-          {mine && (
-            <span className="rounded bg-[#eef2f8] px-1.5 py-0.5 text-[10px] font-medium text-[#63758f]">
-              Vous
-            </span>
-          )}
-          <time
-            className="ml-auto text-[11px] text-[#71839c] max-sm:ml-0"
-            dateTime={new Date(comment.createdAt).toISOString()}
-            title={formatDateTime(comment.createdAt)}
-          >
-            {formatDate(comment.createdAt)}
-            {comment.updatedAt ? " · modifié" : ""}
-          </time>
-        </header>
-        {editing ? (
-          <form
-            aria-busy={busy}
-            onSubmit={(event) => {
-              event.preventDefault();
-              if (busy || !body.trim() || body.trim() === comment.body.trim())
-                return;
-              void perform(
-                () => edit({ id: comment._id, body }),
-                "Votre commentaire n’a pas pu être modifié. Réessayez.",
-                () => {
-                  focusRequest.current = "edit";
-                  setAnnouncement("Commentaire modifié.");
-                },
-              );
-            }}
-          >
-            <label
-              className="mb-2 block text-[13px] font-semibold text-[#536580]"
-              htmlFor={`edit-${comment._id}`}
-            >
-              Modifier votre commentaire
-            </label>
-            <Textarea
-              ref={editingField}
-              className={inputClass}
-              id={`edit-${comment._id}`}
-              autoFocus
-              maxLength={1000}
-              value={body}
-              onChange={(event) => {
-                setBody(event.target.value);
-                setError("");
-              }}
-              onKeyDown={submitOnShortcut}
-              aria-describedby={`edit-length-${comment._id}${error ? ` error-${comment._id}` : ""}`}
-              disabled={busy}
-              rows={3}
-              required
-            />
-            <div className="comment-actions mt-3 flex flex-wrap items-center gap-2">
-              <span
-                className="mr-auto text-[11px] text-[#71839c] tabular-nums max-sm:w-full"
-                id={`edit-length-${comment._id}`}
-              >
-                {body.length} / 1 000
-              </span>
-              <button
-                className={primaryClass}
-                disabled={
-                  busy || !body.trim() || body.trim() === comment.body.trim()
-                }
-              >
-                {busy && (
-                  <LoaderCircle
-                    className="animate-spin motion-reduce:animate-none"
-                    size={14}
-                    aria-hidden="true"
-                  />
-                )}
-                {busy ? "Enregistrement…" : "Enregistrer"}
-              </button>
-              <button
-                className={actionClass}
-                type="button"
-                disabled={busy}
-                onClick={() => {
-                  focusRequest.current = "edit";
-                  setBody(comment.body);
-                  setError("");
-                  setEditing(false);
-                }}
-              >
-                Annuler
-              </button>
-            </div>
-          </form>
-        ) : (
-          <p className="text-sm leading-[1.8] whitespace-pre-wrap text-[#526885] wrap-anywhere">
-            {comment.body}
-          </p>
-        )}
-        {mine && !editing && (
-          <div className="comment-actions mt-2.5">
-            {confirm ? (
-              <div className="flex flex-wrap items-center gap-2 rounded-lg border border-[#efd5db] bg-[#fff8f9] p-2.5">
-                <span
-                  className="mr-auto text-xs leading-relaxed text-[#9d3d50]"
-                  id={`delete-${comment._id}`}
-                >
-                  Supprimer ce commentaire ?
-                </span>
-                <button
-                  ref={confirmButton}
-                  className={`${controlClass} min-h-9 bg-[#b43e53] text-white hover:bg-[#9d3044]`}
-                  disabled={busy}
-                  aria-describedby={`delete-${comment._id}`}
-                  onClick={() =>
-                    void perform(
-                      () => remove({ id: comment._id }),
-                      "Votre commentaire n’a pas pu être supprimé. Réessayez.",
-                      onDeleted,
-                    )
-                  }
-                >
-                  {busy ? "Suppression…" : "Confirmer la suppression"}
-                </button>
-                <button
-                  className={actionClass}
-                  disabled={busy}
-                  onClick={() => {
-                    focusRequest.current = "remove";
-                    setConfirm(false);
-                    setError("");
-                  }}
-                >
-                  Annuler
-                </button>
-              </div>
-            ) : (
-              <div className="-ml-2 flex flex-wrap items-center gap-1">
-                <button
-                  ref={editButton}
-                  className={actionClass}
-                  disabled={busy}
-                  onClick={() => {
-                    setBody(comment.body);
-                    setError("");
-                    setAnnouncement("");
-                    setEditing(true);
-                  }}
-                >
-                  <Pencil size={13} aria-hidden="true" />
-                  Modifier
-                </button>
-                <button
-                  ref={removeButton}
-                  className={`${controlClass} min-h-9 text-[#63758f] hover:bg-[#fff4f6] hover:text-[#9d3d50]`}
-                  disabled={busy}
-                  onClick={() => {
-                    focusRequest.current = "confirm";
-                    setError("");
-                    setAnnouncement("");
-                    setConfirm(true);
-                  }}
-                >
-                  <Trash2 size={13} aria-hidden="true" />
-                  Supprimer
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-        {error && (
-          <p id={`error-${comment._id}`} className={errorClass} role="alert">
-            {error}
-          </p>
-        )}
-        <span className="sr-only" role="status" aria-live="polite">
-          {announcement}
-        </span>
-      </div>
-    </article>
   );
 }
