@@ -19,6 +19,7 @@ import { CreationChallenge } from "@/components/challenges/shared";
 import AuthorLink from "@/components/clik/author-link";
 import ClientScene from "@/components/clik/client-scene";
 import CreationRemixes from "@/components/clik/creation-remixes";
+import AssemblyBadge from "@/components/clik/assembly-badge";
 import { formatDate, formatDateTime } from "@/lib/format-date";
 export const Route = createFileRoute("/creations/$publicationId")({
   loader: async ({ params }) => {
@@ -178,11 +179,7 @@ function CreationDetail({
           </div>
         </div>
         <aside className="creation-details min-w-0 max-lg-narrow:pb-7.5">
-          {p.isAssembly && (
-            <span className="assembly-badge group/assembly-badge px-2 py-0.75 border border-solid border-[#c7dfdf] inline-flex w-fit items-center rounded-[6px] bg-[#edf7f5] text-[#37786b] text-[10px] font-[650] leading-normal whitespace-nowrap">
-              Assemblage
-            </span>
-          )}
+          {p.isAssembly && <AssemblyBadge />}
           <h1 className="mx-0 text-[clamp(28px,_3vw,_42px)] leading-[1.15] font-extrabold tracking-[-1.5px] mt-1.5 mb-4 wrap-anywhere">
             {p.title}
           </h1>

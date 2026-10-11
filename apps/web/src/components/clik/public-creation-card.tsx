@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Box, MessageCircle } from "lucide-react";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import AuthorLink from "./author-link";
+import AssemblyBadge from "./assembly-badge";
 
 export default function PublicCreationCard({
   className,
@@ -29,6 +30,8 @@ export default function PublicCreationCard({
     to: "/creations/$publicationId" as const,
     params: { publicationId: creation._id },
   };
+  const isAssembly =
+    creation.isAssembly || creation.relationship === "assembly";
   if (compact)
     return (
       <article
@@ -78,12 +81,20 @@ export default function PublicCreationCard({
             />
           </p>
           <div className="public-card-footer mt-1 flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-            <span className="creation-kind-badge text-[11px] leading-normal text-[#71839c]">
-              {creation.isAssembly || creation.relationship === "assembly"
-                ? "Assemblage"
-                : "Reprise"}
-              {creation.challenge && ` · Défi du ${creation.challenge.day}`}
-            </span>
+            <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+              {isAssembly ? (
+                <AssemblyBadge compact />
+              ) : (
+                <span className="creation-kind-badge text-[11px] leading-normal text-[#71839c]">
+                  Reprise
+                </span>
+              )}
+              {creation.challenge && (
+                <span className="text-[10px] leading-normal text-[#71839c]">
+                  Défi du {creation.challenge.day}
+                </span>
+              )}
+            </div>
             <Link
               {...target}
               hash="comments"
@@ -128,13 +139,14 @@ export default function PublicCreationCard({
               <Box size={32} />
             </div>
           )}
-          {(creation.relationship || creation.isAssembly) && (
-            <span className="assembly-badge creation-kind-badge group/assembly-badge px-2 py-0.75 border border-solid border-[#c7dfdf] inline-flex w-fit items-center rounded-[6px] bg-[#edf7f5] text-[#37786b] text-[10px] font-[650] leading-normal whitespace-nowrap group/creation-kind-badge absolute left-3 top-3 z-2 pointer-events-none">
-              {creation.isAssembly || creation.relationship === "assembly"
-                ? "Assemblage"
-                : "Reprise"}
-            </span>
-          )}
+          {(creation.relationship || creation.isAssembly) &&
+            (isAssembly ? (
+              <AssemblyBadge className="pointer-events-none absolute top-3 left-3 z-2" />
+            ) : (
+              <span className="creation-kind-badge px-2 py-0.75 border border-solid border-[#c7dfdf] inline-flex w-fit items-center rounded-[6px] bg-[#edf7f5] text-[#37786b] text-[10px] font-[650] leading-normal whitespace-nowrap absolute left-3 top-3 z-2 pointer-events-none">
+                Reprise
+              </span>
+            ))}
           <span
             className="card-arrow group/card-arrow absolute bottom-3.75 right-3.75 bg-[#ffffffde] rounded-full grid place-items-center text-[#356ae6] [transition:background_150ms] size-8 group-hover/card-link:bg-[#356ae6] group-hover/card-link:text-white"
             aria-hidden="true"

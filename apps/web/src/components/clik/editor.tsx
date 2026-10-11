@@ -5,6 +5,7 @@ import EditorPanels from "./editor-panels";
 import PublishDialog from "./publish-dialog";
 import ImportProjectDialog from "./import-project-dialog";
 import ProjectSources from "./project-sources";
+import AssemblyBadge from "./assembly-badge";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAction, useMutation } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
@@ -701,11 +702,7 @@ export default function Editor({
                 )}
                 {projectId ? "Projet privé" : "Création locale"}
               </span>
-              {!!s.provenance.imports.length && (
-                <span className="assembly-badge group/assembly-badge border border-solid border-[#c7dfdf] inline-flex w-fit items-center rounded-[6px] bg-[#edf7f5] text-[#37786b] font-[650] whitespace-nowrap px-1.5 py-0.5 text-[9px] leading-3.5">
-                  Assemblage
-                </span>
-              )}
+              {!!s.provenance.imports.length && <AssemblyBadge compact />}
               <ProjectSources sources={projectSources(s.provenance)} />
             </div>
           </div>

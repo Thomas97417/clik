@@ -17,7 +17,7 @@ import { SignInTo } from "@/components/challenges/shared";
 import PublicCreationCard from "./public-creation-card";
 
 const gridClass =
-  "creation-grid grid grid-cols-3 gap-3 max-xl-narrow:grid-cols-2 max-md-narrow:grid-cols-1";
+  "creation-grid grid grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))] gap-3";
 
 export default function CreationRemixes({
   publicationId,

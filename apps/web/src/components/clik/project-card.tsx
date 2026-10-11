@@ -39,6 +39,7 @@ import { Button } from "@/components/ui/button";
 import { removeLocalCreation } from "@/lib/clik/local";
 import CreationPreview from "./creation-preview";
 import PublishDialog from "./publish-dialog";
+import AssemblyBadge from "./assembly-badge";
 
 export type CreationItem = {
   id: string;
@@ -208,15 +209,15 @@ export default function ProjectCard({
             cacheKey={creation.cacheKey}
             title={creation.title}
           />
-          {creation.challenge && (
-            <span className="challenge-badge project-challenge-badge group/project-challenge-badge block w-fit text-[10px] px-2.25 py-1.5 m-0 absolute bottom-4 left-3.5 max-w-[calc(100%-76px)] rounded-[6px] bg-[#f5f0ffed] text-[#765aa8] font-semibold">
-              Défi du {creation.challenge.day}
-            </span>
-          )}
-          {!!creation.provenance?.imports.length && (
-            <span className="assembly-badge creation-kind-badge group/assembly-badge px-2 py-0.75 border border-solid border-[#c7dfdf] inline-flex w-fit items-center rounded-[6px] bg-[#edf7f5] text-[#37786b] text-[10px] font-[650] leading-normal whitespace-nowrap group/creation-kind-badge absolute z-2 pointer-events-none top-3.5 right-3.5 left-auto">
-              Assemblage
-            </span>
+          {(creation.challenge || !!creation.provenance?.imports.length) && (
+            <div className="pointer-events-none absolute bottom-4 left-3.5 z-2 flex max-w-[calc(100%-76px)] flex-wrap gap-1.5">
+              {creation.challenge && (
+                <span className="challenge-badge project-challenge-badge block w-fit rounded-[6px] bg-[#f5f0ffed] px-2.25 py-1.5 text-[10px] font-semibold text-[#765aa8]">
+                  Défi du {creation.challenge.day}
+                </span>
+              )}
+              {!!creation.provenance?.imports.length && <AssemblyBadge />}
+            </div>
           )}
           <span
             className="card-arrow group/card-arrow absolute bottom-3.75 right-3.75 bg-[#ffffffde] rounded-full grid place-items-center text-[#356ae6] [transition:background_150ms] size-8 group-hover/card-link:bg-[#356ae6] group-hover/card-link:text-white"
