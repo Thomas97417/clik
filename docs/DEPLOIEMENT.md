@@ -279,12 +279,6 @@ Dans la même section **Build variables and secrets**, ajouter ces valeurs publi
 | `VITE_CONVEX_URL`          | URL Convex de production terminant en `.convex.cloud` | Obligatoire                                                                |
 | `VITE_CONVEX_SITE_URL`     | URL du même déploiement terminant en `.convex.site`   | Obligatoire                                                                |
 | `VITE_SEO_INDEXABLE`       | `true`                                                | Pour autoriser le référencement du site public ; `false` pendant les tests |
-| `VITE_POSTHOG_PROJECT_TOKEN` | Token public du projet PostHog                       | Optionnel                                                                  |
-| `VITE_POSTHOG_HOST`          | URL fournie par PostHog                               | Optionnel, avec le token                                                   |
-
-Les anciens noms `VITE_PUBLIC_POSTHOG_KEY` et `VITE_PUBLIC_POSTHOG_HOST` restent compatibles. `VITE_POSTHOG_PROJECT_KEY` est aussi accepté pour le token ; `VITE_POSTHOG_PROJECT_TOKEN` a priorité.
-
-Le Provider PostHog démarre automatiquement lorsque le token est configuré, en développement comme en production. L’intégration mesure les visites et les performances, avec persistance désactivée et sans enregistrement des sessions. Les événements portent une propriété `environment` pour distinguer les environnements.
 
 Clik lit ces variables via Vite pendant la compilation. Les modifier nécessite donc de relancer un **build complet**. La section **Settings → Variables & Secrets** configure les variables du Worker à l’exécution ; pour les `VITE_*` actuelles, utiliser la section **Build**.
 
@@ -407,7 +401,7 @@ Depuis `apps/web`, remplacer les deux URL ci-dessous par celles de Convex Produc
 cd ../..
 ```
 
-Les parenthèses limitent ces variables à cette commande. Pour activer PostHog lors d’une publication locale, fournir également ses deux variables publiques dans ce bloc.
+Les parenthèses limitent ces variables à cette commande.
 
 `bun run deploy` équivaut à lancer `bun run build`, puis `bunx wrangler deploy` depuis le frontend. Le login peut être réutilisé pour les publications suivantes tant qu’il reste valide.
 

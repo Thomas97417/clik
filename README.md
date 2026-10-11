@@ -92,7 +92,7 @@ Pour les démarrages suivants, `bun run dev` suffit si la configuration est déj
 | Emplacement                     | Usage                                                                                  |
 | ------------------------------- | -------------------------------------------------------------------------------------- |
 | `packages/backend/.env.local`   | Configuration locale de la CLI, notamment le déploiement ciblé par `CONVEX_DEPLOYMENT` |
-| `apps/web/.env`                 | Variables du frontend : URL Convex et configuration publique PostHog                   |
+| `apps/web/.env`                 | Variables du frontend : URL Convex et configuration publique du site                  |
 | Variables du déploiement Convex | Configuration des fonctions backend : authentification, Resend et OAuth               |
 
 Ne pas copier tout le fichier du backend dans celui du frontend. Ajouter uniquement les variables nécessaires à chaque emplacement. Les variables préfixées par `VITE_` sont accessibles au navigateur : elles ne doivent pas contenir de secrets. Les fichiers `.env` locaux sont ignorés par Git.
@@ -111,21 +111,6 @@ Créer les applications OAuth auprès des fournisseurs concernés, puis ajouter 
 | GitHub      | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` |
 
 Configurer également les URL de retour OAuth chez chaque fournisseur en fonction de l’URL de l’application.
-
-### Analytics avec PostHog
-
-Ajouter les valeurs du projet PostHog dans **`apps/web/.env`** :
-
-```dotenv
-VITE_POSTHOG_PROJECT_TOKEN=token_public_du_projet
-VITE_POSTHOG_HOST=https://hote-indique-par-posthog
-```
-
-Utiliser la clé publique du projet destinée au SDK web et l’hôte indiqué par PostHog.
-
-PostHog est initialisé automatiquement par `PostHogProvider`, en développement comme en production. Redémarrer le serveur après modification du fichier `.env`. Les événements incluent une propriété `environment` pour distinguer les environnements. La mesure se limite aux visites et aux performances, avec stockage en mémoire, persistance désactivée et sans enregistrement des sessions.
-
-`VITE_POSTHOG_PROJECT_KEY` est également accepté pour le token. Les anciens noms `VITE_PUBLIC_POSTHOG_KEY` et `VITE_PUBLIC_POSTHOG_HOST` restent compatibles ; les noms ci-dessus ont priorité.
 
 ## Dépannage
 
@@ -243,12 +228,6 @@ leur manipulation 3D démarre lorsqu’ils approchent de la zone visible. Les cr
 publiques affichent leur miniature pendant le chargement du canvas. L’image de
 partage par défaut est `public/og/clik.png` (1200 × 630).
 
-Si PostHog est configuré, les événements `web_vital` mesurent LCP, INP et CLS.
-Filtrer sur `environment=production` pour les mesures du site public.
-Les routes sont normalisées, sans identifiants de projets ni paramètres
-d’URL. Suivre le 75e percentile mobile et bureau : LCP ≤ 2,5 s, INP ≤ 200 ms,
-CLS ≤ 0,1. Les mesures locales ne remplacent pas les données réelles de production.
-
 Les tests navigateur publics emploient un backend HTTP de test sur le port 3219
 pour les loaders SSR et des WebSockets simulés pour les interactions. Lancer un
 serveur dédié (sans aucun utilisateur ni publication créés à distance) :
@@ -264,9 +243,7 @@ Les assertions couvrent le HTML sans JavaScript, les métadonnées après naviga
 les URL canoniques, les 404, l’exclusion des données privées, les sitemaps et les
 interactions publiques sur Chromium, Firefox et WebKit.
 
-Le Provider PostHog est monté à la racine et suit les visites au fil des navigations.
-Les mesures de performance sont chargées après le chargement initial, pendant un
-créneau libre du navigateur. Le moteur de rendu Three est séparé des
+Le moteur de rendu Three est séparé des
 modules mathématiques utilisés par les pages publiques. Les paramètres `VITE_*`
 font partie de la clé du cache de build Turbo, pour éviter de réutiliser les
 métadonnées d’un autre environnement.

@@ -4,13 +4,6 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/auth/get-session*", (route) =>
     route.fulfill({ json: null }),
   );
-  await page.route(
-    /https:\/\/(?:[^/]+\.)?posthog\.com\/|https:\/\/analytics\.clik\.test\//,
-    (route) =>
-      route.request().resourceType() === "script"
-        ? route.fulfill({ contentType: "text/javascript", body: "" })
-        : route.fulfill({ json: { status: 1, featureFlags: {}, config: {} } }),
-  );
 });
 
 for (const width of [1440, 390]) {

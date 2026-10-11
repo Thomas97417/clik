@@ -139,8 +139,7 @@ const sections: LegalSection[] = [
                 </th>
                 <td className="px-4 py-3.25 text-left align-top max-md-compact:px-2.5 max-md-compact:py-3">
                   Informations techniques nécessaires à l’hébergement et à la
-                  sécurité, pages consultées, type de navigateur et d’appareil,
-                  ainsi que mesures de performance du site.
+                  sécurité, telles que l’adresse IP et le navigateur.
                 </td>
               </tr>
             </tbody>
@@ -239,14 +238,6 @@ const sections: LegalSection[] = [
           </li>
           <li className="pl-1 mb-3 marker:text-[#86a6db]">
             <strong className="font-[650] text-[#384a64]">
-              Mesurer la performance et la fréquentation :
-            </strong>{" "}
-            comprendre l’utilisation de Clik et améliorer sa fiabilité. Cette
-            mesure est activée automatiquement et poursuit l’intérêt légitime de
-            l’éditeur à améliorer le service.
-          </li>
-          <li className="pl-1 mb-3 marker:text-[#86a6db]">
-            <strong className="font-[650] text-[#384a64]">
               Répondre à une demande ou à une obligation légale :
             </strong>{" "}
             traiter l’exercice de vos droits et respecter les obligations
@@ -301,8 +292,8 @@ const sections: LegalSection[] = [
       <>
         <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Clik fait appel à des prestataires pour héberger le site, enregistrer
-          les comptes et les projets, envoyer les emails de compte et mesurer
-          l’audience. Ils reçoivent les informations utiles à ces fonctions.
+          les comptes et les projets et envoyer les emails de compte. Ils
+          reçoivent les informations utiles à ces fonctions.
         </p>
         <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Des informations peuvent aussi être transmises à une autorité lorsque
@@ -318,26 +309,13 @@ const sections: LegalSection[] = [
   },
   {
     id: "cookies",
-    title: "Stockage local et mesure d’audience",
+    title: "Cookies et stockage local",
     content: (
       <>
         <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Clik utilise des cookies de session et le stockage du navigateur pour
-          maintenir votre connexion, mémoriser des préférences, conserver vos
+          maintenir votre connexion, mémoriser des préférences et conserver vos
           brouillons. Ces éléments servent au fonctionnement du service.
-        </p>
-        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
-          Clik utilise PostHog pour mesurer automatiquement la fréquentation et
-          la performance dès votre visite. Aucun écran d’acceptation n’est
-          affiché. La configuration de cette mesure n’utilise pas de cookies ni
-          d’identifiants persistants dans le stockage de votre navigateur.
-        </p>
-        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
-          Cette mesure concerne les pages consultées et des informations
-          techniques sur le navigateur, l’appareil et les temps de chargement.
-          Elle n’enregistre pas vos sessions, le contenu de vos créations ou vos
-          formulaires, et n’est pas reliée à votre compte Clik. Les identifiants
-          de créations et de comptes sont retirés des chemins transmis.
         </p>
         <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Effacer les données du site dans votre navigateur supprime aussi vos
@@ -385,11 +363,6 @@ const sections: LegalSection[] = [
           </p>
         </div>
         <p className="mx-0 mt-0 mb-3.75 last:mb-0">
-          Les mesures de fréquentation et de performance sont conservées dans le
-          service d’analyse selon les réglages de conservation du projet.
-          Contactez-nous pour obtenir des précisions sur ces durées.
-        </p>
-        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Les créations reprises par d’autres personnes et les références à
           leurs sources peuvent subsister dans leurs propres projets. Certaines
           informations peuvent être conservées si une obligation légale ou la
@@ -408,8 +381,8 @@ const sections: LegalSection[] = [
           Selon les règles applicables à votre situation, vous pouvez demander
           l’accès à vos données, leur rectification, leur effacement, la
           limitation de leur utilisation, leur portabilité ou vous opposer à
-          certains traitements, notamment la mesure d’audience. Pour exercer ces
-          droits ou poser une question, contactez-nous à l’adresse ci-dessous.
+          certains traitements. Pour exercer ces droits ou poser une question,
+          contactez-nous à l’adresse ci-dessous.
         </p>
         <p className="mx-0 mt-0 mb-3.75 last:mb-0">
           Vos paramètres permettent déjà de modifier votre nom et votre adresse

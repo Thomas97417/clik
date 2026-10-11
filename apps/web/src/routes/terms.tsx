@@ -242,13 +242,6 @@ const sections: LegalSection[] = [
           explique les données utilisées par Clik, la connexion avec Google ou
           GitHub, les prestataires techniques, le stockage local et vos droits.
         </p>
-        <p className="mx-0 mt-0 mb-3.75 last:mb-0">
-          Clik mesure automatiquement la fréquentation et les performances de
-          l’application. Cette mesure fonctionne sans écran d’acceptation, sans
-          cookies d’analyse persistants ni enregistrement des sessions. Son
-          fonctionnement et vos droits sont décrits dans la politique de
-          confidentialité.
-        </p>
       </>
     ),
   },

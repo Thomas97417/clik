@@ -1,5 +1,4 @@
 import { seo } from "@/lib/seo/meta";
-import SiteAnalyticsProvider from "@/components/site-analytics-provider";
 import SiteFooter from "@/components/site-footer";
 import type { ConvexQueryClient } from "@convex-dev/react-query";
 import type { QueryClient } from "@tanstack/react-query";
@@ -134,42 +133,40 @@ function RootDocument() {
       authClient={authClient}
       initialToken={context.token}
     >
-      <SiteAnalyticsProvider>
-        <html
-          lang="fr"
-          suppressHydrationWarning
-          className="print:[&&]:overflow-visible! print:[&&]:h-auto!"
-        >
-          <head>
-            <HeadContent />
-          </head>
-          <body className="print:[&&]:overflow-visible! print:[&&]:h-auto! font-sans text-base leading-[inherit] [--background:#f8fafc] [--foreground:#202b40] [--card:#fff] [--card-foreground:#202b40] [--primary:#356ae6] [--primary-foreground:#fff] [--secondary:#eaf0fc] [--secondary-foreground:#356ae6] [--accent:#eaf0fc] [--accent-foreground:#2458ce] [--border:#e4e9f1] [--input:#dfe5ee] [--muted:#f0f3f8] [--muted-foreground:#68758a] [--ring:#356ae6] [--radius:0.65rem] [--font-sans:'Avenir_Next','Segoe_UI',sans-serif]">
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="light"
-              forcedTheme="light"
-              disableTransitionOnChange
-              storageKey="vite-ui-theme"
-            >
-              <div className="grid h-svh grid-rows-[auto_1fr] print:block print:h-auto group/h-svh">
-                <Header />
-                {/* Contain positioned accessibility messages within the scroll surface. */}
-                <div
-                  className={`page-scroll relative${isEditor ? "" : " site-blueprint"} overflow-y-auto print:[&&]:overflow-visible! print:[&&]:h-auto! flex flex-col min-h-0 [scrollbar-gutter:stable]`}
-                >
-                  <div className="page-content print:[&&]:block print:[&&]:h-auto flex-[1_0_auto] only:h-full">
-                    <Outlet />
-                  </div>
-                  <SiteFooter />
+      <html
+        lang="fr"
+        suppressHydrationWarning
+        className="print:[&&]:overflow-visible! print:[&&]:h-auto!"
+      >
+        <head>
+          <HeadContent />
+        </head>
+        <body className="print:[&&]:overflow-visible! print:[&&]:h-auto! font-sans text-base leading-[inherit] [--background:#f8fafc] [--foreground:#202b40] [--card:#fff] [--card-foreground:#202b40] [--primary:#356ae6] [--primary-foreground:#fff] [--secondary:#eaf0fc] [--secondary-foreground:#356ae6] [--accent:#eaf0fc] [--accent-foreground:#2458ce] [--border:#e4e9f1] [--input:#dfe5ee] [--muted:#f0f3f8] [--muted-foreground:#68758a] [--ring:#356ae6] [--radius:0.65rem] [--font-sans:'Avenir_Next','Segoe_UI',sans-serif]">
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            forcedTheme="light"
+            disableTransitionOnChange
+            storageKey="vite-ui-theme"
+          >
+            <div className="grid h-svh grid-rows-[auto_1fr] print:block print:h-auto group/h-svh">
+              <Header />
+              {/* Contain positioned accessibility messages within the scroll surface. */}
+              <div
+                className={`page-scroll relative${isEditor ? "" : " site-blueprint"} overflow-y-auto print:[&&]:overflow-visible! print:[&&]:h-auto! flex flex-col min-h-0 [scrollbar-gutter:stable]`}
+              >
+                <div className="page-content print:[&&]:block print:[&&]:h-auto flex-[1_0_auto] only:h-full">
+                  <Outlet />
                 </div>
+                <SiteFooter />
               </div>
-              <Toaster richColors />
+            </div>
+            <Toaster richColors />
 
-              <Scripts />
-            </ThemeProvider>
-          </body>
-        </html>
-      </SiteAnalyticsProvider>
+            <Scripts />
+          </ThemeProvider>
+        </body>
+      </html>
     </ConvexBetterAuthProvider>
   );
 }
