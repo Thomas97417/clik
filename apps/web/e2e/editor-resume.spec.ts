@@ -108,7 +108,7 @@ for (const draft of ["", "to-remove"]) {
     await expect(page.locator(".project-card")).toHaveCount(0);
     await navigation(page, "L’atelier").click();
     await expect(page.getByLabel("Nom du projet")).toHaveValue(
-      "Ma première création",
+      "Nouvelle création",
     );
     await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
     expect(new URL(page.url()).searchParams.get("draft")).toBe("");

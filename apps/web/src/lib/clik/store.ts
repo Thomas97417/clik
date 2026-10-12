@@ -34,6 +34,7 @@ import {
 } from "@clik/scene";
 import { Matrix4, Vector3 } from "three";
 import { moveTreeBranches } from "./tree-order";
+import { FIRST_CREATION_TITLE } from "./creation-name";
 type Snapshot = {
   scene: SceneDocument;
   title: string;
@@ -115,7 +116,7 @@ const snapshot = (s: State): Snapshot => ({
 export const useEditor = create<State>((set, get) => ({
   challenge: null,
   scene: emptyScene(),
-  title: "Ma première création",
+  title: FIRST_CREATION_TITLE,
   provenance: emptyProvenance(),
   selection: [],
   past: [],

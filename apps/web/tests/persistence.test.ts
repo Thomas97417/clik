@@ -44,6 +44,18 @@ vi.mock("convex/react", () => ({
 }));
 vi.mock("../src/lib/clik/local", () => ({
   readDraft: async (key: string) => mocks.drafts.get(key),
+  prepareLocalCreation: async (key: string) => {
+    if (!mocks.drafts.has(key))
+      mocks.drafts.set(key, {
+        title: "Ma première création",
+        scene: emptyScene(),
+        revision: 0,
+        stamp: "initial",
+        dirty: false,
+        placeholder: true,
+      });
+    return mocks.drafts.get(key);
+  },
   writeDraft: async (key: string, draft: unknown) => {
     if (mocks.writeError) throw mocks.writeError;
     mocks.drafts.set(key, draft);

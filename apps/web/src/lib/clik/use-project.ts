@@ -12,6 +12,7 @@ import { emptyScene, type ChallengeStock } from "@clik/scene";
 import { useEditor } from "./store";
 import {
   readDraft,
+  prepareLocalCreation,
   writeDraft,
   removeLocalCreation,
   type Draft,
@@ -19,6 +20,7 @@ import {
 import { toast } from "sonner";
 import { creationMetadata, importInputs } from "./project-metadata";
 import { rememberLocalDraft } from "./last-local-draft";
+import { FIRST_CREATION_TITLE } from "./creation-name";
 export function useProject(projectId?: string, draftId?: string) {
   const connection = useConvexConnectionState();
   const { isAuthenticated, isLoading } = useConvexAuth(),
@@ -70,7 +72,7 @@ export function useProject(projectId?: string, draftId?: string) {
     loaded.current = key;
     let alive = true;
     setReady(false);
-    readDraft(key)
+    (projectId ? readDraft(key) : prepareLocalCreation(key))
       .then((local) => {
         if (!alive) return;
         revision.current = local?.dirty
@@ -84,7 +86,7 @@ export function useProject(projectId?: string, draftId?: string) {
             : remote
               ? JSON.parse(remote.scene)
               : emptyScene(),
-          recover ? local.title : (remote?.title ?? "Ma première création"),
+          recover ? local.title : (remote?.title ?? FIRST_CREATION_TITLE),
           remote?.challenge
             ? {
                 stock: remote.challenge.stock as ChallengeStock,

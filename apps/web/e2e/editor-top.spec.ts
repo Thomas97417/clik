@@ -19,7 +19,7 @@ for (const draft of [undefined, "my-workshop"]) {
     const nextUrl = page.url();
     expect(new URL(nextUrl).searchParams.get("draft")).not.toBe(draft);
     await expect(page.getByLabel("Nom du projet")).toHaveValue(
-      "Ma première création",
+      "Nouvelle création",
     );
     await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
     await expect(
