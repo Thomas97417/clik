@@ -44,6 +44,7 @@ export async function projectsFixture(
     preparations: [] as any[],
   };
   const imported = new Map<string, typeof project>();
+  const publicationTitles = new Map<string, string>();
   const privateProjects = Array.from(
     { length: options.privateCount ?? 0 },
     (_, i) => ({
@@ -89,6 +90,27 @@ export async function projectsFixture(
   );
   const query = (path: string, args: any) => {
     if (path === "auth:getCurrentUser") return user;
+    if (path === "projects:creation") {
+      const target = [project, ...imported.values()].find(
+        (item) => item.publicationId === args.id,
+      );
+      return target
+        ? {
+            ...target,
+            _id: `version-${args.id}`,
+            title: publicationTitles.get(target._id) ?? target.title,
+            owner: user._id,
+            author: user.name,
+            createdAt: target.updatedAt,
+            sources: [],
+            isAssembly: !!target.imports.length,
+            commentCount: 0,
+            voteCount: 0,
+          }
+        : null;
+    }
+    if (path === "comments:list" || path === "projects:remixes")
+      return { page: [], isDone: true, continueCursor: "" };
     if (path === "projects:sourcesAvailable")
       return args.ids.map((id: string) => ({ id, available: true }));
     if (path === "projects:get") {
@@ -269,6 +291,7 @@ export async function projectsFixture(
                 : [...imported.values()].find((p) => p._id === args.id)!;
             target.publicationId = "publication";
             target.description = args.description;
+            publicationTitles.set(target._id, args.title);
           }
         }
         seq++;

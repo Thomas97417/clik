@@ -31,6 +31,7 @@ import {
   CloudCheck,
   CloudUpload,
   Check,
+  ChevronDown,
   ChevronRight,
   ChevronsDownUp,
   ChevronsUpDown,
@@ -39,6 +40,7 @@ import {
   EyeOff,
   FolderPlus,
   Grid2X2,
+  Globe2,
   Grip,
   HardDrive,
   Layers,
@@ -53,6 +55,7 @@ import {
   PanelRightOpen,
   Plus,
   Redo2,
+  RefreshCw,
   Rotate3D,
   Scan,
   Sun,
@@ -68,6 +71,12 @@ import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -189,10 +198,12 @@ export default function Editor({
   projectId,
   draftId,
   onNewCreation,
+  publishOnLoad = false,
 }: {
   projectId?: string;
   draftId?: string;
   onNewCreation?: () => Promise<void>;
+  publishOnLoad?: boolean;
 }) {
   // The canvas subscribes to live transforms. Keep the tree and inspector stable
   // during a gesture so a 500-part document does not rebuild its UI each frame.
@@ -211,6 +222,9 @@ export default function Editor({
     [pubTitle, setPubTitle] = useState(""),
     [description, setDescription] = useState("");
   const [importing, setImporting] = useState(false);
+  const primaryAction = useRef<HTMLButtonElement>(null);
+  const privateSaveDescriptionId = useId();
+  const publicSaveDescriptionId = useId();
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
     if (!s.challenge) return;
@@ -336,7 +350,7 @@ export default function Editor({
         e.defaultPrevented ||
         e.isComposing ||
         document.querySelector(
-          'dialog[open],[role="dialog"],[role="alertdialog"]',
+          'dialog[open],[role="dialog"],[role="alertdialog"],[role="menu"]',
         )
       )
         return;
@@ -461,15 +475,47 @@ export default function Editor({
           : projectId
             ? CloudCheck
             : HardDrive;
-  const preserve = async () => {
-    if (busy) return;
+  const updatingPublication = !!project.publicationId;
+  const PublicationIcon = updatingPublication ? RefreshCw : Upload;
+  const saveDisabled =
+    !project.ready ||
+    !!s.gesture ||
+    !!s.pending ||
+    !!s.libraryPointer ||
+    project.conflict ||
+    busy ||
+    publishing;
+  const preserve = async (openPublication = false) => {
+    if (saveDisabled) return;
     setBusy(true);
     try {
       const id = await project.copy();
-      await navigate({ to: "/editor/$projectId", params: { projectId: id } });
+      await navigate({
+        to: "/editor/$projectId",
+        params: { projectId: id },
+        search: openPublication ? { publish: true } : {},
+      });
     } finally {
       setBusy(false);
+      requestAnimationFrame(() => primaryAction.current?.focus());
     }
+  };
+  useEffect(() => {
+    if (!publishOnLoad || !projectId || !project.ready || closed) return;
+    primaryAction.current?.focus();
+    setPubTitle(useEditor.getState().title);
+    setPublishing(true);
+    // Consume the request so reloading or returning to this URL won't reopen it.
+    void navigate({
+      to: "/editor/$projectId",
+      params: { projectId },
+      search: {},
+      replace: true,
+    });
+  }, [publishOnLoad, projectId, project.ready, closed, navigate]);
+  const closePublication = () => {
+    setPublishing(false);
+    requestAnimationFrame(() => primaryAction.current?.focus());
   };
   const startCreation = async () => {
     if (!onNewCreation || busy) return;
@@ -503,7 +549,11 @@ export default function Editor({
         revision,
       });
       setPublishing(false);
-      toast.success("Votre création est publiée.");
+      toast.success(
+        updatingPublication
+          ? "Votre publication est à jour."
+          : "Votre création est publiée.",
+      );
       await navigate({
         to: "/creations/$publicationId",
         params: { publicationId: id },
@@ -785,6 +835,7 @@ export default function Editor({
             </div>
             {projectId ? (
               <Button
+                ref={primaryAction}
                 className="editor-primary-action group/editor-primary-action focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 px-2.75 py-0 gap-1.5 inline-flex items-center justify-center text-[11px] h-8 rounded-[6px] whitespace-nowrap [box-shadow:none] leading-(--text-xs--line-height)"
                 disabled={
                   !project.ready || !!s.gesture || project.conflict || closed
@@ -794,7 +845,7 @@ export default function Editor({
                   setPublishing(true);
                 }}
               >
-                <Upload
+                <PublicationIcon
                   className="size-4 pointer-events-none shrink-0"
                   size={15}
                   aria-hidden="true"
@@ -803,29 +854,93 @@ export default function Editor({
                   ? project.publicationId
                     ? "Mettre à jour ma participation"
                     : "Proposer au défi"
-                  : "Publier"}
+                  : updatingPublication
+                    ? "Mettre à jour la publication"
+                    : "Publier"}
               </Button>
             ) : project.isAuthenticated ? (
-              <Button
-                className="editor-primary-action group/editor-primary-action focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 px-2.75 py-0 gap-1.5 inline-flex items-center justify-center text-[11px] h-8 rounded-[6px] whitespace-nowrap [box-shadow:none] leading-(--text-xs--line-height)"
-                disabled={!project.ready || !!s.gesture || busy}
-                onClick={() => safe(preserve)}
-              >
-                {busy ? (
-                  <LoaderCircle
-                    size={16}
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  ref={primaryAction}
+                  render={
+                    <Button className="editor-primary-action group/editor-primary-action focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 px-2.75 py-0 gap-1.5 inline-flex items-center justify-center text-[11px] h-8 rounded-[6px] whitespace-nowrap [box-shadow:none] leading-(--text-xs--line-height) hover:bg-[#2458ce] data-popup-open:bg-[#2458ce]" />
+                  }
+                  disabled={saveDisabled}
+                  aria-busy={busy}
+                >
+                  {busy ? (
+                    <LoaderCircle
+                      size={16}
+                      aria-hidden="true"
+                      className="size-4 pointer-events-none shrink-0 animate-spin"
+                    />
+                  ) : (
+                    <CloudUpload
+                      className="size-4 pointer-events-none shrink-0"
+                      size={16}
+                      aria-hidden="true"
+                    />
+                  )}
+                  {busy ? "Enregistrement…" : "Enregistrer"}
+                  <ChevronDown
+                    className="size-3.5 shrink-0 transition-transform group-data-[popup-open]/editor-primary-action:rotate-180 motion-reduce:transition-none"
                     aria-hidden="true"
-                    className="size-4 pointer-events-none shrink-0 animate-spin"
                   />
-                ) : (
-                  <CloudUpload
-                    className="size-4 pointer-events-none shrink-0"
-                    size={16}
-                    aria-hidden="true"
-                  />
-                )}
-                {busy ? "Enregistrement…" : "Conserver le projet"}
-              </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  sideOffset={8}
+                  className="editor-save-menu w-68 max-w-[calc(100vw-24px)] rounded-[12px] border border-solid border-[#dfe7f3] bg-white p-1.25 text-[#344964] [box-shadow:0_12px_32px_#20396220]"
+                  finalFocus={busy ? false : undefined}
+                >
+                  <DropdownMenuItem
+                    className="cursor-pointer items-start gap-2.5 rounded-[6px] px-2.5 py-2.25 text-xs leading-4.5 data-highlighted:bg-[#f0f4ff] data-highlighted:text-[#285abd]"
+                    aria-label="Enregistrer en privé"
+                    aria-describedby={privateSaveDescriptionId}
+                    disabled={saveDisabled}
+                    onClick={() => safe(() => preserve())}
+                  >
+                    <LockKeyhole
+                      className="mt-0.5 size-4 shrink-0"
+                      aria-hidden="true"
+                    />
+                    <span className="flex min-w-0 flex-col gap-0.5">
+                      <span className="font-semibold">
+                        Enregistrer en privé
+                      </span>
+                      <span
+                        id={privateSaveDescriptionId}
+                        className="text-[11px] leading-4.5 text-[#73839a]"
+                      >
+                        Dans Mes créations, visible de vous seul.
+                      </span>
+                    </span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="cursor-pointer items-start gap-2.5 rounded-[6px] px-2.5 py-2.25 text-xs leading-4.5 data-highlighted:bg-[#f0f4ff] data-highlighted:text-[#285abd]"
+                    aria-label="Publier dans la galerie"
+                    aria-describedby={publicSaveDescriptionId}
+                    disabled={saveDisabled}
+                    onClick={() => safe(() => preserve(true))}
+                  >
+                    <Globe2
+                      className="mt-0.5 size-4 shrink-0"
+                      aria-hidden="true"
+                    />
+                    <span className="flex min-w-0 flex-col gap-0.5">
+                      <span className="font-semibold">
+                        Publier dans la galerie
+                      </span>
+                      <span
+                        id={publicSaveDescriptionId}
+                        className="text-[11px] leading-4.5 text-[#73839a]"
+                      >
+                        Enregistrer et partager votre création.
+                      </span>
+                    </span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <Link
                 to="/sign-in"
@@ -1740,11 +1855,12 @@ export default function Editor({
           description={description}
           onTitleChange={setPubTitle}
           onDescriptionChange={setDescription}
-          onClose={() => setPublishing(false)}
+          onClose={closePublication}
           onPublish={() => void doPublish()}
           busy={busy}
           disabled={closed || (!!stock && !count)}
           challenge={!!project.challenge}
+          updating={updatingPublication}
         />
       )}
       {importing && (

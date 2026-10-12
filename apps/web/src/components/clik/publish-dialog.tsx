@@ -13,6 +13,7 @@ export default function PublishDialog({
   busy,
   disabled = false,
   challenge = false,
+  updating = false,
   error,
 }: {
   title: string;
@@ -24,6 +25,7 @@ export default function PublishDialog({
   busy: boolean;
   disabled?: boolean;
   challenge?: boolean;
+  updating?: boolean;
   error?: string;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -61,11 +63,17 @@ export default function PublishDialog({
           <X className="shrink-0" size={20} />
         </button>
         <h2 className="text-[28px] font-[750] tracking-[-1px]" id={headingId}>
-          {challenge ? "Votre participation au défi" : "Publier votre création"}
+          {challenge
+            ? "Votre participation au défi"
+            : updating
+              ? "Mettre à jour votre publication"
+              : "Publier votre création"}
         </h2>
         <p className="text-[#7a879b] text-[13px] leading-[1.7]">
-          Une version de votre scène sera visible et réutilisable dans Clik avec
-          attribution. Vos prochaines modifications resteront privées.
+          {updating
+            ? "La version publique de votre création sera mise à jour."
+            : "Une version de votre scène sera visible et réutilisable dans Clik avec attribution."}{" "}
+          Vos prochaines modifications resteront privées.
         </p>
         <label className="gap-2 text-[13px] flex flex-col">
           Titre
@@ -103,10 +111,14 @@ export default function PublishDialog({
         )}
         <Button type="submit" disabled={busy || disabled || !title.trim()}>
           {busy
-            ? "Publication…"
+            ? updating
+              ? "Mise à jour…"
+              : "Publication…"
             : challenge
               ? "Valider ma participation"
-              : "Publier cette version"}
+              : updating
+                ? "Mettre à jour la publication"
+                : "Publier cette version"}
         </Button>
       </form>
     </dialog>
