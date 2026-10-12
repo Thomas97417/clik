@@ -475,6 +475,14 @@ export default function Editor({
           : projectId
             ? CloudCheck
             : HardDrive;
+  const saveLabel = project.conflict
+    ? "Conflit à résoudre"
+    : !projectId && saveState === "saved"
+      ? "Enregistré sur cet appareil"
+      : !projectId && project.status === "Enregistrement"
+        ? "Enregistrement sur cet appareil…"
+        : project.status;
+  const sources = projectSources(s.provenance);
   const updatingPublication = !!project.publicationId;
   const PublicationIcon = updatingPublication ? RefreshCw : Upload;
   const saveDisabled =
@@ -736,25 +744,23 @@ export default function Editor({
               disabled={!project.ready || closed || busy}
               onCommit={(title) => s.commit(s.scene, title)}
             />
-            <div className="project-metadata gap-2 flex items-center min-w-0 shrink-0 pl-2.5 border-l border-solid border-l-[#e9edf4] text-[10px] leading-4 whitespace-nowrap">
-              <span
-                className="project-visibility gap-1.25 inline-flex items-center shrink-0 text-[#68788e]"
-                title={
-                  projectId
-                    ? "Ce projet reste privé jusqu’à sa publication."
-                    : "Cette création est conservée dans ce navigateur."
-                }
-              >
-                {projectId ? (
-                  <LockKeyhole size={11} aria-hidden="true" />
-                ) : (
-                  <HardDrive size={11} aria-hidden="true" />
+            {(projectId ||
+              s.provenance.imports.length > 0 ||
+              sources.length > 0) && (
+              <div className="project-metadata gap-2 flex items-center min-w-0 shrink-0 pl-2.5 border-l border-solid border-l-[#e9edf4] text-[10px] leading-4 whitespace-nowrap">
+                {projectId && (
+                  <span
+                    className="project-visibility gap-1.25 inline-flex items-center shrink-0 text-[#68788e]"
+                    title="Ce projet reste privé jusqu’à sa publication."
+                  >
+                    <LockKeyhole size={11} aria-hidden="true" />
+                    Projet privé
+                  </span>
                 )}
-                {projectId ? "Projet privé" : "Création locale"}
-              </span>
-              {!!s.provenance.imports.length && <AssemblyBadge compact />}
-              <ProjectSources sources={projectSources(s.provenance)} />
-            </div>
+                {!!s.provenance.imports.length && <AssemblyBadge compact />}
+                <ProjectSources sources={sources} />
+              </div>
+            )}
           </div>
           <div className="editor-project-actions gap-3.5 flex items-center shrink-0 pl-4 border-l border-solid border-l-[#e9edf4] max-xl-narrow:gap-2.5 max-xl-narrow:pl-3">
             {onNewCreation && (
@@ -821,7 +827,7 @@ export default function Editor({
                   ? "Sauvegarde interrompue"
                   : projectId
                     ? "Sauvegarde automatique"
-                    : "Sauvegarde sur cet appareil"
+                    : "Sauvegarde automatique dans ce navigateur, sur cet appareil."
               }
             >
               <SaveIcon
@@ -829,9 +835,7 @@ export default function Editor({
                 size={14}
                 aria-hidden="true"
               />
-              <span>
-                {project.conflict ? "Conflit à résoudre" : project.status}
-              </span>
+              <span>{saveLabel}</span>
             </div>
             {projectId ? (
               <Button
@@ -867,6 +871,7 @@ export default function Editor({
                   }
                   disabled={saveDisabled}
                   aria-busy={busy}
+                  title="Enregistrer cette création dans votre compte pour la retrouver sur vos autres appareils"
                 >
                   {busy ? (
                     <LoaderCircle
@@ -881,7 +886,7 @@ export default function Editor({
                       aria-hidden="true"
                     />
                   )}
-                  {busy ? "Enregistrement…" : "Enregistrer"}
+                  {busy ? "Enregistrement en ligne…" : "Enregistrer en ligne"}
                   <ChevronDown
                     className="size-3.5 shrink-0 transition-transform group-data-[popup-open]/editor-primary-action:rotate-180 motion-reduce:transition-none"
                     aria-hidden="true"

@@ -110,7 +110,7 @@ export function useProject(projectId?: string, draftId?: string) {
         );
         if (!projectId) rememberLocalDraft(draftId ?? "");
         setReady(true);
-        setStatus(navigator.onLine ? "Enregistré" : "Hors ligne");
+        setStatus(!projectId || navigator.onLine ? "Enregistré" : "Hors ligne");
       })
       .catch((e) => {
         setStatus("Sauvegarde locale indisponible");
@@ -124,13 +124,16 @@ export function useProject(projectId?: string, draftId?: string) {
   useEffect(() => {
     const on = () => {
         setRetry((n) => n + 1);
-        setStatus(
-          useEditor.getState().serial === savedSerial.current
-            ? "Enregistré"
-            : "Enregistrement",
-        );
+        if (projectId)
+          setStatus(
+            useEditor.getState().serial === savedSerial.current
+              ? "Enregistré"
+              : "Enregistrement",
+          );
       },
-      off = () => setStatus("Hors ligne");
+      off = () => {
+        if (projectId) setStatus("Hors ligne");
+      };
     window.addEventListener("online", on);
     window.addEventListener("offline", off);
     const c = new BroadcastChannel(`clik:${key}`);
@@ -184,7 +187,7 @@ export function useProject(projectId?: string, draftId?: string) {
         });
       try {
         await queue.current;
-        setStatus(navigator.onLine ? "Enregistré" : "Hors ligne");
+        setStatus("Enregistré");
         return revision.current;
       } catch (error) {
         if (String(error).includes("LOCAL_CONFLICT")) setConflict(true);
@@ -234,14 +237,14 @@ export function useProject(projectId?: string, draftId?: string) {
   };
   useEffect(() => {
     if (!ready || conflict || gesture || serial === savedSerial.current) return;
-    setStatus(navigator.onLine ? "Enregistrement" : "Hors ligne");
+    setStatus(!projectId || navigator.onLine ? "Enregistrement" : "Hors ligne");
     queue.current = queue.current
       .catch(() => {})
       .then(() => backup(!!projectId))
       .then(() => {
         if (!projectId) {
           savedSerial.current = serial;
-          setStatus(navigator.onLine ? "Enregistré" : "Hors ligne");
+          setStatus("Enregistré");
         }
       })
       .catch((e) => {

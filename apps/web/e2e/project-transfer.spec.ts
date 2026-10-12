@@ -37,7 +37,10 @@ test("conserver un projet le déplace vers le compte, sans doublon local et avec
   ).toContainText("Enregistré");
   await expect.poll(() => localProject(page)).not.toBeNull();
   const snapshot = await localProject(page);
-  const save = page.getByRole("button", { name: "Enregistrer", exact: true });
+  const save = page.getByRole("button", {
+    name: "Enregistrer en ligne",
+    exact: true,
+  });
   await save.press("Enter");
   await expect(page.getByRole("menuitem")).toHaveCount(2);
   await page.keyboard.press("Delete");
@@ -46,19 +49,23 @@ test("conserver un projet le déplace vers le compte, sans doublon local et avec
   await expect(save).toBeFocused();
   expect(fixture.calls.creations).toHaveLength(0);
   fixture.failCreation(true);
-  await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Enregistrer en ligne", exact: true })
+    .click();
   await page
     .getByRole("menuitem", { name: "Enregistrer en privé", exact: true })
     .click();
   await expect(page.getByText(/Enregistrement indisponible/)).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Enregistrer", exact: true }),
+    page.getByRole("button", { name: "Enregistrer en ligne", exact: true }),
   ).toBeEnabled();
   await expect(save).toBeFocused();
   expect(await localProject(page)).toEqual(snapshot);
   await expect(page).toHaveURL(/draft=transfer/);
   fixture.failCreation(false);
-  await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Enregistrer en ligne", exact: true })
+    .click();
   await page
     .getByRole("menuitem", { name: "Enregistrer en privé", exact: true })
     .click();
@@ -108,7 +115,9 @@ test("publier depuis l’atelier local enregistre une seule fois et permet de re
   await page.goto("/editor?draft=transfer");
   await page.getByRole("button", { name: "Brique 2 × 2", exact: true }).click();
   await page.getByLabel("Nom du projet").fill("Mon atelier à partager");
-  await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Enregistrer en ligne", exact: true })
+    .click();
   await page
     .getByRole("menuitem", { name: "Publier dans la galerie", exact: true })
     .click();
@@ -160,7 +169,9 @@ test("annuler la publication garde le projet privé et ne rouvre pas la fenêtre
   const fixture = await projectsFixture(page);
   await page.goto("/editor?draft=transfer");
   await page.getByRole("button", { name: "Brique 1 × 1", exact: true }).click();
-  await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Enregistrer en ligne", exact: true })
+    .click();
   await page
     .getByRole("menuitem", { name: "Publier dans la galerie", exact: true })
     .click();

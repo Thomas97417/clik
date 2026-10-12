@@ -92,12 +92,13 @@ test("hors ligne : le brouillon local reste enregistré", async ({
 }) => {
   await page.goto("/editor");
   await page.getByRole("button", { name: "Brique 1 × 1", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Enregistré");
+  const status = page.getByLabel("Projet et sauvegarde").getByRole("status");
+  await expect(status).toHaveText("Enregistré sur cet appareil");
   await context.setOffline(true);
   await page.getByRole("button", { name: "Brique 2 × 2", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Hors ligne");
+  await expect(status).toHaveText("Enregistré sur cet appareil");
   await context.setOffline(false);
-  await expect(page.getByRole("status")).toContainText("Enregistré");
+  await expect(status).toHaveText("Enregistré sur cet appareil");
   await page.reload();
   await expect(page.locator(".viewport-bottom")).toContainText("2 / 500");
 });
@@ -107,7 +108,9 @@ test("copie locale en cas de conflit conserve les deux brouillons", async ({
 }) => {
   await page.goto("/editor");
   await page.getByRole("button", { name: "Brique 1 × 1", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Enregistré");
+  await expect(
+    page.getByLabel("Projet et sauvegarde").getByRole("status"),
+  ).toContainText("Enregistré");
   const second = await context.newPage();
   await second.goto("/editor");
   await expect(second.locator(".viewport-bottom")).toContainText("1 / 500");
