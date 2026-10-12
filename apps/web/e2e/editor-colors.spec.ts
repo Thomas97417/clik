@@ -1,9 +1,67 @@
 import { expect, test, type Page } from "@playwright/test";
 import { projectsFixture } from "./fixtures/projects";
 import { selectCameraView } from "./camera-view";
+import { CATALOG } from "@clik/scene";
 
 test.beforeEach(async ({ page }) => {
   await projectsFixture(page);
+});
+
+test("couleurs : aucun export PNG du catalogue pendant les réglages", async ({
+  page,
+}) => {
+  await openEditor(page);
+  const previews = page.locator(".piece-card img.part-preview");
+  await expect(previews).toHaveCount(Object.keys(CATALOG).length);
+  const sources = await previews.evaluateAll((images) =>
+    images.map((image) => image.getAttribute("src")),
+  );
+  await page.evaluate(() => {
+    const previous = HTMLCanvasElement.prototype.toDataURL;
+    const audit = { exports: 0 };
+    Reflect.set(window, "colorPerformance", audit);
+    HTMLCanvasElement.prototype.toDataURL = function (...args) {
+      audit.exports++;
+      return previous.apply(this, args);
+    };
+  });
+  await page.getByRole("button", { name: "Marron", exact: true }).click();
+  await page.getByRole("button", { name: "Brique 2 × 4", exact: true }).click();
+  await customColor(page, "#1d697a");
+  const area = page.getByRole("slider", {
+    name: "Saturation et luminosité",
+    exact: true,
+  });
+  const box = (await area.boundingBox())!;
+  await page.mouse.move(box.x + box.width * 0.8, box.y + box.height * 0.2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.7, {
+    steps: 20,
+  });
+  await page.mouse.up();
+  await page
+    .getByRole("button", { name: "Fermer le sélecteur de couleur" })
+    .click();
+  await expect(previews).toHaveCount(sources.length);
+  expect(
+    await previews.evaluateAll((images) =>
+      images.map((image) => image.getAttribute("src")),
+    ),
+  ).toEqual(sources);
+  expect(
+    await page.evaluate(() => Reflect.get(window, "colorPerformance").exports),
+  ).toBe(0);
+  await expect(page.locator(".tree-row.selected .part-dot")).not.toHaveCSS(
+    "background-color",
+    "rgb(29, 105, 122)",
+  );
+  await page
+    .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
+    .click();
+  await expect(page.locator(".tree-row .part-dot")).toHaveCSS(
+    "background-color",
+    "rgb(29, 105, 122)",
+  );
 });
 
 async function openEditor(page: Page) {

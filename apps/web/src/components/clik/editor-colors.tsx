@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Check, ChevronRight, Palette, X } from "lucide-react";
 import { COLORS, COLOR_NAMES, descendants } from "@clik/scene";
 import { toast } from "sonner";
@@ -38,27 +38,57 @@ export default function EditorColors({
   const paletteId = useId();
   const [collapsed, setCollapsed] = useState(false);
   const [open, setOpen] = useState(false);
+  const [draftColor, setDraftColor] = useState<string | null>(null);
   const editing = useRef(false);
+  const frame = useRef<number | null>(null);
+  const pendingColor = useRef<string | null>(null);
+  const color = draftColor ?? state.color;
   const blocked = disabled || (state.manipulating && !editing.current);
-  const custom = !COLORS.some((color) => color === state.color);
-  const selectedIds = new Set(descendants(state.scene, state.selection));
-  const selectedColors = new Set(
-    state.scene.nodes.flatMap((node) =>
-      node.kind === "part" && selectedIds.has(node.id)
-        ? [node.color.toLowerCase()]
-        : [],
-    ),
-  );
+  const custom = !COLORS.some((preset) => preset === color);
+  const selectedColors = useMemo(() => {
+    const ids = new Set(descendants(state.scene, state.selection));
+    return new Set(
+      state.scene.nodes.flatMap((node) =>
+        node.kind === "part" && ids.has(node.id)
+          ? [node.color.toLowerCase()]
+          : [],
+      ),
+    );
+  }, [state.scene, state.selection]);
   const mixed = selectedColors.size > 1;
 
+  const clearPreview = () => {
+    if (frame.current !== null) cancelAnimationFrame(frame.current);
+    frame.current = null;
+    pendingColor.current = null;
+  };
+  const preview = () => {
+    frame.current = null;
+    const next = pendingColor.current;
+    pendingColor.current = null;
+    if (next && editing.current) useEditor.getState().previewColor(next);
+  };
+  const cancel = () => {
+    clearPreview();
+    if (editing.current) useEditor.getState().cancel();
+    editing.current = false;
+    setDraftColor(null);
+  };
   const finish = () => {
     if (!editing.current) return;
-    editing.current = false;
     try {
+      // Flush the last pointer position before committing, even if its frame
+      // has not painted yet. The entire adjustment remains one undo entry.
+      if (frame.current !== null) cancelAnimationFrame(frame.current);
+      preview();
       useEditor.getState().end();
+      editing.current = false;
     } catch (error) {
-      useEditor.getState().cancel();
+      cancel();
       toast.error(String(error));
+    } finally {
+      clearPreview();
+      setDraftColor(null);
     }
   };
   // A close, lost capture or blur also finishes a drag that returns to its
@@ -68,13 +98,13 @@ export default function EditorColors({
     window.addEventListener("blur", blur);
     return () => {
       window.removeEventListener("blur", blur);
+      clearPreview();
       if (editing.current) useEditor.getState().cancel();
     };
   }, []);
   useEffect(() => {
     if (disabled) {
-      if (editing.current) useEditor.getState().cancel();
-      editing.current = false;
+      cancel();
       setOpen(false);
     }
   }, [disabled]);
@@ -101,11 +131,11 @@ export default function EditorColors({
           <span className="palette-current ml-auto inline-flex min-w-0 items-center gap-1.25 rounded-[6px] border border-[#e7ecf3] bg-[#fbfcfe] px-1.5 py-1 text-[11px] font-medium text-[#68788e]">
             <span
               className="size-2.5 shrink-0 rounded-full shadow-[inset_0_0_0_1px_#00000014]"
-              style={{ background: state.color }}
+              style={{ background: color }}
               aria-hidden="true"
             />
             <span className="truncate">
-              {mixed ? "Plusieurs couleurs" : colorName(state.color)}
+              {mixed ? "Plusieurs couleurs" : colorName(color)}
             </span>
           </span>
         </button>
@@ -120,11 +150,11 @@ export default function EditorColors({
           role="group"
           aria-label="Choisir une couleur"
         >
-          {COLORS.map((color, i) => {
-            const chosen = !mixed && state.color === color;
+          {COLORS.map((preset, i) => {
+            const chosen = !mixed && color === preset;
             return (
               <button
-                key={color}
+                key={preset}
                 type="button"
                 title={COLOR_NAMES[i]}
                 aria-label={COLOR_NAMES[i]}
@@ -137,7 +167,7 @@ export default function EditorColors({
                 )}
                 onClick={() => {
                   try {
-                    useEditor.getState().setColor(color);
+                    useEditor.getState().setColor(preset);
                   } catch (error) {
                     toast.error(String(error));
                   }
@@ -146,7 +176,7 @@ export default function EditorColors({
                 <span
                   className="palette-swatch grid aspect-square w-full place-items-center rounded-[5px] shadow-[inset_0_0_0_1px_#00000014]"
                   style={{
-                    background: color,
+                    background: preset,
                     color: [2, 3, 4, 7, 9, 10, 12].includes(i)
                       ? "#fff"
                       : "#25354e",
@@ -161,7 +191,7 @@ export default function EditorColors({
           })}
         </div>
         <ColorPicker
-          value={state.color}
+          value={color}
           format="hex"
           open={open}
           disabled={blocked}
@@ -177,10 +207,20 @@ export default function EditorColors({
                 editor.begin();
                 editing.current = true;
               }
-              editor.previewColor(color);
+              setDraftColor(color);
+              pendingColor.current = color;
+              if (frame.current === null) {
+                frame.current = requestAnimationFrame(() => {
+                  try {
+                    preview();
+                  } catch (error) {
+                    cancel();
+                    toast.error(String(error));
+                  }
+                });
+              }
             } catch (error) {
-              useEditor.getState().cancel();
-              editing.current = false;
+              cancel();
               toast.error(String(error));
             }
           }}
@@ -215,7 +255,7 @@ export default function EditorColors({
             <span className="flex-1 text-left">Personnaliser</span>
             <ColorPickerSwatch className="size-3.5 rounded-[3px]" />
             <span className="font-mono text-[10px] uppercase tabular-nums">
-              {state.color}
+              {color}
             </span>
           </ColorPickerTrigger>
           <ColorPickerContent
@@ -228,8 +268,7 @@ export default function EditorColors({
             onLostPointerCapture={finish}
             onKeyDown={(event) => {
               if (event.key === "Escape" && editing.current) {
-                useEditor.getState().cancel();
-                editing.current = false;
+                cancel();
               }
             }}
           >

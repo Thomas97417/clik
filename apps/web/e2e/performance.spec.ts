@@ -5,7 +5,9 @@ test("500 pièces : déplacement avec aperçu à 30 images par seconde", async (
   page,
 }, info) => {
   await page.goto("/editor");
-  await expect(page.getByRole("status")).toContainText("Enregistré");
+  await expect(
+    page.getByLabel("Projet et sauvegarde").getByRole("status"),
+  ).toContainText("Enregistré");
   await page.evaluate(async () => {
     const request = indexedDB.open("clik", 1);
     const db = await new Promise<IDBDatabase>((resolve, reject) => {

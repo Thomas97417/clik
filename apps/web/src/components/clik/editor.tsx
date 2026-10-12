@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { useEffect, useMemo, useRef, useState, useId } from "react";
+import { memo, useEffect, useMemo, useRef, useState, useId } from "react";
 import { useTreeDrag } from "./use-tree-drag";
 import EditorPanels from "./editor-panels";
 import EditorColors from "./editor-colors";
@@ -88,6 +88,16 @@ import { useEditor } from "@/lib/clik/store";
 import { useProject } from "@/lib/clik/use-project";
 import ClientScene from "./client-scene";
 import PartPreview from "./part-preview";
+import { sceneLayoutKey } from "@/lib/clik/scene-layout";
+
+const LibraryPartPreview = memo(function LibraryPartPreview({
+  type,
+}: {
+  type: PartType;
+}) {
+  const color = useEditor((state) => state.color);
+  return <PartPreview type={type} color={color} />;
+});
 const catalog = Object.entries(CATALOG) as [
   PartType,
   (typeof CATALOG)[PartType],
@@ -207,7 +217,7 @@ export default function Editor({
   // The canvas subscribes to live transforms. Keep the tree and inspector stable
   // during a gesture so a 500-part document does not rebuild its UI each frame.
   const s = useEditor(
-      useShallow((state) => ({
+      useShallow(({ color: _color, ...state }) => ({
         ...state,
         scene: state.gesture?.scene ?? state.scene,
         snapPreview: null,
@@ -449,10 +459,8 @@ export default function Editor({
   );
   const selectionBranches = new Set(descendants(s.scene, selectionRoots));
   const count = s.scene.nodes.filter((n) => n.kind === "part").length;
-  const overlap = useMemo(
-    () => hasOverlappingParts(s.scene),
-    [s.gesture ? null : s.scene],
-  );
+  const layoutKey = useMemo(() => sceneLayoutKey(s.scene), [s.scene]);
+  const overlap = useMemo(() => hasOverlappingParts(s.scene), [layoutKey]);
   const saveState = project.conflict
     ? "conflict"
     : project.status.includes("impossible") ||
@@ -1186,7 +1194,7 @@ export default function Editor({
                         </span>
                       )}
                       <span className="piece-preview flex items-center justify-center w-full h-14 shrink-0 pointer-events-none last:text-[13px]! last:leading-[1.4] last:text-[#65738a] last:whitespace-normal last:max-w-full last:wrap-anywhere last:text-center">
-                        <PartPreview type={id} color={s.color} />
+                        <LibraryPartPreview type={id} />
                       </span>
                       <span className="piece-name last:text-[13px]! last:leading-[1.4] last:text-[#65738a] last:whitespace-normal last:max-w-full last:wrap-anywhere last:text-center">
                         {p.name.replace(/ \d.*$/, "")}

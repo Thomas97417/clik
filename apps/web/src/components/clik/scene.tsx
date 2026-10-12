@@ -24,8 +24,10 @@ import {
   Vector3,
 } from "three";
 import { geometry } from "@/lib/clik/geometry";
+import { sceneLayoutKey } from "@/lib/clik/scene-layout";
 import {
   CATALOG,
+  descendants,
   inherited,
   matrix,
   movableRoots,
@@ -48,19 +50,23 @@ function Batch({
   type,
   scene,
   editable,
+  layoutKey,
+  selectedIds,
 }: {
   type: PartType;
   scene: SceneDocument;
   editable: boolean;
+  layoutKey: string;
+  selectedIds: ReadonlySet<string>;
 }) {
   const ref = useRef<InstancedMesh>(null);
   const previous = useRef<{
     mesh: InstancedMesh;
     parts: Part[];
-    selection: string[];
+    selectedIds: ReadonlySet<string>;
     editable: boolean;
+    layoutKey: string;
   } | null>(null);
-  const selection = useEditor((s) => s.selection);
   const parts = useMemo(
     () =>
       scene.nodes.filter(
@@ -76,13 +82,20 @@ function Batch({
     const mesh = ref.current;
     if (!mesh) return;
     const before = previous.current;
+    const sameMesh = before?.mesh === mesh;
+    const sameLayout = sameMesh && before.layoutKey === layoutKey;
     let moved = false,
       recolored = false;
     parts.forEach((part, i) => {
-      const unchanged = before?.mesh === mesh && before.parts[i] === part;
+      const oldPart = before?.parts[i];
+      const unchanged = sameMesh && oldPart === part;
       // applyDelta shares untouched nodes. Root instances only need uploading
       // when they change; children also depend on their parent's transform.
-      if (!unchanged || part.parentId) {
+      if (
+        !sameMesh ||
+        oldPart?.id !== part.id ||
+        (!sameLayout && (!unchanged || part.parentId))
+      ) {
         mesh.setMatrixAt(
           i,
           part.parentId ? worldMatrix(scene, part.id) : matrix(part),
@@ -90,16 +103,13 @@ function Batch({
         moved = true;
       }
       if (
-        !unchanged ||
-        before?.selection !== selection ||
+        !sameMesh ||
+        oldPart?.id !== part.id ||
+        oldPart.color !== part.color ||
+        before?.selectedIds !== selectedIds ||
         before.editable !== editable
       ) {
-        const selected = selection.some(
-          (id) =>
-            id === part.id ||
-            (part.parentId &&
-              (part.parentId === id || isChild(scene, part.parentId, id))),
-        );
+        const selected = selectedIds.has(part.id);
         mesh.setColorAt(
           i,
           new Color(part.color).lerp(
@@ -115,8 +125,8 @@ function Batch({
       mesh.computeBoundingSphere();
     }
     if (recolored && mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-    previous.current = { mesh, parts, selection, editable };
-  }, [parts, scene, selection, editable]);
+    previous.current = { mesh, parts, selectedIds, editable, layoutKey };
+  }, [parts, scene, selectedIds, editable, layoutKey]);
   if (!parts.length) return null;
   return (
     <instancedMesh
@@ -126,13 +136,6 @@ function Batch({
       receiveShadow
       userData={{ parts }}
     />
-  );
-}
-function isChild(scene: SceneDocument, id: string, parent: string): boolean {
-  const n = scene.nodes.find((n) => n.id === id);
-  return (
-    !!n?.parentId &&
-    (n.parentId === parent || isChild(scene, n.parentId, parent))
   );
 }
 function Manipulator({
@@ -211,6 +214,18 @@ function Stage({
     s = useEditor(),
     rotation = useRef<ComponentRef<typeof TransformControls>>(null);
   const [gridStep, setGridStep] = useState(1);
+  const layoutKey = useMemo(() => sceneLayoutKey(scene), [scene]);
+  // A gesture changes positions or colors, never ancestry. Keep selection
+  // membership stable through its previews, including nested assemblies.
+  const selectionScene = editable ? (s.gesture?.scene ?? scene) : scene;
+  const selectionLayoutKey = useMemo(
+    () => sceneLayoutKey(selectionScene),
+    [selectionScene],
+  );
+  const selectedIds = useMemo(
+    () => new Set(descendants(selectionScene, s.selection)),
+    [selectionLayoutKey, s.selection],
+  );
   const [resetView, setResetView] = useState(0);
   // Rotate the original light around Y, keeping its elevation and intensity.
   const lightAngle = ((editable ? s.lightAngle : 0) * Math.PI) / 180;
@@ -269,10 +284,7 @@ function Stage({
         (n) =>
           n.kind === "part" &&
           !inherited(scene, n.id, "hidden") &&
-          (!editable ||
-            !s.selection.length ||
-            s.selection.includes(n.id) ||
-            s.selection.some((id) => isChild(scene, n.id, id))),
+          (!editable || !s.selection.length || selectedIds.has(n.id)),
       )
       .map((n) => {
         const { w, h, d } = CATALOG[(n as Part).type];
@@ -381,7 +393,14 @@ function Stage({
         </mesh>
       )}
       {(Object.keys(CATALOG) as PartType[]).map((type) => (
-        <Batch key={type} type={type} scene={scene} editable={editable} />
+        <Batch
+          key={type}
+          type={type}
+          scene={scene}
+          editable={editable}
+          layoutKey={layoutKey}
+          selectedIds={selectedIds}
+        />
       ))}
       {editable && s.pending && library.free && (
         <group matrixAutoUpdate={false} matrix={matrix(library.free)}>

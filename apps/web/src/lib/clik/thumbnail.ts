@@ -19,11 +19,11 @@ import {
   type SceneDocument,
 } from "@clik/scene";
 import { geometry } from "./geometry";
-const cache = new Map<string, string>();
+import { PART_PREVIEW_COLOR } from "./part-preview-color";
+const cache = new Map<PartType, string>();
 let renderer: WebGLRenderer | undefined;
-export function partThumbnail(type: PartType, color: string) {
-  const key = `${type}:${color}`;
-  if (cache.has(key)) return cache.get(key)!;
+export function partThumbnail(type: PartType) {
+  if (cache.has(type)) return cache.get(type)!;
   renderer ??= new WebGLRenderer({ alpha: true, antialias: true });
   renderer.setSize(160, 100);
   const scene = new Scene(),
@@ -32,7 +32,7 @@ export function partThumbnail(type: PartType, color: string) {
   camera.lookAt(0, CATALOG[type].h / 2, 0);
   const mesh = new Mesh(
     geometry(type),
-    new MeshStandardMaterial({ color, roughness: 0.3 }),
+    new MeshStandardMaterial({ color: PART_PREVIEW_COLOR, roughness: 0.3 }),
   );
   // Fit the projected bounding box, with a consistent margin for larger models.
   camera.updateMatrixWorld();
@@ -57,7 +57,7 @@ export function partThumbnail(type: PartType, color: string) {
   renderer.render(scene, camera);
   const url = renderer.domElement.toDataURL("image/png");
   mesh.material.dispose();
-  cache.set(key, url);
+  cache.set(type, url);
   return url;
 }
 
