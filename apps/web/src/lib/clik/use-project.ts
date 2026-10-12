@@ -357,5 +357,6 @@ export function useProject(projectId?: string, draftId?: string) {
     origin: useEditor.getState().provenance.origin,
     challenge: remote?.challenge,
     publicationId: remote?.publicationId,
+    description: remote?.description ?? "",
   };
 }

@@ -264,6 +264,7 @@ describe("Projets privés et versions publiques", () => {
       title: "Original",
       scene,
     });
+    expect((await alice.query(api.projects.get, { id })).description).toBe("");
     const thumbnail = await t.run((ctx) =>
       ctx.storage.store(new Blob(["test"], { type: "image/png" })),
     );
@@ -280,6 +281,10 @@ describe("Projets privés et versions publiques", () => {
     });
     const first = await t.query(api.projects.creation, { id: pub });
     expect(first?.scene).toBe(scene);
+    expect(await alice.query(api.projects.get, { id })).toMatchObject({
+      publicationId: pub,
+      description: "Une première construction.",
+    });
     expect(
       (
         await alice.query(api.projects.list, {
@@ -293,6 +298,9 @@ describe("Projets privés et versions publiques", () => {
       scene: JSON.stringify(emptyScene()),
       revision: 0,
     });
+    expect((await alice.query(api.projects.get, { id })).description).toBe(
+      "Une première construction.",
+    );
     expect((await t.query(api.projects.creation, { id: pub }))?.scene).toBe(
       scene,
     );
@@ -303,6 +311,9 @@ describe("Projets privés et versions publiques", () => {
       thumbnail,
       revision: 1,
     });
+    expect((await alice.query(api.projects.get, { id })).description).toBe(
+      "Une description à conserver après retrait.",
+    );
     const copyId = await bob.mutation(api.projects.remix, {
       id: pub,
       versionId: first!._id,
@@ -314,6 +325,10 @@ describe("Projets privés et versions publiques", () => {
       bob.mutation(api.projects.withdraw, { id: pub }),
     ).rejects.toThrow();
     await alice.mutation(api.projects.withdraw, { id: pub });
+    expect(await alice.query(api.projects.get, { id })).toMatchObject({
+      publicationId: null,
+      description: "Une description à conserver après retrait.",
+    });
     expect(
       (
         await alice.query(api.projects.list, {
@@ -330,6 +345,7 @@ describe("Projets privés et versions publiques", () => {
     const copy = await bob.query(api.projects.get, { id: copyId });
     expect(copy.origin?.author).toBe("Alice");
     expect(copy.scene).toBe(scene);
+    expect(copy.description).toBe("");
     await expect(
       bob.mutation(api.projects.remix, { id: pub, versionId: first!._id }),
     ).rejects.toThrow("indisponible");

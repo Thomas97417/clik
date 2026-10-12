@@ -255,6 +255,7 @@ export async function projectsFixture(
               scene: args.scene,
               revision: 0,
               publicationId: null,
+              description: "",
               imports: (args.imports ?? []).map((item: any) => ({
                 ...item,
                 sources: item.receiptIds.length ? sources : [],
@@ -294,23 +295,23 @@ export async function projectsFixture(
             publicationTitles.set(target._id, args.title);
           }
         }
+        const failureMessage = preparing
+          ? "Import indisponible, réessayez."
+          : removing
+            ? "Suppression indisponible, réessayez."
+            : creating
+              ? "Enregistrement indisponible, réessayez."
+              : withdrawing
+                ? "Retrait indisponible, réessayez."
+                : "Publication indisponible, réessayez.";
         seq++;
         ws.send(
           JSON.stringify({
             type: "MutationResponse",
             requestId: message.requestId,
             success: !failed,
-            result: failed
-              ? preparing
-                ? "Import indisponible, réessayez."
-                : removing
-                  ? "Suppression indisponible, réessayez."
-                  : creating
-                    ? "Enregistrement indisponible, réessayez."
-                    : withdrawing
-                      ? "Retrait indisponible, réessayez."
-                      : "Publication indisponible, réessayez."
-              : result,
+            result: failed ? failureMessage : result,
+            errorData: failed ? failureMessage : undefined,
             ts: ts(),
             logLines: [],
           }),

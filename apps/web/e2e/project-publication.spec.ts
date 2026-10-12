@@ -1,6 +1,68 @@
 import { test, expect } from "@playwright/test";
 import { projectsFixture } from "./fixtures/projects";
 
+test("mettre à jour depuis l’éditeur conserve la description publiée et les corrections après un échec", async ({
+  page,
+}) => {
+  const fixture = await projectsFixture(page, { published: true });
+  const original = "Une lumière au bord de la mer.";
+  const changed = "Un phare pour guider les bateaux au fil des saisons.";
+  await page.goto("/editor/project");
+  const update = page.getByRole("button", {
+    name: "Mettre à jour la publication",
+    exact: true,
+  });
+  await update.click();
+  const dialog = page.getByRole("dialog", {
+    name: "Mettre à jour votre publication",
+  });
+  const description = dialog.getByLabel("Description", { exact: true });
+  const confirm = dialog.getByRole("button", {
+    name: "Mettre à jour la publication",
+    exact: true,
+  });
+  await expect(description).toHaveValue(original);
+  await confirm.click();
+  await expect(page).toHaveURL(/\/creations\/publication$/);
+  await expect(page.locator(".description")).toHaveText(original);
+  expect(fixture.calls.publications[0]).toMatchObject({
+    id: "project",
+    description: original,
+  });
+
+  await page.goto("/editor/project");
+  await update.click();
+  await description.fill("Description abandonnée.");
+  await dialog.getByRole("button", { name: "Annuler", exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(update).toBeFocused();
+  await update.click();
+  await expect(description).toHaveValue(original);
+  expect(fixture.calls.publications).toHaveLength(1);
+
+  await description.fill(changed);
+  fixture.failPublication(true);
+  await confirm.click();
+  await expect(dialog.getByRole("alert")).toHaveText(
+    "Publication indisponible, réessayez.",
+  );
+  await expect(description).toHaveValue(changed);
+  await expect(confirm).toBeEnabled();
+  fixture.failPublication(false);
+  await confirm.click();
+  await expect(page).toHaveURL(/\/creations\/publication$/);
+  await expect(page.locator(".description")).toHaveText(changed);
+  expect(fixture.calls.publications).toHaveLength(3);
+  expect(fixture.calls.publications[2]).toMatchObject({
+    id: "project",
+    description: changed,
+  });
+  expect(fixture.calls.creations).toHaveLength(0);
+  await page.goto("/editor/project");
+  await update.click();
+  await expect(description).toHaveValue(changed);
+});
+
 test("Privée ouvre un menu puis la modale préremplie, sans ouvrir l’éditeur", async ({
   page,
 }, info) => {

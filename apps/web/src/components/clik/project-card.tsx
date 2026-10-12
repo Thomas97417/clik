@@ -12,6 +12,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useAction, useMutation, useConvexAuth } from "convex/react";
+import { ConvexError } from "convex/values";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import {
@@ -134,7 +135,11 @@ export default function ProjectCard({
       closePublication();
       toast.success("Votre création est publiée.");
     } catch (error) {
-      setPublicationError(String(error));
+      setPublicationError(
+        error instanceof ConvexError && typeof error.data === "string"
+          ? error.data
+          : "La publication n’a pas pu être enregistrée. Réessayez.",
+      );
     } finally {
       setBusy(false);
     }

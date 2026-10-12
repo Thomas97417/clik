@@ -202,6 +202,7 @@ export const get = query({
       ...p,
       challenge: p.challengeId ? await ctx.db.get(p.challengeId) : null,
       publicationId: publication?.active ? publication._id : null,
+      description: publication?.description ?? "",
       serverNow: Date.now(),
     };
   },

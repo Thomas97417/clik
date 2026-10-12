@@ -8,6 +8,7 @@ import ProjectSources from "./project-sources";
 import AssemblyBadge from "./assembly-badge";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAction, useMutation } from "convex/react";
+import { ConvexError } from "convex/values";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import {
@@ -222,6 +223,7 @@ export default function Editor({
     [pubTitle, setPubTitle] = useState(""),
     [description, setDescription] = useState("");
   const [importing, setImporting] = useState(false);
+  const [publicationError, setPublicationError] = useState<string>();
   const primaryAction = useRef<HTMLButtonElement>(null);
   const privateSaveDescriptionId = useId();
   const publicSaveDescriptionId = useId();
@@ -512,6 +514,8 @@ export default function Editor({
     if (!publishOnLoad || !projectId || !project.ready || closed) return;
     primaryAction.current?.focus();
     setPubTitle(useEditor.getState().title);
+    setDescription(project.description);
+    setPublicationError(undefined);
     setPublishing(true);
     // Consume the request so reloading or returning to this URL won't reopen it.
     void navigate({
@@ -520,9 +524,17 @@ export default function Editor({
       search: {},
       replace: true,
     });
-  }, [publishOnLoad, projectId, project.ready, closed, navigate]);
+  }, [
+    publishOnLoad,
+    projectId,
+    project.ready,
+    project.description,
+    closed,
+    navigate,
+  ]);
   const closePublication = () => {
     setPublishing(false);
+    setPublicationError(undefined);
     requestAnimationFrame(() => primaryAction.current?.focus());
   };
   const startCreation = async () => {
@@ -538,6 +550,7 @@ export default function Editor({
   const doPublish = async () => {
     if (!projectId || busy) return;
     setBusy(true);
+    setPublicationError(undefined);
     try {
       const revision = await project.flush();
       const { publicationThumbnail } = await import("@/lib/clik/thumbnail");
@@ -567,7 +580,11 @@ export default function Editor({
         params: { publicationId: id },
       });
     } catch (e) {
-      toast.error(String(e));
+      setPublicationError(
+        e instanceof ConvexError && typeof e.data === "string"
+          ? e.data
+          : "La publication n’a pas pu être enregistrée. Réessayez.",
+      );
     } finally {
       setBusy(false);
     }
@@ -846,6 +863,8 @@ export default function Editor({
                 }
                 onClick={() => {
                   setPubTitle(s.title);
+                  setDescription(project.description);
+                  setPublicationError(undefined);
                   setPublishing(true);
                 }}
               >
@@ -1866,6 +1885,7 @@ export default function Editor({
           disabled={closed || (!!stock && !count)}
           challenge={!!project.challenge}
           updating={updatingPublication}
+          error={publicationError}
         />
       )}
       {importing && (
