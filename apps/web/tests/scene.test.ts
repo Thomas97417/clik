@@ -183,7 +183,7 @@ describe("SceneDocument et transformations", () => {
       validateScene({ ...emptyScene(), nodes: [p, { ...p, id: "b" }] }),
     ).toBeTruthy();
     expect(() =>
-      validateScene({ ...emptyScene(), nodes: [{ ...p, color: "#badbad" }] }),
+      validateScene({ ...emptyScene(), nodes: [{ ...p, color: "#invalid" }] }),
     ).toThrow();
     const g = group({ ...emptyScene(), nodes: [p] }, [p.id], "g");
     expect(() => reparent(g, ["g"], "g")).toThrow();

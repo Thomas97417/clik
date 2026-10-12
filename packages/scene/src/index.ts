@@ -207,7 +207,7 @@ export function hasTopStud(type: PartType, row: number, column = 0) {
   return part.shape !== "slope" || row === part.d - 1;
 }
 export const COLORS = [
-  "#f5f5f3",
+  "#f2e8d5",
   "#b9c2ca",
   "#58616c",
   "#252830",
@@ -219,9 +219,10 @@ export const COLORS = [
   "#4079e8",
   "#8b5bd6",
   "#ef85b0",
+  "#8b5e3c",
 ] as const;
 export const COLOR_NAMES = [
-  "Blanc",
+  "Crème",
   "Gris clair",
   "Gris foncé",
   "Noir",
@@ -233,7 +234,14 @@ export const COLOR_NAMES = [
   "Bleu",
   "Violet",
   "Rose",
+  "Marron",
 ];
+// Opaque RGB colors also cover historical presets, imported projects and custom shades.
+export const colorSchema = z
+  .string()
+  .length(7)
+  .regex(/^#[\da-f]{6}$/i);
+export type PartColor = z.infer<typeof colorSchema>;
 export type Vec3 = [number, number, number];
 const vector = z.tuple([
   z.number().finite().min(-10000).max(10000),
@@ -255,7 +263,7 @@ const nodeSchema = z.discriminatedUnion("kind", [
       ...base,
       kind: z.literal("part"),
       type: z.enum(Object.keys(CATALOG) as [PartType, ...PartType[]]),
-      color: z.enum(COLORS),
+      color: colorSchema,
     })
     .strict(),
   z.object({ ...base, kind: z.literal("group") }).strict(),
@@ -607,7 +615,7 @@ export function applyDelta(
 }
 export function makePart(
   type: PartType,
-  color: (typeof COLORS)[number],
+  color: PartColor,
   position: Vec3 = [0, 0, 0],
 ): Part {
   return {

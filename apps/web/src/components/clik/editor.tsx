@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useRef, useState, useId } from "react";
 import { useTreeDrag } from "./use-tree-drag";
 import EditorPanels from "./editor-panels";
+import EditorColors from "./editor-colors";
 import PublishDialog from "./publish-dialog";
 import ImportProjectDialog from "./import-project-dialog";
 import ProjectSources from "./project-sources";
@@ -14,8 +15,6 @@ import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import {
   CATALOG,
   countStock,
-  COLORS,
-  COLOR_NAMES,
   inherited,
   ancestors,
   descendants,
@@ -31,7 +30,6 @@ import {
   Box,
   CloudCheck,
   CloudUpload,
-  Check,
   ChevronDown,
   ChevronRight,
   ChevronsDownUp,
@@ -268,8 +266,6 @@ export default function Editor({
   const treeId = useId();
   const propertiesId = useId();
   const [propertiesCollapsed, setPropertiesCollapsed] = useState(false);
-  const paletteId = useId();
-  const [paletteCollapsed, setPaletteCollapsed] = useState(false);
   const [libraryCollapsed, setLibraryCollapsed] = useState(false);
   const [inspectorCollapsed, setInspectorCollapsed] = useState(false);
   const libraryId = useId();
@@ -1203,112 +1199,15 @@ export default function Editor({
                 </div>
               </div>
               <div className="library-footer shrink-0 border-t border-solid border-t-[#e7ecf3] bg-white">
-                <div className="palette-section m-0">
-                  <h2>
-                    <button
-                      className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 palette-toggle px-3 py-2.5 gap-1.5 flex items-center w-full min-h-12 text-left text-[13px] font-[650] text-[#34435c] hover:bg-[#f8faff] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:-outline-offset-2 group/palette-toggle"
-                      aria-label={
-                        paletteCollapsed
-                          ? "Déplier les couleurs"
-                          : "Replier les couleurs"
-                      }
-                      aria-expanded={!paletteCollapsed}
-                      aria-controls={paletteId}
-                      onClick={() =>
-                        setPaletteCollapsed((collapsed) => !collapsed)
-                      }
-                    >
-                      <ChevronRight
-                        className="shrink-0 group-aria-expanded/palette-toggle:transform-[rotate(90deg)]"
-                        size={16}
-                        aria-hidden="true"
-                      />
-                      Couleurs
-                      <span className="palette-current px-1.5 py-1 gap-1.25 border border-solid border-[#e7ecf3] inline-flex items-center ml-auto rounded-[6px] bg-[#fbfcfe] text-[#68788e] text-[11px] font-medium whitespace-nowrap">
-                        <span
-                          className="rounded-full [box-shadow:inset_0_0_0_1px_#00000014] size-2.5"
-                          style={{ background: s.color }}
-                          aria-hidden="true"
-                        />
-                        {COLOR_NAMES[COLORS.indexOf(s.color)]}
-                      </span>
-                    </button>
-                  </h2>
-                  <div
-                    id={paletteId}
-                    className="palette px-3 gap-1.25 grid grid-cols-[repeat(auto-fill,minmax(26px,1fr))] pt-0 pb-3 [&[hidden]]:hidden"
-                    hidden={paletteCollapsed}
-                    role="group"
-                    aria-label="Choisir une couleur"
-                  >
-                    {COLORS.map((color, i) => (
-                      <button
-                        key={color}
-                        title={COLOR_NAMES[i]}
-                        aria-label={COLOR_NAMES[i]}
-                        aria-pressed={s.color === color}
-                        className={cn(
-                          "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
-                          "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
-                          "outline-offset-3",
-                          s.color === color ? "chosen group/chosen" : "",
-                          "focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:-outline-offset-2 p-0.75 border border-solid border-transparent min-w-0 aspect-square rounded-[8px] hover:border-[#d2ddef] hover:bg-[#f1f5fc] [&[class~='group/chosen']]:border-[#356ae6] [&[class~='group/chosen']]:bg-[#edf3ff] [&[class~='group/chosen']]:[box-shadow:0_0_0_1px_#356ae620]",
-                        )}
-                        onClick={() => {
-                          useEditor.setState({ color });
-                          const ids = new Set(
-                            s.selection.flatMap((id) => [
-                              id,
-                              ...s.scene.nodes
-                                .filter((n) => {
-                                  let p = n.parentId;
-                                  while (p) {
-                                    if (p === id) return true;
-                                    p =
-                                      s.scene.nodes.find((x) => x.id === p)
-                                        ?.parentId ?? null;
-                                  }
-                                  return false;
-                                })
-                                .map((n) => n.id),
-                            ]),
-                          );
-                          safe(() =>
-                            s.commit({
-                              ...s.scene,
-                              nodes: s.scene.nodes.map((n) =>
-                                n.kind === "part" &&
-                                ids.has(n.id) &&
-                                !inherited(s.scene, n.id, "locked")
-                                  ? { ...n, color }
-                                  : n,
-                              ),
-                            }),
-                          );
-                        }}
-                      >
-                        <span
-                          className="palette-swatch grid place-items-center rounded-[5px] [box-shadow:inset_0_0_0_1px_#00000014] w-full aspect-square"
-                          style={{
-                            background: color,
-                            color: [2, 3, 4, 7, 9, 10].includes(i)
-                              ? "#fff"
-                              : "#25354e",
-                          }}
-                        >
-                          {s.color === color && (
-                            <Check
-                              className="shrink-0"
-                              size={15}
-                              strokeWidth={3}
-                              aria-hidden="true"
-                            />
-                          )}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <EditorColors
+                  disabled={
+                    !project.ready ||
+                    closed ||
+                    project.conflict ||
+                    busy ||
+                    publishing
+                  }
+                />
                 <div className="library-tip group/library-tip px-3.5 gap-2 pt-2 pb-3 flex items-center text-[#68788e] bg-[#f8faff]">
                   <Grip className="shrink-0" size={16} aria-hidden="true" />
                   <p className="text-[11px] leading-[1.6]">

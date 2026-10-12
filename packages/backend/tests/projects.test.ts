@@ -31,6 +31,57 @@ const scene = JSON.stringify(
   validateScene({ ...emptyScene(), nodes: [makePart("brick-2x2", "#4079e8")] }),
 );
 describe("Projets privés et versions publiques", () => {
+  it("conserve les couleurs personnalisées et les anciens blancs à l’enregistrement, la publication et la reprise", async () => {
+    const { alice, bob, t } = setup();
+    const colors = ["#123abc", "#f5f5f3", "#f2e8d5", "#8b5e3c"];
+    const customScene = {
+      ...emptyScene(),
+      nodes: colors.map((color, i) =>
+        makePart("brick-1x1", color, [i * 3, 0, 0]),
+      ),
+    };
+    const id = await alice.mutation(api.projects.create, {
+      title: "Nuances",
+      scene: JSON.stringify(customScene),
+    });
+    expect(
+      JSON.parse((await alice.query(api.projects.get, { id })).scene),
+    ).toEqual(customScene);
+    customScene.nodes[0].color = "#c567ab";
+    const savedScene = JSON.stringify(validateScene(customScene));
+    await alice.mutation(api.projects.save, {
+      id,
+      title: "Nuances",
+      scene: savedScene,
+      revision: 0,
+    });
+    expect((await alice.query(api.projects.get, { id })).scene).toBe(
+      savedScene,
+    );
+    const thumbnail = await t.run((ctx) =>
+      ctx.storage.store(new Blob(["test"], { type: "image/png" })),
+    );
+    await alice.mutation(internal.projects.registerThumbnail, {
+      projectId: id,
+      storageId: thumbnail,
+    });
+    const publication = await alice.mutation(api.projects.publish, {
+      id,
+      title: "Nuances",
+      description: "Couleurs sur mesure",
+      thumbnail,
+      revision: 1,
+    });
+    const version = await t.query(api.projects.creation, { id: publication });
+    expect(version?.scene).toBe(savedScene);
+    const copyId = await bob.mutation(api.projects.remix, {
+      id: publication,
+      versionId: version!._id,
+    });
+    expect((await bob.query(api.projects.get, { id: copyId })).scene).toBe(
+      savedScene,
+    );
+  });
   it("trie toute la collection par modification avant de paginer, en conservant la confidentialité", async () => {
     const { alice, bob, t } = setup();
     const ids = [];

@@ -22,8 +22,10 @@ import {
   type SceneDocument,
   type SceneNode,
   type PartType,
+  type PartColor,
   type Vec3,
   COLORS,
+  colorSchema,
   validateChallengeStock,
   type ChallengeStock,
   importAssembly,
@@ -39,6 +41,7 @@ type Snapshot = {
   scene: SceneDocument;
   title: string;
   provenance: ProjectProvenance;
+  color: PartColor;
 };
 export type EditorChallenge = {
   stock: ChallengeStock;
@@ -54,6 +57,20 @@ function checkChallenge(
     throw Error("Ce défi est clos. Continuez dans une copie libre.");
   validateChallengeStock(scene, challenge.stock);
 }
+function selectedColor(
+  scene: SceneDocument,
+  selection: string[],
+  fallback: PartColor,
+) {
+  for (const id of [...selection].reverse()) {
+    const ids = new Set(descendants(scene, [id]));
+    const part = scene.nodes.find(
+      (node) => node.kind === "part" && ids.has(node.id),
+    );
+    if (part?.kind === "part") return part.color.toLowerCase();
+  }
+  return fallback;
+}
 type State = Snapshot & {
   challenge: EditorChallenge | null;
   selection: string[];
@@ -64,7 +81,6 @@ type State = Snapshot & {
   lightAngle: number;
   uniformLighting: boolean;
   tool: "translate" | "rotate";
-  color: (typeof COLORS)[number];
   pending: PartType | null;
   libraryPointer: { id: number; type: PartType; x: number; y: number } | null;
   libraryClickSuppressed: boolean;
@@ -89,7 +105,10 @@ type State = Snapshot & {
   ) => void;
   importProject: (scene: SceneDocument, item: ProjectImport) => void;
   select: (id: string, add?: boolean) => void;
+  deselect: (id: string) => void;
   selectAll: () => void;
+  setColor: (color: PartColor) => void;
+  previewColor: (color: PartColor) => void;
   add: (type: PartType, position?: Vec3) => void;
   patch: (id: string, patch: Partial<SceneNode>) => void;
   nudge: (delta: Vec3) => void;
@@ -112,6 +131,7 @@ const snapshot = (s: State): Snapshot => ({
   scene: s.scene,
   title: s.title,
   provenance: s.provenance,
+  color: s.color,
 });
 export const useEditor = create<State>((set, get) => ({
   challenge: null,
@@ -183,23 +203,76 @@ export const useEditor = create<State>((set, get) => ({
       ...s.provenance,
       imports: [...s.provenance.imports, item],
     });
-    set({ selection: [result.id], frame: s.frame + 1 });
+    set({
+      selection: [result.id],
+      color: selectedColor(result.scene, [result.id], s.color),
+      frame: s.frame + 1,
+    });
   },
   select: (id, add = false) =>
-    set((s) => ({
-      selection: add
+    set((s) => {
+      const selection = add
         ? s.selection.includes(id)
           ? s.selection.filter((x) => x !== id)
           : [...s.selection, id]
-        : [id],
-    })),
+        : [id];
+      return { selection, color: selectedColor(s.scene, selection, s.color) };
+    }),
+  deselect: (id) =>
+    set((s) => {
+      const selection = s.selection.filter(
+        (root) => !descendants(s.scene, [root]).includes(id),
+      );
+      return { selection, color: selectedColor(s.scene, selection, s.color) };
+    }),
   // Selecting only roots carries every descendant once, including folded groups.
   selectAll: () =>
-    set((s) => ({
-      selection: s.scene.nodes
+    set((s) => {
+      const selection = s.scene.nodes
         .filter((n) => n.parentId === null)
-        .map((n) => n.id),
-    })),
+        .map((n) => n.id);
+      return { selection, color: selectedColor(s.scene, selection, s.color) };
+    }),
+  setColor: (value) => {
+    const color = colorSchema.parse(value).toLowerCase();
+    const s = get();
+    if (s.gesture || s.pending || s.libraryPointer) return;
+    const ids = new Set(descendants(s.scene, s.selection));
+    s.commit({
+      ...s.scene,
+      nodes: s.scene.nodes.map((node) =>
+        node.kind === "part" &&
+        ids.has(node.id) &&
+        !inherited(s.scene, node.id, "locked")
+          ? { ...node, color }
+          : node,
+      ),
+    });
+    set({ color });
+  },
+  // Reuse the existing gesture transaction: previews stay live without being
+  // autosaved or adding undo entries until end() commits the final shade.
+  previewColor: (value) => {
+    const color = colorSchema.parse(value).toLowerCase();
+    const s = get();
+    if (!s.gesture) return;
+    checkChallenge(s.gesture.scene, s.challenge);
+    const scene = s.gesture.scene;
+    const ids = new Set(descendants(scene, s.selection));
+    set({
+      color,
+      scene: {
+        ...scene,
+        nodes: scene.nodes.map((node) =>
+          node.kind === "part" &&
+          ids.has(node.id) &&
+          !inherited(scene, node.id, "locked")
+            ? { ...node, color }
+            : node,
+        ),
+      },
+    });
+  },
   add: (type, position) => {
     const s = get();
     const part = position
@@ -269,7 +342,7 @@ export const useEditor = create<State>((set, get) => ({
     const s = get(),
       r = duplicate(s.scene, s.selection);
     s.commit(r.scene);
-    set({ selection: r.ids });
+    set({ selection: r.ids, color: selectedColor(r.scene, r.ids, s.color) });
   },
   group: () => {
     const s = get(),
@@ -365,6 +438,7 @@ export const useEditor = create<State>((set, get) => ({
     const before = s.gesture;
     set({ ...before, gesture: null, snapPreview: null, gestureIds: [] });
     get().commit(scene);
+    set({ color: s.color });
   },
   cancel: () => {
     const s = get();
@@ -406,6 +480,6 @@ export const useEditor = create<State>((set, get) => ({
       s.scene,
     );
     s.commit(r.scene);
-    set({ selection: r.ids });
+    set({ selection: r.ids, color: selectedColor(r.scene, r.ids, s.color) });
   },
 }));

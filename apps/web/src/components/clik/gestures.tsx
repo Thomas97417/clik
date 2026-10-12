@@ -221,14 +221,10 @@ export function Gestures({
         part.id,
       );
       if (e.shiftKey) {
-        if (selected)
-          useEditor.setState({
-            selection: state.selection.filter(
-              (id) => !descendants(state.scene, [id]).includes(part.id),
-            ),
-          });
+        if (selected) state.deselect(part.id);
         else state.select(part.id, true);
       } else if (!selected) state.select(part.id);
+      else useEditor.setState({ color: part.color.toLowerCase() });
       blockedPointer = e.pointerId;
       canvas.setPointerCapture(e.pointerId);
       if (

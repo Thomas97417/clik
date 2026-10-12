@@ -1,0 +1,276 @@
+import { useEffect, useId, useRef, useState } from "react";
+import { Check, ChevronRight, Palette, X } from "lucide-react";
+import { COLORS, COLOR_NAMES, descendants } from "@clik/scene";
+import { toast } from "sonner";
+import { useShallow } from "zustand/react/shallow";
+import { cn } from "@/lib/utils";
+import { useEditor } from "@/lib/clik/store";
+import {
+  ColorPicker,
+  ColorPickerArea,
+  ColorPickerContent,
+  ColorPickerCopy,
+  ColorPickerFields,
+  ColorPickerPanel,
+  ColorPickerSlider,
+  ColorPickerSwatch,
+  ColorPickerTrigger,
+} from "@/components/reui/color-picker";
+
+const colorName = (color: string) => {
+  const index = COLORS.findIndex((preset) => preset === color.toLowerCase());
+  return index >= 0 ? COLOR_NAMES[index] : color.toUpperCase();
+};
+
+export default function EditorColors({
+  disabled = false,
+}: {
+  disabled?: boolean;
+}) {
+  const state = useEditor(
+    useShallow((s) => ({
+      color: s.color,
+      scene: s.gesture?.scene ?? s.scene,
+      selection: s.selection,
+      manipulating: !!s.gesture || !!s.pending || !!s.libraryPointer,
+    })),
+  );
+  const paletteId = useId();
+  const [collapsed, setCollapsed] = useState(false);
+  const [open, setOpen] = useState(false);
+  const editing = useRef(false);
+  const blocked = disabled || (state.manipulating && !editing.current);
+  const custom = !COLORS.some((color) => color === state.color);
+  const selectedIds = new Set(descendants(state.scene, state.selection));
+  const selectedColors = new Set(
+    state.scene.nodes.flatMap((node) =>
+      node.kind === "part" && selectedIds.has(node.id)
+        ? [node.color.toLowerCase()]
+        : [],
+    ),
+  );
+  const mixed = selectedColors.size > 1;
+
+  const finish = () => {
+    if (!editing.current) return;
+    editing.current = false;
+    try {
+      useEditor.getState().end();
+    } catch (error) {
+      useEditor.getState().cancel();
+      toast.error(String(error));
+    }
+  };
+  // A close, lost capture or blur also finishes a drag that returns to its
+  // initial shade, for which the picker intentionally emits no value commit.
+  useEffect(() => {
+    const blur = () => finish();
+    window.addEventListener("blur", blur);
+    return () => {
+      window.removeEventListener("blur", blur);
+      if (editing.current) useEditor.getState().cancel();
+    };
+  }, []);
+  useEffect(() => {
+    if (disabled) {
+      if (editing.current) useEditor.getState().cancel();
+      editing.current = false;
+      setOpen(false);
+    }
+  }, [disabled]);
+
+  return (
+    <div className="palette-section m-0">
+      <h2>
+        <button
+          type="button"
+          className="palette-toggle panel-heading flex min-h-12 w-full cursor-pointer items-center gap-1.5 px-3 py-2.5 text-left text-[13px] font-[650] text-[#34435c] outline-offset-3 transition-colors hover:bg-[#f8faff] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-[#356ae6] focus-visible:-outline-offset-2 group/palette-toggle"
+          aria-label={
+            collapsed ? "Déplier les couleurs" : "Replier les couleurs"
+          }
+          aria-expanded={!collapsed}
+          aria-controls={paletteId}
+          onClick={() => setCollapsed(!collapsed)}
+        >
+          <ChevronRight
+            size={16}
+            aria-hidden="true"
+            className="shrink-0 group-aria-expanded/palette-toggle:rotate-90"
+          />
+          Couleurs
+          <span className="palette-current ml-auto inline-flex min-w-0 items-center gap-1.25 rounded-[6px] border border-[#e7ecf3] bg-[#fbfcfe] px-1.5 py-1 text-[11px] font-medium text-[#68788e]">
+            <span
+              className="size-2.5 shrink-0 rounded-full shadow-[inset_0_0_0_1px_#00000014]"
+              style={{ background: state.color }}
+              aria-hidden="true"
+            />
+            <span className="truncate">
+              {mixed ? "Plusieurs couleurs" : colorName(state.color)}
+            </span>
+          </span>
+        </button>
+      </h2>
+      <div
+        id={paletteId}
+        hidden={collapsed}
+        className="px-3 pb-3 [&[hidden]]:hidden"
+      >
+        <div
+          className="palette grid grid-cols-[repeat(auto-fill,minmax(22px,1fr))] gap-1.25"
+          role="group"
+          aria-label="Choisir une couleur"
+        >
+          {COLORS.map((color, i) => {
+            const chosen = !mixed && state.color === color;
+            return (
+              <button
+                key={color}
+                type="button"
+                title={COLOR_NAMES[i]}
+                aria-label={COLOR_NAMES[i]}
+                aria-pressed={chosen}
+                disabled={blocked}
+                className={cn(
+                  "aspect-square min-w-0 cursor-pointer rounded-[8px] border border-transparent p-0.5 outline-offset-2 transition-colors hover:border-[#d2ddef] hover:bg-[#f1f5fc] focus-visible:outline-2 focus-visible:outline-[#356ae6] disabled:cursor-not-allowed disabled:opacity-40",
+                  chosen &&
+                    "chosen border-[#356ae6] bg-[#edf3ff] shadow-[0_0_0_1px_#356ae620]",
+                )}
+                onClick={() => {
+                  try {
+                    useEditor.getState().setColor(color);
+                  } catch (error) {
+                    toast.error(String(error));
+                  }
+                }}
+              >
+                <span
+                  className="palette-swatch grid aspect-square w-full place-items-center rounded-[5px] shadow-[inset_0_0_0_1px_#00000014]"
+                  style={{
+                    background: color,
+                    color: [2, 3, 4, 7, 9, 10, 12].includes(i)
+                      ? "#fff"
+                      : "#25354e",
+                  }}
+                >
+                  {chosen && (
+                    <Check size={15} strokeWidth={3} aria-hidden="true" />
+                  )}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        <ColorPicker
+          value={state.color}
+          format="hex"
+          open={open}
+          disabled={blocked}
+          onOpenChange={(next) => {
+            if (!next) finish();
+            setOpen(next);
+          }}
+          onValueChange={(color) => {
+            if (!color || blocked) return;
+            try {
+              const editor = useEditor.getState();
+              if (!editing.current) {
+                editor.begin();
+                editing.current = true;
+              }
+              editor.previewColor(color);
+            } catch (error) {
+              useEditor.getState().cancel();
+              editing.current = false;
+              toast.error(String(error));
+            }
+          }}
+          onValueCommit={finish}
+          aria-label="Personnaliser la couleur"
+          i18n={{
+            labels: {
+              panelLabel: "Couleur personnalisée",
+              area: "Saturation et luminosité",
+              hue: "Teinte",
+              saturation: "Saturation",
+              brightness: "Luminosité",
+              red: "Rouge",
+              green: "Vert",
+              blue: "Bleu",
+              hex: "Code hexadécimal",
+              format: "Format",
+              copy: "Copier la couleur",
+              copied: "Couleur copiée",
+            },
+          }}
+        >
+          <ColorPickerTrigger
+            className={cn(
+              "mt-2 h-8.5 w-full cursor-pointer justify-start gap-2 rounded-[6px] border-[#e1e8f2] bg-[#fafcff] px-2 text-[11px] text-[#536580] shadow-none hover:border-[#cddcfa] hover:bg-[#edf3ff] hover:text-[#356ae6] focus-visible:ring-[#356ae6]/30",
+              custom &&
+                !mixed &&
+                "border-[#cfddfb] bg-[#f2f6ff] text-[#356ae6]",
+            )}
+          >
+            <Palette size={14} aria-hidden="true" className="shrink-0" />
+            <span className="flex-1 text-left">Personnaliser</span>
+            <ColorPickerSwatch className="size-3.5 rounded-[3px]" />
+            <span className="font-mono text-[10px] uppercase tabular-nums">
+              {state.color}
+            </span>
+          </ColorPickerTrigger>
+          <ColorPickerContent
+            side="right"
+            sideOffset={12}
+            align="end"
+            className="editor-color-picker max-h-[calc(100dvh-24px)] w-72 gap-3 overflow-y-auto overscroll-contain rounded-[10px] border border-[#dce5f2] bg-white p-3 text-[#34435c] shadow-[0_8px_32px_#26395624] ring-0 [&_[data-slot=color-picker-area-thumb]]:rounded-full [&_[data-slot=color-picker-slider-thumb]]:rounded-full"
+            onPointerUp={finish}
+            onPointerCancel={finish}
+            onLostPointerCapture={finish}
+            onKeyDown={(event) => {
+              if (event.key === "Escape" && editing.current) {
+                useEditor.getState().cancel();
+                editing.current = false;
+              }
+            }}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-semibold">
+                Couleur personnalisée
+              </span>
+              <button
+                type="button"
+                aria-label="Fermer le sélecteur de couleur"
+                onClick={() => {
+                  finish();
+                  setOpen(false);
+                }}
+                className="grid size-6 cursor-pointer place-items-center rounded-[4px] text-[#7a879d] hover:bg-[#edf3ff] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-[#356ae6]"
+              >
+                <X size={14} aria-hidden="true" />
+              </button>
+            </div>
+            <ColorPickerPanel>
+              <ColorPickerArea className="h-36 rounded-[6px]" />
+              <div className="flex items-center gap-3 py-0.5">
+                <ColorPickerSlider
+                  channel="hue"
+                  className="flex-1 rounded-full"
+                />
+                <ColorPickerCopy className="size-7 rounded-[5px] text-[#68788e] hover:bg-[#edf3ff] hover:text-[#356ae6] [&>svg]:size-4" />
+              </div>
+              <ColorPickerFields
+                formats={["hex", "rgb"]}
+                className="h-8.5 rounded-[6px] border-[#dfe7f3] text-xs focus-within:border-[#356ae6] [&_[data-slot=input-group-button]]:rounded-[4px]"
+              />
+            </ColorPickerPanel>
+            <p className="border-t border-[#edf0f5] pt-2 text-[11px] leading-relaxed text-[#68788e]">
+              {selectedColors.size
+                ? "Appliquée aux pièces sélectionnées, sauf celles verrouillées."
+                : "Utilisée pour les prochaines pièces."}
+            </p>
+          </ColorPickerContent>
+        </ColorPicker>
+      </div>
+    </div>
+  );
+}
