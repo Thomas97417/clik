@@ -56,12 +56,29 @@ export const CATALOG = {
     h: 2.4,
     shape: "slope",
   },
+  "slope-steep-2x1x1": {
+    name: "Pente haute 2 × 1 × 1",
+    w: 1,
+    d: 2,
+    h: 1.2,
+    shape: "slope",
+    slopeRun: 0.5,
+  },
+  "slope-steep-2x2x1": {
+    name: "Pente haute 2 × 2 × 1",
+    w: 2,
+    d: 2,
+    h: 1.2,
+    shape: "slope",
+    slopeRun: 0.5,
+  },
   "tile-1x1": { name: "Tuile lisse 1 × 1", w: 1, d: 1, h: 0.4, shape: "tile" },
   "tile-1x2": { name: "Tuile lisse 1 × 2", w: 2, d: 1, h: 0.4, shape: "tile" },
   "tile-2x2": { name: "Tuile lisse 2 × 2", w: 2, d: 2, h: 0.4, shape: "tile" },
   "tile-1x3": { name: "Tuile lisse 1 × 3", w: 3, d: 1, h: 0.4, shape: "tile" },
   "tile-1x4": { name: "Tuile lisse 1 × 4", w: 4, d: 1, h: 0.4, shape: "tile" },
   "tile-1x6": { name: "Tuile lisse 1 × 6", w: 6, d: 1, h: 0.4, shape: "tile" },
+  "tile-1x8": { name: "Tuile lisse 1 × 8", w: 8, d: 1, h: 0.4, shape: "tile" },
   "tile-2x3": { name: "Tuile lisse 2 × 3", w: 3, d: 2, h: 0.4, shape: "tile" },
   "tile-2x4": { name: "Tuile lisse 2 × 4", w: 4, d: 2, h: 0.4, shape: "tile" },
   "tile-4x4": { name: "Tuile lisse 4 × 4", w: 4, d: 4, h: 0.4, shape: "tile" },
@@ -69,6 +86,41 @@ export const CATALOG = {
     name: "Brique ronde 1 × 1",
     w: 1,
     d: 1,
+    h: 1.2,
+    shape: "round",
+  },
+  "round-brick-2x2": {
+    name: "Brique ronde 2 × 2",
+    w: 2,
+    d: 2,
+    h: 1.2,
+    shape: "round",
+  },
+  "round-brick-3x3": {
+    name: "Brique ronde 3 × 3",
+    w: 3,
+    d: 3,
+    h: 1.2,
+    shape: "round",
+  },
+  "round-brick-4x4": {
+    name: "Brique ronde 4 × 4",
+    w: 4,
+    d: 4,
+    h: 1.2,
+    shape: "round",
+  },
+  "round-brick-6x6": {
+    name: "Brique ronde 6 × 6",
+    w: 6,
+    d: 6,
+    h: 1.2,
+    shape: "round",
+  },
+  "round-brick-8x8": {
+    name: "Brique ronde 8 × 8",
+    w: 8,
+    d: 8,
     h: 1.2,
     shape: "round",
   },
@@ -1011,7 +1063,12 @@ export function snapSelection(
   return previewSelection(scene, ids, enabled).scene;
 }
 
-export { archProfile, roundProfile } from "./part-shapes";
+export {
+  archProfile,
+  roundProfile,
+  slopeCrease,
+  slopeRoofHeight,
+} from "./part-shapes";
 
 export {
   challengeDay,

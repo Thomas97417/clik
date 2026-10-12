@@ -173,15 +173,18 @@ describe("Nouveaux modèles du catalogue", () => {
   it.each(types.filter((type) => CATALOG[type].shape === "slope"))(
     "%s : rampe continue et accroches uniquement sur la rangée haute",
     (type) => {
-      const { w, d, h } = CATALOG[type];
-      for (const z of [-d / 2 + 0.2, -0.25, d / 2 - 1, d / 2 - 0.15]) {
+      const part = CATALOG[type];
+      const { w, d, h } = part;
+      const run = "slopeRun" in part ? part.slopeRun : d - 1;
+      const crease = -d / 2 + run;
+      for (const z of [-d / 2 + 0.2, crease - 0.1, crease, d / 2 - 0.15]) {
         const roof = hit(
           type,
           new Vector3(w / 2 - 0.1, h + 1, z),
           new Vector3(0, -1, 0),
         );
         const expected =
-          z < d / 2 - 1 ? 0.25 + ((h - 0.25) * (z + d / 2)) / (d - 1) : h;
+          z < crease ? 0.25 + ((h - 0.25) * (z + d / 2)) / run : h;
         expect(roof.point.y).toBeCloseTo(expected, 5);
       }
       const target = makePart(type, "#4079e8");
@@ -284,7 +287,7 @@ describe("Volumes ouverts du catalogue", () => {
   );
 });
 
-describe("Plaques et tuiles rondes de plusieurs diamètres", () => {
+describe("Briques, plaques et tuiles rondes de plusieurs diamètres", () => {
   it.each([
     [2, 4],
     [3, 5],
@@ -292,15 +295,18 @@ describe("Plaques et tuiles rondes de plusieurs diamètres", () => {
     [6, 24],
     [8, 44],
   ])(
-    "diamètre %i : %i logements réels, et des plots uniquement sur la plaque",
+    "diamètre %i : %i logements réels, des plots sur les briques et plaques, des tuiles lisses",
     (size, count) => {
+      const brick = `round-brick-${size}x${size}` as PartType;
       const plate = `round-plate-${size}x${size}` as PartType;
       const tile = `round-tile-${size}x${size}` as PartType;
+      expect(cells(brick)).toHaveLength(count);
       expect(cells(plate)).toHaveLength(count);
       expect(cells(tile)).toHaveLength(count);
+      expect(cells(brick, true)).toHaveLength(count);
       expect(cells(plate, true)).toHaveLength(count);
       expect(cells(tile, true)).toHaveLength(0);
-      for (const type of [plate, tile]) {
+      for (const type of [brick, plate, tile]) {
         // Bounding-square corners must remain empty, even below the piece.
         const x = size / 2 - 0.1;
         expect(
@@ -315,7 +321,7 @@ describe("Plaques et tuiles rondes de plusieurs diamètres", () => {
           const support = makePart(type, "#4079e8");
           const corner = makePart("brick-1x1", "#ef4444", [
             (size - 1) / 2,
-            0.4,
+            CATALOG[type].h,
             (size - 1) / 2,
           ]);
           expect(
@@ -324,16 +330,19 @@ describe("Plaques et tuiles rondes de plusieurs diamètres", () => {
           ).toBe("grid");
         }
       }
-      const support = makePart(plate, "#4079e8");
-      const upper = makePart(tile, "#ef4444", [0, 0.5, 0]);
-      const result = snapCandidate(
-        { ...emptyScene(), nodes: [support] },
-        upper,
-        true,
-      );
-      expect(result.kind).toBe("attachment");
-      expect(result.part.position).toEqual([0, 0.4, 0]);
-      expect(result.points).toHaveLength(count);
+      for (const type of [brick, plate]) {
+        const support = makePart(type, "#4079e8");
+        const h = CATALOG[type].h;
+        const upper = makePart(tile, "#ef4444", [0, h + 0.1, 0]);
+        const result = snapCandidate(
+          { ...emptyScene(), nodes: [support] },
+          upper,
+          true,
+        );
+        expect(result.kind).toBe("attachment");
+        expect(result.part.position).toEqual([0, h, 0]);
+        expect(result.points).toHaveLength(count);
+      }
     },
   );
 });

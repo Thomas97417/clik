@@ -239,7 +239,7 @@ describe("Collisions des formes concaves et rondes", () => {
 it.each([2, 3, 4, 6, 8])(
   "diamètre %i : collisions sur le disque, pas dans les coins de sa boîte",
   (size) => {
-    for (const family of ["plate", "tile"]) {
+    for (const family of ["brick", "plate", "tile"]) {
       const disk = makePart(
         `round-${family}-${size}x${size}` as PartType,
         "#4079e8",
@@ -260,7 +260,7 @@ it.each([2, 3, 4, 6, 8])(
       );
       expect(
         snapCandidate(scene, neighbor, false).part.position[1],
-      ).toBeCloseTo(0.4);
+      ).toBeCloseTo(CATALOG[disk.type].h);
     }
   },
 );

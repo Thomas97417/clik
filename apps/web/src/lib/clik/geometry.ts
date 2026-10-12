@@ -15,6 +15,8 @@ import {
   hasBottomSocket,
   archProfile,
   roundProfile,
+  slopeCrease,
+  slopeRoofHeight,
   type PartType,
 } from "@clik/scene";
 
@@ -78,11 +80,12 @@ function halfRoof(points: Vector2[], front: boolean, crease: number) {
 
 export function geometry(type: PartType) {
   if (geometries.has(type)) return geometries.get(type)!;
-  const { w, d, h, shape } = CATALOG[type];
-  const slope = CATALOG[type].shape === "slope";
-  const crease = d / 2 - 1;
+  const dimensions = CATALOG[type];
+  const { w, d, h, shape } = dimensions;
+  const slope = shape === "slope";
+  const crease = slope ? slopeCrease(dimensions) : 0;
   const roofHeight = (z: number) =>
-    slope && z < crease ? 0.25 + ((h - 0.25) * (z + d / 2)) / (d - 1) : h;
+    slope ? slopeRoofHeight(dimensions, z) : h;
   const parts: BufferGeometry[] = [];
   const base = outline(w, d, 0, shape);
   const contour = (shape: Shape) => {

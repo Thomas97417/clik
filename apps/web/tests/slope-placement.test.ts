@@ -20,17 +20,19 @@ describe("placement sur les rampes", () => {
   it.each(slopes)(
     "%s : protège toute l’empreinte, avec et sans aimantation",
     (type) => {
-      const { d, h } = CATALOG[type];
+      const part = CATALOG[type];
+      const { d, h } = part;
+      const run = "slopeRun" in part ? part.slopeRun : d - 1;
       const target = makePart(type, "#4079e8");
       const scene = { ...emptyScene(), nodes: [target] };
       const z = -(d - 1) / 2;
-      const heightAtPointer = 0.25 + ((h - 0.25) * 0.5) / (d - 1);
+      const heightAtPointer = 0.25 + (h - 0.25) * Math.min(0.5 / run, 1);
       const piece = makePart("brick-1x1", "#ef4444", [0, heightAtPointer, z]);
       for (const enabled of [false, true]) {
         const result = snapCandidate(scene, piece, enabled);
         // The uphill edge is higher than the center seen by the pointer.
-        const highestZ = Math.min(d / 2 - 1, result.part.position[2] + 0.49);
-        const roof = 0.25 + ((h - 0.25) * (highestZ + d / 2)) / (d - 1);
+        const highestZ = Math.min(-d / 2 + run, result.part.position[2] + 0.49);
+        const roof = 0.25 + ((h - 0.25) * (highestZ + d / 2)) / run;
         expect(result.part.position[1]).toBeGreaterThanOrEqual(roof - 1e-8);
         expect(result.points).toEqual([]);
         if (enabled)
@@ -40,7 +42,7 @@ describe("placement sur les rampes", () => {
       }
       const free = snapCandidate(scene, piece, false).part;
       expect(free.position[1]).toBeCloseTo(
-        0.25 + ((h - 0.25) * 0.99) / (d - 1),
+        0.25 + (h - 0.25) * Math.min(0.99 / run, 1),
         8,
       );
     },

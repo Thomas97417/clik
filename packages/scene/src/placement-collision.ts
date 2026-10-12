@@ -1,5 +1,11 @@
 import { Box3, Matrix4, Vector3 } from "three";
-import { archProfile, roundProfile, type PartDimensions } from "./part-shapes";
+import {
+  archProfile,
+  roundProfile,
+  slopeCrease,
+  slopeRoofHeight,
+  type PartDimensions,
+} from "./part-shapes";
 
 type Body = {
   vertices: Vector3[];
@@ -115,8 +121,8 @@ export function placementBody(
           [-z, 0],
           [z, 0],
           [z, h],
-          [d / 2 - 1, h],
-          [-z, 0.25 + ((h - 0.25) * 0.01) / (d - 1)],
+          [slopeCrease(dimensions), h],
+          [-z, slopeRoofHeight(dimensions, -z)],
         ]
       : [
           [-z, 0],

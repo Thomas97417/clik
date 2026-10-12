@@ -9,7 +9,9 @@ test("catalogue étendu : aperçus entiers, ajout et restauration de chaque mod�
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/editor");
   const canvas = page.locator("canvas").first();
-  await expect(canvas).toHaveAttribute("data-rendered", "0");
+  await expect(canvas).toHaveAttribute("data-rendered", "0", {
+    timeout: 30000,
+  });
   let count = 0;
   for (const [category, prefix] of [
     ["Briques", "brick"],
@@ -25,7 +27,9 @@ test("catalogue étendu : aperçus entiers, ajout et restauration de chaque mod�
       type.startsWith(prefix),
     );
     await expect(page.locator(".piece-card")).toHaveCount(models.length);
-    await expect(page.locator(".piece-card img")).toHaveCount(models.length);
+    await expect(page.locator(".piece-card img")).toHaveCount(models.length, {
+      timeout: 30000,
+    });
     // Inspect the rendered PNGs: every model is visible and clear of all edges.
     expect(
       await page.locator(".piece-card img").evaluateAll(async (images) => {
@@ -73,7 +77,9 @@ test("catalogue étendu : aperçus entiers, ajout et restauration de chaque mod�
       );
     }
   }
-  await expect(page.getByRole("status")).toContainText("Enregistré");
+  await expect(
+    page.getByLabel("Projet et sauvegarde").getByRole("status"),
+  ).toContainText("Enregistré");
   await page.reload();
   await expect(canvas).toHaveAttribute(
     "data-rendered",

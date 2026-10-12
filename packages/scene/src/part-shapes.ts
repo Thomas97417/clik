@@ -1,4 +1,22 @@
-export type PartDimensions = { w: number; d: number; h: number; shape: string };
+export type PartDimensions = {
+  w: number;
+  d: number;
+  h: number;
+  shape: string;
+  slopeRun?: number;
+};
+
+/** A shorter run keeps one-brick-high steep slopes distinct from ordinary slopes. */
+export function slopeCrease({ d, slopeRun = d - 1 }: PartDimensions) {
+  return -d / 2 + slopeRun;
+}
+
+export function slopeRoofHeight(
+  { d, h, slopeRun = d - 1 }: PartDimensions,
+  z: number,
+) {
+  return 0.25 + (h - 0.25) * Math.min((z + d / 2) / slopeRun, 1);
+}
 
 /** Shared facets: the visible underside and collision solids use the same arch. */
 export function archProfile({ w, h }: PartDimensions): [number, number][] {
