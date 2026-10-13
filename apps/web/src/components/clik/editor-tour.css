@@ -1,0 +1,150 @@
+.editor-tour-popover.driver-popover {
+  width: 344px;
+  min-width: 0;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid #dfe7f3;
+  border-radius: 12px;
+  padding: 18px;
+  color: #344964;
+  font-family: inherit;
+  box-shadow: 0 14px 44px #20396224;
+}
+
+.editor-tour-popover .editor-tour-eyebrow {
+  margin: 0 24px 8px 0;
+  color: #356ae6;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.5;
+}
+
+.editor-tour-popover .driver-popover-title {
+  padding-right: 16px;
+  color: #263b58;
+  font-size: 16px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.editor-tour-popover .driver-popover-description {
+  margin-top: 10px !important;
+  color: #68788e;
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+.editor-tour-popover .driver-popover-description p {
+  margin: 0;
+}
+
+.editor-tour-popover .driver-popover-description p + p {
+  margin-top: 8px;
+}
+
+.editor-tour-popover .driver-popover-close-btn {
+  top: 10px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  color: #8996a9;
+  font-size: 19px;
+  line-height: 26px;
+}
+
+.editor-tour-popover .driver-popover-close-btn:hover {
+  background: #f0f4fa;
+  color: #356ae6;
+}
+
+.editor-tour-popover .driver-popover-footer {
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #edf0f5;
+}
+
+.editor-tour-popover .driver-popover-progress-text {
+  color: #8290a4;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.editor-tour-popover .driver-popover-navigation-btns {
+  gap: 6px;
+}
+
+.editor-tour-popover .driver-popover-navigation-btns button + button {
+  margin-left: 0;
+}
+
+.editor-tour-popover .driver-popover-footer-btn {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dfe7f3;
+  border-radius: 6px;
+  padding: 0 10px;
+  color: #536888;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.editor-tour-popover .driver-popover-prev-btn:hover {
+  border-color: #cddcfa;
+  background: #edf3ff;
+  color: #356ae6;
+}
+
+.editor-tour-popover .driver-popover-next-btn {
+  border-color: #356ae6;
+  background: #356ae6;
+  color: white;
+}
+
+.editor-tour-popover .driver-popover-next-btn:hover {
+  border-color: #2458ce;
+  background: #2458ce;
+}
+
+.editor-tour-popover button:focus-visible {
+  outline: 2px solid #356ae6;
+  outline-offset: 3px;
+}
+
+.editor-tour-popover .editor-tour-shortcuts {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.editor-tour-popover .editor-tour-shortcuts > div {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.editor-tour-popover .editor-tour-shortcuts kbd {
+  width: fit-content;
+  border: 1px solid #dfe7f3;
+  border-radius: 4px;
+  padding: 2px 5px;
+  background: #f8faff;
+  color: #45658f;
+  font-family: inherit;
+  font-size: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .editor-tour-popover {
+    animation: none !important;
+  }
+}

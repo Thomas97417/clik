@@ -3,6 +3,7 @@ import { memo, useEffect, useMemo, useRef, useState, useId } from "react";
 import { useTreeDrag } from "./use-tree-drag";
 import EditorPanels from "./editor-panels";
 import EditorColors from "./editor-colors";
+import EditorHelp from "./editor-help";
 import PublishDialog from "./publish-dialog";
 import ImportProjectDialog from "./import-project-dialog";
 import ProjectSources from "./project-sources";
@@ -231,6 +232,7 @@ export default function Editor({
     [pubTitle, setPubTitle] = useState(""),
     [description, setDescription] = useState("");
   const [importing, setImporting] = useState(false);
+  const [tourActive, setTourActive] = useState(false);
   const [publicationError, setPublicationError] = useState<string>();
   const primaryAction = useRef<HTMLButtonElement>(null);
   const privateSaveDescriptionId = useId();
@@ -352,9 +354,13 @@ export default function Editor({
     publish = useMutation(api.projects.publish);
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
+      // Safari can otherwise navigate back on Backspace while the tour has focus.
+      if (tourActive && ["Backspace", "Delete"].includes(e.key))
+        e.preventDefault();
       if (
         publishing ||
         busy ||
+        tourActive ||
         e.defaultPrevented ||
         e.isComposing ||
         document.querySelector(
@@ -449,7 +455,7 @@ export default function Editor({
     };
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
-  }, [publishing, busy, project.ready, closed]);
+  }, [publishing, busy, project.ready, closed, tourActive]);
   const selected = s.scene.nodes.find((n) => n.id === s.selection[0]);
   const selectionRoots = roots(s.scene, s.selection);
   const selectionParents = new Set(
@@ -837,6 +843,29 @@ export default function Editor({
               />
               <span className="max-xl-narrow:hidden">Importer</span>
             </Button>
+            <EditorHelp
+              disabled={
+                !project.ready ||
+                busy ||
+                publishing ||
+                importing ||
+                !!s.gesture ||
+                !!s.pending ||
+                !!s.libraryPointer
+              }
+              prepareTour={() => {
+                setTourActive(true);
+                setLibraryCollapsed(false);
+                setInspectorCollapsed(false);
+                setPropertiesCollapsed(false);
+                return () => {
+                  setLibraryCollapsed(libraryCollapsed);
+                  setInspectorCollapsed(inspectorCollapsed);
+                  setPropertiesCollapsed(propertiesCollapsed);
+                  setTourActive(false);
+                };
+              }}
+            />
             <div
               className="save-status gap-1.5 flex items-center text-[#68788e] text-xs max-w-57.5 leading-[1.4] data-[state=offline]:text-[#9b660c] data-[state=conflict]:text-[#9b660c] data-[state=error]:text-[#c33e42] group/save-status"
               data-state={saveState}
@@ -1044,7 +1073,7 @@ export default function Editor({
           </div>
         )}
         <EditorPanels
-          inert={busy && !publishing}
+          inert={tourActive || (busy && !publishing)}
           libraryCollapsed={libraryCollapsed}
           inspectorCollapsed={inspectorCollapsed}
           libraryId={libraryId}
@@ -1083,6 +1112,7 @@ export default function Editor({
             </button>
             <aside
               id={libraryId}
+              data-editor-tour="library"
               className="library overflow-hidden flex flex-col min-h-0 bg-white min-w-0 h-full [&[hidden]]:hidden"
               aria-label="Bibliothèque de pièces"
               hidden={libraryCollapsed}
@@ -1319,7 +1349,7 @@ export default function Editor({
               </button>
             </div>
             {project.ready ? (
-              <ClientScene scene={s.scene} editable={!closed} />
+              <ClientScene scene={s.scene} editable={!closed && !tourActive} />
             ) : (
               <div className="empty-state px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0]">
                 Chargement de la création…
@@ -1486,6 +1516,7 @@ export default function Editor({
             </button>
             <aside
               id={inspectorId}
+              data-editor-tour="inspector"
               className="inspector overflow-auto flex flex-col min-h-0 bg-white [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:#c4cede_transparent] overscroll-contain h-full [&[hidden]]:hidden"
               aria-label="Construction et propriétés"
               hidden={inspectorCollapsed}
@@ -1771,7 +1802,10 @@ export default function Editor({
             </span>{" "}
             L’atelier des possibles
           </span>
-          <span className="flex items-center gap-y-1.5 gap-x-3 flex-wrap">
+          <span
+            data-editor-tour="shortcuts"
+            className="flex items-center gap-y-1.5 gap-x-3 flex-wrap"
+          >
             Glisser / flèches : déplacer · Maj + ↑ / ↓ : hauteur · Espace +
             glisser / clic droit : caméra · Maj + clic : sélection multiple{" "}
             <ChevronRight size={12} /> D : dupliquer <ChevronRight size={12} />{" "}
