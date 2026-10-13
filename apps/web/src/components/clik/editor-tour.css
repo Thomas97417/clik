@@ -22,6 +22,10 @@
   line-height: 1.5;
 }
 
+.editor-tour-popover.editor-tour-shortcuts-popover {
+  width: 400px;
+}
+
 .editor-tour-popover .driver-popover-title {
   padding-right: 16px;
   color: #263b58;

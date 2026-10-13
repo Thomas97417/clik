@@ -1,5 +1,114 @@
 import { expect, test, type Page } from "@playwright/test";
 
+for (const mac of [true, false]) {
+  test(`raccourcis complets ${mac ? "Mac" : "Windows"} : symboles, mêmes commandes dans la visite et fond transparent`, async ({
+    page,
+  }, info) => {
+    await page.addInitScript((isMac) => {
+      Object.defineProperty(navigator, "platform", {
+        configurable: true,
+        get: () => (isMac ? "MacIntel" : "Win32"),
+      });
+      Object.defineProperty(navigator, "userAgentData", {
+        configurable: true,
+        get: () => ({ platform: isMac ? "macOS" : "Windows" }),
+      });
+    }, mac);
+    await openEditor(page);
+    const trigger = page.getByRole("button", {
+      name: "Afficher les raccourcis de l’atelier",
+      exact: true,
+    });
+    const before = await trigger.textContent();
+    await expect(trigger).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    await trigger.hover();
+    await expect(trigger).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    await trigger.click();
+    const popup = page.getByRole("dialog", {
+      name: "Les raccourcis à portée de main",
+      exact: true,
+    });
+    await expect(popup).toBeVisible();
+    await expect(trigger).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    const undo = popup
+      .locator(".editor-shortcut-row")
+      .filter({ has: page.getByText("Annuler", { exact: true }) });
+    await expect(undo.locator("kbd")).toHaveAttribute(
+      "title",
+      `${mac ? "Commande" : "Contrôle"} + Z`,
+    );
+    await expect(undo.locator('kbd span[aria-hidden="true"]')).toHaveText([
+      mac ? "⌘" : "Ctrl",
+      "Z",
+    ]);
+    for (const label of [
+      "Rétablir",
+      "Copier la sélection",
+      "Coller",
+      "Supprimer la sélection",
+      "Grouper la sélection",
+      "Dégrouper",
+      "Zoomer / dézoomer",
+      "Ajuster la largeur",
+    ]) {
+      await expect(popup.getByText(label, { exact: true })).toHaveCount(1);
+    }
+    const list = popup.getByRole("region", { name: "Liste des raccourcis" });
+    await list.focus();
+    await page.keyboard.press("PageDown");
+    await expect
+      .poll(() => list.evaluate((element) => element.scrollTop))
+      .toBeGreaterThan(0);
+    await list.evaluate((element) => element.scrollTo(0, 0));
+    const presentation = (container: ReturnType<Page["locator"]>) =>
+      container.locator(".editor-shortcut-row").evaluateAll((rows) =>
+        rows.map((row) => ({
+          action: row.firstElementChild?.textContent,
+          keys: Array.from(row.querySelectorAll("kbd")).map((key) => ({
+            label: key.getAttribute("title"),
+            glyphs: Array.from(key.querySelectorAll('[aria-hidden="true"]'))
+              .map((symbol) => symbol.textContent)
+              .join(""),
+          })),
+        })),
+      );
+    const popupRows = await presentation(popup);
+    await page.screenshot({
+      path: `/tmp/clik-shortcut-symbols-${mac ? "mac" : "pc"}-${info.project.name}.png`,
+    });
+    await page.keyboard.press("Escape");
+    await expect(popup).toHaveCount(0);
+    await expect(trigger).toHaveText(before!);
+    await help(page).click();
+    await expect(tour(page)).toBeVisible();
+    await tour(page)
+      .getByRole("button", { name: "Suivant", exact: true })
+      .click();
+    await tour(page)
+      .getByRole("button", { name: "Suivant", exact: true })
+      .click();
+    await expect(tour(page)).toHaveAccessibleName(
+      "Les raccourcis à portée de main",
+    );
+    expect(await presentation(tour(page))).toEqual(popupRows);
+    const tourList = tour(page).getByRole("region", {
+      name: "Liste des raccourcis",
+    });
+    await expect(tourList).toBeFocused();
+    await page.keyboard.press("PageDown");
+    await expect
+      .poll(() => tourList.evaluate((element) => element.scrollTop))
+      .toBeGreaterThan(0);
+    await expect(
+      tour(page).getByRole("button", { name: "Terminer", exact: true }),
+    ).toBeVisible();
+    await tour(page)
+      .getByRole("button", { name: "Terminer", exact: true })
+      .click();
+    await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+  });
+}
+
 const help = (page: Page) =>
   page.getByRole("button", { name: "Aide de l’atelier", exact: true });
 const welcome = (page: Page) =>

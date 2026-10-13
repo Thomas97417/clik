@@ -1,26 +1,70 @@
 .editor-shortcuts-list {
   display: grid;
-  gap: 8px;
+  gap: 20px;
   margin-top: 14px;
+  max-height: min(360px, calc(100dvh - 260px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #c4cede transparent;
+  padding-right: 6px;
 }
 
-.editor-shortcuts-list > div {
-  display: grid;
-  grid-template-columns: 130px minmax(0, 1fr);
-  align-items: start;
-  gap: 10px;
-  color: #68788e;
-  font-size: 11px;
+.editor-shortcuts-list:focus-visible {
+  border-radius: 6px;
+  outline: 2px solid #356ae6;
+  outline-offset: 2px;
+}
+
+.editor-shortcut-group h3 {
+  margin: 0 0 8px;
+  color: #344964;
+  font-size: 12px;
+  font-weight: 650;
   line-height: 1.5;
 }
 
-.editor-shortcuts-list kbd {
-  width: fit-content;
-  border: 1px solid #dfe7f3;
-  border-radius: 4px;
-  padding: 2px 5px;
-  background: #f8faff;
-  color: #45658f;
-  font-family: inherit;
+.editor-shortcut-context {
+  margin: -4px 0 8px !important;
+  color: #8290a4;
   font-size: 10px;
+  line-height: 1.5;
+}
+
+.editor-shortcut-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 0;
+  color: #68788e;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.editor-shortcut-keys {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 5px;
+  max-width: 190px;
+}
+
+.editor-shortcuts-list kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 25px;
+  min-height: 24px;
+  border: 1px solid #dfe7f3;
+  border-radius: 6px;
+  padding: 2px 6px;
+  background: #f3f6fa;
+  color: #45658f;
+  font-family: system-ui, "Segoe UI Symbol", sans-serif;
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
 }

@@ -3,9 +3,10 @@ import "driver.js/dist/driver.css";
 import "./editor-tour.css";
 import "./editor-shortcuts.css";
 import {
-  EDITOR_SHORTCUTS,
   EDITOR_SHORTCUTS_DESCRIPTION,
   EDITOR_SHORTCUTS_TITLE,
+  editorShortcutsHtml,
+  isMacKeyboard,
 } from "@/lib/clik/editor-shortcuts";
 
 export function startEditorTour(onClose: () => void) {
@@ -49,8 +50,11 @@ export function startEditorTour(onClose: () => void) {
       title.before(label);
     },
     onHighlighted: (_element, _step, { state }) => {
-      // The editor panels are inert: keep keyboard focus in the tour's controls.
-      state.popover?.nextButton.focus();
+      // Focus the scrollable shortcuts so the whole list is reachable by keyboard.
+      const list = state.popover?.wrapper.querySelector<HTMLElement>(
+        ".editor-shortcuts-list",
+      );
+      (list ?? state.popover?.nextButton)?.focus();
     },
     onDestroyStarted: close,
     onDestroyed: finish,
@@ -83,12 +87,8 @@ export function startEditorTour(onClose: () => void) {
           title: EDITOR_SHORTCUTS_TITLE,
           description:
             `<p>${EDITOR_SHORTCUTS_DESCRIPTION}</p>` +
-            '<div class="editor-shortcuts-list">' +
-            EDITOR_SHORTCUTS.map(
-              ([key, label]) =>
-                `<div><kbd>${key}</kbd><span>${label}</span></div>`,
-            ).join("") +
-            "</div>",
+            editorShortcutsHtml(isMacKeyboard()),
+          popoverClass: "editor-tour-popover editor-tour-shortcuts-popover",
           side: "top",
           align: "end",
         },

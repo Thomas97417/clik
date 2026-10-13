@@ -8,9 +8,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
-  EDITOR_SHORTCUTS,
+  EDITOR_SHORTCUT_GROUPS,
   EDITOR_SHORTCUTS_DESCRIPTION,
   EDITOR_SHORTCUTS_TITLE,
+  isMacKeyboard,
+  shortcutKeys,
 } from "@/lib/clik/editor-shortcuts";
 import "./editor-shortcuts.css";
 
@@ -20,8 +22,11 @@ export default function EditorShortcutsPopover({
   disabled: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [mac, setMac] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
   const close = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => setMac(isMacKeyboard()), []);
 
   useEffect(() => {
     if (disabled) setOpen(false);
@@ -45,7 +50,7 @@ export default function EditorShortcutsPopover({
         aria-label="Afficher les raccourcis de l’atelier"
         title="Afficher les raccourcis de l’atelier"
         disabled={disabled}
-        className="editor-shortcuts-trigger -mx-1.5 -my-0.5 flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-1.5 rounded-[6px] border-0 bg-transparent px-1.5 py-0.5 text-left [font:inherit] text-inherit outline-offset-3 transition-colors hover:bg-[#edf3ff] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-[#356ae6] disabled:cursor-default data-popup-open:bg-[#edf3ff] data-popup-open:text-[#356ae6]"
+        className="editor-shortcuts-trigger -mx-1.5 -my-0.5 flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-1.5 rounded-[6px] border-0 bg-transparent px-1.5 py-0.5 text-left [font:inherit] text-inherit outline-offset-3 transition-colors hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-[#356ae6] disabled:cursor-default data-popup-open:text-[#356ae6]"
       >
         Glisser / flèches : déplacer · Maj + ↑ / ↓ : hauteur · Espace + glisser
         / clic droit : caméra · Maj + clic : sélection multiple{" "}
@@ -60,7 +65,7 @@ export default function EditorShortcutsPopover({
         sideOffset={14}
         initialFocus={close}
         finalFocus={trigger}
-        className="editor-shortcuts-popover relative w-86 max-w-[calc(100vw-32px)] max-h-[calc(100dvh-32px)] gap-0 overflow-y-auto overscroll-contain rounded-[12px] border border-solid border-[#dfe7f3] bg-white p-4.5 text-[#344964] ring-0 [box-shadow:0_14px_44px_#20396224] motion-reduce:animate-none"
+        className="editor-shortcuts-popover relative w-100 max-w-[calc(100vw-32px)] max-h-[calc(100dvh-32px)] gap-0 overflow-y-auto overscroll-contain rounded-[12px] border border-solid border-[#dfe7f3] bg-white p-4.5 text-[#344964] ring-0 [box-shadow:0_14px_44px_#20396224] motion-reduce:animate-none"
         onKeyDown={(event) => {
           // Prevent Safari's history navigation while reading the shortcuts.
           if (["Backspace", "Delete"].includes(event.key))
@@ -85,12 +90,40 @@ export default function EditorShortcutsPopover({
         <PopoverDescription className="mt-2.5 text-xs leading-[1.75] text-[#68788e]">
           {EDITOR_SHORTCUTS_DESCRIPTION}
         </PopoverDescription>
-        <div className="editor-shortcuts-list">
-          {EDITOR_SHORTCUTS.map(([key, label]) => (
-            <div key={key}>
-              <kbd>{key}</kbd>
-              <span>{label}</span>
-            </div>
+        <div
+          className="editor-shortcuts-list"
+          tabIndex={0}
+          role="region"
+          aria-label="Liste des raccourcis"
+        >
+          {EDITOR_SHORTCUT_GROUPS.map((group) => (
+            <section className="editor-shortcut-group" key={group.title}>
+              <h3>{group.title}</h3>
+              {group.context && (
+                <p className="editor-shortcut-context">{group.context}</p>
+              )}
+              {group.shortcuts.map((shortcut) => (
+                <div className="editor-shortcut-row" key={shortcut.label}>
+                  <span>{shortcut.label}</span>
+                  <div className="editor-shortcut-keys">
+                    {shortcut.keys.map((combination) => {
+                      const keys = shortcutKeys(combination, mac);
+                      const label = keys.map((key) => key.label).join(" + ");
+                      return (
+                        <kbd key={combination.join("-")} title={label}>
+                          <span className="sr-only">{label}</span>
+                          {keys.map((key, index) => (
+                            <span key={index} aria-hidden="true">
+                              {key.glyph}
+                            </span>
+                          ))}
+                        </kbd>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </section>
           ))}
         </div>
       </PopoverContent>
