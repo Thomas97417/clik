@@ -1,0 +1,26 @@
+.editor-shortcuts-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.editor-shortcuts-list > div {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  color: #68788e;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.editor-shortcuts-list kbd {
+  width: fit-content;
+  border: 1px solid #dfe7f3;
+  border-radius: 4px;
+  padding: 2px 5px;
+  background: #f8faff;
+  color: #45658f;
+  font-family: inherit;
+  font-size: 10px;
+}

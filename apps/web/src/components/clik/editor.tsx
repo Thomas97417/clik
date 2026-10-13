@@ -4,6 +4,7 @@ import { useTreeDrag } from "./use-tree-drag";
 import EditorPanels from "./editor-panels";
 import EditorColors from "./editor-colors";
 import EditorHelp from "./editor-help";
+import EditorShortcutsPopover from "./editor-shortcuts-popover";
 import PublishDialog from "./publish-dialog";
 import ImportProjectDialog from "./import-project-dialog";
 import ProjectSources from "./project-sources";
@@ -1802,16 +1803,18 @@ export default function Editor({
             </span>{" "}
             L’atelier des possibles
           </span>
-          <span
-            data-editor-tour="shortcuts"
-            className="flex items-center gap-y-1.5 gap-x-3 flex-wrap"
-          >
-            Glisser / flèches : déplacer · Maj + ↑ / ↓ : hauteur · Espace +
-            glisser / clic droit : caméra · Maj + clic : sélection multiple{" "}
-            <ChevronRight size={12} /> D : dupliquer <ChevronRight size={12} />{" "}
-            F : cadrer <ChevronRight size={12} /> R / Maj + R : ±90°{" "}
-            <ChevronRight size={12} /> Échap : annuler
-          </span>
+          <EditorShortcutsPopover
+            disabled={
+              !project.ready ||
+              tourActive ||
+              busy ||
+              publishing ||
+              importing ||
+              !!s.gesture ||
+              !!s.pending ||
+              !!s.libraryPointer
+            }
+          />
         </footer>
       </main>
       {publishing && (

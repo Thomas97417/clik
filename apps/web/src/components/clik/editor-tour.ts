@@ -1,17 +1,12 @@
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 import "./editor-tour.css";
-
-const shortcuts = [
-  ["↑ ↓ ← →", "Déplacer une pièce"],
-  ["Maj + ↑ / ↓", "Changer sa hauteur"],
-  ["Espace + glisser / clic droit", "Déplacer la caméra"],
-  ["Maj + clic", "Sélectionner plusieurs pièces"],
-  ["D", "Dupliquer la sélection"],
-  ["F", "Cadrer la sélection"],
-  ["R / Maj + R", "Tourner de +90° / −90°"],
-  ["Échap", "Annuler l’action en cours"],
-];
+import "./editor-shortcuts.css";
+import {
+  EDITOR_SHORTCUTS,
+  EDITOR_SHORTCUTS_DESCRIPTION,
+  EDITOR_SHORTCUTS_TITLE,
+} from "@/lib/clik/editor-shortcuts";
 
 export function startEditorTour(onClose: () => void) {
   let finished = false;
@@ -85,16 +80,14 @@ export function startEditorTour(onClose: () => void) {
       {
         element: '[data-editor-tour="shortcuts"]',
         popover: {
-          title: "Les raccourcis à portée de main",
+          title: EDITOR_SHORTCUTS_TITLE,
           description:
-            "<p>La barre du bas garde les commandes utiles sous les yeux. Voici vos premiers repères :</p>" +
-            '<div class="editor-tour-shortcuts">' +
-            shortcuts
-              .map(
-                ([key, label]) =>
-                  `<div><kbd>${key}</kbd><span>${label}</span></div>`,
-              )
-              .join("") +
+            `<p>${EDITOR_SHORTCUTS_DESCRIPTION}</p>` +
+            '<div class="editor-shortcuts-list">' +
+            EDITOR_SHORTCUTS.map(
+              ([key, label]) =>
+                `<div><kbd>${key}</kbd><span>${label}</span></div>`,
+            ).join("") +
             "</div>",
           side: "top",
           align: "end",

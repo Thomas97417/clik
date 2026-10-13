@@ -117,32 +117,6 @@
   outline-offset: 3px;
 }
 
-.editor-tour-popover .editor-tour-shortcuts {
-  display: grid;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.editor-tour-popover .editor-tour-shortcuts > div {
-  display: grid;
-  grid-template-columns: 130px minmax(0, 1fr);
-  align-items: start;
-  gap: 10px;
-  font-size: 11px;
-  line-height: 1.5;
-}
-
-.editor-tour-popover .editor-tour-shortcuts kbd {
-  width: fit-content;
-  border: 1px solid #dfe7f3;
-  border-radius: 4px;
-  padding: 2px 5px;
-  background: #f8faff;
-  color: #45658f;
-  font-family: inherit;
-  font-size: 10px;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .editor-tour-popover {
     animation: none !important;
