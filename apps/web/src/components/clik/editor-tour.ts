@@ -9,6 +9,16 @@ import {
   isMacKeyboard,
 } from "@/lib/clik/editor-shortcuts";
 
+const actionIconSources: Record<string, string> = {
+  select: '[aria-label="Tout sélectionner"]',
+  group: '[title="Grouper"], [title="Nouveau groupe"]',
+  ungroup: '[title="Dissocier"]',
+  duplicate: '[aria-label="Dupliquer"]',
+  remove: '[title="Supprimer"]',
+  collapse: '[aria-label="Tout replier"]',
+  expand: '[aria-label="Tout déplier"]',
+};
+
 export function startEditorTour(onClose: () => void) {
   let finished = false;
   const finish = () => {
@@ -39,22 +49,44 @@ export function startEditorTour(onClose: () => void) {
     doneBtnText: "Terminer",
     closeBtnLabel: "Quitter la visite",
     onPopoverRender: ({ wrapper, title, description, closeButton }) => {
+      // Driver sets display:block inline; flex keeps the navigation outside scrolling text.
+      wrapper.style.display = "flex";
       wrapper.setAttribute("role", "dialog");
       wrapper.setAttribute("aria-modal", "true");
       wrapper.setAttribute("aria-labelledby", title.id);
       wrapper.setAttribute("aria-describedby", description.id);
+      description.tabIndex = 0;
       closeButton.setAttribute("title", "Quitter la visite");
       const label = document.createElement("p");
       label.className = "editor-tour-eyebrow";
       label.textContent = "LES REPÈRES DE L’ATELIER";
       title.before(label);
+      // Reuse the toolbar's SVGs so the guide always shows the same icons.
+      const toolbar = document.querySelector(
+        '[data-editor-tour="construction-actions"]',
+      );
+      for (const placeholder of description.querySelectorAll<HTMLElement>(
+        "[data-editor-tour-icon]",
+      )) {
+        const selector = actionIconSources[placeholder.dataset.editorTourIcon!];
+        const icon = toolbar?.querySelector(selector)?.querySelector("svg");
+        if (icon) placeholder.appendChild(icon.cloneNode(true));
+      }
     },
     onHighlighted: (_element, _step, { state }) => {
       // Focus the scrollable shortcuts so the whole list is reachable by keyboard.
-      const list = state.popover?.wrapper.querySelector<HTMLElement>(
+      const popover = state.popover;
+      if (!popover) return;
+      const list = popover.wrapper.querySelector<HTMLElement>(
         ".editor-shortcuts-list",
       );
-      (list ?? state.popover?.nextButton)?.focus();
+      const description = popover.description;
+      (
+        list ??
+        (description.scrollHeight > description.clientHeight
+          ? description
+          : popover.nextButton)
+      ).focus();
     },
     onDestroyStarted: close,
     onDestroyed: finish,
@@ -75,8 +107,37 @@ export function startEditorTour(onClose: () => void) {
         popover: {
           title: "Votre construction, en détail",
           description:
-            "<p>À droite, retrouvez les pièces et les groupes de votre construction.</p>" +
-            "<p>Les propriétés affichent le nom, la position et la rotation de la sélection. Ce panneau se replie et se redimensionne aussi.</p>",
+            "<p>La liste de droite rassemble les pièces et les groupes de votre création. Sélectionnez un élément ici pour le retrouver sur la scène.</p>" +
+            "<p>Les flèches ouvrent les groupes. Les icônes d’œil et de cadenas permettent de masquer ou de verrouiller un élément.</p>" +
+            "<p>Vous pouvez replier ce panneau ou l’élargir en tirant sa bordure vers la scène.</p>",
+          side: "left",
+          align: "center",
+        },
+      },
+      {
+        element: '[data-editor-tour="construction-actions"]',
+        popover: {
+          title: "Les actions de construction",
+          description:
+            "<p>Cette barre agit sur votre sélection et organise la liste.</p>" +
+            '<ul class="editor-tour-actions">' +
+            '<li><strong><span class="editor-tour-action-name"><span data-editor-tour-icon="select" aria-hidden="true"></span>Tout sélectionner</span></strong><span>Sélectionne toutes les pièces et tous les groupes d’un seul clic.</span></li>' +
+            '<li><strong><span class="editor-tour-action-name"><span data-editor-tour-icon="group" aria-hidden="true"></span>Grouper / Nouveau groupe</span></strong><span>Réunit la sélection pour la déplacer ensemble. Sans sélection, crée un groupe vide.</span></li>' +
+            '<li><strong><span class="editor-tour-action-name"><span data-editor-tour-icon="ungroup" aria-hidden="true"></span>Dissocier</span></strong><span>Sépare les éléments d’un groupe en conservant ses pièces.</span></li>' +
+            '<li><strong><span class="editor-tour-action-name"><span data-editor-tour-icon="duplicate" aria-hidden="true"></span>Dupliquer</span> / <span class="editor-tour-action-name"><span data-editor-tour-icon="remove" aria-hidden="true"></span>Supprimer</span></strong><span>Crée une copie de la sélection, ou la retire de la création.</span></li>' +
+            '<li><strong><span class="editor-tour-action-name"><span data-editor-tour-icon="collapse" aria-hidden="true"></span>Tout replier</span> / <span class="editor-tour-action-name"><span data-editor-tour-icon="expand" aria-hidden="true"></span>Tout déplier</span></strong><span>Masque ou affiche le contenu des groupes dans la liste.</span></li>' +
+            "</ul>",
+          side: "left",
+          align: "start",
+        },
+      },
+      {
+        element: '[data-editor-tour="properties"]',
+        popover: {
+          title: "Les propriétés de la sélection",
+          description:
+            "<p>Après avoir sélectionné une pièce ou un groupe, retrouvez ici son nom, son groupe parent, sa position et sa rotation.</p>" +
+            "<p>Modifiez les valeurs X, Y et Z pour des réglages précis. Vous pouvez replier cette section pour agrandir la liste de construction.</p>",
           side: "left",
           align: "center",
         },

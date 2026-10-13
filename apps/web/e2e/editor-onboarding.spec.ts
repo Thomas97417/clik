@@ -81,15 +81,7 @@ for (const mac of [true, false]) {
     await expect(trigger).toHaveText(before!);
     await help(page).click();
     await expect(tour(page)).toBeVisible();
-    await tour(page)
-      .getByRole("button", { name: "Suivant", exact: true })
-      .click();
-    await tour(page)
-      .getByRole("button", { name: "Suivant", exact: true })
-      .click();
-    await expect(tour(page)).toHaveAccessibleName(
-      "Les raccourcis à portée de main",
-    );
+    await advanceToShortcuts(page);
     expect(await presentation(tour(page))).toEqual(popupRows);
     const tourList = tour(page).getByRole("region", {
       name: "Liste des raccourcis",
@@ -117,6 +109,38 @@ const welcome = (page: Page) =>
     exact: true,
   });
 const tour = (page: Page) => page.locator(".editor-tour-popover");
+
+async function expectNoHorizontalScroll(page: Page) {
+  // The arrow can extend outside the card without becoming a scrollable area.
+  await expect(tour(page)).toHaveCSS("overflow-x", "visible");
+  expect(
+    await tour(page).evaluate((element) => {
+      element.scrollLeft = 50;
+      return element.scrollLeft;
+    }),
+  ).toBe(0);
+  const description = tour(page).locator(".driver-popover-description");
+  expect(
+    await description.evaluate(
+      (element) => element.scrollWidth <= element.clientWidth + 1,
+    ),
+  ).toBe(true);
+}
+
+async function advanceToShortcuts(page: Page) {
+  for (const title of [
+    "Votre construction, en détail",
+    "Les actions de construction",
+    "Les propriétés de la sélection",
+    "Les raccourcis à portée de main",
+  ]) {
+    await tour(page)
+      .getByRole("button", { name: "Suivant", exact: true })
+      .click();
+    await expect(tour(page)).toHaveAccessibleName(title);
+    await expectNoHorizontalScroll(page);
+  }
+}
 
 async function openEditor(page: Page, draft?: string) {
   await page.goto(draft ? `/editor?draft=${draft}` : "/editor");
@@ -180,7 +204,7 @@ test("accueil discret une seule fois, bibliothèque utilisable et visite chargé
   await expect(help(page)).toBeFocused();
 });
 
-test("les trois étapes et le clavier préservent la scène, la sélection et l’historique", async ({
+test("les cinq étapes présentent les actions sans débordement et préservent la scène, la sélection et l’historique", async ({
   page,
 }, info) => {
   const errors: string[] = [];
@@ -195,7 +219,7 @@ test("les trois étapes et le clavier préservent la scène, la sélection et l�
   await help(page).click();
   await expect(tour(page)).toHaveAttribute("aria-modal", "true");
   await expect(tour(page)).toHaveAccessibleName("Les pièces et leurs couleurs");
-  await expect(tour(page)).toContainText("Étape 1 sur 3");
+  await expect(tour(page)).toContainText("Étape 1 sur 5");
   await expect(page.locator(".driver-active-element")).toHaveAttribute(
     "data-editor-tour",
     "library",
@@ -222,12 +246,47 @@ test("les trois étapes et le clavier préservent la scène, la sélection et l�
     "data-editor-tour",
     "inspector",
   );
-  await expect(tour(page)).toContainText("Étape 2 sur 3");
+  await expect(tour(page)).toContainText("Étape 2 sur 5");
+  await expectNoHorizontalScroll(page);
   await page.keyboard.press("ArrowLeft");
   await expect(tour(page)).toHaveAccessibleName("Les pièces et leurs couleurs");
   await tour(page)
     .getByRole("button", { name: "Suivant", exact: true })
     .click();
+  await tour(page)
+    .getByRole("button", { name: "Suivant", exact: true })
+    .click();
+  await expect(tour(page)).toHaveAccessibleName("Les actions de construction");
+  await expect(page.locator(".driver-active-element")).toHaveAttribute(
+    "data-editor-tour",
+    "construction-actions",
+  );
+  await expect(tour(page)).toContainText("Étape 3 sur 5");
+  for (const label of [
+    "Tout sélectionner",
+    "Grouper / Nouveau groupe",
+    "Dissocier",
+    "Dupliquer / Supprimer",
+    "Tout replier / Tout déplier",
+  ]) {
+    await expect(tour(page).getByText(label, { exact: true })).toBeVisible();
+  }
+  await expectNoHorizontalScroll(page);
+  await page.screenshot({
+    path: `/tmp/clik-tour-construction-actions-${info.project.name}.png`,
+  });
+  await tour(page)
+    .getByRole("button", { name: "Suivant", exact: true })
+    .click();
+  await expect(tour(page)).toHaveAccessibleName(
+    "Les propriétés de la sélection",
+  );
+  await expect(page.locator(".driver-active-element")).toHaveAttribute(
+    "data-editor-tour",
+    "properties",
+  );
+  await expect(tour(page)).toContainText("Étape 4 sur 5");
+  await expectNoHorizontalScroll(page);
   await tour(page)
     .getByRole("button", { name: "Suivant", exact: true })
     .click();
@@ -238,7 +297,7 @@ test("les trois étapes et le clavier préservent la scène, la sélection et l�
     "data-editor-tour",
     "shortcuts",
   );
-  await expect(tour(page)).toContainText("Étape 3 sur 3");
+  await expect(tour(page)).toContainText("Étape 5 sur 5");
   await page.screenshot({
     path: `/tmp/clik-tour-shortcuts-${info.project.name}.png`,
   });
@@ -326,15 +385,7 @@ test("le mobile garde l’accueil pour la première ouverture de l’atelier sur
   await expect(welcome(page)).toBeVisible();
   await help(page).click();
   await expect(tour(page)).toBeVisible();
-  await tour(page)
-    .getByRole("button", { name: "Suivant", exact: true })
-    .click();
-  await tour(page)
-    .getByRole("button", { name: "Suivant", exact: true })
-    .click();
-  await expect(tour(page)).toHaveAccessibleName(
-    "Les raccourcis à portée de main",
-  );
+  await advanceToShortcuts(page);
   const box = (await tour(page).boundingBox())!;
   expect(box.x).toBeGreaterThanOrEqual(0);
   expect(box.y).toBeGreaterThanOrEqual(0);
@@ -350,4 +401,49 @@ test("le mobile garde l’accueil pour la première ouverture de l’atelier sur
   await expect(help(page)).toBeEnabled();
   await expect(welcome(page)).toHaveCount(0);
   await expect(tour(page)).toHaveCount(0);
+});
+
+test("les actions restent lisibles au clavier dans une fenêtre basse, avec les boutons de visite visibles", async ({
+  page,
+}, info) => {
+  await page.setViewportSize({ width: 900, height: 450 });
+  await openEditor(page);
+  await help(page).click();
+  await expect(tour(page)).toBeVisible();
+  for (const title of [
+    "Votre construction, en détail",
+    "Les actions de construction",
+  ]) {
+    await tour(page)
+      .getByRole("button", { name: "Suivant", exact: true })
+      .click();
+    await expect(tour(page)).toHaveAccessibleName(title);
+    await expectNoHorizontalScroll(page);
+  }
+  const description = tour(page).locator(".driver-popover-description");
+  await expect(description).toBeFocused();
+  await page.keyboard.press("PageDown");
+  await expect
+    .poll(() => description.evaluate((element) => element.scrollTop))
+    .toBeGreaterThan(0);
+  await expect(
+    tour(page).getByRole("button", { name: "Suivant", exact: true }),
+  ).toBeInViewport();
+  await expect(
+    tour(page).getByRole("button", { name: "Précédent", exact: true }),
+  ).toBeInViewport();
+  await expect(
+    tour(page).getByRole("button", { name: "Quitter la visite", exact: true }),
+  ).toBeInViewport();
+  const box = (await tour(page).boundingBox())!;
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.y).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(900);
+  expect(box.y + box.height).toBeLessThanOrEqual(450);
+  await page.screenshot({
+    path: `/tmp/clik-tour-actions-short-${info.project.name}.png`,
+  });
+  await page.keyboard.press("Escape");
+  await expect(help(page)).toBeFocused();
+  await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
 });

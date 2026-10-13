@@ -3,8 +3,9 @@
   min-width: 0;
   max-width: calc(100vw - 32px);
   max-height: calc(100dvh - 32px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
   border: 1px solid #dfe7f3;
   border-radius: 12px;
   padding: 18px;
@@ -14,6 +15,7 @@
 }
 
 .editor-tour-popover .editor-tour-eyebrow {
+  flex-shrink: 0;
   margin: 0 24px 8px 0;
   color: #356ae6;
   font-size: 9px;
@@ -27,6 +29,7 @@
 }
 
 .editor-tour-popover .driver-popover-title {
+  flex-shrink: 0;
   padding-right: 16px;
   color: #263b58;
   font-size: 16px;
@@ -35,7 +38,14 @@
 }
 
 .editor-tour-popover .driver-popover-description {
+  min-height: 0;
   margin-top: 10px !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #c4cede transparent;
+  overflow-wrap: anywhere;
   color: #68788e;
   font-size: 12px;
   line-height: 1.75;
@@ -47,6 +57,56 @@
 
 .editor-tour-popover .driver-popover-description p + p {
   margin-top: 8px;
+}
+
+.editor-tour-popover .editor-shortcuts-list {
+  padding: 4px 6px 4px 4px;
+}
+
+.editor-tour-popover .editor-shortcuts-list:focus-visible {
+  outline-offset: -2px;
+}
+
+.editor-tour-actions {
+  display: grid;
+  gap: 12px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.editor-tour-actions li {
+  display: grid;
+  gap: 2px;
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+.editor-tour-actions strong {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  color: #344964;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.editor-tour-action-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.editor-tour-action-name [data-editor-tour-icon] {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: #607eac;
+}
+
+.editor-tour-action-name svg {
+  width: 16px;
+  height: 16px;
 }
 
 .editor-tour-popover .driver-popover-close-btn {
@@ -66,6 +126,7 @@
 }
 
 .editor-tour-popover .driver-popover-footer {
+  flex-shrink: 0;
   gap: 10px;
   margin-top: 16px;
   padding-top: 12px;
@@ -116,7 +177,8 @@
   background: #2458ce;
 }
 
-.editor-tour-popover button:focus-visible {
+.editor-tour-popover button:focus-visible,
+.editor-tour-popover .driver-popover-description:focus-visible {
   outline: 2px solid #356ae6;
   outline-offset: 3px;
 }

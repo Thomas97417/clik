@@ -1532,7 +1532,10 @@ export default function Editor({
                   </span>
                 </div>
               </div>
-              <div className="tree-actions px-2 gap-0.75 flex pt-0 pb-3 border-b border-solid border-b-[#edf0f5]">
+              <div
+                data-editor-tour="construction-actions"
+                className="tree-actions px-2 gap-0.75 flex pt-0 pb-3 border-b border-solid border-b-[#edf0f5]"
+              >
                 <button
                   className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
                   title="Tout sélectionner"
@@ -1638,7 +1641,10 @@ export default function Editor({
               <span className="sr-only" role="status" aria-live="polite">
                 {treeDrag.active ? treeDrag.target?.label : ""}
               </span>
-              <div className="properties px-4.25 py-0 border-t border-solid border-t-[#e9edf3] shrink-0">
+              <div
+                data-editor-tour="properties"
+                className="properties px-4.25 py-0 border-t border-solid border-t-[#e9edf3] shrink-0"
+              >
                 <div className="panel-heading group/panel-heading flex items-center justify-between px-0 py-4.75">
                   <h2 className="text-sm font-[750] leading-normal">
                     <button
