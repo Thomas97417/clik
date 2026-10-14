@@ -58,9 +58,9 @@ export function placementBody(
     );
   }
   if (shape === "corner") {
-    const x = w / 2 - 0.01,
-      z = d / 2 - 0.01,
-      cut = -0.01;
+    const x = w / 2,
+      z = d / 2,
+      cut = 0;
     const rectangle = (
       left: number,
       right: number,
@@ -83,15 +83,15 @@ export function placementBody(
     const curve = archProfile(dimensions);
     const sections: [number, number][][] = [
       [
-        [-w / 2 + 0.01, 0],
+        [-w / 2, 0],
         [curve[0][0], 0],
         [curve[0][0], h],
-        [-w / 2 + 0.01, h],
+        [-w / 2, h],
       ],
       [
         [curve[curve.length - 1][0], 0],
-        [w / 2 - 0.01, 0],
-        [w / 2 - 0.01, h],
+        [w / 2, 0],
+        [w / 2, h],
         [curve[curve.length - 1][0], h],
       ],
       ...curve
@@ -106,15 +106,15 @@ export function placementBody(
     return compound(
       sections.map((section) =>
         prism(
-          section.map(([x, y]) => new Vector3(x, y, -d / 2 + 0.01)),
-          new Vector3(0, 0, d - 0.02),
+          section.map(([x, y]) => new Vector3(x, y, -d / 2)),
+          new Vector3(0, 0, d),
           matrix,
         ),
       ),
     );
   }
-  const x = w / 2 - 0.01,
-    z = d / 2 - 0.01;
+  const x = w / 2,
+    z = d / 2;
   const profile =
     shape === "slope"
       ? [

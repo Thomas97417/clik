@@ -44,7 +44,7 @@ for (const snap of [true, false]) {
       await page.getByLabel("position Z", { exact: true }).inputValue(),
     );
     // Ramp center is z=0.5; check its height under the brick's uphill edge.
-    const localEdge = Math.min(0.5, z - 0.5 + 0.49);
+    const localEdge = Math.min(0.5, z - 0.5 + 0.5);
     const roof = 0.25 + (0.95 * (localEdge + 1.5)) / 2;
     expect(Number(await height.inputValue())).toBeGreaterThanOrEqual(
       roof - 0.002,

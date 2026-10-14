@@ -15,6 +15,34 @@ import { useEditor } from "../src/lib/clik/store";
 
 describe("collisions des pièces", () => {
   it.each(Object.keys(CATALOG) as PartType[])(
+    "%s : accepte un contact exact et refuse même une faible pénétration",
+    (type) => {
+      const { w, d } = CATALOG[type];
+      const first = makePart(type, "#4079e8");
+      const scene = { ...emptyScene(), nodes: [first] };
+      for (const position of [
+        [w, 0, 0],
+        [0, 0, d],
+      ] as [number, number, number][]) {
+        const neighbor = makePart(type, "#ef4444", position);
+        expect(
+          hasOverlappingParts({ ...scene, nodes: [first, neighbor] }),
+        ).toBe(false);
+        expect(snapCandidate(scene, neighbor, false).part).toBe(neighbor);
+        neighbor.position = position.map((value) =>
+          value ? value - 0.005 : 0,
+        ) as [number, number, number];
+        expect(
+          hasOverlappingParts({ ...scene, nodes: [first, neighbor] }),
+        ).toBe(true);
+        const corrected = snapCandidate(scene, neighbor, false).part;
+        expect(
+          hasOverlappingParts({ ...scene, nodes: [first, corrected] }),
+        ).toBe(false);
+      }
+    },
+  );
+  it.each(Object.keys(CATALOG) as PartType[])(
     "%s occupe son volume avec et sans aimantation",
     (type) => {
       const target = makePart(type, "#4079e8");

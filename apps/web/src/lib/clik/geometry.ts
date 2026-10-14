@@ -27,18 +27,18 @@ const SOCKET_RADIUS = STUD_RADIUS + 0.025;
 const SEGMENTS = 24;
 
 function outline(w: number, d: number, inset = 0, kind = "block") {
-  const x = w / 2 - 0.01 - inset,
-    z = d / 2 - 0.01 - inset,
+  const x = w / 2 - inset,
+    z = d / 2 - inset,
     r = 0.045 - inset;
   const shape = new Shape();
   if (kind === "round") {
-    const scale = x / (w / 2 - 0.01);
+    const scale = x / (w / 2);
     return new Shape(
       roundProfile(w, d).map(([px, pz]) => new Vector2(px * scale, pz * scale)),
     );
   }
   if (kind === "corner") {
-    const cut = -0.01 - inset;
+    const cut = -inset;
     return new Shape(
       [
         [-x, -z],
@@ -224,8 +224,8 @@ function archShell(
   holes: Path[],
 ) {
   const { w, d, h } = dimensions;
-  const x = w / 2 - 0.01,
-    z = d / 2 - 0.01;
+  const x = w / 2,
+    z = d / 2;
   const curve = archProfile(dimensions);
   const radius = w / 2 - 1;
   const points = [

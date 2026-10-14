@@ -31,7 +31,7 @@ describe("placement sur les rampes", () => {
       for (const enabled of [false, true]) {
         const result = snapCandidate(scene, piece, enabled);
         // The uphill edge is higher than the center seen by the pointer.
-        const highestZ = Math.min(-d / 2 + run, result.part.position[2] + 0.49);
+        const highestZ = Math.min(-d / 2 + run, result.part.position[2] + 0.5);
         const roof = 0.25 + ((h - 0.25) * (highestZ + d / 2)) / run;
         expect(result.part.position[1]).toBeGreaterThanOrEqual(roof - 1e-8);
         expect(result.points).toEqual([]);
@@ -42,7 +42,7 @@ describe("placement sur les rampes", () => {
       }
       const free = snapCandidate(scene, piece, false).part;
       expect(free.position[1]).toBeCloseTo(
-        0.25 + (h - 0.25) * Math.min(0.99 / run, 1),
+        0.25 + (h - 0.25) * Math.min(1 / run, 1),
         8,
       );
     },
@@ -72,7 +72,7 @@ describe("placement sur les rampes", () => {
       const piece = makePart("brick-1x1", "#ef4444", point.toArray());
       piece.rotation[1] = angle;
       const result = snapCandidate(scene, piece, false).part;
-      expect(result.position[1]).toBeCloseTo(3.1905, 8);
+      expect(result.position[1]).toBeCloseTo(3.2, 8);
       expect(result.rotation).toEqual(piece.rotation);
     },
   );
@@ -93,7 +93,7 @@ describe("placement sur les rampes", () => {
     target.hidden = true;
     const inside = makePart("brick-1x1", "#ef4444", [0, 0.5, -0.5]);
     expect(snapCandidate(scene, inside, false).part.position[1]).toBeCloseTo(
-      1.1905,
+      1.2,
     );
   });
 
@@ -112,7 +112,7 @@ describe("placement sur les rampes", () => {
     const piece = makePart("brick-1x1", "#ef4444", position.toArray());
     piece.rotation[0] = 0.3;
     const result = snapCandidate(scene, piece, false).part;
-    const lift = (1.1905 - 0.725) / (Math.cos(0.3) + 0.95 * Math.sin(0.3));
+    const lift = (1.2 - 0.725) / (Math.cos(0.3) + 0.95 * Math.sin(0.3));
     expect(result.position[1]).toBeCloseTo(position.y + lift, 8);
     parent.hidden = true;
     expect(snapCandidate(scene, piece, false).part).toEqual(result);
@@ -135,7 +135,7 @@ describe("placement sur les rampes", () => {
       const second = new Vector3().setFromMatrixPosition(
         worldMatrix(preview.scene, b.id),
       );
-      expect(second.y).toBeGreaterThanOrEqual(1.1905 - 1e-8);
+      expect(second.y).toBeGreaterThanOrEqual(1.2 - 1e-8);
       expect(first.clone().sub(second).toArray()).toEqual([4, 0, 0]);
       expect(preview.points).toEqual([]);
     }
@@ -151,7 +151,7 @@ describe("placement sur les rampes", () => {
     store.begin(moving.id);
     store.preview(new Matrix4().makeTranslation(-3, 0, 0));
     const shown = useEditor.getState().scene;
-    expect(shown.nodes[1].position[1]).toBeCloseTo(1.1905);
+    expect(shown.nodes[1].position[1]).toBeCloseTo(1.2);
     store.end();
     expect(useEditor.getState().scene).toEqual(shown);
     expect(useEditor.getState().past).toHaveLength(1);

@@ -83,10 +83,12 @@ for (const snap of [true, false]) {
     const canvas = page.locator("canvas").first();
     await expect(canvas).toHaveAttribute("data-rendered", "1");
     const box = (await canvas.boundingBox())!;
+    // With the minimum camera distance, this point is outside the brick while
+    // the larger plate's footprint still overlaps it.
     await dragLibrary(
       page,
       "Plaque 4 × 4",
-      box.x + box.width / 2 + 200,
+      box.x + box.width / 2 + 100,
       box.y + box.height / 2,
     );
     await page.mouse.up();

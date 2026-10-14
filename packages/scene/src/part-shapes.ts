@@ -39,10 +39,7 @@ export function roundProfile(w: number, d: number): [number, number][] {
     { length: segments },
     (_, i) => {
       const angle = (i * Math.PI * 2) / segments;
-      return [
-        (w / 2 - 0.01) * Math.cos(angle),
-        (d / 2 - 0.01) * Math.sin(angle),
-      ];
+      return [(w / 2) * Math.cos(angle), (d / 2) * Math.sin(angle)];
     },
   );
   if (w === 2 && d === 2) {

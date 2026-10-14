@@ -53,6 +53,39 @@ function hit(
 
 describe("Géométrie des emboîtements", () => {
   it.each(types)(
+    "%s : les pièces voisines se touchent sans jour sur X et Z",
+    (type) => {
+      const { w, d, shape } = CATALOG[type];
+      const offsets = [new Vector3(w, 0, 0), new Vector3(0, 0, d)];
+      for (const offset of offsets) {
+        const direction = offset.clone().normalize();
+        const contact = offset.clone().multiplyScalar(0.5);
+        contact.y = 0.1;
+        if (shape === "corner") {
+          if (offset.x) contact.z = -d / 4;
+          else contact.x = -w / 4;
+        } else if (shape === "arch" && offset.z) {
+          contact.x = (w - 1) / 2;
+        }
+        const first = hit(
+          type,
+          contact.clone().addScaledVector(direction, 0.1),
+          direction.clone().negate(),
+        );
+        const neighbor = hit(
+          type,
+          contact.clone().addScaledVector(direction, -0.1),
+          direction,
+          matrix(makePart(type, "#4079e8", offset.toArray())),
+        );
+        expect(first).toBeDefined();
+        expect(neighbor).toBeDefined();
+        expect(first.point.distanceTo(contact)).toBeLessThan(1e-6);
+        expect(first.point.distanceTo(neighbor.point)).toBeLessThan(1e-6);
+      }
+    },
+  );
+  it.each(types)(
     "%s : logements ouverts, parois intérieures et plafond assez profond pour les plots",
     (type) => {
       const { w, d } = CATALOG[type];
@@ -231,7 +264,7 @@ describe("Volumes ouverts du catalogue", () => {
       ).toBeUndefined();
       expect(
         hit(type, new Vector3(0, 2.8, 3), new Vector3(0, 0, -1)).point.z,
-      ).toBeCloseTo(0.49);
+      ).toBeCloseTo(0.5);
       expect(
         hit(type, new Vector3(0, -1, 0), new Vector3(0, 1, 0)).point.y,
       ).toBeCloseTo(2.4);
@@ -241,7 +274,7 @@ describe("Volumes ouverts du catalogue", () => {
           new Vector3((CATALOG[type].w - 1) / 2, 1, 3),
           new Vector3(0, 0, -1),
         ).point.z,
-      ).toBeCloseTo(0.49);
+      ).toBeCloseTo(0.5);
       const arch = makePart(type, "#4079e8", [0, 1.3, 0]);
       const support = makePart("brick-1x1", "#ef4444");
       expect(
@@ -282,7 +315,7 @@ describe("Volumes ouverts du catalogue", () => {
       ).toBeUndefined();
       expect(
         hit(type, new Vector3(1, 0.1, 0), new Vector3(-1, 0, 0)).point.x,
-      ).toBeCloseTo(0.49);
+      ).toBeCloseTo(0.5);
     },
   );
 });
