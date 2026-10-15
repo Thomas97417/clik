@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type ComponentRef,
+  type RefObject,
 } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
@@ -17,6 +18,7 @@ import {
 import {
   Box3,
   Color,
+  type Camera,
   type Group,
   InstancedMesh,
   Matrix4,
@@ -203,16 +205,25 @@ function Stage({
   editable,
   showGrid,
   onViewControls,
+  cameraRef,
 }: {
   scene: SceneDocument;
   editable: boolean;
   showGrid: boolean;
   onViewControls?: (actions: ViewActions | null) => void;
+  cameraRef?: RefObject<Camera | null>;
 }) {
   const { camera, gl, scene: threeScene } = useThree(),
     controls = useRef<ComponentRef<typeof OrbitControls>>(null),
     s = useEditor(),
     rotation = useRef<ComponentRef<typeof TransformControls>>(null);
+  useLayoutEffect(() => {
+    if (!cameraRef) return;
+    cameraRef.current = camera;
+    return () => {
+      if (cameraRef.current === camera) cameraRef.current = null;
+    };
+  }, [camera, cameraRef]);
   const [gridStep, setGridStep] = useState(1);
   const layoutKey = useMemo(() => sceneLayoutKey(scene), [scene]);
   // A gesture changes positions or colors, never ancestry. Keep selection
@@ -449,11 +460,13 @@ export default function Scene({
   editable = false,
   showGrid = true,
   showViewControls = false,
+  cameraRef,
 }: {
   scene: SceneDocument;
   editable?: boolean;
   showGrid?: boolean;
   showViewControls?: boolean;
+  cameraRef?: RefObject<Camera | null>;
 }) {
   const [viewActions, setViewActions] = useState<ViewActions | null>(null);
   const liveScene = useEditor((s) => (editable ? s.scene : scene));
@@ -489,6 +502,7 @@ export default function Scene({
           editable={editable}
           showGrid={showGrid}
           onViewControls={showViewControls ? setViewActions : undefined}
+          cameraRef={cameraRef}
         />
       </Canvas>
       {showViewControls && !editable && viewActions && (

@@ -5,8 +5,10 @@ import {
   useEffect,
   useState,
   type ReactNode,
+  type RefObject,
 } from "react";
 import type { SceneDocument } from "@clik/scene";
+import type { Camera } from "three";
 const Scene = lazy(() => import("./scene"));
 class SceneBoundary extends Component<
   { children: ReactNode },
@@ -37,6 +39,7 @@ export default function ClientScene(props: {
   editable?: boolean;
   showGrid?: boolean;
   showViewControls?: boolean;
+  cameraRef?: RefObject<Camera | null>;
   poster?: string | null;
   title?: string;
 }) {

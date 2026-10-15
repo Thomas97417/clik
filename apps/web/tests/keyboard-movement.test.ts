@@ -8,6 +8,62 @@ import {
   worldMatrix,
 } from "@clik/scene";
 import { useEditor } from "../src/lib/clik/store";
+import { PerspectiveCamera, Vector3 } from "three";
+import { cameraRelativeStep } from "../src/lib/clik/camera-relative-movement";
+
+describe("Déplacement selon la caméra", () => {
+  it.each([
+    { position: [0, 10, 10], right: [1, 0, 0], up: [0, 0, -1] },
+    { position: [10, 10, 0], right: [0, 0, -1], up: [-1, 0, 0] },
+    { position: [0, 10, -10], right: [-1, 0, 0], up: [0, 0, 1] },
+    { position: [-10, 10, 0], right: [0, 0, 1], up: [1, 0, 0] },
+    { position: [10, 9, 10], right: [1, 0, 0], up: [0, 0, -1] },
+    { position: [0.001, 10, 0], right: [0, 0, -1], up: [-1, 0, 0] },
+    { position: [0, -10, 10], right: [1, 0, 0], up: [0, 0, 1] },
+  ])("suit la vue depuis $position", ({ position, right, up }) => {
+    const camera = new PerspectiveCamera();
+    camera.position.set(position[0]!, position[1]!, position[2]!);
+    camera.lookAt(0, 0, 0);
+    expect(cameraRelativeStep("ArrowRight", camera)).toEqual(right);
+    expect(cameraRelativeStep("ArrowUp", camera)).toEqual(up);
+    expect(cameraRelativeStep("ArrowLeft", camera)).toEqual(
+      right.map((value) => -value || 0),
+    );
+    expect(cameraRelativeStep("ArrowDown", camera)).toEqual(
+      up.map((value) => -value || 0),
+    );
+  });
+
+  it("avance dans le sens des flèches à l’écran tout autour de la scène, sans sortir de la grille", () => {
+    const camera = new PerspectiveCamera();
+    for (const height of [-10, 1, 10, 10000]) {
+      for (let angle = -180; angle <= 180; angle += 5) {
+        const theta = (angle * Math.PI) / 180;
+        camera.position.set(Math.sin(theta) * 10, height, Math.cos(theta) * 10);
+        camera.lookAt(0, 0, 0);
+        for (const key of ["ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown"]) {
+          const step = cameraRelativeStep(key, camera);
+          expect(step.every(Number.isInteger)).toBe(true);
+          expect(step[1]).toBe(0);
+          expect(new Vector3(...step).length()).toBe(1);
+          const projected = new Vector3(...step).applyQuaternion(
+            camera.quaternion.clone().invert(),
+          );
+          if (key === "ArrowRight") expect(projected.x).toBeGreaterThan(0);
+          if (key === "ArrowLeft") expect(projected.x).toBeLessThan(0);
+          if (key === "ArrowUp") expect(projected.y).toBeGreaterThan(0);
+          if (key === "ArrowDown") expect(projected.y).toBeLessThan(0);
+        }
+      }
+    }
+  });
+
+  it("conserve les directions initiales tant que la caméra n’est pas disponible", () => {
+    expect(cameraRelativeStep("ArrowRight", null)).toEqual([1, 0, 0]);
+    expect(cameraRelativeStep("ArrowUp", null)).toEqual([0, 0, -1]);
+    expect(cameraRelativeStep("Enter", null)).toEqual([0, 0, 0]);
+  });
+});
 
 beforeEach(() => {
   useEditor.getState().load(emptyScene(), "Clavier");

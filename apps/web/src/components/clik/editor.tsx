@@ -86,11 +86,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { CSSProperties } from "react";
+import type { Camera } from "three";
 import { useEditor } from "@/lib/clik/store";
 import { useProject } from "@/lib/clik/use-project";
 import ClientScene from "./client-scene";
 import PartPreview from "./part-preview";
 import { sceneLayoutKey } from "@/lib/clik/scene-layout";
+import { cameraRelativeStep } from "@/lib/clik/camera-relative-movement";
 
 const LibraryPartPreview = memo(function LibraryPartPreview({
   type,
@@ -236,6 +238,7 @@ export default function Editor({
   const [tourActive, setTourActive] = useState(false);
   const [publicationError, setPublicationError] = useState<string>();
   const primaryAction = useRef<HTMLButtonElement>(null);
+  const camera = useRef<Camera | null>(null);
   const privateSaveDescriptionId = useId();
   const publicSaveDescriptionId = useId();
   const [now, setNow] = useState(Date.now());
@@ -415,9 +418,7 @@ export default function Editor({
         const direction = e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 1;
         const delta: Vec3 = e.shiftKey
           ? [0, -direction * 1.2, 0]
-          : e.key === "ArrowLeft" || e.key === "ArrowRight"
-            ? [direction, 0, 0]
-            : [0, 0, direction];
+          : cameraRelativeStep(e.key, camera.current);
         e.preventDefault();
         safe(() => state.nudge(delta));
       } else if (e.key === "Delete" || e.key === "Backspace") {
@@ -1350,7 +1351,11 @@ export default function Editor({
               </button>
             </div>
             {project.ready ? (
-              <ClientScene scene={s.scene} editable={!closed && !tourActive} />
+              <ClientScene
+                scene={s.scene}
+                editable={!closed && !tourActive}
+                cameraRef={camera}
+              />
             ) : (
               <div className="empty-state px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0]">
                 Chargement de la création…

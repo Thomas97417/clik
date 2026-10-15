@@ -60,6 +60,7 @@ export const EDITOR_SHORTCUT_GROUPS: readonly ShortcutGroup[] = [
   },
   {
     title: "Pièces et sélection",
+    context: "Les flèches suivent la vue, par pas de grille",
     shortcuts: [
       {
         label: "Déplacer la sélection",
