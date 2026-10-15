@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, MailCheck } from "lucide-react";
 import z from "zod";
 import { authClient } from "@/lib/auth-client";
 import { authErrorMessage, emailSchema } from "@/lib/auth-form";
@@ -54,14 +54,22 @@ export default function EmailLinkForm({
       {sent ? (
         <>
           <div
-            className="auth-confirmation p-4.5 border border-solid border-[#cce8db] mb-5 rounded-[12px] bg-[#f1faf6] text-[#316e55] text-[13px] leading-[1.8] wrap-anywhere"
+            className="auth-confirmation mb-5 rounded-[14px] border border-[#dfe7f4] bg-[#f6f8fc] p-4"
             role="status"
           >
-            <strong className="block mb-1.75 font-[650]">
-              La demande a bien été prise en compte.
-            </strong>
-            <p>
-              Si un compte est associé à <b>{sent}</b>, vous recevrez un lien de{" "}
+            <div className="flex items-center gap-2.5">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-[10px] border border-[#dce6fb] bg-white text-[#356ae6]">
+                <MailCheck size={17} aria-hidden="true" />
+              </span>
+              <strong className="text-[13px] leading-snug font-[650] text-[#34425b]">
+                Demande prise en compte
+              </strong>
+            </div>
+            <p className="mt-3 text-[13px] leading-relaxed font-medium text-[#344d73] wrap-anywhere">
+              {sent}
+            </p>
+            <p className="mt-1.5 text-xs leading-[1.75] text-[#647693]">
+              Si un compte est associé à cette adresse, vous recevrez un lien de{" "}
               {reset ? "réinitialisation" : "vérification"}.
             </p>
           </div>
