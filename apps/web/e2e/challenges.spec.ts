@@ -254,6 +254,115 @@ test("tri des participations : souris, clavier et menu mobile", async ({
   }
 });
 
+test("votes immédiats avant confirmation : compteurs, trois briques, limite et changement de choix", async ({
+  page,
+}, info) => {
+  const { challengeFixture } = await import("./fixtures/challenges");
+  const fixture = await challengeFixture(page);
+  await page.goto("/challenges");
+  const cards = page.locator(".challenge-entry");
+  await expect(cards).toHaveCount(4);
+  fixture.holdVotes(true);
+  for (let index = 0; index < 3; index++) {
+    const button = cards.nth(index).getByRole("button");
+    await expect(button).toBeEnabled();
+    await button.click();
+    await expect(button).toHaveAttribute("aria-pressed", "true");
+    await expect(button).toHaveAttribute("aria-busy", "true");
+    await expect(button.locator(".challenge-vote-count")).toHaveText(
+      String(index + 1),
+    );
+    await expect(button).toContainText("Soutenue");
+  }
+  await expect.poll(() => fixture.voteRequests.length).toBe(3);
+  await expect(cards.nth(3).getByRole("button")).toBeDisabled();
+  await expect(
+    page.locator(".challenge-entries-heading .vote-brick[data-used=true]"),
+  ).toHaveCount(3);
+  await page.locator(".challenge-entries-heading").scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: `/tmp/clik-challenge-votes-pending-${info.project.name}.png`,
+  });
+  fixture.holdVotes(false);
+  await expect(cards.nth(0).getByRole("button")).toHaveAttribute(
+    "aria-busy",
+    "false",
+  );
+  fixture.holdVotes(true);
+  await cards
+    .nth(0)
+    .getByRole("button", { name: /Retirer mon vote/ })
+    .click();
+  await expect(cards.nth(0).locator(".challenge-vote-count")).toHaveText("0");
+  await expect(cards.nth(3).getByRole("button")).toBeEnabled();
+  await cards.nth(3).getByRole("button").click();
+  await expect(cards.nth(3).locator(".challenge-vote-count")).toHaveText("4");
+  await expect(
+    page.getByText("3 / 3 votes attribués pour ce défi.", { exact: false }),
+  ).toBeVisible();
+  fixture.holdVotes(false);
+  await expect(cards.nth(3).getByRole("button")).toHaveAttribute(
+    "aria-busy",
+    "false",
+  );
+  await expect(cards.nth(0).getByRole("button")).toHaveAttribute(
+    "aria-pressed",
+    "false",
+  );
+  await page.setViewportSize({ width: 390, height: 844 });
+  await cards.nth(3).scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: `/tmp/clik-challenge-vote-mobile-${info.project.name}.png`,
+  });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+});
+
+test("un vote refusé annule l’état optimiste, y compris sur la page de création et lors d’un retrait", async ({
+  page,
+}, info) => {
+  const { challengeFixture } = await import("./fixtures/challenges");
+  const fixture = await challengeFixture(page);
+  await page.goto("/creations/entry-0");
+  const banner = page.locator(".creation-challenge");
+  const button = banner.getByRole("button");
+  await expect(button).toBeEnabled();
+  fixture.holdVotes(true);
+  fixture.failNextVote();
+  await button.click();
+  await expect(button).toHaveAttribute("aria-pressed", "true");
+  await expect(button.locator(".challenge-vote-count")).toHaveText("1");
+  await expect(banner.locator(".challenge-vote-budget")).toContainText("1 / 3");
+  await expect(banner.locator(".vote-brick[data-used=true]")).toHaveCount(1);
+  fixture.holdVotes(false);
+  await expect(button).toHaveAttribute("aria-pressed", "false");
+  await expect(button.locator(".challenge-vote-count")).toHaveText("0");
+  await expect(banner.locator(".challenge-vote-budget")).toContainText("0 / 3");
+  await expect(
+    page.getByText("Votre vote n’a pas pu être enregistré. Réessayez."),
+  ).toBeVisible();
+  await button.click();
+  await expect(button).toHaveAttribute("aria-pressed", "true");
+  await expect(button).toHaveAttribute("aria-busy", "false");
+  fixture.holdVotes(true);
+  fixture.failNextVote();
+  await button.click();
+  await expect(button).toHaveAttribute("aria-pressed", "false");
+  await expect(button.locator(".challenge-vote-count")).toHaveText("0");
+  await expect(banner.locator(".challenge-vote-budget")).toContainText("0 / 3");
+  fixture.holdVotes(false);
+  await expect(button).toHaveAttribute("aria-pressed", "true");
+  await expect(button.locator(".challenge-vote-count")).toHaveText("1");
+  await expect(banner.locator(".challenge-vote-budget")).toContainText("1 / 3");
+  await banner.scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: `/tmp/clik-creation-vote-${info.project.name}.png`,
+  });
+});
+
 test("participations : trois coups de cœur, changement de vote et commentaires", async ({
   page,
 }, info) => {

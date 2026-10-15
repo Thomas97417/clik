@@ -1,12 +1,14 @@
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
-import { ArrowUpRight, Heart, LoaderCircle } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { ConvexError } from "convex/values";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import { toast } from "sonner";
 import { formatChallengeDay } from "@/lib/clik/challenge-date";
+import { optimisticVote } from "@/lib/clik/optimistic-vote";
 export function useServerNow(serverNow?: number) {
   const [offset, setOffset] = useState(0),
     [now, setNow] = useState(serverNow ?? Date.now());
@@ -59,49 +61,93 @@ export function SignInTo({
     </Link>
   );
 }
+function VoteBrick({
+  used,
+  className,
+}: {
+  used?: boolean;
+  className?: string;
+}) {
+  return (
+    <svg
+      className={cn("vote-brick shrink-0", className)}
+      viewBox="0 0 20 18"
+      aria-hidden="true"
+      focusable="false"
+      data-used={used}
+    >
+      <rect x="6" y="1.5" width="8" height="5" rx="1.5" fill="currentColor" />
+      <rect x="2" y="5" width="16" height="11.5" rx="1.5" fill="currentColor" />
+      <path
+        d="M3.5 6.5h13"
+        stroke="white"
+        strokeOpacity=".25"
+        strokeWidth="1"
+      />
+    </svg>
+  );
+}
+
+export function VoteBricks({
+  used,
+  className,
+}: {
+  used: number;
+  className?: string;
+}) {
+  return (
+    <span
+      className={cn(
+        "challenge-vote-bricks inline-flex shrink-0 gap-1.25",
+        className,
+      )}
+      aria-hidden="true"
+    >
+      {[0, 1, 2].map((index) => (
+        <VoteBrick
+          key={index}
+          used={index < used}
+          className="h-3.5 w-3.75 text-[#d8e1ee] transition-colors duration-150 data-[used=true]:text-[#6087df] motion-reduce:transition-none"
+        />
+      ))}
+    </span>
+  );
+}
+
+const voteButtonClassName =
+  "challenge-vote group/challenge-vote inline-flex items-center justify-center gap-2 min-h-9 max-w-full border border-solid border-[#d9e4f2] rounded-[8px] py-1.25 pr-1.75 pl-2.5 bg-white text-[#526b8c] text-xs font-semibold leading-[1.4] cursor-pointer transition-colors duration-150 [&:hover:not(:disabled)]:border-[#b9cef2] [&:hover:not(:disabled)]:bg-[#f7faff] [&:hover:not(:disabled)]:text-[#356ae6] aria-pressed:border-[#b9cef2] aria-pressed:bg-[#edf3ff] aria-pressed:text-[#2458ce] [&[aria-pressed='true']:hover:not(:disabled)]:border-[#a5bfe9] [&[aria-pressed='true']:hover:not(:disabled)]:bg-[#e5eeff] data-[unavailable]:border-[#e3e8f0] data-[unavailable]:bg-[#f8fafc] data-[unavailable]:text-[#8390a4] disabled:cursor-not-allowed aria-busy:cursor-progress focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 motion-reduce:transition-none";
+
 export function VoteButton({
   publicationId,
+  challengeId,
   owner,
   count,
   choices,
 }: {
   publicationId: Id<"publications">;
+  challengeId?: Id<"challenges">;
   owner: string;
   count: number;
   choices: { publicationId: Id<"publications"> }[];
 }) {
   const { isAuthenticated } = useConvexAuth();
   const me = useQuery(api.auth.getCurrentUser, isAuthenticated ? {} : "skip");
-  const vote = useMutation(api.challenges.vote),
-    [busy, setBusy] = useState(false);
+  const vote = useMutation(api.challenges.vote).withOptimisticUpdate(
+    (store, args) => optimisticVote(store, args, challengeId),
+  );
+  const [busy, setBusy] = useState(false);
+  const pending = useRef(false);
   const voted = choices.some((c) => c.publicationId === publicationId),
     own = owner === me?._id;
   const limitReached = !voted && choices.length >= 3;
+  const ready = !!challengeId && !!me;
   const content = (
     <>
-      {busy ? (
-        <LoaderCircle
-          className="vote-pending animate-spin motion-reduce:animate-none"
-          size={16}
-          aria-hidden="true"
-        />
-      ) : (
-        <Heart
-          size={16}
-          fill={voted ? "currentColor" : "none"}
-          aria-hidden="true"
-        />
-      )}
+      <VoteBrick className="h-4.5 w-4.75 text-[#91a8c6] group-aria-pressed/challenge-vote:text-[#356ae6]" />
       <span className="challenge-vote-label min-w-0">
-        {busy
-          ? "En cours…"
-          : own
-            ? "Votre création"
-            : voted
-              ? "Soutenue"
-              : "J’aime"}
+        {own ? "Votre création" : voted ? "Soutenue" : "J’aime"}
       </span>
-      <span className="challenge-vote-count group/challenge-vote-count px-1.5 py-0.5 inline-flex items-center justify-center min-w-6.5 min-h-6.25 ml-0.75 rounded-[6px] bg-[#f2edf9] text-[11px] tabular-nums group-aria-pressed/challenge-vote:bg-[#ffffff26] group-data-[own]/challenge-vote:bg-[#e9edf4]">
+      <span className="challenge-vote-count inline-flex items-center justify-center min-w-6 min-h-5.5 rounded-[4px] px-1.25 py-0.5 bg-[#f1f5fa] text-[#637b9a] text-[11px] font-bold tabular-nums group-aria-pressed/challenge-vote:bg-[#dce8ff] group-aria-pressed/challenge-vote:text-[#2458ce]">
         {count}
       </span>
     </>
@@ -109,7 +155,7 @@ export function VoteButton({
   if (!isAuthenticated)
     return (
       <SignInTo
-        className="challenge-vote py-1.5 gap-2 border border-solid border-[#e0d7ed] inline-flex items-center justify-center min-h-9.5 max-w-full pr-1.75 pl-2.75 rounded-[11px] text-[#795ba0] bg-white text-xs font-semibold leading-[1.4] cursor-pointer hover:enabled:border-[#baa2d5] hover:enabled:bg-[#f6f0fd] aria-pressed:border-[#7959a5] aria-pressed:bg-[#7959a5] aria-pressed:text-white [&[aria-pressed='true']:hover:not(:disabled)]:border-[#684a93] [&[aria-pressed='true']:hover:not(:disabled)]:bg-[#684a93] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#9672c0] focus-visible:outline-offset-3 disabled:cursor-not-allowed disabled:opacity-65 data-own:border-[#e1e6ed] data-own:text-[#778499] data-own:bg-[#f6f8fb] data-own:opacity-100 aria-[busy=true]:cursor-wait [transition:background_150ms,border-color_150ms,color_150ms] leading-[1.4]"
+        className={voteButtonClassName}
         title="Connectez-vous pour soutenir cette création"
         label={`Se connecter pour voter (${count})`}
       >
@@ -118,28 +164,39 @@ export function VoteButton({
     );
   return (
     <button
-      className="outline-offset-3 challenge-vote py-1.5 gap-2 border border-solid border-[#e0d7ed] inline-flex items-center justify-center min-h-9.5 max-w-full pr-1.75 pl-2.75 rounded-[11px] text-[#795ba0] bg-white text-xs font-semibold leading-[1.4] cursor-pointer hover:enabled:border-[#baa2d5] hover:enabled:bg-[#f6f0fd] aria-pressed:border-[#7959a5] aria-pressed:bg-[#7959a5] aria-pressed:text-white [&[aria-pressed='true']:hover:not(:disabled)]:border-[#684a93] [&[aria-pressed='true']:hover:not(:disabled)]:bg-[#684a93] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#9672c0] focus-visible:outline-offset-3 disabled:cursor-not-allowed disabled:opacity-65 data-own:border-[#e1e6ed] data-own:text-[#778499] data-own:bg-[#f6f8fb] data-own:opacity-100 aria-[busy=true]:cursor-wait [transition:background_150ms,border-color_150ms,color_150ms] leading-[1.4]"
+      type="button"
+      className={voteButtonClassName}
       aria-pressed={voted}
       aria-busy={busy}
       data-own={own || undefined}
+      data-unavailable={own || limitReached || !ready || undefined}
       aria-label={`${voted ? "Retirer mon vote" : "Voter pour cette création"} (${count})`}
-      disabled={busy || own || limitReached}
+      disabled={busy || own || limitReached || !ready}
       title={
         own
           ? "C’est votre création"
-          : limitReached
-            ? "Retirez un vote pour changer de choix"
-            : voted
-              ? "Retirer votre soutien à cette création"
-              : "Soutenir cette création"
+          : !ready
+            ? "Chargement de vos votes…"
+            : limitReached
+              ? "Retirez un vote pour changer de choix"
+              : voted
+                ? "Retirer votre soutien à cette création"
+                : "Soutenir cette création"
       }
       onClick={async () => {
+        if (pending.current || own || limitReached || !ready) return;
+        pending.current = true;
         setBusy(true);
         try {
           await vote({ publicationId, voted: !voted });
         } catch (e) {
-          toast.error(String(e));
+          toast.error(
+            e instanceof ConvexError && typeof e.data === "string"
+              ? e.data
+              : "Votre vote n’a pas pu être enregistré. Réessayez.",
+          );
         } finally {
+          pending.current = false;
           setBusy(false);
         }
       }}
@@ -216,18 +273,7 @@ export function CreationChallenge({
           className="challenge-vote-budget gap-1.25 flex flex-col text-[#9989a8] text-[10px] leading-normal"
           title="Vous pouvez soutenir trois créations par défi et retirer un vote pour changer de choix."
         >
-          <span
-            className="challenge-vote-studs gap-1.25 inline-flex"
-            aria-hidden="true"
-          >
-            {[0, 1, 2].map((index) => (
-              <i
-                className="relative block w-3.75 h-2.75 mt-0.75 rounded-xs bg-[#e3d9ed] before:[content:''] before:absolute before:w-1.75 before:h-0.75 before:left-1 before:-top-0.75 before:rounded-[2px_2px_0_0] before:[background:inherit] data-used:bg-[#a385c4]"
-                key={index}
-                data-used={(isAuthenticated && index < used) || undefined}
-              />
-            ))}
-          </span>
+          <VoteBricks used={isAuthenticated ? used : 0} />
           <span>
             {isAuthenticated
               ? data
@@ -238,6 +284,7 @@ export function CreationChallenge({
         </div>
         <VoteButton
           publicationId={publicationId}
+          challengeId={data?.challenge?._id}
           owner={owner}
           count={count}
           choices={data?.choices ?? []}

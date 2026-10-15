@@ -50,6 +50,7 @@ import {
   SignInTo,
   useServerNow,
   VoteButton,
+  VoteBricks,
 } from "@/components/challenges/shared";
 export const Route = createFileRoute("/challenges")({
   validateSearch: (
@@ -381,10 +382,13 @@ function Entries({
           >
             À vous de choisir vos coups de cœur.
           </h2>
-          <p className="mt-2 text-[#71839c] text-xs leading-[1.7]">
-            {choices.length} / 3 votes attribués pour ce défi. Retirez un vote
-            pour changer de choix.
-          </p>
+          <div className="mt-2 flex items-start gap-2.5 text-[#71839c] text-xs leading-[1.7]">
+            <VoteBricks used={choices.length} className="mt-1" />
+            <p>
+              {choices.length} / 3 votes attribués pour ce défi. Retirez un vote
+              pour changer de choix.
+            </p>
+          </div>
         </div>
         <div className="challenge-sort gap-2.5 flex items-center shrink-0 text-xs leading-[inherit] text-[#71839c]">
           <label htmlFor="challenge-sort">Trier</label>
@@ -479,6 +483,7 @@ function Entries({
               <div className="challenge-entry-actions px-4 py-3 gap-2 flex justify-between items-center flex-wrap border-t border-solid border-t-[#edf0f6] bg-[#fcfcfe]">
                 <VoteButton
                   publicationId={p._id}
+                  challengeId={challenge._id}
                   owner={p.owner}
                   count={p.voteCount}
                   choices={choices}

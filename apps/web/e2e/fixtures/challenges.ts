@@ -76,6 +76,10 @@ export async function challengeFixture(page: Page) {
   let heldReplies = false;
   const pendingReplies: (() => void)[] = [];
   let failedComment: "add" | "edit" | "remove" | null = null;
+  const voteRequests: { publicationId: string; voted: boolean }[] = [];
+  let heldVotes = false;
+  let failedVote = false;
+  const pendingVotes: (() => void)[] = [];
   function insertComment(input: {
     publicationId?: string;
     body: string;
@@ -281,6 +285,43 @@ export async function challengeFixture(page: Page) {
         );
       } else if (message.type === "Mutation") {
         const a = message.args[0];
+        if (message.udfPath === "challenges:vote") {
+          voteRequests.push({ publicationId: a.publicationId, voted: a.voted });
+          const finish = () => {
+            const entry = entries.find(
+              (entry) => entry._id === a.publicationId,
+            )!;
+            const had = choices.some(
+              (choice) => choice.publicationId === entry._id,
+            );
+            const rejected =
+              failedVote || (!had && a.voted && choices.length >= 3);
+            failedVote = false;
+            if (!rejected && had !== a.voted) {
+              entry.voteCount += a.voted ? 1 : -1;
+              choices = a.voted
+                ? [...choices, { publicationId: entry._id, epoch: 0 }]
+                : choices.filter(
+                    (choice) => choice.publicationId !== entry._id,
+                  );
+            }
+            seq++;
+            ws.send(
+              JSON.stringify({
+                type: "MutationResponse",
+                requestId: message.requestId,
+                success: !rejected,
+                result: rejected ? "Vote temporairement indisponible" : null,
+                ts: ts(),
+                logLines: [],
+              }),
+            );
+            transition();
+          };
+          if (heldVotes) pendingVotes.push(finish);
+          else finish();
+          return;
+        }
         if (heldReplies && message.udfPath === "comments:add" && a.replyToId) {
           pendingReplies.push(() => {
             const result = insertComment(a);
@@ -344,16 +385,6 @@ export async function challengeFixture(page: Page) {
           }
           result = publicationId;
         }
-        if (message.udfPath === "challenges:vote") {
-          const entry = entries.find((e) => e._id === a.publicationId)!;
-          const had = choices.some((c) => c.publicationId === entry._id);
-          if (had !== a.voted) {
-            entry.voteCount += a.voted ? 1 : -1;
-            choices = a.voted
-              ? [...choices, { publicationId: entry._id, epoch: 0 }]
-              : choices.filter((c) => c.publicationId !== entry._id);
-          }
-        }
         if (message.udfPath === "comments:add") {
           result = insertComment(a);
         }
@@ -393,6 +424,14 @@ export async function challengeFixture(page: Page) {
   });
   return {
     uploads,
+    voteRequests,
+    holdVotes: (value: boolean) => {
+      heldVotes = value;
+      if (!value) pendingVotes.splice(0).forEach((finish) => finish());
+    },
+    failNextVote: () => {
+      failedVote = true;
+    },
     seedComment: insertComment,
     replyRequests,
     holdReplies: (value: boolean) => {
