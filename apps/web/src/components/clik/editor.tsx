@@ -58,6 +58,7 @@ import {
   Redo2,
   RefreshCw,
   Rotate3D,
+  SquareDashedMousePointer,
   Scan,
   Sun,
   Trash2,
@@ -384,7 +385,7 @@ export default function Editor({
         state.cancel();
         return;
       }
-      if (state.gesture || state.pending) return;
+      if (state.gesture || state.pending || state.boxSelecting) return;
       if (e.key.toLowerCase() === "r" && !mod && !e.altKey) {
         const target = e.target instanceof HTMLElement ? e.target : null;
         if (
@@ -1281,15 +1282,44 @@ export default function Editor({
               </div>
               <div className="tool-group flex border-r border-solid border-r-[#e7ecf2] pr-1 mr-0.5">
                 <button
+                  type="button"
+                  aria-label="Sélection par cadre"
+                  title="Sélection par cadre (Maj + glisser sur le fond)"
+                  aria-pressed={s.boxSelect}
+                  disabled={
+                    !project.ready ||
+                    closed ||
+                    busy ||
+                    publishing ||
+                    !!s.gesture ||
+                    !!s.pending ||
+                    s.boxSelecting
+                  }
+                  className="flex h-8.25 min-w-8.5 cursor-pointer items-center justify-center rounded-[6px] px-1.75 text-[#7a879d] transition-colors hover:bg-[#f0f4fa] aria-pressed:bg-[#eaf0ff] aria-pressed:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#356ae6] disabled:cursor-not-allowed disabled:opacity-40"
+                  onClick={() =>
+                    useEditor.setState({ boxSelect: !s.boxSelect })
+                  }
+                >
+                  <SquareDashedMousePointer
+                    className="shrink-0"
+                    size={19}
+                    aria-hidden="true"
+                  />
+                </button>
+                <button
                   title="Déplacer"
                   className={cn(
                     "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
                     "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
                     "outline-offset-3",
-                    s.tool === "translate" ? "active group/active" : "",
+                    s.tool === "translate" && !s.boxSelect
+                      ? "active group/active"
+                      : "",
                     "px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] [&[class~='group/active']]:bg-[#eaf0ff] [&[class~='group/active']]:text-[#356ae6] hover:bg-[#f0f4fa]",
                   )}
-                  onClick={() => useEditor.setState({ tool: "translate" })}
+                  onClick={() =>
+                    useEditor.setState({ tool: "translate", boxSelect: false })
+                  }
                 >
                   <Move3D className="shrink-0" size={19} />
                 </button>
@@ -1299,10 +1329,14 @@ export default function Editor({
                     "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
                     "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
                     "outline-offset-3",
-                    s.tool === "rotate" ? "active group/active" : "",
+                    s.tool === "rotate" && !s.boxSelect
+                      ? "active group/active"
+                      : "",
                     "px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] [&[class~='group/active']]:bg-[#eaf0ff] [&[class~='group/active']]:text-[#356ae6] hover:bg-[#f0f4fa]",
                   )}
-                  onClick={() => useEditor.setState({ tool: "rotate" })}
+                  onClick={() =>
+                    useEditor.setState({ tool: "rotate", boxSelect: false })
+                  }
                 >
                   <Rotate3D className="shrink-0" size={19} />
                 </button>

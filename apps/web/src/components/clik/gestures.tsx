@@ -20,9 +20,16 @@ import {
   worldMatrix,
   type Part,
   type SelectionPreview,
+  type SceneDocument,
 } from "@clik/scene";
 import { useEditor } from "@/lib/clik/store";
 import { geometry } from "@/lib/clik/geometry";
+import {
+  partsInsideBox,
+  projectSelectionBounds,
+  type BoxSelectionPreview,
+  type SelectionBounds,
+} from "@/lib/clik/box-selection";
 import { toast } from "sonner";
 
 // Keep the orientation widget above the bottom display controls.
@@ -43,11 +50,27 @@ type Drag = {
   moving: Set<string>;
   started: boolean;
 };
+type BoxGesture = {
+  pointer: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  scene: SceneDocument;
+  bounds: SelectionBounds[];
+  base: string[];
+  ids: string[];
+  previewIds: string[];
+  add: boolean;
+  hit?: string;
+  started: boolean;
+};
 
 export function Gestures({
   controls,
   rotation,
   onLibraryPreview,
+  onBoxPreview,
 }: {
   controls: Controls;
   rotation: Rotation;
@@ -55,6 +78,7 @@ export function Gestures({
     preview: SelectionPreview | null,
     free: Part | null,
   ) => void;
+  onBoxPreview: (preview: BoxSelectionPreview | null) => void;
 }) {
   const { camera, gl, scene } = useThree();
   useEffect(() => {
@@ -65,6 +89,7 @@ export function Gestures({
       "Scène 3D — glisser une pièce pour la déplacer",
     );
     let drag: Drag | null = null;
+    let box: BoxGesture | null = null;
     let blockedPointer: number | null = null;
     let moveFrame = 0;
     let lastMove: { clientX: number; clientY: number } | null = null;
@@ -137,6 +162,100 @@ export function Gestures({
       e.preventDefault();
       e.stopImmediatePropagation();
     };
+    const clearBox = () => {
+      if (!box) return;
+      const pointer = box.pointer;
+      box = null;
+      cancelAnimationFrame(moveFrame);
+      moveFrame = 0;
+      lastMove = null;
+      useEditor.setState({ boxSelect: false, boxSelecting: false });
+      onBoxPreview(null);
+      if (controls.current) controls.current.enabled = true;
+      setRotation("enabled", true);
+      if (canvas.hasPointerCapture(pointer))
+        canvas.releasePointerCapture(pointer);
+      canvas.style.cursor = "auto";
+    };
+    const updateBox = () => {
+      moveFrame = 0;
+      if (!box || !lastMove) return;
+      if (
+        !box.started &&
+        Math.hypot(lastMove.clientX - box.x, lastMove.clientY - box.y) <= 4
+      )
+        return;
+      box.started = true;
+      const bounds = canvas.getBoundingClientRect();
+      const x = Math.max(
+        0,
+        Math.min(box.width, lastMove.clientX - bounds.left),
+      );
+      const y = Math.max(
+        0,
+        Math.min(box.height, lastMove.clientY - bounds.top),
+      );
+      const startX = box.x - bounds.left;
+      const startY = box.y - bounds.top;
+      const rect = {
+        left: Math.min(startX, x),
+        top: Math.min(startY, y),
+        width: Math.abs(x - startX),
+        height: Math.abs(y - startY),
+      };
+      box.ids = partsInsideBox(box.bounds, rect);
+      const ids = [...new Set([...box.base, ...box.ids])];
+      if (
+        ids.length !== box.previewIds.length ||
+        ids.some((id, i) => id !== box!.previewIds[i])
+      )
+        box.previewIds = ids;
+      onBoxPreview({ rect, ids: box.previewIds });
+    };
+    const startBox = (e: PointerEvent, hit?: string) => {
+      stop(e);
+      const state = useEditor.getState();
+      // Finish orbit damping before freezing the camera for the whole selection.
+      const orbit = controls.current!;
+      const damping = orbit.enableDamping;
+      orbit.enableDamping = false;
+      orbit.update();
+      orbit.enableDamping = damping;
+      orbit.enabled = false;
+      setRotation("enabled", false);
+      const bounds = canvas.getBoundingClientRect();
+      const base = e.shiftKey
+        ? descendants(state.scene, state.selection).filter(
+            (id) =>
+              state.scene.nodes.some(
+                (node) => node.id === id && node.kind === "part",
+              ) && !inherited(state.scene, id, "hidden"),
+          )
+        : [];
+      box = {
+        pointer: e.pointerId,
+        x: e.clientX,
+        y: e.clientY,
+        width: bounds.width,
+        height: bounds.height,
+        scene: state.scene,
+        bounds: projectSelectionBounds(
+          state.scene,
+          camera,
+          bounds.width,
+          bounds.height,
+        ),
+        base,
+        ids: [],
+        previewIds: base,
+        add: e.shiftKey,
+        hit,
+        started: false,
+      };
+      useEditor.setState({ boxSelecting: true });
+      canvas.setPointerCapture(e.pointerId);
+      canvas.style.cursor = "crosshair";
+    };
     const release = () => {
       cancelAnimationFrame(moveFrame);
       moveFrame = 0;
@@ -151,6 +270,7 @@ export function Gestures({
     };
     const cancel = () => {
       space = false;
+      clearBox();
       if (cameraGesture) {
         const before = cameraGesture;
         canvas.dispatchEvent(
@@ -186,7 +306,7 @@ export function Gestures({
       onLibraryPreview(null, null);
     };
     const down = (e: PointerEvent) => {
-      if (drag || blockedPointer !== null || cameraGesture) {
+      if (drag || box || blockedPointer !== null || cameraGesture) {
         stop(e);
         return;
       }
@@ -202,6 +322,12 @@ export function Gestures({
       }
       controls.current!.mouseButtons.LEFT = MOUSE.ROTATE;
       if (e.button !== 0 || overCameraWidget(e)) return;
+      if (state.boxSelect) {
+        setRay(e);
+        const hit = hits()[0];
+        startBox(e, hit?.object.userData.parts[hit.instanceId ?? 0]?.id);
+        return;
+      }
       if (
         state.tool === "rotate" &&
         rotation.current &&
@@ -211,6 +337,10 @@ export function Gestures({
       setRay(e);
       const hit = hits()[0];
       if (!hit) {
+        if (e.shiftKey) {
+          startBox(e);
+          return;
+        }
         useEditor.setState({ selection: [] });
         startCamera(e);
         return;
@@ -294,6 +424,13 @@ export function Gestures({
       useEditor.getState().preview(delta);
     };
     const move = (e: PointerEvent) => {
+      if (box) {
+        if (e.pointerId !== box.pointer) return;
+        stop(e);
+        lastMove = { clientX: e.clientX, clientY: e.clientY };
+        if (!moveFrame) moveFrame = requestAnimationFrame(updateBox);
+        return;
+      }
       if (!drag) {
         if (blockedPointer !== null) {
           stop(e);
@@ -305,7 +442,14 @@ export function Gestures({
             return;
           }
           setRay(e);
-          canvas.style.cursor = space ? "grab" : hits()[0] ? "grab" : "auto";
+          const hit = hits()[0];
+          canvas.style.cursor = space
+            ? "grab"
+            : useEditor.getState().boxSelect || (e.shiftKey && !hit)
+              ? "crosshair"
+              : hit
+                ? "grab"
+                : "auto";
         }
         return;
       }
@@ -356,10 +500,27 @@ export function Gestures({
       return true;
     };
     const wheel = (e: WheelEvent) => {
+      if (box) {
+        stop(e);
+        return;
+      }
       // Upward scroll is +90°, downward -90°.
       if (e.deltaY && rotateHeldPiece(-Math.sign(e.deltaY))) stop(e);
     };
     const up = (e: PointerEvent) => {
+      if (box && e.pointerId === box.pointer) {
+        stop(e);
+        cancelAnimationFrame(moveFrame);
+        lastMove = { clientX: e.clientX, clientY: e.clientY };
+        updateBox();
+        const state = useEditor.getState();
+        state.selectMany(
+          box.started ? box.ids : box.hit ? [box.hit] : [],
+          box.add,
+        );
+        clearBox();
+        return;
+      }
       if (cameraGesture) finishCamera();
       if (e.pointerId !== (drag?.pointer ?? blockedPointer)) return;
       stop(e);
@@ -383,6 +544,7 @@ export function Gestures({
         cancel();
         return;
       }
+      if (box) return;
       if (
         e.key.toLowerCase() === "r" &&
         !e.ctrlKey &&
@@ -530,6 +692,16 @@ export function Gestures({
       if (e.pointerId === useEditor.getState().libraryPointer?.id) cancel();
     };
     const unsubscribe = useEditor.subscribe((s, before) => {
+      if (
+        box &&
+        (!s.boxSelecting ||
+          s.scene !== box.scene ||
+          s.view !== before.view ||
+          s.frame !== before.frame)
+      )
+        clearBox();
+      if (s.boxSelect !== before.boxSelect && !box)
+        canvas.style.cursor = s.boxSelect ? "crosshair" : "auto";
       if (s.libraryPointer !== before.libraryPointer) clearLibrary();
       if (!s.snap && before.snap) {
         library = library && { ...library, preview: null };
@@ -543,7 +715,7 @@ export function Gestures({
     canvas.addEventListener("pointercancel", cancel);
     canvas.addEventListener("lostpointercapture", cancelLost);
     function cancelLost() {
-      if (drag || blockedPointer !== null) cancel();
+      if (drag || box || blockedPointer !== null) cancel();
     }
     canvas.addEventListener("pointerenter", enter);
     canvas.addEventListener("pointerleave", leave);
@@ -559,8 +731,10 @@ export function Gestures({
     window.addEventListener("keydown", keydown, true);
     window.addEventListener("keyup", keyup);
     window.addEventListener("blur", cancel);
+    window.addEventListener("resize", clearBox);
     return () => {
       unsubscribe();
+      clearBox();
       cancelAnimationFrame(moveFrame);
       canvas.removeEventListener("pointerdown", down, true);
       canvas.removeEventListener("pointermove", move, true);
@@ -578,7 +752,8 @@ export function Gestures({
       window.removeEventListener("keydown", keydown, true);
       window.removeEventListener("keyup", keyup);
       window.removeEventListener("blur", cancel);
+      window.removeEventListener("resize", clearBox);
     };
-  }, [camera, gl, scene, controls, rotation, onLibraryPreview]);
+  }, [camera, gl, scene, controls, rotation, onLibraryPreview, onBoxPreview]);
   return null;
 }

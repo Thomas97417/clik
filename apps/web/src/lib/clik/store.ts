@@ -81,6 +81,8 @@ type State = Snapshot & {
   lightAngle: number;
   uniformLighting: boolean;
   tool: "translate" | "rotate";
+  boxSelect: boolean;
+  boxSelecting: boolean;
   pending: PartType | null;
   libraryPointer: { id: number; type: PartType; x: number; y: number } | null;
   libraryClickSuppressed: boolean;
@@ -107,6 +109,7 @@ type State = Snapshot & {
   select: (id: string, add?: boolean) => void;
   deselect: (id: string) => void;
   selectAll: () => void;
+  selectMany: (ids: string[], add?: boolean) => void;
   setColor: (color: PartColor) => void;
   previewColor: (color: PartColor) => void;
   add: (type: PartType, position?: Vec3) => void;
@@ -146,6 +149,8 @@ export const useEditor = create<State>((set, get) => ({
   lightAngle: 0,
   uniformLighting: false,
   tool: "translate",
+  boxSelect: false,
+  boxSelecting: false,
   color: COLORS[9],
   pending: null,
   libraryPointer: null,
@@ -164,6 +169,8 @@ export const useEditor = create<State>((set, get) => ({
       title,
       provenance: validateProvenance(provenance),
       selection: [],
+      boxSelect: false,
+      boxSelecting: false,
       past: [],
       future: [],
       serial: 0,
@@ -233,6 +240,19 @@ export const useEditor = create<State>((set, get) => ({
         .map((n) => n.id);
       return { selection, color: selectedColor(s.scene, selection, s.color) };
     }),
+  selectMany: (ids, add = false) =>
+    set((s) => {
+      const visible = ids.filter(
+        (id) =>
+          s.scene.nodes.some((node) => node.id === id) &&
+          !inherited(s.scene, id, "hidden"),
+      );
+      const selection = roots(
+        s.scene,
+        add ? [...s.selection, ...visible] : visible,
+      );
+      return { selection, color: selectedColor(s.scene, selection, s.color) };
+    }),
   setColor: (value) => {
     const color = colorSchema.parse(value).toLowerCase();
     const s = get();
@@ -299,13 +319,13 @@ export const useEditor = create<State>((set, get) => ({
   },
   nudge: (delta) => {
     const s = get();
-    if (s.gesture || s.pending || s.libraryPointer) return;
+    if (s.gesture || s.pending || s.libraryPointer || s.boxSelecting) return;
     const next = stepSelection(s.scene, s.selection, delta);
     if (next !== s.scene) s.commit(next);
   },
   rotate: (turn) => {
     const s = get();
-    if (s.gesture || s.pending || s.libraryPointer) return;
+    if (s.gesture || s.pending || s.libraryPointer || s.boxSelecting) return;
     const ids = movableRoots(s.scene, s.selection);
     const moving = new Set(descendants(s.scene, ids));
     const anchor = s.scene.nodes.find(
@@ -449,6 +469,8 @@ export const useEditor = create<State>((set, get) => ({
       gestureIds: [],
       pending: null,
       libraryPointer: null,
+      boxSelect: false,
+      boxSelecting: false,
     });
   },
   copy: () => {

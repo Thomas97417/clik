@@ -77,6 +77,7 @@ export const EDITOR_SHORTCUT_GROUPS: readonly ShortcutGroup[] = [
       { label: "Tourner de −90°", keys: [["shift", "R"]] },
       { label: "Tourner une pièce tenue", keys: [["wheel"]] },
       { label: "Sélection multiple", keys: [["shift", "click"]] },
+      { label: "Sélection par cadre sur le fond", keys: [["shift", "drag"]] },
       { label: "Grouper la sélection", keys: [["mod", "G"]] },
       { label: "Dégrouper", keys: [["shift", "mod", "G"]] },
     ],

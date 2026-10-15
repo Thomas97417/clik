@@ -27,6 +27,7 @@ import {
 } from "three";
 import { geometry } from "@/lib/clik/geometry";
 import { sceneLayoutKey } from "@/lib/clik/scene-layout";
+import type { BoxSelectionPreview } from "@/lib/clik/box-selection";
 import {
   CATALOG,
   descendants,
@@ -206,12 +207,16 @@ function Stage({
   showGrid,
   onViewControls,
   cameraRef,
+  boxSelection,
+  onBoxPreview,
 }: {
   scene: SceneDocument;
   editable: boolean;
   showGrid: boolean;
   onViewControls?: (actions: ViewActions | null) => void;
   cameraRef?: RefObject<Camera | null>;
+  boxSelection: BoxSelectionPreview | null;
+  onBoxPreview: (preview: BoxSelectionPreview | null) => void;
 }) {
   const { camera, gl, scene: threeScene } = useThree(),
     controls = useRef<ComponentRef<typeof OrbitControls>>(null),
@@ -234,8 +239,9 @@ function Stage({
     [selectionScene],
   );
   const selectedIds = useMemo(
-    () => new Set(descendants(selectionScene, s.selection)),
-    [selectionLayoutKey, s.selection],
+    () =>
+      new Set(boxSelection?.ids ?? descendants(selectionScene, s.selection)),
+    [selectionLayoutKey, s.selection, boxSelection?.ids],
   );
   const [resetView, setResetView] = useState(0);
   // Rotate the original light around Y, keeping its elevation and intensity.
@@ -425,18 +431,21 @@ function Stage({
         </group>
       )}
       {editable && preview && <SnapPreview preview={preview} />}
-      {editable && s.tool === "rotate" && <Manipulator rotation={rotation} />}
+      {editable && s.tool === "rotate" && !s.boxSelect && (
+        <Manipulator rotation={rotation} />
+      )}
       {editable && (
         <Gestures
           controls={controls}
           rotation={rotation}
           onLibraryPreview={onLibraryPreview}
+          onBoxPreview={onBoxPreview}
         />
       )}
       <OrbitControls
         ref={controls}
         makeDefault
-        enabled={!editable || (!s.gesture && !s.pending)}
+        enabled={!editable || (!s.gesture && !s.pending && !s.boxSelecting)}
         minDistance={3}
         maxDistance={50000}
         maxPolarAngle={Math.PI * 0.95}
@@ -469,6 +478,10 @@ export default function Scene({
   cameraRef?: RefObject<Camera | null>;
 }) {
   const [viewActions, setViewActions] = useState<ViewActions | null>(null);
+  const [boxSelection, setBoxSelection] = useState<BoxSelectionPreview | null>(
+    null,
+  );
+  const boxSelect = useEditor((s) => editable && s.boxSelect);
   const liveScene = useEditor((s) => (editable ? s.scene : scene));
   const [supported] = useState(() => {
     try {
@@ -503,8 +516,33 @@ export default function Scene({
           showGrid={showGrid}
           onViewControls={showViewControls ? setViewActions : undefined}
           cameraRef={cameraRef}
+          boxSelection={boxSelection}
+          onBoxPreview={setBoxSelection}
         />
       </Canvas>
+      {editable && boxSelection && (
+        <div
+          className="selection-box pointer-events-none absolute z-2 border border-[#356ae6] bg-[#356ae6]/10"
+          style={boxSelection.rect}
+          aria-hidden="true"
+          data-count={boxSelection.ids.length}
+        >
+          <span className="absolute top-1 left-1 rounded-[4px] bg-[#356ae6] px-1.5 py-0.5 text-[10px] leading-4 font-medium whitespace-nowrap text-white">
+            {boxSelection.ids.length} pièce
+            {boxSelection.ids.length > 1 ? "s" : ""}
+          </span>
+        </div>
+      )}
+      {boxSelect && !boxSelection && (
+        <p
+          className="pointer-events-none absolute top-19 left-1/2 z-2 w-max max-w-[calc(100%-24px)] -translate-x-1/2 rounded-[8px] border border-[#dce5f4] bg-white/95 px-3 py-2 text-center text-[11px] leading-relaxed text-[#526783] shadow-[0_2px_8px_#53668108]"
+          role="status"
+        >
+          Glissez pour encadrer les pièces.
+          <br />
+          Maj pour ajouter · Échap pour annuler
+        </p>
+      )}
       {showViewControls && !editable && viewActions && (
         <div
           className="creation-preview-controls group/creation-preview-controls gap-0.75 absolute bottom-1.25 right-1.25 flex items-center text-[#626b8d]"
