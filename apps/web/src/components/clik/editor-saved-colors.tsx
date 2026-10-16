@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { Check, Plus, Trash2 } from "lucide-react";
+import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
 import {
   ColorPicker,
   getForegroundColor,
@@ -32,6 +32,7 @@ export function EditorSavedColors({
   const [slot, setSlot] = useState(0);
   const [draft, setDraft] = useState(color);
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
   const anchor = useRef<HTMLButtonElement | null>(null);
   const hintId = useId();
 
@@ -49,7 +50,10 @@ export function EditorSavedColors({
     return () => window.removeEventListener("storage", sync);
   }, []);
   useEffect(() => {
-    if (disabled) setOpen(false);
+    if (disabled) {
+      setOpen(false);
+      setEditing(false);
+    }
   }, [disabled]);
 
   const edit = (index: number, button: HTMLButtonElement) => {
@@ -57,6 +61,7 @@ export function EditorSavedColors({
     anchor.current = button;
     setSlot(index);
     setDraft(colors[index] ?? color);
+    setEditing(false);
     setOpen(true);
   };
   const remember = (value: string | null) => {
@@ -86,74 +91,135 @@ export function EditorSavedColors({
       i18n={editorColorPickerI18n}
     >
       <span id={hintId} className="sr-only">
-        Clic droit ou Maj + Entrée pour modifier une couleur personnelle.
+        Utilisez « Modifier mes couleurs », le clic droit ou Maj + Entrée pour
+        modifier une couleur personnelle.
       </span>
-      {colors.map((saved, index) => {
-        const chosen = !!saved && !mixed && saved === color;
-        const label = saved
-          ? `Couleur personnelle ${index + 1}, ${saved.toUpperCase()}`
-          : `Ajouter la couleur personnelle ${index + 1}`;
-        return (
-          <button
-            key={index}
-            type="button"
-            data-custom-color-slot={index + 1}
-            aria-label={label}
-            aria-describedby={saved ? hintId : undefined}
-            aria-pressed={saved ? chosen : undefined}
-            aria-keyshortcuts={saved ? "Shift+Enter Shift+F10" : undefined}
-            title={saved ? `${label} · Clic droit pour modifier` : label}
-            disabled={disabled}
-            className={cn(
-              "group/saved-color aspect-square min-w-0 cursor-pointer rounded-[8px] border border-transparent p-0.5 outline-offset-2 transition-colors hover:border-[#d2ddef] hover:bg-[#f1f5fc] focus-visible:outline-2 focus-visible:outline-[#356ae6] disabled:cursor-not-allowed disabled:opacity-40",
-              chosen &&
-                "chosen border-[#356ae6] bg-[#edf3ff] shadow-[0_0_0_1px_#356ae620]",
-            )}
-            onClick={(event) => {
-              if (saved) apply(saved);
-              else edit(index, event.currentTarget);
-            }}
-            onContextMenu={(event) => {
-              event.preventDefault();
-              edit(index, event.currentTarget);
-            }}
-            onKeyDown={(event) => {
-              if (
-                event.key === "F2" ||
-                (event.shiftKey && ["Enter", "F10"].includes(event.key))
-              ) {
+      <div
+        role="group"
+        aria-label="Couleurs personnelles"
+        className="relative col-span-3 grid grid-cols-3 gap-1.25"
+      >
+        <span
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute -inset-0.5 rounded-[10px] border border-[#dce5f2] bg-[#f8faff] transition-colors",
+            editing && "border-[#9cb8f3] bg-[#edf3ff]",
+          )}
+        />
+        {colors.map((saved, index) => {
+          const chosen = !!saved && !mixed && saved === color;
+          const label = saved
+            ? `Couleur personnelle ${index + 1}, ${saved.toUpperCase()}`
+            : `Ajouter la couleur personnelle ${index + 1}`;
+          return (
+            <button
+              key={index}
+              type="button"
+              data-custom-color-slot={index + 1}
+              aria-label={
+                editing && saved
+                  ? `Modifier la couleur personnelle ${index + 1}, ${saved.toUpperCase()}`
+                  : label
+              }
+              aria-describedby={saved ? hintId : undefined}
+              aria-pressed={saved && !editing ? chosen : undefined}
+              aria-keyshortcuts={saved ? "Shift+Enter Shift+F10" : undefined}
+              title={
+                editing && saved
+                  ? `Modifier la couleur personnelle ${index + 1}`
+                  : saved
+                    ? `${label} · Clic droit pour modifier`
+                    : label
+              }
+              disabled={disabled}
+              className={cn(
+                "group/saved-color relative aspect-square min-w-0 cursor-pointer rounded-[8px] border border-transparent p-0.5 outline-offset-2 transition-colors hover:border-[#d2ddef] hover:bg-[#f1f5fc] focus-visible:outline-2 focus-visible:outline-[#356ae6] disabled:cursor-not-allowed disabled:opacity-40",
+                editing &&
+                  saved &&
+                  "border-dashed border-[#7d9fe9] bg-[#edf3ff] hover:border-[#356ae6]",
+                chosen &&
+                  !editing &&
+                  "chosen border-[#356ae6] bg-[#edf3ff] shadow-[0_0_0_1px_#356ae620]",
+              )}
+              onClick={(event) => {
+                if (saved && !editing) apply(saved);
+                else edit(index, event.currentTarget);
+              }}
+              onContextMenu={(event) => {
                 event.preventDefault();
                 edit(index, event.currentTarget);
-              }
-            }}
-          >
-            <span
-              className={cn(
-                "palette-swatch grid aspect-square w-full place-items-center rounded-[5px]",
-                saved
-                  ? "shadow-[inset_0_0_0_1px_#00000014]"
-                  : "border border-dashed border-[#c6d2e3] bg-[#f8faff] text-[#8c9cb4] group-hover/saved-color:border-[#7d9fe9] group-hover/saved-color:text-[#356ae6]",
-              )}
-              style={
-                saved
-                  ? {
-                      background: saved,
-                      color:
-                        getForegroundColor(saved, { dark: "#25354e" }) ??
-                        undefined,
-                    }
-                  : undefined
-              }
+              }}
+              onKeyDown={(event) => {
+                if (
+                  event.key === "F2" ||
+                  (event.shiftKey && ["Enter", "F10"].includes(event.key))
+                ) {
+                  event.preventDefault();
+                  edit(index, event.currentTarget);
+                }
+              }}
             >
-              {chosen ? (
-                <Check size={15} strokeWidth={3} aria-hidden="true" />
-              ) : !saved ? (
-                <Plus size={12} strokeWidth={1.75} aria-hidden="true" />
-              ) : null}
-            </span>
-          </button>
-        );
-      })}
+              <span
+                className={cn(
+                  "palette-swatch grid aspect-square w-full place-items-center rounded-[5px]",
+                  saved
+                    ? "shadow-[inset_0_0_0_1px_#00000014]"
+                    : "border border-dashed border-[#c6d2e3] bg-[#f8faff] text-[#8c9cb4] group-hover/saved-color:border-[#7d9fe9] group-hover/saved-color:text-[#356ae6]",
+                )}
+                style={
+                  saved
+                    ? {
+                        background: saved,
+                        color:
+                          getForegroundColor(saved, { dark: "#25354e" }) ??
+                          undefined,
+                      }
+                    : undefined
+                }
+              >
+                {editing && saved ? (
+                  <Pencil size={12} strokeWidth={2} aria-hidden="true" />
+                ) : chosen ? (
+                  <Check size={15} strokeWidth={3} aria-hidden="true" />
+                ) : !saved ? (
+                  <Plus size={12} strokeWidth={1.75} aria-hidden="true" />
+                ) : null}
+              </span>
+            </button>
+          );
+        })}
+        <button
+          type="button"
+          aria-label={
+            editing
+              ? "Annuler la modification des couleurs"
+              : "Modifier mes couleurs"
+          }
+          title={
+            editing
+              ? "Annuler la modification des couleurs"
+              : "Modifier mes couleurs"
+          }
+          aria-pressed={editing}
+          disabled={disabled}
+          className={cn(
+            "absolute -right-1.5 -bottom-1.5 z-10 grid size-4 cursor-pointer place-items-center rounded-[5px] border border-[#d5dfed] bg-white text-[#68788e] shadow-[0_1px_2px_#2639560a] outline-offset-2 transition-colors hover:border-[#9cb8f3] hover:bg-[#edf3ff] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-[#356ae6] disabled:cursor-not-allowed disabled:opacity-40",
+            editing && "border-[#9cb8f3] bg-[#edf3ff] text-[#356ae6]",
+          )}
+          onClick={() => setEditing(!editing)}
+        >
+          {editing ? (
+            <X size={10} aria-hidden="true" />
+          ) : (
+            <Pencil size={10} aria-hidden="true" />
+          )}
+        </button>
+        {editing && (
+          <span className="sr-only" role="status">
+            Choisissez une case personnelle à modifier.
+          </span>
+        )}
+      </div>
       <EditorColorPickerContent
         title={`Couleur personnelle ${slot + 1}`}
         anchor={anchor}

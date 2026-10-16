@@ -343,6 +343,14 @@ test("couleurs personnelles : trois cases vides, réglage sans modifier la scèn
   await expect(
     page.getByRole("button", { name: /^Ajouter la couleur personnelle/ }),
   ).toHaveCount(3);
+  await expect(
+    page
+      .getByRole("group", { name: "Couleurs personnelles", exact: true })
+      .getByRole("button", { name: "Modifier mes couleurs", exact: true }),
+  ).toBeVisible();
+  const paletteHeight = await page
+    .locator(".palette")
+    .evaluate((element) => element.getBoundingClientRect().height);
   await page.getByRole("button", { name: "Brique 2 × 4", exact: true }).click();
   const dot = page.locator(".tree-row .part-dot");
   await personalColor(page, 1).click();
@@ -366,6 +374,11 @@ test("couleurs personnelles : trois cases vides, réglage sans modifier la scèn
 
   await setPersonalColor(page, 1, "#216579");
   await expect(dot).toHaveCSS("background-color", "rgb(33, 101, 121)");
+  expect(
+    await page
+      .locator(".palette")
+      .evaluate((element) => element.getBoundingClientRect().height),
+  ).toBeCloseTo(paletteHeight, 1);
   await expect(personalColor(page, 1)).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Rouge", exact: true }).click();
   await personalColor(page, 1).click();
@@ -420,7 +433,15 @@ test("couleurs personnelles : les trois teintes restent disponibles après recha
     );
   for (const { width, height } of dimensions)
     expect(Math.abs(width - height)).toBeLessThan(1);
-  await personalColor(page, 3).click({ button: "right" });
+  await page
+    .getByRole("button", { name: "Modifier mes couleurs", exact: true })
+    .click();
+  for (const [index, color] of colors.entries())
+    await expect(personalColor(page, index + 1)).toHaveAttribute(
+      "aria-label",
+      `Modifier la couleur personnelle ${index + 1}, ${color.toUpperCase()}`,
+    );
+  await personalColor(page, 3).click();
   await expect(page.locator(".editor-color-picker")).toBeInViewport();
   await expect(
     page.getByRole("textbox", { name: "Code hexadécimal", exact: true }),
@@ -435,7 +456,7 @@ test("couleurs personnelles : les trois teintes restent disponibles après recha
   });
 });
 
-test("couleurs personnelles : modification au clavier, suppression et synchronisation entre onglets", async ({
+test("couleurs personnelles : modification visuelle, clic droit, clavier et synchronisation entre onglets", async ({
   page,
   context,
 }) => {
@@ -449,11 +470,48 @@ test("couleurs personnelles : modification au clavier, suppression et synchronis
     "aria-label",
     "Couleur personnelle 1, #123ABC",
   );
-  await personalColor(page, 1).click({ button: "right" });
+  const edit = page.getByRole("button", {
+    name: "Modifier mes couleurs",
+    exact: true,
+  });
+  await expect(edit).toBeVisible();
+  const paletteHeight = await page
+    .locator(".palette")
+    .evaluate((element) => element.getBoundingClientRect().height);
+  await edit.click();
+  await expect(personalColor(page, 1)).toHaveAttribute(
+    "aria-label",
+    "Modifier la couleur personnelle 1, #123ABC",
+  );
+  await expect(
+    page.getByRole("status").filter({
+      hasText: "Choisissez une case personnelle à modifier.",
+    }),
+  ).toHaveText("Choisissez une case personnelle à modifier.");
+  expect(
+    await page
+      .locator(".palette")
+      .evaluate((element) => element.getBoundingClientRect().height),
+  ).toBeCloseTo(paletteHeight, 1);
+  await page
+    .getByRole("button", {
+      name: "Annuler la modification des couleurs",
+      exact: true,
+    })
+    .click();
+  await personalColor(page, 1).click();
+  await expect(page.locator(".editor-color-picker")).not.toBeVisible();
+  await edit.click();
+  await personalColor(page, 1).click();
   const input = page.getByRole("textbox", {
     name: "Code hexadécimal",
     exact: true,
   });
+  await expect(input).toHaveValue("123ABC");
+  await expect(page.locator(".tree-row .part-dot")).toHaveCSS(
+    "background-color",
+    "rgb(18, 58, 188)",
+  );
   await input.fill("#d3985e");
   await input.press("Enter");
   await page
