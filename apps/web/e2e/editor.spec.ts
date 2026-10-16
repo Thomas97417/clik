@@ -13,9 +13,11 @@ test("construction, couleurs, historique et récupération du brouillon", async 
   await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
   await expect(page.locator("canvas").first()).toBeVisible();
   await page.getByRole("button", { name: "Rouge", exact: true }).click();
+  await page.keyboard.down("Control");
   await page.keyboard.down("d");
-  await page.keyboard.down("d"); // Holding D must create only one copy.
+  await page.keyboard.down("d"); // Holding Ctrl+D must create only one copy.
   await page.keyboard.up("d");
+  await page.keyboard.up("Control");
   await expect(page.locator(".viewport-bottom")).toContainText("2 / 500");
   await expect(page.getByLabel("position X", { exact: true })).toHaveValue(
     "2.5",

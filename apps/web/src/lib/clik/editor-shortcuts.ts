@@ -19,6 +19,9 @@ const keySymbols = {
   rightDrag: { glyph: "Clic droit", label: "Clic droit et glisser" },
   wheel: { glyph: "Molette", label: "Molette de la souris" },
   Z: { glyph: "Z", label: "Z" },
+  A: { glyph: "A", label: "A" },
+  Q: { glyph: "Q", label: "Q" },
+  S: { glyph: "S", label: "S" },
   Y: { glyph: "Y", label: "Y" },
   C: { glyph: "C", label: "C" },
   V: { glyph: "V", label: "V" },
@@ -53,15 +56,17 @@ export const EDITOR_SHORTCUT_GROUPS: readonly ShortcutGroup[] = [
       },
       { label: "Copier la sélection", keys: [["mod", "C"]] },
       { label: "Coller", keys: [["mod", "V"]] },
-      { label: "Dupliquer la sélection", keys: [["D"]] },
+      { label: "Dupliquer la sélection", keys: [["mod", "D"]] },
       { label: "Supprimer la sélection", keys: [["backspace"], ["delete"]] },
       { label: "Annuler l’action en cours", keys: [["escape"]] },
     ],
   },
   {
     title: "Pièces et sélection",
-    context: "Les flèches suivent la vue, par pas de grille",
+    context:
+      "Les flèches déplacent les pièces sélectionnées selon la vue, par pas de grille",
     shortcuts: [
+      { label: "Tout sélectionner", keys: [["A"]] },
       {
         label: "Déplacer la sélection",
         keys: [["drag"], ["left"], ["up"], ["down"], ["right"]],
@@ -78,15 +83,20 @@ export const EDITOR_SHORTCUT_GROUPS: readonly ShortcutGroup[] = [
       { label: "Tourner une pièce tenue", keys: [["wheel"]] },
       { label: "Sélection multiple", keys: [["shift", "click"]] },
       { label: "Sélection par cadre sur le fond", keys: [["shift", "drag"]] },
-      { label: "Grouper la sélection", keys: [["mod", "G"]] },
+      { label: "Grouper la sélection", keys: [["G"], ["mod", "G"]] },
       { label: "Dégrouper", keys: [["shift", "mod", "G"]] },
     ],
   },
   {
     title: "Caméra",
-    context: "Glissez sur le fond de la scène pour tourner la vue",
+    context:
+      "ZQSD déplace la caméra selon la vue. Les flèches font de même sans sélection",
     shortcuts: [
       { label: "Cadrer la sélection", keys: [["F"]] },
+      { label: "Avancer", keys: [["Z"], ["up"]] },
+      { label: "Aller à gauche", keys: [["Q"], ["left"]] },
+      { label: "Reculer", keys: [["S"], ["down"]] },
+      { label: "Aller à droite", keys: [["D"], ["right"]] },
       { label: "Tourner autour de la scène", keys: [["drag"]] },
       { label: "Déplacer la caméra", keys: [["space", "drag"], ["rightDrag"]] },
       { label: "Zoomer / dézoomer", keys: [["wheel"]] },

@@ -49,6 +49,7 @@ import { toast } from "sonner";
 import { CAMERA_GIZMO_MARGIN, Gestures } from "./gestures";
 import { SnapPreview } from "./snap-preview";
 import { GroundGrid } from "./ground-grid";
+import { KeyboardCamera } from "./keyboard-camera";
 import { Minus, Plus, RotateCcw } from "lucide-react";
 
 type ViewActions = { zoom: (direction: number) => void; reset: () => void };
@@ -283,6 +284,7 @@ function Manipulator({
 function Stage({
   scene,
   editable,
+  keyboardNavigation,
   showGrid,
   onViewControls,
   cameraRef,
@@ -291,6 +293,7 @@ function Stage({
 }: {
   scene: SceneDocument;
   editable: boolean;
+  keyboardNavigation: boolean;
   showGrid: boolean;
   onViewControls?: (actions: ViewActions | null) => void;
   cameraRef?: RefObject<Camera | null>;
@@ -529,6 +532,7 @@ function Stage({
         maxDistance={50000}
         maxPolarAngle={Math.PI * 0.95}
       />
+      <KeyboardCamera controls={controls} enabled={keyboardNavigation} />
       {/* Remounting cancels a pending axis tween that would override the reset. */}
       <GizmoHelper
         key={editable ? "editor" : resetView}
@@ -546,12 +550,14 @@ function Stage({
 export default function Scene({
   scene,
   editable = false,
+  keyboardNavigation = false,
   showGrid = true,
   showViewControls = false,
   cameraRef,
 }: {
   scene: SceneDocument;
   editable?: boolean;
+  keyboardNavigation?: boolean;
   showGrid?: boolean;
   showViewControls?: boolean;
   cameraRef?: RefObject<Camera | null>;
@@ -592,6 +598,7 @@ export default function Scene({
         <Stage
           scene={liveScene}
           editable={editable}
+          keyboardNavigation={keyboardNavigation}
           showGrid={showGrid}
           onViewControls={showViewControls ? setViewActions : undefined}
           cameraRef={cameraRef}

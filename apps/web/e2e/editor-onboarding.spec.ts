@@ -309,7 +309,7 @@ test("les cinq étapes présentent les actions sans débordement et préservent 
   expect(await snapshot(page)).toEqual(before);
   expect(errors).toEqual([]);
   // The editor's keyboard controls work again after the visit.
-  await page.keyboard.press("d");
+  await page.keyboard.press("Control+d");
   await expect(page.locator(".viewport-bottom")).toContainText("2 / 500");
 });
 

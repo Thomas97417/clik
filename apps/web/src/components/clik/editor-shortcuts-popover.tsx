@@ -54,7 +54,8 @@ export default function EditorShortcutsPopover({
       >
         Glisser / flèches : déplacer · Maj + ↑ / ↓ : hauteur · Espace + glisser
         / clic droit : caméra · Maj + clic : sélection multiple{" "}
-        <ChevronRight size={12} aria-hidden="true" /> D : dupliquer
+        <ChevronRight size={12} aria-hidden="true" /> {mac ? "⌘" : "Ctrl"} + D :
+        dupliquer
         <ChevronRight size={12} aria-hidden="true" /> F : cadrer
         <ChevronRight size={12} aria-hidden="true" /> R / Maj + R : ±90°
         <ChevronRight size={12} aria-hidden="true" /> Échap : annuler

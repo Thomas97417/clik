@@ -94,6 +94,7 @@ import ClientScene from "./client-scene";
 import PartPreview from "./part-preview";
 import { sceneLayoutKey } from "@/lib/clik/scene-layout";
 import { cameraRelativeStep } from "@/lib/clik/camera-relative-movement";
+import { editorShortcutTarget } from "@/lib/clik/editor-keyboard";
 
 const LibraryPartPreview = memo(function LibraryPartPreview({
   type,
@@ -386,7 +387,17 @@ export default function Editor({
         return;
       }
       if (state.gesture || state.pending || state.boxSelecting) return;
-      if (e.key.toLowerCase() === "r" && !mod && !e.altKey) {
+      if (e.key.toLowerCase() === "a" && !mod && !e.altKey) {
+        if (
+          !project.ready ||
+          closed ||
+          e.repeat ||
+          !editorShortcutTarget(e.target)
+        )
+          return;
+        e.preventDefault();
+        state.selectAll();
+      } else if (e.key.toLowerCase() === "r" && !mod && !e.altKey) {
         const target = e.target instanceof HTMLElement ? e.target : null;
         if (
           !project.ready ||
@@ -437,22 +448,29 @@ export default function Editor({
       } else if (mod && e.key.toLowerCase() === "v") {
         e.preventDefault();
         safe(state.paste);
-      } else if (e.key.toLowerCase() === "d" && !e.altKey) {
-        const target = e.target instanceof HTMLElement ? e.target : null;
+      } else if (mod && e.key.toLowerCase() === "d" && !e.altKey) {
         if (
           !project.ready ||
           closed ||
           e.repeat ||
           !state.selection.length ||
-          (target && target !== document.body && !target.closest(".editor")) ||
-          target?.closest('[role="menu"],[role="listbox"],[role="combobox"]')
+          !editorShortcutTarget(e.target)
         )
           return;
         e.preventDefault();
         safe(state.duplicate);
-      } else if (mod && e.key.toLowerCase() === "g") {
+      } else if (e.key.toLowerCase() === "g" && !e.altKey) {
+        if (
+          !project.ready ||
+          closed ||
+          e.repeat ||
+          !state.selection.length ||
+          (!mod && e.shiftKey) ||
+          !editorShortcutTarget(e.target)
+        )
+          return;
         e.preventDefault();
-        safe(e.shiftKey ? state.ungroup : state.group);
+        safe(mod && e.shiftKey ? state.ungroup : state.group);
       } else if (e.key.toLowerCase() === "f")
         useEditor.setState({ frame: state.frame + 1 });
     };
@@ -1388,6 +1406,7 @@ export default function Editor({
               <ClientScene
                 scene={s.scene}
                 editable={!closed && !tourActive}
+                keyboardNavigation={!busy && !publishing && !tourActive}
                 cameraRef={camera}
               />
             ) : (
@@ -1579,6 +1598,7 @@ export default function Editor({
                   className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
                   title="Tout sélectionner"
                   aria-label="Tout sélectionner"
+                  aria-keyshortcuts="a"
                   disabled={!s.scene.nodes.length}
                   onClick={s.selectAll}
                 >
@@ -1591,6 +1611,9 @@ export default function Editor({
                 <button
                   className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
                   title={s.selection.length ? "Grouper" : "Nouveau groupe"}
+                  aria-keyshortcuts={
+                    s.selection.length ? "g Control+g Meta+g" : undefined
+                  }
                   onClick={() => safe(s.group)}
                   disabled={
                     !project.ready || closed || !!s.gesture || !!s.pending
@@ -1608,9 +1631,9 @@ export default function Editor({
                 </button>
                 <button
                   className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
-                  title="Dupliquer (D)"
+                  title="Dupliquer (⌘/Ctrl + D)"
                   aria-label="Dupliquer"
-                  aria-keyshortcuts="d Control+d Meta+d"
+                  aria-keyshortcuts="Control+d Meta+d"
                   onClick={() => safe(s.duplicate)}
                   disabled={!s.selection.length}
                 >
