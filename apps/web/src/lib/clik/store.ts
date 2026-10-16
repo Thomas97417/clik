@@ -37,6 +37,7 @@ import {
 import { Matrix4, Vector3 } from "three";
 import { moveTreeBranches } from "./tree-order";
 import { FIRST_CREATION_TITLE } from "./creation-name";
+import { completeGroupSelection, withoutSelection } from "./selection";
 type Snapshot = {
   scene: SceneDocument;
   title: string;
@@ -218,19 +219,26 @@ export const useEditor = create<State>((set, get) => ({
   },
   select: (id, add = false) =>
     set((s) => {
-      const selection = add
-        ? s.selection.includes(id)
-          ? s.selection.filter((x) => x !== id)
+      const ids = add
+        ? descendants(s.scene, s.selection).includes(id)
+          ? withoutSelection(s.scene, s.selection, id)
           : [...s.selection, id]
         : [id];
-      return { selection, color: selectedColor(s.scene, selection, s.color) };
+      // A direct click on a group must still let the inspector target it.
+      const directGroup =
+        !add && s.scene.nodes.find((node) => node.id === id)?.kind === "group";
+      return {
+        selection: directGroup ? [id] : completeGroupSelection(s.scene, ids),
+        color: selectedColor(s.scene, ids, s.color),
+      };
     }),
   deselect: (id) =>
     set((s) => {
-      const selection = s.selection.filter(
-        (root) => !descendants(s.scene, [root]).includes(id),
-      );
-      return { selection, color: selectedColor(s.scene, selection, s.color) };
+      const ids = withoutSelection(s.scene, s.selection, id);
+      return {
+        selection: completeGroupSelection(s.scene, ids),
+        color: selectedColor(s.scene, ids, s.color),
+      };
     }),
   // Selecting only roots carries every descendant once, including folded groups.
   selectAll: () =>
@@ -247,11 +255,11 @@ export const useEditor = create<State>((set, get) => ({
           s.scene.nodes.some((node) => node.id === id) &&
           !inherited(s.scene, id, "hidden"),
       );
-      const selection = roots(
-        s.scene,
-        add ? [...s.selection, ...visible] : visible,
-      );
-      return { selection, color: selectedColor(s.scene, selection, s.color) };
+      const selection = add ? [...s.selection, ...visible] : visible;
+      return {
+        selection: completeGroupSelection(s.scene, selection),
+        color: selectedColor(s.scene, selection, s.color),
+      };
     }),
   setColor: (value) => {
     const color = colorSchema.parse(value).toLowerCase();

@@ -115,10 +115,10 @@ describe("Sélection par cadre", () => {
     const editor = useEditor.getState();
     editor.load(scene, "Cadre");
     editor.selectMany([a.id, hidden.id, "missing", a.id]);
-    expect(useEditor.getState().selection).toEqual([a.id]);
+    expect(useEditor.getState().selection).toEqual(["group"]);
     editor.selectMany([b.id], true);
     expect(new Set(useEditor.getState().selection)).toEqual(
-      new Set([a.id, b.id]),
+      new Set(["group", b.id]),
     );
     expect(useEditor.getState().color).toBe(b.color);
     editor.select("group");

@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { emptyScene, group, makePart } from "@clik/scene";
 import { selectCameraView } from "./camera-view";
 
-async function setup(page: Page) {
+async function setup(page: Page, grouped = false) {
   const front = {
     ...makePart("brick-2x2", "#4079e8", [-4, 0, 0]),
     name: "Devant",
@@ -19,12 +19,17 @@ async function setup(page: Page) {
     ...makePart("brick-1x1", "#ef4444", [-4, 0, -2]),
     name: "Masquée",
   };
-  const scene = group(
+  let scene = group(
     { ...emptyScene(), nodes: [front, back, right, hidden] },
     [hidden.id],
     "hidden-group",
   );
   scene.nodes.find((node) => node.id === "hidden-group")!.hidden = true;
+  if (grouped) {
+    scene = group(scene, [front.id, back.id], "visible-group");
+    scene.nodes.find((node) => node.id === "visible-group")!.name =
+      "Assemblage";
+  }
   await page.goto("/terms");
   await page.evaluate(async (scene) => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
@@ -56,7 +61,10 @@ async function setup(page: Page) {
   }, scene);
   await page.goto("/editor?draft=box-selection");
   const canvas = page.locator("canvas").first();
-  await expect(canvas).toHaveAttribute("data-rendered", "5");
+  await expect(canvas).toHaveAttribute(
+    "data-rendered",
+    String(scene.nodes.length),
+  );
   await selectCameraView(page, "front");
   const box = (await canvas.boundingBox())!;
   const row = (id: string) => page.locator(`[data-node-id="${id}"]`);
@@ -161,4 +169,82 @@ test("Maj ajoute au cadre, le sens de tracé est libre et les annulations restau
   await row(front.id).locator(".tree-name").click();
   await page.keyboard.up("Shift");
   await expect(page.locator(".tree-row.selected")).toHaveCount(2);
+});
+
+test("le groupe est sélectionné dès que toutes ses pièces le sont, par clics ou par cadre", async ({
+  page,
+}) => {
+  const { canvas, box, row, front, back, right } = await setup(page, true);
+  const assembly = row("visible-group");
+  const shiftClick = async (id: string) =>
+    row(id)
+      .locator(".tree-name")
+      .click({ modifiers: ["Shift"] });
+  const selected = /(^|\s)selected(\s|$)/;
+  await row(front.id).locator(".tree-name").click();
+  await expect(row(front.id)).toHaveClass(selected);
+  await expect(assembly).not.toHaveClass(selected);
+  await shiftClick(back.id);
+  await expect(assembly).toHaveClass(selected);
+  await expect(page.locator(".tree-row.selected")).toHaveCount(1);
+  await expect(page.getByLabel("Nom", { exact: true })).toHaveValue(
+    "Assemblage",
+  );
+  await expect(
+    page.getByRole("button", { name: "Dissocier", exact: true }),
+  ).toBeEnabled();
+
+  // Removing a child leaves the other piece selected, and adding it restores
+  // the group rather than introducing a second copy of its descendants.
+  await shiftClick(front.id);
+  await expect(assembly).not.toHaveClass(selected);
+  await expect(row(back.id)).toHaveClass(selected);
+  await expect(page.locator(".tree-row.selected")).toHaveCount(1);
+  await shiftClick(front.id);
+  await expect(assembly).toHaveClass(selected);
+  await shiftClick(right.id);
+  await expect(page.locator(".tree-row.selected")).toHaveCount(2);
+  await shiftClick("visible-group");
+  await expect(page.locator(".tree-row.selected")).toHaveCount(1);
+  await expect(row(right.id)).toHaveClass(selected);
+
+  await page
+    .getByRole("button", { name: "Sélection par cadre", exact: true })
+    .click();
+  await page.mouse.move(box.x + 10, box.y + 100);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2 - 5, box.y + box.height - 100, {
+    steps: 12,
+  });
+  await expect(page.locator(".selection-box")).toHaveAttribute(
+    "data-count",
+    "2",
+  );
+  await page.mouse.up();
+  await expect(assembly).toHaveClass(selected);
+  await expect(row(right.id)).not.toHaveClass(selected);
+  await expect(page.locator(".tree-row.selected")).toHaveCount(1);
+
+  const frames = Number(await canvas.getAttribute("data-frames"));
+  await page
+    .getByRole("button", { name: "Cadrer la sélection (F)", exact: true })
+    .click();
+  await expect
+    .poll(async () => Number(await canvas.getAttribute("data-frames")))
+    .toBeGreaterThan(frames + 2);
+  await canvas.click({
+    position: { x: box.width / 2, y: box.height / 2 },
+    modifiers: ["Shift"],
+  });
+  await expect(assembly).not.toHaveClass(selected);
+  await expect(row(back.id)).toHaveClass(selected);
+  await canvas.click({
+    position: { x: box.width / 2, y: box.height / 2 },
+    modifiers: ["Shift"],
+  });
+  await expect(assembly).toHaveClass(selected);
+  await expect(page.locator(".tree-row.selected")).toHaveCount(1);
+  await expect(
+    page.getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true }),
+  ).toBeDisabled();
 });
