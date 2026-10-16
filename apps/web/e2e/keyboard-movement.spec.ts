@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { selectCameraView } from "./camera-view";
+import { emptyScene, makePart } from "@clik/scene";
 
 test("flèches : grille, hauteur, répétition et annuler/rétablir", async ({
   page,
@@ -115,4 +116,92 @@ test("les flèches suivent la vue choisie et une rotation libre de 180°", async
   await expect(position("X")).toHaveValue("0");
   await page.keyboard.press("ArrowUp");
   await expect(position("Z")).toHaveValue("0");
+});
+
+test("Maj-flèches atteint le plafond, le support et le sol quand il reste moins d’un pas", async ({
+  page,
+}) => {
+  const mobile = {
+    ...makePart("brick-1x1", "#4079e8", [0.5, 0.8, 0.5]),
+    name: "Mobile",
+  };
+  const free = {
+    ...makePart("brick-1x1", "#41a66b", [4.5, 0.35, 0.5]),
+    name: "Libre",
+  };
+  const scene = {
+    ...emptyScene(),
+    nodes: [
+      mobile,
+      makePart("plate-1x1", "#ef4444", [0.5, 0, 0.5]),
+      makePart("plate-1x1", "#ef4444", [0.5, 2.4, 0.5]),
+      free,
+    ],
+  };
+  await page.goto("/terms");
+  await page.evaluate(async (scene) => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open("clik", 1);
+      request.onupgradeneeded = () =>
+        request.result.createObjectStore("drafts");
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const tx = db.transaction("drafts", "readwrite");
+        tx.objectStore("drafts").put(
+          {
+            scene,
+            title: "Hauteur disponible",
+            revision: 0,
+            stamp: crypto.randomUUID(),
+            dirty: false,
+          },
+          "guest:vertical-movement",
+        );
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    } finally {
+      db.close();
+    }
+  }, scene);
+  await page.goto("/editor?draft=vertical-movement");
+  await expect(page.locator("canvas").first()).toHaveAttribute(
+    "data-rendered",
+    "4",
+  );
+  const select = async (id: string) =>
+    page.locator(`[data-node-id="${id}"] .tree-name`).click();
+  const y = page.getByLabel("position Y", { exact: true });
+  const serial = () =>
+    page.evaluate(async () => {
+      const path = "/src/lib/clik/store.ts";
+      const { useEditor } = await import(/* @vite-ignore */ path);
+      return useEditor.getState().serial;
+    });
+  await select(mobile.id);
+  await page.keyboard.press("Shift+ArrowUp");
+  await expect(y).toHaveValue("1.2");
+  expect(await serial()).toBe(1);
+  await page.keyboard.press("Shift+ArrowUp");
+  await expect(y).toHaveValue("1.2");
+  expect(await serial()).toBe(1);
+  await page.keyboard.press("Shift+ArrowDown");
+  await expect(y).toHaveValue("0.4");
+  expect(await serial()).toBe(2);
+  await page.keyboard.press("Shift+ArrowDown");
+  await expect(y).toHaveValue("0.4");
+  expect(await serial()).toBe(2);
+  await page.keyboard.press("Control+z");
+  await select(mobile.id);
+  await expect(y).toHaveValue("1.2");
+  await page.keyboard.press("Control+Shift+z");
+  await select(mobile.id);
+  await expect(y).toHaveValue("0.4");
+  await select(free.id);
+  await page.keyboard.press("Shift+ArrowDown");
+  await expect(y).toHaveValue("0");
+  await expect(page.locator(".overlap")).toHaveCount(0);
 });

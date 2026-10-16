@@ -5,6 +5,7 @@ import {
   placementBody,
   collisionClearance,
   bodiesOverlap,
+  verticalTravel,
 } from "./placement-collision";
 import { roundHasSocket } from "./part-shapes";
 export const CATALOG = {
@@ -932,7 +933,7 @@ export function movableRoots(scene: SceneDocument, ids: string[]) {
   );
 }
 
-/** A keyboard step stays on its requested axis; occupied destinations are refused. */
+/** A keyboard step stays on its axis; vertical travel stops at first contact. */
 export function stepSelection(
   scene: SceneDocument,
   ids: string[],
@@ -940,12 +941,31 @@ export function stepSelection(
 ) {
   const movable = movableRoots(scene, ids);
   if (!movable.length) return scene;
+  const movingIds = new Set(descendants(scene, movable));
+  if (delta[0] === 0 && delta[2] === 0 && delta[1] !== 0) {
+    const moving: ReturnType<typeof placementBody>[] = [];
+    const obstacles: typeof moving = [];
+    for (const node of scene.nodes) {
+      if (node.kind !== "part") continue;
+      const body = placementBody(
+        CATALOG[node.type],
+        worldMatrix(scene, node.id),
+      );
+      (movingIds.has(node.id) ? moving : obstacles).push(body);
+    }
+    const amount = verticalTravel(moving, obstacles, delta[1]);
+    if (Math.abs(amount) <= 1e-8) return scene;
+    return applyDelta(
+      scene,
+      movable,
+      new Matrix4().makeTranslation(0, amount, 0),
+    );
+  }
   const next = applyDelta(
     scene,
     movable,
     new Matrix4().makeTranslation(...delta),
   );
-  const movingIds = new Set(descendants(scene, movable));
   const moving = next.nodes
     .filter((n): n is Part => n.kind === "part" && movingIds.has(n.id))
     .map((n) => placementBody(CATALOG[n.type], worldMatrix(next, n.id)));

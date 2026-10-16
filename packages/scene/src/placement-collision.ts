@@ -44,6 +44,19 @@ function compound(pieces: Body[]): Body {
   };
 }
 
+const solids = (body: Body): Body[] =>
+  body.pieces ? body.pieces.flatMap(solids) : [body];
+
+function separatingAxes(a: Body, b: Body) {
+  const axes = [...a.normals, ...b.normals];
+  for (const edge of a.edges)
+    for (const other of b.edges) {
+      const axis = new Vector3().crossVectors(edge, other);
+      if (axis.lengthSq() > 1e-12) axes.push(axis.normalize());
+    }
+  return axes;
+}
+
 // Studs intentionally enter sockets. Concave shapes are unions of convex solids.
 export function placementBody(
   dimensions: PartDimensions,
@@ -165,14 +178,8 @@ function penetrationLift(a: Body, b: Body, offset: number) {
         lift = Math.max(lift, penetrationLift(part, other, offset));
     return lift;
   }
-  const axes = [...a.normals, ...b.normals];
-  for (const edge of a.edges)
-    for (const other of b.edges) {
-      const axis = new Vector3().crossVectors(edge, other);
-      if (axis.lengthSq() > 1e-12) axes.push(axis.normalize());
-    }
   let lift = Infinity;
-  for (let axis of axes) {
+  for (let axis of separatingAxes(a, b)) {
     if (axis.y < 0) axis = axis.clone().negate();
     const av = a.vertices.map((v) => v.dot(axis) + offset * axis.y);
     const bv = b.vertices.map((v) => v.dot(axis));
@@ -192,8 +199,6 @@ export function collisionClearance(
   obstacles: Body[],
   grid = false,
 ) {
-  const solids = (body: Body): Body[] =>
-    body.pieces ? body.pieces.flatMap(solids) : [body];
   moving = moving.flatMap(solids);
   obstacles = obstacles.flatMap(solids);
   let lift = 0;
@@ -216,4 +221,56 @@ export function collisionClearance(
 
 export function bodiesOverlap(a: Body, b: Body) {
   return penetrationLift(a, b, 0) > 1e-8;
+}
+
+// Sweep a convex solid along world Y. Intersect its overlap intervals on every
+// separating axis to find the first contact, even if the endpoint is free.
+function verticalContact(a: Body, b: Body, direction: number, limit: number) {
+  const swept = a.bounds.clone();
+  swept.min.y += Math.min(0, direction * limit);
+  swept.max.y += Math.max(0, direction * limit);
+  if (!swept.intersectsBox(b.bounds)) return limit;
+
+  let enter = -Infinity,
+    exit = Infinity;
+  for (const axis of separatingAxes(a, b)) {
+    const av = a.vertices.map((v) => v.dot(axis));
+    const bv = b.vertices.map((v) => v.dot(axis));
+    const minA = Math.min(...av),
+      maxA = Math.max(...av),
+      minB = Math.min(...bv),
+      maxB = Math.max(...bv);
+    const speed = direction * axis.y;
+    if (Math.abs(speed) <= 1e-8) {
+      if (maxA <= minB + 1e-8 || maxB <= minA + 1e-8) return limit;
+      continue;
+    }
+    const first = (minB - maxA) / speed;
+    const last = (maxB - minA) / speed;
+    enter = Math.max(enter, Math.min(first, last));
+    exit = Math.min(exit, Math.max(first, last));
+    if (exit <= Math.max(enter, 0) + 1e-8) return limit;
+  }
+  return Math.min(limit, Math.max(0, enter));
+}
+
+/** Stop a rigid selection at the first obstacle or the floor, without a gap. */
+export function verticalTravel(
+  moving: Body[],
+  obstacles: Body[],
+  amount: number,
+) {
+  if (!moving.length || !amount) return 0;
+  const direction = Math.sign(amount);
+  const bottom = Math.min(...moving.map((body) => body.bounds.min.y));
+  let distance = Math.abs(amount);
+  if (direction < 0) distance = Math.min(distance, Math.max(0, bottom));
+  const targets = obstacles.flatMap(solids);
+  for (const part of moving.flatMap(solids))
+    for (const obstacle of targets) {
+      distance = verticalContact(part, obstacle, direction, distance);
+      if (distance <= 1e-8) return 0;
+    }
+  const travel = direction * distance;
+  return bottom + travel < -1e-6 ? 0 : travel;
 }

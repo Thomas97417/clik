@@ -154,7 +154,9 @@ describe("Déplacement par pas de grille", () => {
     const scene = { ...emptyScene(), nodes: [a, b, c] };
     const next = stepSelection(scene, [a.id], [0, -0.4, 0]);
     expect(next).not.toBe(scene);
-    expect(stepSelection(next, [a.id], [0, -0.4, 0])).toBe(next);
+    const atFloor = stepSelection(next, [a.id], [0, -0.4, 0]);
+    expect(atFloor.nodes[0].position[1]).toBeCloseTo(0.5);
+    expect(stepSelection(atFloor, [a.id], [0, -0.4, 0])).toBe(atFloor);
   });
   it("ne perturbe pas un glisser-déplacer et respecte la clôture du défi", () => {
     const a = makePart("brick-1x1", "#4079e8");
