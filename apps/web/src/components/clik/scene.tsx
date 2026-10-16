@@ -14,17 +14,21 @@ import {
   TransformControls,
   GizmoHelper,
   GizmoViewport,
+  Outlines,
 } from "@react-three/drei";
 import {
   Box3,
+  type BufferGeometry,
   Color,
   type Camera,
   type Group,
   InstancedMesh,
   Matrix4,
   MeshStandardMaterial,
+  MeshBasicMaterial,
   Vector3,
 } from "three";
+import { toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { geometry } from "@/lib/clik/geometry";
 import { sceneLayoutKey } from "@/lib/clik/scene-layout";
 import type { BoxSelectionPreview } from "@/lib/clik/box-selection";
@@ -49,6 +53,67 @@ import { Minus, Plus, RotateCcw } from "lucide-react";
 
 type ViewActions = { zoom: (direction: number) => void; reset: () => void };
 const material = new MeshStandardMaterial({ roughness: 0.32, metalness: 0.02 });
+const selectionTint = new Color("#b7d5ff");
+const outlineCarrierMaterial = new MeshBasicMaterial({ visible: false });
+const noRaycast = () => {};
+const outlineGeometries = new Map<PartType, BufferGeometry>();
+function selectionGeometry(type: PartType) {
+  let result = outlineGeometries.get(type);
+  if (!result) {
+    // Smooth only the outline shell, once per model. Keep the brick's lighting
+    // normals intact and avoid rebuilding geometry as a selection grows.
+    result = toCreasedNormals(geometry(type).clone(), Math.PI);
+    outlineGeometries.set(type, result);
+  }
+  return result;
+}
+
+function SelectionOutline({
+  type,
+  scene,
+  parts,
+  layoutKey,
+}: {
+  type: PartType;
+  scene: SceneDocument;
+  parts: Part[];
+  layoutKey: string;
+}) {
+  const mesh = useRef<InstancedMesh>(null);
+  const selectionKey = parts.map((part) => part.id).join(",");
+  useLayoutEffect(() => {
+    if (!mesh.current) return;
+    parts.forEach((part, index) =>
+      mesh.current!.setMatrixAt(
+        index,
+        part.parentId ? worldMatrix(scene, part.id) : matrix(part),
+      ),
+    );
+    mesh.current.instanceMatrix.needsUpdate = true;
+    mesh.current.computeBoundingSphere();
+    // Outlines shares the instance transforms; its child bounds must not keep
+    // culling a selection at its previous position after a drag.
+    mesh.current.traverse((object) => {
+      if (object instanceof InstancedMesh) object.frustumCulled = false;
+    });
+  }, [layoutKey, selectionKey]);
+  return (
+    <instancedMesh
+      ref={mesh}
+      args={[selectionGeometry(type), outlineCarrierMaterial, parts.length]}
+      raycast={noRaycast}
+    >
+      <Outlines
+        key={parts.length}
+        color="#356ae6"
+        thickness={2.5}
+        angle={0}
+        toneMapped={false}
+        renderOrder={1}
+      />
+    </instancedMesh>
+  );
+}
 function Batch({
   type,
   scene,
@@ -80,6 +145,10 @@ function Batch({
           (!n.parentId || !inherited(scene, n.parentId, "hidden")),
       ),
     [scene, type],
+  );
+  const selection = useMemo(
+    () => (editable ? parts.filter((part) => selectedIds.has(part.id)) : []),
+    [parts, selectedIds, editable],
   );
   useLayoutEffect(() => {
     const mesh = ref.current;
@@ -116,8 +185,8 @@ function Batch({
         mesh.setColorAt(
           i,
           new Color(part.color).lerp(
-            new Color("#ffffff"),
-            editable && selected ? 0.18 : 0,
+            selectionTint,
+            editable && selected ? 0.25 : 0,
           ),
         );
         recolored = true;
@@ -132,13 +201,23 @@ function Batch({
   }, [parts, scene, selectedIds, editable, layoutKey]);
   if (!parts.length) return null;
   return (
-    <instancedMesh
-      ref={ref}
-      args={[geometry(type), material, parts.length]}
-      castShadow
-      receiveShadow
-      userData={{ parts }}
-    />
+    <>
+      <instancedMesh
+        ref={ref}
+        args={[geometry(type), material, parts.length]}
+        castShadow
+        receiveShadow
+        userData={{ parts }}
+      />
+      {selection.length > 0 && (
+        <SelectionOutline
+          type={type}
+          scene={scene}
+          parts={selection}
+          layoutKey={layoutKey}
+        />
+      )}
+    </>
   );
 }
 function Manipulator({
