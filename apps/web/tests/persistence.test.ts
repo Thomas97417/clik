@@ -21,6 +21,7 @@ const mocks = vi.hoisted(() => ({
   authenticated: true,
   userLoading: false,
   writeError: undefined as Error | undefined,
+  writeGates: [] as Promise<void>[],
 }));
 vi.mock("convex/react", () => ({
   useConvex: () => ({ query: async () => mocks.remote }),
@@ -57,6 +58,7 @@ vi.mock("../src/lib/clik/local", () => ({
     return mocks.drafts.get(key);
   },
   writeDraft: async (key: string, draft: unknown) => {
+    await mocks.writeGates.shift();
     if (mocks.writeError) throw mocks.writeError;
     mocks.drafts.set(key, draft);
   },
@@ -79,6 +81,7 @@ beforeEach(() => {
   mocks.authenticated = true;
   mocks.userLoading = false;
   mocks.writeError = undefined;
+  mocks.writeGates = [];
   Object.defineProperty(navigator, "onLine", {
     value: true,
     configurable: true,
@@ -172,12 +175,14 @@ it("signale un échec de sauvegarde locale et permet de réessayer", async () =>
     await expect(result.current.flush()).rejects.toThrow("indisponible");
   });
   expect(result.current.status).toBe("Sauvegarde locale indisponible");
+  expect(result.current.localStatus).toBe("error");
   mocks.writeError = undefined;
   await act(async () => {
     await result.current.flush();
   });
   expect(mocks.drafts.get("guest")).toBeDefined();
   expect(result.current.status).toBe("Enregistré");
+  expect(result.current.localStatus).toBe("saved");
 });
 
 it("refuse de quitter la version locale en conflit sans écraser l’autre onglet", async () => {
@@ -213,6 +218,8 @@ it("conserve les changements hors ligne et les envoie à la reconnexion", async 
     expect(mocks.drafts.get("project:alice:project")?.dirty).toBe(true),
   );
   expect(mocks.save).not.toHaveBeenCalled();
+  expect(result.current.localStatus).toBe("saved");
+  expect(result.current.syncStatus).toBe("offline");
   vi.useFakeTimers();
   Object.defineProperty(navigator, "onLine", {
     value: true,
@@ -229,7 +236,132 @@ it("conserve les changements hors ligne et les envoie à la reconnexion", async 
   );
   expect(mocks.drafts.get("project:alice:project").dirty).toBe(false);
   expect(result.current.status).toBe("Enregistré");
+  expect(result.current.localStatus).toBe("saved");
+  expect(result.current.syncStatus).toBe("synced");
 });
+
+it("crée une copie locale du projet en ligne avant de confirmer sa sauvegarde sur l’appareil", async () => {
+  let confirm!: () => void;
+  mocks.writeGates.push(new Promise<void>((resolve) => (confirm = resolve)));
+  const { result } = renderHook(() => useProject("project"));
+  await waitFor(() => expect(result.current.ready).toBe(true));
+  expect(result.current.localStatus).toBe("saving");
+  expect(result.current.syncStatus).toBe("synced");
+  expect(mocks.drafts.has("project:alice:project")).toBe(false);
+  await act(async () => confirm());
+  expect(result.current.localStatus).toBe("saved");
+  expect(mocks.drafts.get("project:alice:project")).toMatchObject({
+    revision: 3,
+    dirty: false,
+    scene: emptyScene(),
+  });
+  expect(mocks.save).not.toHaveBeenCalled();
+});
+
+it("réutilise la copie locale à jour sans changer sa version à l’ouverture d’un autre onglet", async () => {
+  mocks.drafts.set("project:alice:project", {
+    scene: emptyScene(),
+    title: "Projet",
+    revision: 3,
+    dirty: false,
+    stamp: "already-backed-up",
+  });
+  const { result } = renderHook(() => useProject("project"));
+  await waitFor(() => expect(result.current.localStatus).toBe("saved"));
+  expect(mocks.drafts.get("project:alice:project").stamp).toBe(
+    "already-backed-up",
+  );
+  expect(mocks.save).not.toHaveBeenCalled();
+});
+
+it("ne confirme pas les nouvelles modifications lorsqu’une ancienne écriture locale se termine", async () => {
+  const { result } = renderHook(() => useProject());
+  await waitFor(() => expect(result.current.localStatus).toBe("saved"));
+  let first!: () => void;
+  let second!: () => void;
+  mocks.writeGates.push(
+    new Promise<void>((resolve) => (first = resolve)),
+    new Promise<void>((resolve) => (second = resolve)),
+  );
+  await act(async () => useEditor.getState().add("brick-1x1"));
+  await act(async () => useEditor.getState().add("brick-2x2"));
+  expect(result.current.localStatus).toBe("saving");
+  await act(async () => first());
+  expect(mocks.drafts.get("guest").scene.nodes).toHaveLength(1);
+  expect(result.current.localStatus).toBe("saving");
+  await act(async () => second());
+  expect(mocks.drafts.get("guest").scene.nodes).toHaveLength(2);
+  expect(result.current.localStatus).toBe("saved");
+  expect(result.current.syncStatus).toBe("local");
+});
+
+it("confirme la copie locale pendant un envoi lent et attend l’envoi des dernières modifications", async () => {
+  const { result } = renderHook(() => useProject("project"));
+  await waitFor(() => expect(result.current.localStatus).toBe("saved"));
+  let confirm!: (revision: number) => void;
+  mocks.save.mockImplementationOnce(
+    () => new Promise<number>((resolve) => (confirm = resolve)),
+  );
+  mocks.save.mockResolvedValue(5);
+  vi.useFakeTimers();
+  await act(async () => useEditor.getState().add("brick-1x1"));
+  expect(result.current.localStatus).toBe("saved");
+  expect(result.current.syncStatus).toBe("syncing");
+  expect(mocks.save).not.toHaveBeenCalled();
+  await act(async () => vi.advanceTimersByTimeAsync(1000));
+  expect(mocks.save).toHaveBeenCalledOnce();
+  expect(result.current.localStatus).toBe("saved");
+  expect(result.current.syncStatus).toBe("syncing");
+  await act(async () => useEditor.getState().add("brick-2x2"));
+  await act(async () => confirm(4));
+  expect(result.current.localStatus).toBe("saved");
+  expect(result.current.syncStatus).toBe("syncing");
+  expect(mocks.drafts.get("project:alice:project").dirty).toBe(true);
+  await act(async () => vi.advanceTimersByTimeAsync(1000));
+  expect(mocks.save).toHaveBeenCalledTimes(2);
+  expect(JSON.parse(mocks.save.mock.calls[1][0].scene).nodes).toHaveLength(2);
+  expect(mocks.save.mock.calls[1][0].revision).toBe(4);
+  expect(result.current.localStatus).toBe("saved");
+  expect(result.current.syncStatus).toBe("synced");
+  expect(mocks.drafts.get("project:alice:project").dirty).toBe(false);
+});
+
+it("conserve la confirmation locale si la synchronisation échoue", async () => {
+  const { result } = renderHook(() => useProject("project"));
+  await waitFor(() => expect(result.current.localStatus).toBe("saved"));
+  mocks.save.mockRejectedValue(Error("Serveur indisponible"));
+  vi.useFakeTimers();
+  await act(async () => useEditor.getState().add("brick-1x1"));
+  await act(async () => vi.advanceTimersByTimeAsync(1000));
+  expect(result.current.localStatus).toBe("saved");
+  expect(result.current.syncStatus).toBe("error");
+  expect(mocks.drafts.get("project:alice:project")).toMatchObject({
+    dirty: true,
+    scene: { nodes: [expect.objectContaining({ type: "brick-1x1" })] },
+  });
+});
+
+it("recharge la version en ligne après un conflit et rétablit les deux confirmations", async () => {
+  const { result } = renderHook(() => useProject("project"));
+  await waitFor(() => expect(result.current.localStatus).toBe("saved"));
+  mocks.save.mockRejectedValueOnce(Error("CONFLICT"));
+  vi.useFakeTimers();
+  await act(async () => useEditor.getState().add("brick-1x1"));
+  await act(async () => vi.advanceTimersByTimeAsync(1000));
+  expect(result.current.conflict).toBe(true);
+  await act(async () => result.current.reload());
+  expect(result.current.conflict).toBe(false);
+  expect(result.current.localStatus).toBe("saved");
+  expect(result.current.syncStatus).toBe("synced");
+  expect(mocks.drafts.get("project:alice:project")).toMatchObject({
+    dirty: false,
+    scene: emptyScene(),
+  });
+  await act(async () => useEditor.getState().add("brick-2x2"));
+  expect(result.current.localStatus).toBe("saved");
+  expect(result.current.syncStatus).toBe("syncing");
+});
+
 it("un conflit serveur préserve le brouillon local et propose une copie", async () => {
   mocks.save.mockRejectedValue(new Error("CONFLICT"));
   const { result } = renderHook(() => useProject("project"));

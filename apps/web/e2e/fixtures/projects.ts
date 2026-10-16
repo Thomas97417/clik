@@ -61,6 +61,9 @@ export async function projectsFixture(
   let fail = false;
   let failWithdrawal = false;
   let failImport = false;
+  let failSave = false;
+  let holdSaves = false;
+  const heldSaves: (() => void)[] = [];
   const sources = [
     {
       publicationId: "original",
@@ -187,7 +190,7 @@ export async function projectsFixture(
       );
       version = endVersion;
     };
-    ws.onMessage((raw) => {
+    ws.onMessage(async (raw) => {
       const message = JSON.parse(String(raw));
       if (message.type === "ModifyQuerySet") {
         for (const mod of message.modifications) {
@@ -227,7 +230,7 @@ export async function projectsFixture(
             : creating
               ? failCreate
               : saving
-                ? false
+                ? failSave
                 : withdrawing
                   ? failWithdrawal
                   : fail;
@@ -265,19 +268,21 @@ export async function projectsFixture(
         }
         if (saving) {
           calls.saves.push(args);
-          const target =
-            args.id === "project"
-              ? project
-              : [...imported.values()].find((p) => p._id === args.id)!;
-          target.title = args.title;
-          target.scene = args.scene;
-          target.revision = args.revision + 1;
-          target.updatedAt = Date.now();
-          target.imports = (args.imports ?? []).map((item: any) => ({
-            ...item,
-            sources: item.receiptIds.length ? sources : [],
-          }));
-          result = target.revision;
+          if (!failed) {
+            const target =
+              args.id === "project"
+                ? project
+                : [...imported.values()].find((p) => p._id === args.id)!;
+            target.title = args.title;
+            target.scene = args.scene;
+            target.revision = args.revision + 1;
+            target.updatedAt = Date.now();
+            target.imports = (args.imports ?? []).map((item: any) => ({
+              ...item,
+              sources: item.receiptIds.length ? sources : [],
+            }));
+            result = target.revision;
+          }
         }
         if (withdrawing) {
           calls.withdrawals.push(args);
@@ -301,9 +306,13 @@ export async function projectsFixture(
             ? "Suppression indisponible, réessayez."
             : creating
               ? "Enregistrement indisponible, réessayez."
-              : withdrawing
-                ? "Retrait indisponible, réessayez."
-                : "Publication indisponible, réessayez.";
+              : saving
+                ? "Synchronisation indisponible, réessayez."
+                : withdrawing
+                  ? "Retrait indisponible, réessayez."
+                  : "Publication indisponible, réessayez.";
+        if (saving && holdSaves)
+          await new Promise<void>((resolve) => heldSaves.push(resolve));
         seq++;
         ws.send(
           JSON.stringify({
@@ -322,6 +331,13 @@ export async function projectsFixture(
   });
   return {
     calls,
+    holdSaves: (value: boolean) => {
+      holdSaves = value;
+      if (!value) heldSaves.splice(0).forEach((resume) => resume());
+    },
+    failSave: (value: boolean) => {
+      failSave = value;
+    },
     failImport: (value: boolean) => {
       failImport = value;
     },

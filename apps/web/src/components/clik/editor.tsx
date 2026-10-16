@@ -4,6 +4,7 @@ import { useTreeDrag } from "./use-tree-drag";
 import EditorPanels from "./editor-panels";
 import EditorColors from "./editor-colors";
 import EditorHelp from "./editor-help";
+import EditorSaveStatus from "./editor-save-status";
 import EditorShortcutsPopover from "./editor-shortcuts-popover";
 import PublishDialog from "./publish-dialog";
 import ImportProjectDialog from "./import-project-dialog";
@@ -28,9 +29,7 @@ import {
   projectSources,
 } from "@clik/scene";
 import {
-  AlertCircle,
   Box,
-  CloudCheck,
   CloudUpload,
   ChevronDown,
   ChevronRight,
@@ -43,7 +42,6 @@ import {
   Grid2X2,
   Globe2,
   Grip,
-  HardDrive,
   Layers,
   ListChecks,
   LockKeyhole,
@@ -67,7 +65,6 @@ import {
   UnlockKeyhole,
   Upload,
   Import,
-  WifiOff,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
@@ -488,33 +485,6 @@ export default function Editor({
   const count = s.scene.nodes.filter((n) => n.kind === "part").length;
   const layoutKey = useMemo(() => sceneLayoutKey(s.scene), [s.scene]);
   const overlap = useMemo(() => hasOverlappingParts(s.scene), [layoutKey]);
-  const saveState = project.conflict
-    ? "conflict"
-    : project.status.includes("impossible") ||
-        project.status.includes("indisponible")
-      ? "error"
-      : project.status === "Hors ligne"
-        ? "offline"
-        : project.status === "Enregistré"
-          ? "saved"
-          : "saving";
-  const SaveIcon =
-    saveState === "error" || saveState === "conflict"
-      ? AlertCircle
-      : saveState === "offline"
-        ? WifiOff
-        : saveState === "saving"
-          ? LoaderCircle
-          : projectId
-            ? CloudCheck
-            : HardDrive;
-  const saveLabel = project.conflict
-    ? "Conflit à résoudre"
-    : !projectId && saveState === "saved"
-      ? "Enregistré sur cet appareil"
-      : !projectId && project.status === "Enregistrement"
-        ? "Enregistrement sur cet appareil…"
-        : project.status;
   const sources = projectSources(s.provenance);
   const updatingPublication = !!project.publicationId;
   const PublicationIcon = updatingPublication ? RefreshCw : Upload;
@@ -887,27 +857,11 @@ export default function Editor({
                 };
               }}
             />
-            <div
-              className="save-status gap-1.5 flex items-center text-[#68788e] text-xs max-w-57.5 leading-[1.4] data-[state=offline]:text-[#9b660c] data-[state=conflict]:text-[#9b660c] data-[state=error]:text-[#c33e42] group/save-status"
-              data-state={saveState}
-              role="status"
-              aria-live="polite"
-              aria-atomic="true"
-              title={
-                saveState === "conflict" || saveState === "error"
-                  ? "Sauvegarde interrompue"
-                  : projectId
-                    ? "Sauvegarde automatique"
-                    : "Sauvegarde automatique dans ce navigateur, sur cet appareil."
-              }
-            >
-              <SaveIcon
-                className="shrink-0 group-data-[state=saved]/save-status:text-[#34906c] group-data-[state=saving]/save-status:text-[#356ae6] group-data-[state=saving]/save-status:animate-[spin_1.5s_linear_infinite] motion-reduce:group-data-[state=saving]/save-status:animate-none"
-                size={14}
-                aria-hidden="true"
-              />
-              <span>{saveLabel}</span>
-            </div>
+            <EditorSaveStatus
+              localStatus={project.localStatus}
+              syncStatus={project.syncStatus}
+              conflict={project.conflict}
+            />
             {projectId ? (
               <Button
                 ref={primaryAction}

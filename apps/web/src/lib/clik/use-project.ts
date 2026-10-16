@@ -21,6 +21,11 @@ import { toast } from "sonner";
 import { creationMetadata, importInputs } from "./project-metadata";
 import { rememberLocalDraft } from "./last-local-draft";
 import { FIRST_CREATION_TITLE } from "./creation-name";
+
+export type LocalSaveStatus = "loading" | "saving" | "saved" | "error";
+export type ProjectSyncStatus =
+  "local" | "loading" | "syncing" | "synced" | "offline" | "error";
+
 export function useProject(projectId?: string, draftId?: string) {
   const connection = useConvexConnectionState();
   const { isAuthenticated, isLoading } = useConvexAuth(),
@@ -36,6 +41,12 @@ export function useProject(projectId?: string, draftId?: string) {
     [status, setStatus] = useState("Chargement"),
     [conflict, setConflict] = useState(false),
     [retry, setRetry] = useState(0);
+  const [localSave, setLocalSave] = useState<{
+    serial: number | null;
+    error: boolean;
+  }>({ serial: null, error: false });
+  const [online, setOnline] = useState(true);
+  const [syncError, setSyncError] = useState(false);
   const key = projectId
       ? `project:${me?._id ?? "pending"}:${projectId}`
       : draftId
@@ -51,7 +62,7 @@ export function useProject(projectId?: string, draftId?: string) {
     channel = useRef<BroadcastChannel | null>(null),
     savedSerial = useRef(0),
     transferred = useRef(false);
-  const backup = async (dirty: boolean) => {
+  const backup = async () => {
     // Queued effects from the old editor must not recreate a transferred draft.
     if (transferred.current) return;
     const s = useEditor.getState(),
@@ -60,11 +71,19 @@ export function useProject(projectId?: string, draftId?: string) {
         title: s.gesture?.title ?? s.title,
         revision: revision.current,
         stamp: crypto.randomUUID(),
-        dirty,
+        dirty: !!projectId && s.serial !== savedSerial.current,
         provenance: s.gesture?.provenance ?? s.provenance,
       };
-    await writeDraft(key, draft, stamp.current);
+    try {
+      await writeDraft(key, draft, stamp.current);
+    } catch (error) {
+      setLocalSave((previous) => ({ ...previous, error: true }));
+      throw error;
+    }
     stamp.current = draft.stamp;
+    // Acknowledge exactly the committed snapshot written to IndexedDB, even
+    // when newer edits have been made while the transaction was pending.
+    setLocalSave({ serial: s.serial, error: false });
     channel.current?.postMessage(draft.stamp);
   };
   useEffect(() => {
@@ -107,6 +126,14 @@ export function useProject(projectId?: string, draftId?: string) {
               },
         );
         savedSerial.current = local?.dirty && projectId ? -1 : 0;
+        setLocalSave({
+          serial:
+            recover || !projectId || local?.revision === remote?.revision
+              ? 0
+              : null,
+          error: false,
+        });
+        setSyncError(false);
         setConflict(
           !!(local?.dirty && remote && local.revision !== remote.revision),
         );
@@ -115,6 +142,7 @@ export function useProject(projectId?: string, draftId?: string) {
         setStatus(!projectId || navigator.onLine ? "Enregistré" : "Hors ligne");
       })
       .catch((e) => {
+        setLocalSave((previous) => ({ ...previous, error: true }));
         setStatus("Sauvegarde locale indisponible");
         toast.error(String(e));
       });
@@ -124,7 +152,9 @@ export function useProject(projectId?: string, draftId?: string) {
     };
   }, [key, !!(projectId && remote), !!(projectId && me)]);
   useEffect(() => {
+    setOnline(navigator.onLine);
     const on = () => {
+        setOnline(true);
         setRetry((n) => n + 1);
         if (projectId)
           setStatus(
@@ -134,6 +164,7 @@ export function useProject(projectId?: string, draftId?: string) {
           );
       },
       off = () => {
+        setOnline(false);
         if (projectId) setStatus("Hors ligne");
       };
     window.addEventListener("online", on);
@@ -184,7 +215,7 @@ export function useProject(projectId?: string, draftId?: string) {
           const current = useEditor.getState();
           if (current.gesture)
             throw Error("Terminez la manipulation avant de sauvegarder.");
-          await backup(false);
+          await backup();
           savedSerial.current = current.serial;
         });
       try {
@@ -208,6 +239,7 @@ export function useProject(projectId?: string, draftId?: string) {
     const s = useEditor.getState(),
       sentSerial = s.serial;
     setStatus("Enregistrement");
+    setSyncError(false);
     try {
       const rev = await save({
         id: projectId as Id<"projects">,
@@ -215,12 +247,13 @@ export function useProject(projectId?: string, draftId?: string) {
         title: s.title,
         revision: revision.current,
         imports: importInputs(s.provenance),
+      }).catch((error) => {
+        setSyncError(true);
+        throw error;
       });
       revision.current = rev;
       savedSerial.current = sentSerial;
-      queue.current = queue.current.then(() =>
-        backup(useEditor.getState().serial !== sentSerial),
-      );
+      queue.current = queue.current.then(() => backup());
       await queue.current;
       setStatus("Enregistré");
       return rev;
@@ -238,11 +271,16 @@ export function useProject(projectId?: string, draftId?: string) {
     }
   };
   useEffect(() => {
-    if (!ready || conflict || gesture || serial === savedSerial.current) return;
-    setStatus(!projectId || navigator.onLine ? "Enregistrement" : "Hors ligne");
+    if (!ready || conflict || gesture) return;
+    const needsSync = serial !== savedSerial.current;
+    if (!needsSync && localSave.serial === serial) return;
+    if (needsSync)
+      setStatus(
+        !projectId || navigator.onLine ? "Enregistrement" : "Hors ligne",
+      );
     queue.current = queue.current
       .catch(() => {})
-      .then(() => backup(!!projectId))
+      .then(() => backup())
       .then(() => {
         if (!projectId) {
           savedSerial.current = serial;
@@ -254,7 +292,7 @@ export function useProject(projectId?: string, draftId?: string) {
         else setStatus("Sauvegarde locale indisponible");
       });
     const timer = window.setTimeout(() => {
-      if (projectId && navigator.onLine && !busy.current)
+      if (projectId && needsSync && navigator.onLine && !busy.current)
         void flush().catch((e) => toast.error(String(e)));
     }, 1000);
     return () => clearTimeout(timer);
@@ -303,7 +341,9 @@ export function useProject(projectId?: string, draftId?: string) {
     revision.current = p?.revision ?? 0;
     savedSerial.current = 0;
     setConflict(false);
-    await backup(false);
+    setSyncError(false);
+    queue.current = queue.current.catch(() => {}).then(() => backup());
+    await queue.current;
     setStatus("Enregistré");
   };
   const copy = async () => {
@@ -314,7 +354,7 @@ export function useProject(projectId?: string, draftId?: string) {
     busy.current = true;
     try {
       await queue.current.catch(() => {});
-      if (!projectId && !stamp.current) await backup(false);
+      if (!projectId && !stamp.current) await backup();
       const s = useEditor.getState(),
         sourceStamp = stamp.current;
       const id = await create({
@@ -345,9 +385,29 @@ export function useProject(projectId?: string, draftId?: string) {
       busy.current = false;
     }
   };
+  const localStatus: LocalSaveStatus = localSave.error
+    ? "error"
+    : !ready
+      ? "loading"
+      : localSave.serial === serial
+        ? "saved"
+        : "saving";
+  const syncStatus: ProjectSyncStatus = !projectId
+    ? "local"
+    : !ready
+      ? "loading"
+      : !online || !connection.isWebSocketConnected
+        ? "offline"
+        : serial === savedSerial.current
+          ? "synced"
+          : syncError
+            ? "error"
+            : "syncing";
   return {
     ready,
     status,
+    localStatus,
+    syncStatus,
     conflict,
     reload,
     copy,
