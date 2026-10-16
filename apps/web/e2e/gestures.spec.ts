@@ -19,6 +19,24 @@ const position = async (page: Page) =>
     ),
   );
 
+async function projectState(page: Page) {
+  return page.evaluate(async () => {
+    const path = "/src/lib/clik/store.ts";
+    const { useEditor } = await import(/* @vite-ignore */ path);
+    const state = useEditor.getState();
+    return JSON.parse(
+      JSON.stringify({
+        scene: state.scene,
+        selection: state.selection,
+        color: state.color,
+        past: state.past,
+        future: state.future,
+        serial: state.serial,
+      }),
+    );
+  });
+}
+
 test("clic, seuil, aperçu et un seul geste annulable", async ({
   page,
 }, info) => {
@@ -139,6 +157,85 @@ test("sélection immédiate, Maj-clic et désélection dans le vide", async ({
   await page.keyboard.up("Shift");
   await expect(page.locator(".tree-row.selected")).toHaveCount(0);
   await expect(canvas).not.toHaveAttribute("data-dragging", "true");
+});
+
+for (const selection of ["pièce", "pièces", "groupe"]) {
+  test(`orbiter conserve la sélection (${selection}), un clic sur le fond la retire au relâchement`, async ({
+    page,
+  }) => {
+    const { canvas, box } = await setup(page);
+    if (selection !== "pièce") {
+      await page.locator('.piece-card[aria-label="Brique 1 × 1"]').click();
+      await page.keyboard.press("a");
+      if (selection === "groupe") await page.keyboard.press("g");
+      await page
+        .getByRole("button", { name: "Cadrer la sélection (F)" })
+        .click();
+    }
+    const before = await projectState(page);
+    const image = await canvas.evaluate((c: HTMLCanvasElement) =>
+      c.toDataURL(),
+    );
+    const x = box.x + 50,
+      y = box.y + 250;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    expect(await projectState(page)).toEqual(before);
+    await page.mouse.move(x + 120, y + 80, { steps: 8 });
+    expect(await projectState(page)).toEqual(before);
+    await page.mouse.up();
+    expect(await projectState(page)).toEqual(before);
+    await expect
+      .poll(() =>
+        canvas.evaluate(
+          (c: HTMLCanvasElement, previous) => c.toDataURL() !== previous,
+          image,
+        ),
+      )
+      .toBe(true);
+
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    expect(await projectState(page)).toEqual(before);
+    // Small pointer jitter still counts as a click.
+    await page.mouse.move(x + 3, y);
+    await page.mouse.up();
+    await expect(page.locator(".tree-row.selected")).toHaveCount(0);
+    expect(await projectState(page)).toEqual({ ...before, selection: [] });
+  });
+}
+
+test("retour au point de départ, sortie du canvas et annulation de caméra conservent la sélection", async ({
+  page,
+}) => {
+  const { canvas, box } = await setup(page);
+  const before = await projectState(page);
+  const x = box.x + 50,
+    y = box.y + 250;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(box.x - 20, y, { steps: 5 });
+  await page.mouse.move(x, y, { steps: 5 });
+  await page.mouse.up();
+  expect(await projectState(page)).toEqual(before);
+
+  for (const action of ["escape", "pointercancel", "blur", "capture"]) {
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    // An unrelated pointer release must not complete this pending click.
+    await canvas.dispatchEvent("pointerup", { pointerId: 999 });
+    expect(await projectState(page)).toEqual(before);
+    if (action === "escape") await page.keyboard.press("Escape");
+    if (action === "pointercancel") await canvas.dispatchEvent("pointercancel");
+    if (action === "blur")
+      await page.evaluate(() => window.dispatchEvent(new Event("blur")));
+    if (action === "capture") await canvas.dispatchEvent("lostpointercapture");
+    await page.mouse.up();
+    expect(await projectState(page)).toEqual(before);
+  }
+  // Cancellation must also leave the next ordinary click usable.
+  await page.mouse.click(x, y);
+  await expect(page.locator(".tree-row.selected")).toHaveCount(0);
 });
 
 test("empilement : plots éclairés, dépôt et désactivation de l’aimantation", async ({

@@ -97,13 +97,21 @@ export function Gestures({
       inside = false;
     let cameraGesture: {
       pointer: number;
+      x: number;
+      y: number;
+      moved: boolean;
+      deselectOnClick: boolean;
       position: Vector3;
       quaternion: typeof camera.quaternion;
       target: Vector3;
     } | null = null;
-    const startCamera = (e: PointerEvent) => {
+    const startCamera = (e: PointerEvent, deselectOnClick = false) => {
       cameraGesture = {
         pointer: e.pointerId,
+        x: e.clientX,
+        y: e.clientY,
+        moved: false,
+        deselectOnClick,
         position: camera.position.clone(),
         quaternion: camera.quaternion.clone(),
         target: controls.current!.target.clone(),
@@ -117,9 +125,27 @@ export function Gestures({
     ) => {
       if (rotation.current) Reflect.set(rotation.current, key, value);
     };
-    const finishCamera = () => {
+    const moveCamera = (e: PointerEvent) => {
+      if (
+        cameraGesture?.pointer === e.pointerId &&
+        Math.hypot(e.clientX - cameraGesture.x, e.clientY - cameraGesture.y) > 4
+      )
+        cameraGesture.moved = true;
+    };
+    const finishCamera = (e?: PointerEvent) => {
+      if (e && e.pointerId !== cameraGesture?.pointer) return;
+      const before = cameraGesture;
       cameraGesture = null;
       setRotation("enabled", true);
+      // Wait for release to distinguish a background click from an orbit drag.
+      if (
+        before?.deselectOnClick &&
+        !before.moved &&
+        e?.button === 0 &&
+        e.target === canvas &&
+        Math.hypot(e.clientX - before.x, e.clientY - before.y) <= 4
+      )
+        useEditor.setState({ selection: [] });
     };
     let library: { free: Part; preview: SelectionPreview | null } | null = null;
     let libraryTurns = 0;
@@ -273,6 +299,8 @@ export function Gestures({
       clearBox();
       if (cameraGesture) {
         const before = cameraGesture;
+        // The synthetic release only ends OrbitControls, never a pending click.
+        cameraGesture = null;
         canvas.dispatchEvent(
           new PointerEvent("pointerup", {
             pointerId: before.pointer,
@@ -341,8 +369,7 @@ export function Gestures({
           startBox(e);
           return;
         }
-        useEditor.setState({ selection: [] });
-        startCamera(e);
+        startCamera(e, true);
         return;
       }
       stop(e);
@@ -521,7 +548,7 @@ export function Gestures({
         clearBox();
         return;
       }
-      if (cameraGesture) finishCamera();
+      if (cameraGesture) finishCamera(e);
       if (e.pointerId !== (drag?.pointer ?? blockedPointer)) return;
       stop(e);
       if (drag?.started) {
@@ -715,7 +742,7 @@ export function Gestures({
     canvas.addEventListener("pointercancel", cancel);
     canvas.addEventListener("lostpointercapture", cancelLost);
     function cancelLost() {
-      if (drag || box || blockedPointer !== null) cancel();
+      if (drag || box || blockedPointer !== null || cameraGesture) cancel();
     }
     canvas.addEventListener("pointerenter", enter);
     canvas.addEventListener("pointerleave", leave);
@@ -723,6 +750,7 @@ export function Gestures({
       capture: true,
       passive: false,
     });
+    window.addEventListener("pointermove", moveCamera, true);
     window.addEventListener("pointerup", libraryUp, true);
     window.addEventListener("pointercancel", libraryCancel, true);
     window.addEventListener("lostpointercapture", libraryCancel, true);
@@ -744,6 +772,7 @@ export function Gestures({
       canvas.removeEventListener("pointerenter", enter);
       canvas.removeEventListener("pointerleave", leave);
       window.removeEventListener("pointermove", libraryMove, true);
+      window.removeEventListener("pointermove", moveCamera, true);
       window.removeEventListener("pointerup", libraryUp, true);
       window.removeEventListener("pointercancel", libraryCancel, true);
       window.removeEventListener("lostpointercapture", libraryCancel, true);
