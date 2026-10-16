@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { projectsFixture } from "./fixtures/projects";
 import { selectCameraView } from "./camera-view";
 import { CATALOG } from "@clik/scene";
+import { SAVED_COLORS_KEY } from "../src/lib/clik/saved-colors";
 
 test.beforeEach(async ({ page }) => {
   await projectsFixture(page);
@@ -299,7 +300,7 @@ test("couleurs : pastilles carrées pendant le redimensionnement et réglage san
         height: el.getBoundingClientRect().height,
       })),
     );
-  expect(swatches).toHaveLength(13);
+  expect(swatches).toHaveLength(16);
   for (const swatch of swatches)
     expect(Math.abs(swatch.width - swatch.height)).toBeLessThan(1);
   await page
@@ -317,4 +318,187 @@ test("couleurs : pastilles carrées pendant le redimensionnement et réglage san
   await page.screenshot({
     path: `/private/tmp/clik-editor-colors-${info.project.name}.png`,
   });
+});
+
+const personalColor = (page: Page, slot: number) =>
+  page.locator(`[data-custom-color-slot="${slot}"]`);
+async function setPersonalColor(page: Page, slot: number, color: string) {
+  await personalColor(page, slot).click();
+  const input = page.getByRole("textbox", {
+    name: "Code hexadécimal",
+    exact: true,
+  });
+  await input.fill(color);
+  await input.press("Enter");
+  await page
+    .getByRole("button", { name: "Enregistrer et utiliser", exact: true })
+    .click();
+}
+
+test("couleurs personnelles : trois cases vides, réglage sans modifier la scène et réutilisation en un clic", async ({
+  page,
+}) => {
+  await openEditor(page);
+  await expect(page.locator(".palette-swatch")).toHaveCount(16);
+  await expect(
+    page.getByRole("button", { name: /^Ajouter la couleur personnelle/ }),
+  ).toHaveCount(3);
+  await page.getByRole("button", { name: "Brique 2 × 4", exact: true }).click();
+  const dot = page.locator(".tree-row .part-dot");
+  await personalColor(page, 1).click();
+  const input = page.getByRole("textbox", {
+    name: "Code hexadécimal",
+    exact: true,
+  });
+  await input.fill("#216579");
+  await input.press("Enter");
+  await expect(dot).toHaveCSS("background-color", "rgb(64, 121, 232)");
+  await page
+    .getByRole("button", { name: "Fermer le sélecteur de couleur" })
+    .click();
+  await expect(personalColor(page, 1)).toHaveAttribute(
+    "aria-label",
+    "Ajouter la couleur personnelle 1",
+  );
+  expect(
+    await page.evaluate((key) => localStorage.getItem(key), SAVED_COLORS_KEY),
+  ).toBeNull();
+
+  await setPersonalColor(page, 1, "#216579");
+  await expect(dot).toHaveCSS("background-color", "rgb(33, 101, 121)");
+  await expect(personalColor(page, 1)).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Rouge", exact: true }).click();
+  await personalColor(page, 1).click();
+  await expect(page.locator(".editor-color-picker")).not.toBeVisible();
+  await expect(dot).toHaveCSS("background-color", "rgb(33, 101, 121)");
+  await page.keyboard.press("Control+z");
+  await expect(dot).toHaveCSS("background-color", "rgb(239, 68, 68)");
+  await expect(personalColor(page, 1)).toHaveAttribute(
+    "aria-label",
+    "Couleur personnelle 1, #216579",
+  );
+  await personalColor(page, 1).click();
+  await page.getByRole("button", { name: "Brique 1 × 1", exact: true }).click();
+  await expect(page.locator(".tree-row.selected .part-dot")).toHaveCSS(
+    "background-color",
+    "rgb(33, 101, 121)",
+  );
+});
+
+test("couleurs personnelles : les trois teintes restent disponibles après rechargement et dans un autre projet", async ({
+  page,
+}, info) => {
+  await openEditor(page);
+  const colors = ["#216579", "#e4ad65", "#f3f0e8"];
+  for (const [index, color] of colors.entries())
+    await setPersonalColor(page, index + 1, color);
+  await page.reload();
+  await expect(personalColor(page, 3)).toHaveAttribute(
+    "aria-label",
+    "Couleur personnelle 3, #F3F0E8",
+  );
+  await page.goto("/editor?draft=saved-colors-another-project");
+  for (const [index, color] of colors.entries())
+    await expect(personalColor(page, index + 1)).toHaveAttribute(
+      "aria-label",
+      `Couleur personnelle ${index + 1}, ${color.toUpperCase()}`,
+    );
+  await page.setViewportSize({ width: 900, height: 760 });
+  await page
+    .getByRole("separator", {
+      name: "Redimensionner la bibliothèque",
+      exact: true,
+    })
+    .press("End");
+  const dimensions = await page
+    .locator(".palette-swatch")
+    .evaluateAll((nodes) =>
+      nodes.map((node) => {
+        const { width, height } = node.getBoundingClientRect();
+        return { width, height };
+      }),
+    );
+  for (const { width, height } of dimensions)
+    expect(Math.abs(width - height)).toBeLessThan(1);
+  await personalColor(page, 3).click({ button: "right" });
+  await expect(page.locator(".editor-color-picker")).toBeInViewport();
+  await expect(
+    page.getByRole("textbox", { name: "Code hexadécimal", exact: true }),
+  ).toHaveValue("F3F0E8");
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: `/private/tmp/clik-saved-colors-${info.project.name}.png`,
+  });
+});
+
+test("couleurs personnelles : modification au clavier, suppression et synchronisation entre onglets", async ({
+  page,
+  context,
+}) => {
+  await openEditor(page);
+  await page.getByRole("button", { name: "Brique 2 × 4", exact: true }).click();
+  await setPersonalColor(page, 1, "#123abc");
+  const second = await context.newPage();
+  await projectsFixture(second);
+  await second.goto("/editor?draft=saved-colors-other-tab");
+  await expect(personalColor(second, 1)).toHaveAttribute(
+    "aria-label",
+    "Couleur personnelle 1, #123ABC",
+  );
+  await personalColor(page, 1).click({ button: "right" });
+  const input = page.getByRole("textbox", {
+    name: "Code hexadécimal",
+    exact: true,
+  });
+  await input.fill("#d3985e");
+  await input.press("Enter");
+  await page
+    .getByRole("button", { name: "Fermer le sélecteur de couleur" })
+    .click();
+  await expect(page.locator(".tree-row .part-dot")).toHaveCSS(
+    "background-color",
+    "rgb(18, 58, 188)",
+  );
+  await personalColor(page, 1).focus();
+  await personalColor(page, 1).press("Shift+Enter");
+  await input.fill("#d3985e");
+  await input.press("Enter");
+  await page
+    .getByRole("button", { name: "Enregistrer et utiliser", exact: true })
+    .click();
+  await expect(personalColor(second, 1)).toHaveAttribute(
+    "aria-label",
+    "Couleur personnelle 1, #D3985E",
+  );
+  await expect(personalColor(page, 1)).toBeFocused();
+  await personalColor(page, 1).click({ button: "right" });
+  await page
+    .getByRole("button", {
+      name: "Vider la couleur personnelle 1",
+      exact: true,
+    })
+    .click();
+  for (const tab of [page, second])
+    await expect(personalColor(tab, 1)).toHaveAttribute(
+      "aria-label",
+      "Ajouter la couleur personnelle 1",
+    );
+  await expect(page.locator(".tree-row .part-dot")).toHaveCSS(
+    "background-color",
+    "rgb(211, 152, 94)",
+  );
+  await page.keyboard.press("Control+z");
+  await expect(page.locator(".tree-row .part-dot")).toHaveCSS(
+    "background-color",
+    "rgb(18, 58, 188)",
+  );
+  await expect(personalColor(page, 1)).toHaveAttribute(
+    "aria-label",
+    "Ajouter la couleur personnelle 1",
+  );
+  await second.close();
 });
