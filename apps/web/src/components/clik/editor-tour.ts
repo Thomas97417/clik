@@ -3,7 +3,6 @@ import "driver.js/dist/driver.css";
 import "./editor-tour.css";
 import "./editor-shortcuts.css";
 import {
-  EDITOR_SHORTCUTS_DESCRIPTION,
   EDITOR_SHORTCUTS_TITLE,
   editorShortcutsHtml,
   isMacKeyboard,
@@ -34,7 +33,7 @@ export function startEditorTour(onClose: () => void) {
     animate: false,
     overlayColor: "#23334d",
     overlayOpacity: 0.28,
-    stagePadding: 5,
+    stagePadding: 0,
     stageRadius: 8,
     popoverOffset: 14,
     popoverClass: "editor-tour-popover",
@@ -155,9 +154,7 @@ export function startEditorTour(onClose: () => void) {
         element: '[data-editor-tour="shortcuts"]',
         popover: {
           title: EDITOR_SHORTCUTS_TITLE,
-          description:
-            `<p>${EDITOR_SHORTCUTS_DESCRIPTION}</p>` +
-            editorShortcutsHtml(isMacKeyboard()),
+          description: editorShortcutsHtml(isMacKeyboard()),
           popoverClass: "editor-tour-popover editor-tour-shortcuts-popover",
           side: "top",
           align: "end",

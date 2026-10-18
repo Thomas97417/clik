@@ -1,6 +1,4 @@
 export const EDITOR_SHORTCUTS_TITLE = "Les raccourcis";
-export const EDITOR_SHORTCUTS_DESCRIPTION =
-  "Retrouvez les commandes de l’atelier, avec les touches de votre clavier.";
 
 const keySymbols = {
   shift: { glyph: "⇧", label: "Majuscule" },

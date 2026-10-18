@@ -3,13 +3,11 @@ import { ChevronRight, X } from "lucide-react";
 import {
   Popover,
   PopoverContent,
-  PopoverDescription,
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
   EDITOR_SHORTCUT_GROUPS,
-  EDITOR_SHORTCUTS_DESCRIPTION,
   EDITOR_SHORTCUTS_TITLE,
   isMacKeyboard,
   shortcutKeys,
@@ -85,9 +83,6 @@ export default function EditorShortcutsPopover({
         <PopoverTitle className="pr-4 text-base font-[750] leading-[1.45] text-[#263b58]">
           {EDITOR_SHORTCUTS_TITLE}
         </PopoverTitle>
-        <PopoverDescription className="mt-2.5 text-xs leading-[1.75] text-[#68788e]">
-          {EDITOR_SHORTCUTS_DESCRIPTION}
-        </PopoverDescription>
         <div
           className="editor-shortcuts-list"
           tabIndex={0}
