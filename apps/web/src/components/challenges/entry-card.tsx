@@ -17,6 +17,8 @@ const metals = {
     badge: "border-[#e3cc93] bg-[#fffcf0]/95 text-[#8c671e]",
     author:
       "text-[#8c671e] hover:text-[#715113] focus-visible:outline-[#8c671e]",
+    comments:
+      "hover:bg-[#fbf4df] hover:text-[#8c671e] focus-visible:outline-[#8c671e]",
     actions: "border-t-[#eee4cb] bg-[#fffdf7]",
     arrow:
       "bg-[#fffcf0]/95 text-[#8c671e] group-hover/card-link:bg-[#8c671e] group-focus-visible/card-link:bg-[#8c671e]",
@@ -30,6 +32,8 @@ const metals = {
     badge: "border-[#cbd6e6] bg-[#f8fbff]/95 text-[#576c89]",
     author:
       "text-[#576c89] hover:text-[#41546e] focus-visible:outline-[#576c89]",
+    comments:
+      "hover:bg-[#edf2f8] hover:text-[#576c89] focus-visible:outline-[#576c89]",
     actions: "border-t-[#e1e8f1] bg-[#f9fbfe]",
     arrow:
       "bg-[#f8fbff]/95 text-[#576c89] group-hover/card-link:bg-[#576c89] group-focus-visible/card-link:bg-[#576c89]",
@@ -43,6 +47,8 @@ const metals = {
     badge: "border-[#e0bfa7] bg-[#fff8f1]/95 text-[#955d3a]",
     author:
       "text-[#955d3a] hover:text-[#79482a] focus-visible:outline-[#955d3a]",
+    comments:
+      "hover:bg-[#faeddf] hover:text-[#955d3a] focus-visible:outline-[#955d3a]",
     actions: "border-t-[#ecdfd4] bg-[#fffaf6]",
     arrow:
       "bg-[#fff8f1]/95 text-[#955d3a] group-hover/card-link:bg-[#955d3a] group-focus-visible/card-link:bg-[#955d3a]",
@@ -147,7 +153,10 @@ export default memo(function ChallengeEntryCard({
           to="/creations/$publicationId"
           params={{ publicationId: entry._id }}
           hash="comments"
-          className="challenge-entry-comments group/card-link ml-auto inline-flex min-h-9.5 min-w-9.5 items-center justify-center gap-1.5 rounded-[10px] px-2.25 py-1.5 text-xs leading-normal text-[#8792a5] tabular-nums outline-offset-3 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] hover:bg-[#eef1f8] hover:text-[#536c90] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3"
+          className={cn(
+            "challenge-entry-comments group/card-link ml-auto inline-flex min-h-9.5 min-w-9.5 items-center justify-center gap-1.5 rounded-[10px] px-2.25 py-1.5 text-xs leading-normal text-[#8792a5] tabular-nums outline-offset-3 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] hover:bg-[#eef1f8] hover:text-[#536c90] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3",
+            metal?.comments,
+          )}
           aria-label={`${entry.commentCount} commentaires sur ${entry.title}`}
         >
           <MessageCircle size={16} aria-hidden="true" />
