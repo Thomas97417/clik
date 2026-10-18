@@ -47,6 +47,12 @@ export function startEditorTour(onClose: () => void) {
     prevBtnText: "Précédent",
     doneBtnText: "Terminer",
     closeBtnLabel: "Quitter la visite",
+    onHighlightStarted: (_element, step, { driver }) => {
+      driver.setConfig({
+        ...driver.getConfig(),
+        stagePadding: step.data?.stagePadding ?? 0,
+      });
+    },
     onPopoverRender: ({ wrapper, title, description, closeButton }) => {
       // Driver sets display:block inline; flex keeps the navigation outside scrolling text.
       wrapper.style.display = "flex";
@@ -99,6 +105,7 @@ export function startEditorTour(onClose: () => void) {
       },
       {
         element: '[data-editor-tour="saved-colors"]',
+        data: { stagePadding: 7 },
         popover: {
           title: "Vos trois couleurs personnelles",
           description:
@@ -152,6 +159,7 @@ export function startEditorTour(onClose: () => void) {
       },
       {
         element: '[data-editor-tour="shortcuts"]',
+        data: { stagePadding: 7 },
         popover: {
           title: EDITOR_SHORTCUTS_TITLE,
           description: editorShortcutsHtml(isMacKeyboard()),
