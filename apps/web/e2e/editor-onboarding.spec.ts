@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { EDITOR_SHORTCUTS_TITLE } from "../src/lib/clik/editor-shortcuts";
 
 for (const mac of [true, false]) {
   test(`raccourcis complets ${mac ? "Mac" : "Windows"} : symboles, mêmes commandes dans la visite et fond transparent`, async ({
@@ -25,7 +26,7 @@ for (const mac of [true, false]) {
     await expect(trigger).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
     await trigger.click();
     const popup = page.getByRole("dialog", {
-      name: "Les raccourcis à portée de main",
+      name: EDITOR_SHORTCUTS_TITLE,
       exact: true,
     });
     await expect(popup).toBeVisible();
@@ -129,10 +130,11 @@ async function expectNoHorizontalScroll(page: Page) {
 
 async function advanceToShortcuts(page: Page) {
   for (const title of [
+    "Vos trois couleurs personnelles",
     "Votre construction, en détail",
     "Les actions de construction",
     "Les propriétés de la sélection",
-    "Les raccourcis à portée de main",
+    EDITOR_SHORTCUTS_TITLE,
   ]) {
     await tour(page)
       .getByRole("button", { name: "Suivant", exact: true })
@@ -204,7 +206,7 @@ test("accueil discret une seule fois, bibliothèque utilisable et visite chargé
   await expect(help(page)).toBeFocused();
 });
 
-test("les cinq étapes présentent les actions sans débordement et préservent la scène, la sélection et l’historique", async ({
+test("les six étapes présentent les couleurs et les actions sans débordement et préservent la scène, la sélection et l’historique", async ({
   page,
 }, info) => {
   const errors: string[] = [];
@@ -219,7 +221,7 @@ test("les cinq étapes présentent les actions sans débordement et préservent 
   await help(page).click();
   await expect(tour(page)).toHaveAttribute("aria-modal", "true");
   await expect(tour(page)).toHaveAccessibleName("Les pièces et leurs couleurs");
-  await expect(tour(page)).toContainText("Étape 1 sur 5");
+  await expect(tour(page)).toContainText("Étape 1 sur 6");
   await expect(page.locator(".driver-active-element")).toHaveAttribute(
     "data-editor-tour",
     "library",
@@ -240,16 +242,38 @@ test("les cinq étapes présentent les actions sans débordement et préservent 
   await page.keyboard.press("Backspace");
   await page.keyboard.press("ArrowRight");
   await expect(tour(page)).toHaveAccessibleName(
+    "Vos trois couleurs personnelles",
+  );
+  await expect(page.locator(".driver-active-element")).toHaveAttribute(
+    "data-editor-tour",
+    "saved-colors",
+  );
+  await expect(tour(page)).toContainText("Étape 2 sur 6");
+  await expect(tour(page)).toContainText("Enregistrer et utiliser");
+  await expect(tour(page)).toContainText("sur cet appareil");
+  await expectNoHorizontalScroll(page);
+  await page.screenshot({
+    path: `/tmp/clik-tour-saved-colors-${info.project.name}.png`,
+  });
+  await page.keyboard.press("ArrowRight");
+  await expect(tour(page)).toHaveAccessibleName(
     "Votre construction, en détail",
   );
   await expect(page.locator(".driver-active-element")).toHaveAttribute(
     "data-editor-tour",
     "inspector",
   );
-  await expect(tour(page)).toContainText("Étape 2 sur 5");
+  await expect(tour(page)).toContainText("Étape 3 sur 6");
   await expectNoHorizontalScroll(page);
   await page.keyboard.press("ArrowLeft");
+  await expect(tour(page)).toHaveAccessibleName(
+    "Vos trois couleurs personnelles",
+  );
+  await page.keyboard.press("ArrowLeft");
   await expect(tour(page)).toHaveAccessibleName("Les pièces et leurs couleurs");
+  await tour(page)
+    .getByRole("button", { name: "Suivant", exact: true })
+    .click();
   await tour(page)
     .getByRole("button", { name: "Suivant", exact: true })
     .click();
@@ -261,7 +285,7 @@ test("les cinq étapes présentent les actions sans débordement et préservent 
     "data-editor-tour",
     "construction-actions",
   );
-  await expect(tour(page)).toContainText("Étape 3 sur 5");
+  await expect(tour(page)).toContainText("Étape 4 sur 6");
   for (const label of [
     "Tout sélectionner",
     "Grouper / Nouveau groupe",
@@ -285,19 +309,17 @@ test("les cinq étapes présentent les actions sans débordement et préservent 
     "data-editor-tour",
     "properties",
   );
-  await expect(tour(page)).toContainText("Étape 4 sur 5");
+  await expect(tour(page)).toContainText("Étape 5 sur 6");
   await expectNoHorizontalScroll(page);
   await tour(page)
     .getByRole("button", { name: "Suivant", exact: true })
     .click();
-  await expect(tour(page)).toHaveAccessibleName(
-    "Les raccourcis à portée de main",
-  );
+  await expect(tour(page)).toHaveAccessibleName(EDITOR_SHORTCUTS_TITLE);
   await expect(page.locator(".driver-active-element")).toHaveAttribute(
     "data-editor-tour",
     "shortcuts",
   );
-  await expect(tour(page)).toContainText("Étape 5 sur 5");
+  await expect(tour(page)).toContainText("Étape 6 sur 6");
   await page.screenshot({
     path: `/tmp/clik-tour-shortcuts-${info.project.name}.png`,
   });
@@ -325,6 +347,9 @@ test("visite sans pièces : panneaux ouverts temporairement et nettoyage sur nav
     .getByRole("button", { name: "Replier les propriétés", exact: true })
     .click();
   await page
+    .getByRole("button", { name: "Replier les couleurs", exact: true })
+    .click();
+  await page
     .getByRole("button", { name: "Replier la bibliothèque", exact: true })
     .click();
   await page
@@ -335,6 +360,10 @@ test("visite sans pièces : panneaux ouverts temporairement et nettoyage sur nav
     .click();
   await help(page).click();
   await expect(tour(page)).toBeVisible();
+  await expect(page.locator(".palette-toggle")).toHaveAttribute(
+    "aria-expanded",
+    "true",
+  );
   await expect(
     page.getByRole("complementary", {
       name: "Bibliothèque de pièces",
@@ -356,6 +385,10 @@ test("visite sans pièces : panneaux ouverts temporairement et nettoyage sur nav
   await expect(page.locator('[data-editor-tour="library"]')).toBeHidden();
   await expect(page.locator('[data-editor-tour="inspector"]')).toBeHidden();
   await expect(page.locator(".properties-toggle")).toHaveAttribute(
+    "aria-expanded",
+    "false",
+  );
+  await expect(page.locator(".palette-toggle")).toHaveAttribute(
     "aria-expanded",
     "false",
   );
@@ -411,6 +444,7 @@ test("les actions restent lisibles au clavier dans une fenêtre basse, avec les 
   await help(page).click();
   await expect(tour(page)).toBeVisible();
   for (const title of [
+    "Vos trois couleurs personnelles",
     "Votre construction, en détail",
     "Les actions de construction",
   ]) {

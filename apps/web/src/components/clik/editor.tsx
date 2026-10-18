@@ -1213,6 +1213,7 @@ export default function Editor({
               </div>
               <div className="library-footer shrink-0 border-t border-solid border-t-[#e7ecf3] bg-white">
                 <EditorColors
+                  forceExpanded={tourActive}
                   disabled={
                     !project.ready ||
                     closed ||

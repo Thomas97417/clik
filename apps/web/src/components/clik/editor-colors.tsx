@@ -23,8 +23,10 @@ const colorName = (color: string) => {
 
 export default function EditorColors({
   disabled = false,
+  forceExpanded = false,
 }: {
   disabled?: boolean;
+  forceExpanded?: boolean;
 }) {
   const state = useEditor(
     useShallow((s) => ({
@@ -36,6 +38,7 @@ export default function EditorColors({
   );
   const paletteId = useId();
   const [collapsed, setCollapsed] = useState(false);
+  const isCollapsed = collapsed && !forceExpanded;
   const [open, setOpen] = useState(false);
   const [draftColor, setDraftColor] = useState<string | null>(null);
   const editing = useRef(false);
@@ -115,9 +118,9 @@ export default function EditorColors({
           type="button"
           className="palette-toggle panel-heading flex min-h-12 w-full cursor-pointer items-center gap-1.5 px-3 py-2.5 text-left text-[13px] font-[650] text-[#34435c] outline-offset-3 transition-colors hover:bg-[#f8faff] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-[#356ae6] focus-visible:-outline-offset-2 group/palette-toggle"
           aria-label={
-            collapsed ? "Déplier les couleurs" : "Replier les couleurs"
+            isCollapsed ? "Déplier les couleurs" : "Replier les couleurs"
           }
-          aria-expanded={!collapsed}
+          aria-expanded={!isCollapsed}
           aria-controls={paletteId}
           onClick={() => setCollapsed(!collapsed)}
         >
@@ -141,7 +144,7 @@ export default function EditorColors({
       </h2>
       <div
         id={paletteId}
-        hidden={collapsed}
+        hidden={isCollapsed}
         className="px-3 pb-3 [&[hidden]]:hidden"
       >
         <div

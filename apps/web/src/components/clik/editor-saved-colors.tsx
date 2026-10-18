@@ -97,6 +97,7 @@ export function EditorSavedColors({
       <div
         role="group"
         aria-label="Couleurs personnelles"
+        data-editor-tour="saved-colors"
         className="relative col-span-3 grid grid-cols-3 gap-1.25"
       >
         <span

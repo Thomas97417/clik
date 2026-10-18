@@ -82,9 +82,6 @@ export default function EditorShortcutsPopover({
         >
           <X size={14} aria-hidden="true" />
         </button>
-        <p className="mb-2 mr-6 text-[9px] font-bold leading-[1.5] tracking-[0.1em] text-[#356ae6]">
-          LES REPÈRES DE L’ATELIER
-        </p>
         <PopoverTitle className="pr-4 text-base font-[750] leading-[1.45] text-[#263b58]">
           {EDITOR_SHORTCUTS_TITLE}
         </PopoverTitle>

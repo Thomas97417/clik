@@ -57,10 +57,6 @@ export function startEditorTour(onClose: () => void) {
       wrapper.setAttribute("aria-describedby", description.id);
       description.tabIndex = 0;
       closeButton.setAttribute("title", "Quitter la visite");
-      const label = document.createElement("p");
-      label.className = "editor-tour-eyebrow";
-      label.textContent = "LES REPÈRES DE L’ATELIER";
-      title.before(label);
       // Reuse the toolbar's SVGs so the guide always shows the same icons.
       const toolbar = document.querySelector(
         '[data-editor-tour="construction-actions"]',
@@ -100,6 +96,19 @@ export function startEditorTour(onClose: () => void) {
             "<p>Vous pouvez le replier ou agrandir la bibliothèque en tirant sa bordure vers la scène.</p>",
           side: "right",
           align: "center",
+        },
+      },
+      {
+        element: '[data-editor-tour="saved-colors"]',
+        popover: {
+          title: "Vos trois couleurs personnelles",
+          description:
+            "<p>Les trois cases encadrées complètent la palette avec vos propres couleurs.</p>" +
+            "<p>Cliquez sur une case vide <strong>+</strong>, choisissez une teinte, puis <strong>Enregistrer et utiliser</strong>. Un clic sur une couleur enregistrée permet de la réutiliser.</p>" +
+            "<p>Pour la remplacer ou la vider, cliquez sur le <strong>crayon</strong>, puis sur la case à modifier. Le clic droit sur une case fonctionne aussi.</p>" +
+            "<p>Ces couleurs sont conservées <strong>sur cet appareil</strong> et disponibles dans tous vos projets.</p>",
+          side: "right",
+          align: "end",
         },
       },
       {

@@ -14,16 +14,6 @@
   box-shadow: 0 14px 44px #20396224;
 }
 
-.editor-tour-popover .editor-tour-eyebrow {
-  flex-shrink: 0;
-  margin: 0 24px 8px 0;
-  color: #356ae6;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  line-height: 1.5;
-}
-
 .editor-tour-popover.editor-tour-shortcuts-popover {
   width: 400px;
 }
