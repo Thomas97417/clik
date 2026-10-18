@@ -1545,90 +1545,92 @@ export default function Editor({
                   </span>
                 </div>
               </div>
-              <div
-                data-editor-tour="construction-actions"
-                className="tree-actions px-2 gap-0.75 flex pt-0 pb-3 border-b border-solid border-b-[#edf0f5]"
-              >
-                <button
-                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
-                  title="Tout sélectionner"
-                  aria-label="Tout sélectionner"
-                  aria-keyshortcuts="a"
-                  disabled={!s.scene.nodes.length}
-                  onClick={s.selectAll}
+              <div className="tree-actions pt-0 pb-3 border-b border-solid border-b-[#edf0f5]">
+                <div
+                  data-editor-tour="construction-actions"
+                  className="flex gap-0.75 px-2"
                 >
-                  <ListChecks
-                    className="shrink-0"
-                    size={17}
-                    aria-hidden="true"
-                  />
-                </button>
-                <button
-                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
-                  title={s.selection.length ? "Grouper" : "Nouveau groupe"}
-                  aria-keyshortcuts={
-                    s.selection.length ? "g Control+g Meta+g" : undefined
-                  }
-                  onClick={() => safe(s.group)}
-                  disabled={
-                    !project.ready || closed || !!s.gesture || !!s.pending
-                  }
-                >
-                  <FolderPlus className="shrink-0" size={17} />
-                </button>
-                <button
-                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
-                  title="Dissocier"
-                  onClick={() => safe(s.ungroup)}
-                  disabled={selected?.kind !== "group"}
-                >
-                  <Ungroup className="shrink-0" size={17} />
-                </button>
-                <button
-                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
-                  title="Dupliquer (⌘/Ctrl + D)"
-                  aria-label="Dupliquer"
-                  aria-keyshortcuts="Control+d Meta+d"
-                  onClick={() => safe(s.duplicate)}
-                  disabled={!s.selection.length}
-                >
-                  <Copy className="shrink-0" size={17} />
-                </button>
-                <button
-                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
-                  title="Supprimer"
-                  onClick={() => safe(s.remove)}
-                  disabled={!s.selection.length}
-                >
-                  <Trash2 className="shrink-0" size={17} />
-                </button>
-                <span className="tree-actions-spacer flex-1" />
-                <button
-                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
-                  title="Tout replier"
-                  aria-label="Tout replier"
-                  disabled={
-                    !hierarchy.groups.some((n) => !collapsedGroups.has(n.id))
-                  }
-                  onClick={() =>
-                    setCollapsedGroups(
-                      new Set(hierarchy.groups.map((n) => n.id)),
-                    )
-                  }
-                >
-                  <ChevronsDownUp className="shrink-0" size={17} />
-                </button>
-                <button
-                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
-                  title="Tout déplier"
-                  aria-label="Tout déplier"
-                  disabled={
-                    !hierarchy.groups.some((n) => collapsedGroups.has(n.id))
-                  }
-                  onClick={() => setCollapsedGroups(new Set())}
-                >
-                  <ChevronsUpDown className="shrink-0" size={17} />
-                </button>
+                  <button
+                    className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
+                    title="Tout sélectionner"
+                    aria-label="Tout sélectionner"
+                    aria-keyshortcuts="a"
+                    disabled={!s.scene.nodes.length}
+                    onClick={s.selectAll}
+                  >
+                    <ListChecks
+                      className="shrink-0"
+                      size={17}
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <button
+                    className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
+                    title={s.selection.length ? "Grouper" : "Nouveau groupe"}
+                    aria-keyshortcuts={
+                      s.selection.length ? "g Control+g Meta+g" : undefined
+                    }
+                    onClick={() => safe(s.group)}
+                    disabled={
+                      !project.ready || closed || !!s.gesture || !!s.pending
+                    }
+                  >
+                    <FolderPlus className="shrink-0" size={17} />
+                  </button>
+                  <button
+                    className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
+                    title="Dissocier"
+                    onClick={() => safe(s.ungroup)}
+                    disabled={selected?.kind !== "group"}
+                  >
+                    <Ungroup className="shrink-0" size={17} />
+                  </button>
+                  <button
+                    className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
+                    title="Dupliquer (⌘/Ctrl + D)"
+                    aria-label="Dupliquer"
+                    aria-keyshortcuts="Control+d Meta+d"
+                    onClick={() => safe(s.duplicate)}
+                    disabled={!s.selection.length}
+                  >
+                    <Copy className="shrink-0" size={17} />
+                  </button>
+                  <button
+                    className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
+                    title="Supprimer"
+                    onClick={() => safe(s.remove)}
+                    disabled={!s.selection.length}
+                  >
+                    <Trash2 className="shrink-0" size={17} />
+                  </button>
+                  <span className="tree-actions-spacer flex-1" />
+                  <button
+                    className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
+                    title="Tout replier"
+                    aria-label="Tout replier"
+                    disabled={
+                      !hierarchy.groups.some((n) => !collapsedGroups.has(n.id))
+                    }
+                    onClick={() =>
+                      setCollapsedGroups(
+                        new Set(hierarchy.groups.map((n) => n.id)),
+                      )
+                    }
+                  >
+                    <ChevronsDownUp className="shrink-0" size={17} />
+                  </button>
+                  <button
+                    className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 p-0 gap-1.5 h-8.25 min-w-0 flex items-center justify-center rounded-[6px] text-[#7a879d] flex-[0_1_30px] hover:bg-[#f0f4fa] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 focus-visible:rounded-[4px]"
+                    title="Tout déplier"
+                    aria-label="Tout déplier"
+                    disabled={
+                      !hierarchy.groups.some((n) => collapsedGroups.has(n.id))
+                    }
+                    onClick={() => setCollapsedGroups(new Set())}
+                  >
+                    <ChevronsUpDown className="shrink-0" size={17} />
+                  </button>
+                </div>
               </div>
               <div
                 ref={treeDrag.container}
