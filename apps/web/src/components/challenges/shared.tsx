@@ -115,7 +115,7 @@ export function VoteBricks({
 }
 
 const voteButtonClassName =
-  "challenge-vote group/challenge-vote inline-flex items-center justify-center gap-2 min-h-9 max-w-full border border-solid border-[#d9e4f2] rounded-[8px] py-1.25 pr-1.75 pl-2.5 bg-white text-[#526b8c] text-xs font-semibold leading-[1.4] cursor-pointer transition-colors duration-150 [&:hover:not(:disabled)]:border-[#b9cef2] [&:hover:not(:disabled)]:bg-[#f7faff] [&:hover:not(:disabled)]:text-[#356ae6] aria-pressed:border-[#b9cef2] aria-pressed:bg-[#edf3ff] aria-pressed:text-[#2458ce] [&[aria-pressed='true']:hover:not(:disabled)]:border-[#a5bfe9] [&[aria-pressed='true']:hover:not(:disabled)]:bg-[#e5eeff] data-[unavailable]:border-[#e3e8f0] data-[unavailable]:bg-[#f8fafc] data-[unavailable]:text-[#8390a4] disabled:cursor-not-allowed aria-busy:cursor-progress focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 motion-reduce:transition-none";
+  "challenge-vote group/challenge-vote inline-flex items-center justify-center gap-2 min-h-9 max-w-full border border-solid border-[var(--vote-border,#d9e4f2)] rounded-[8px] py-1.25 pr-1.75 pl-2.5 bg-[var(--vote-bg,#fff)] text-[var(--vote-accent,#526b8c)] text-xs font-semibold leading-[1.4] cursor-pointer transition-colors duration-150 [&:hover:not(:disabled)]:border-[var(--vote-border,#b9cef2)] [&:hover:not(:disabled)]:bg-[var(--vote-hover-bg,#f7faff)] [&:hover:not(:disabled)]:text-[var(--vote-accent,#356ae6)] aria-pressed:border-[var(--vote-border,#b9cef2)] aria-pressed:bg-[var(--vote-active-bg,#edf3ff)] aria-pressed:text-[var(--vote-accent,#2458ce)] [&[aria-pressed='true']:hover:not(:disabled)]:border-[var(--vote-border,#a5bfe9)] [&[aria-pressed='true']:hover:not(:disabled)]:bg-[var(--vote-active-hover-bg,#e5eeff)] data-[unavailable]:border-[var(--vote-border,#e3e8f0)] data-[unavailable]:bg-[var(--vote-bg,#f8fafc)] data-[unavailable]:text-[var(--vote-muted,#8390a4)] disabled:cursor-not-allowed aria-busy:cursor-progress focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[var(--vote-accent,#356ae6)] focus-visible:outline-offset-3 motion-reduce:transition-none";
 
 export function VoteButton({
   publicationId,
@@ -123,12 +123,14 @@ export function VoteButton({
   owner,
   count,
   choices,
+  className,
 }: {
   publicationId: Id<"publications">;
   challengeId?: Id<"challenges">;
   owner: string;
   count: number;
   choices: { publicationId: Id<"publications"> }[];
+  className?: string;
 }) {
   const { isAuthenticated } = useConvexAuth();
   const me = useQuery(api.auth.getCurrentUser, isAuthenticated ? {} : "skip");
@@ -143,11 +145,11 @@ export function VoteButton({
   const ready = !!challengeId && !!me;
   const content = (
     <>
-      <VoteBrick className="h-4.5 w-4.75 text-[#91a8c6] group-aria-pressed/challenge-vote:text-[#356ae6]" />
+      <VoteBrick className="h-4.5 w-4.75 text-[var(--vote-muted,#91a8c6)] group-aria-pressed/challenge-vote:text-[var(--vote-accent,#356ae6)]" />
       <span className="challenge-vote-label min-w-0">
         {own ? "Votre création" : voted ? "Soutenue" : "J’aime"}
       </span>
-      <span className="challenge-vote-count inline-flex items-center justify-center min-w-6 min-h-5.5 rounded-[4px] px-1.25 py-0.5 bg-[#f1f5fa] text-[#637b9a] text-[11px] font-bold tabular-nums group-aria-pressed/challenge-vote:bg-[#dce8ff] group-aria-pressed/challenge-vote:text-[#2458ce]">
+      <span className="challenge-vote-count inline-flex items-center justify-center min-w-6 min-h-5.5 rounded-[4px] px-1.25 py-0.5 bg-[var(--vote-count-bg,#f1f5fa)] text-[var(--vote-accent,#637b9a)] text-[11px] font-bold tabular-nums group-aria-pressed/challenge-vote:bg-[var(--vote-count-active-bg,#dce8ff)] group-aria-pressed/challenge-vote:text-[var(--vote-accent,#2458ce)]">
         {count}
       </span>
     </>
@@ -155,7 +157,7 @@ export function VoteButton({
   if (!isAuthenticated)
     return (
       <SignInTo
-        className={voteButtonClassName}
+        className={cn(voteButtonClassName, className)}
         title="Connectez-vous pour soutenir cette création"
         label={`Se connecter pour voter (${count})`}
       >
@@ -165,7 +167,7 @@ export function VoteButton({
   return (
     <button
       type="button"
-      className={voteButtonClassName}
+      className={cn(voteButtonClassName, className)}
       aria-pressed={voted}
       aria-busy={busy}
       data-own={own || undefined}

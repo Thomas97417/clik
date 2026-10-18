@@ -15,7 +15,12 @@ const metals = {
       "bg-[linear-gradient(#fff,#fff),linear-gradient(135deg,#e5c46c,#fff3cb_28%,#d9b35c_49%,#d8e8ee_72%,#ead09a)] shadow-[0_4px_20px_#b3872820]",
     thumbnail: "bg-[radial-gradient(ellipse_at_50%_35%,#fffaf0,#eee9db)]",
     badge: "border-[#e3cc93] bg-[#fffcf0]/95 text-[#8c671e]",
+    author:
+      "text-[#8c671e] hover:text-[#715113] focus-visible:outline-[#8c671e]",
     actions: "border-t-[#eee4cb] bg-[#fffdf7]",
+    arrow:
+      "bg-[#fffcf0]/95 text-[#8c671e] group-hover/card-link:bg-[#8c671e] group-focus-visible/card-link:bg-[#8c671e]",
+    vote: "[--vote-accent:#8c671e] [--vote-border:#e3cc93] [--vote-bg:#fffcf0] [--vote-hover-bg:#fbf4df] [--vote-active-bg:#f7ebc4] [--vote-active-hover-bg:#f0dfac] [--vote-muted:#9b864f] [--vote-count-bg:#f3ead2] [--vote-count-active-bg:#ead496]",
     foil: "#f3d58d",
   },
   2: {
@@ -23,7 +28,12 @@ const metals = {
       "bg-[linear-gradient(#fff,#fff),linear-gradient(135deg,#b7c8dc,#f5f9ff_28%,#a9bdcf_49%,#ded4f0_72%,#bfdde5)] shadow-[0_4px_20px_#657b9a1c]",
     thumbnail: "bg-[radial-gradient(ellipse_at_50%_35%,#f7faff,#e3e9f1)]",
     badge: "border-[#cbd6e6] bg-[#f8fbff]/95 text-[#576c89]",
+    author:
+      "text-[#576c89] hover:text-[#41546e] focus-visible:outline-[#576c89]",
     actions: "border-t-[#e1e8f1] bg-[#f9fbfe]",
+    arrow:
+      "bg-[#f8fbff]/95 text-[#576c89] group-hover/card-link:bg-[#576c89] group-focus-visible/card-link:bg-[#576c89]",
+    vote: "[--vote-accent:#576c89] [--vote-border:#cbd6e6] [--vote-bg:#f8fbff] [--vote-hover-bg:#edf2f8] [--vote-active-bg:#e6edf5] [--vote-active-hover-bg:#dbe5f0] [--vote-muted:#8796ad] [--vote-count-bg:#eaf0f7] [--vote-count-active-bg:#cedaea]",
     foil: "#d6e3f6",
   },
   3: {
@@ -31,7 +41,12 @@ const metals = {
       "bg-[linear-gradient(#fff,#fff),linear-gradient(135deg,#cb9675,#ffead6_28%,#c5916f_49%,#e3d4ea_72%,#dfb995)] shadow-[0_4px_20px_#a36f4520]",
     thumbnail: "bg-[radial-gradient(ellipse_at_50%_35%,#fff8f1,#eee2d8)]",
     badge: "border-[#e0bfa7] bg-[#fff8f1]/95 text-[#955d3a]",
+    author:
+      "text-[#955d3a] hover:text-[#79482a] focus-visible:outline-[#955d3a]",
     actions: "border-t-[#ecdfd4] bg-[#fffaf6]",
+    arrow:
+      "bg-[#fff8f1]/95 text-[#955d3a] group-hover/card-link:bg-[#955d3a] group-focus-visible/card-link:bg-[#955d3a]",
+    vote: "[--vote-accent:#955d3a] [--vote-border:#e0bfa7] [--vote-bg:#fff8f1] [--vote-hover-bg:#faeddf] [--vote-active-bg:#f5e3d2] [--vote-active-hover-bg:#edd5be] [--vote-muted:#ac876c] [--vote-count-bg:#f2e5d9] [--vote-count-active-bg:#e8c9b0]",
     foil: "#e7b18c",
   },
 } as const;
@@ -90,7 +105,10 @@ export default memo(function ChallengeEntryCard({
             </span>
           )}
           <span
-            className="card-arrow group/card-arrow absolute right-3.75 bottom-3.75 grid size-8 place-items-center rounded-full bg-[#ffffffde] text-[#356ae6] [transition:background_150ms] group-hover/card-link:bg-[#356ae6] group-hover/card-link:text-white"
+            className={cn(
+              "card-arrow group/card-arrow absolute right-3.75 bottom-3.75 grid size-8 place-items-center rounded-full bg-[#ffffffde] text-[#356ae6] transition-colors duration-150 group-hover/card-link:bg-[#356ae6] group-hover/card-link:text-white group-focus-visible/card-link:bg-[#356ae6] group-focus-visible/card-link:text-white motion-reduce:transition-none",
+              metal?.arrow,
+            )}
             aria-hidden="true"
           >
             <ArrowUpRight size={19} />
@@ -105,6 +123,7 @@ export default memo(function ChallengeEntryCard({
       <p className="public-card-author group/public-card-author min-w-0 px-5 pt-0 pb-4 text-xs leading-[inherit] text-[#73829a]">
         par{" "}
         <AuthorLink
+          className={metal?.author}
           id={entry.owner}
           name={entry.author}
           avatar={entry.avatar}
@@ -117,6 +136,7 @@ export default memo(function ChallengeEntryCard({
         )}
       >
         <VoteButton
+          className={metal?.vote}
           publicationId={entry._id}
           challengeId={challengeId}
           owner={entry.owner}
