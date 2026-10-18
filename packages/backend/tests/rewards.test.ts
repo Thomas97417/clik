@@ -146,7 +146,7 @@ describe("Récompenses des défis", () => {
     [1, 1, 1, 1],
     [0, 0, 0, 0],
   ])("respecte les rangs de compétition : %j", async (...scores) => {
-    const { t, publish, settle, awards } = await setup();
+    const { t, publish, settle, awards, challengeId } = await setup();
     for (let i = 0; i < scores.length; i++) {
       const entry = await publish(`owner-${i}`);
       await t.run((ctx) =>
@@ -168,6 +168,62 @@ describe("Récompenses des défis", () => {
     expect(
       (await awards()).map(({ rank, score }) => ({ rank, score })),
     ).toEqual(expected);
+    for (const sort of ["recent", "votes"] as const) {
+      const entries = await t.query(api.challenges.entries, {
+        challengeId,
+        sort,
+        paginationOpts: { numItems: 12, cursor: null },
+      });
+      for (const entry of entries.page) {
+        const score = scores[Number(entry.owner.slice("owner-".length))];
+        const rank = 1 + scores.filter((value) => value > score).length;
+        expect(entry.podiumRank).toBe(score > 0 && rank <= 3 ? rank : null);
+      }
+    }
+  });
+
+  it("réserve les cartes du podium aux récompenses définitives, indépendamment des votes suivants", async () => {
+    const { t, publish, settle, challengeId } = await setup();
+    const ids: Id<"publications">[] = [];
+    for (const [owner, score] of [
+      ["gold", 4],
+      ["silver", 3],
+      ["bronze", 2],
+      ["other", 0],
+    ] as const) {
+      const entry = await publish(owner);
+      ids.push(entry.id);
+      await t.run((ctx) =>
+        ctx.db.patch(entry.id, { voteCount: score, rewardScore: score }),
+      );
+    }
+    const entries = () =>
+      t.query(api.challenges.entries, {
+        challengeId,
+        sort: "votes",
+        paginationOpts: { numItems: 12, cursor: null },
+      });
+    expect(
+      (await entries()).page.every((entry) => entry.podiumRank === null),
+    ).toBe(true);
+    vi.setSystemTime(deadline);
+    await settle();
+    await t.run(async (ctx) => {
+      await ctx.db.patch(ids[0], { voteCount: 0 });
+      await ctx.db.patch(ids[3], { voteCount: 20 });
+    });
+    const ranked = (await entries()).page;
+    expect(ranked[0]).toMatchObject({ owner: "other", podiumRank: null });
+    expect(ranked.find((entry) => entry.owner === "gold")).toMatchObject({
+      podiumRank: 1,
+      voteCount: 0,
+    });
+    expect(ranked.find((entry) => entry.owner === "silver")?.podiumRank).toBe(
+      2,
+    );
+    expect(ranked.find((entry) => entry.owner === "bronze")?.podiumRank).toBe(
+      3,
+    );
   });
 
   it("exclut un retrait avant échéance, conserve un retrait après et masque les liens privés", async () => {
@@ -229,9 +285,32 @@ describe("Récompenses des défis", () => {
     vi.setSystemTime(deadline);
     expect(await settle()).toBe(false);
     expect(await awards()).toHaveLength(100);
+    const inProgress = await t.query(api.challenges.entries, {
+      challengeId,
+      sort: "recent",
+      paginationOpts: { numItems: 12, cursor: null },
+    });
+    expect(inProgress.page.every((entry) => entry.podiumRank === null)).toBe(
+      true,
+    );
     await Promise.all([settle(), settle()]);
     expect(await awards()).toHaveLength(105);
     expect((await awards()).every((a) => a.rank === 1)).toBe(true);
+    const firstPage = await t.query(api.challenges.entries, {
+      challengeId,
+      sort: "recent",
+      paginationOpts: { numItems: 2, cursor: null },
+    });
+    const nextPage = await t.query(api.challenges.entries, {
+      challengeId,
+      sort: "recent",
+      paginationOpts: { numItems: 2, cursor: firstPage.continueCursor },
+    });
+    expect(
+      [...firstPage.page, ...nextPage.page].every(
+        (entry) => entry.podiumRank === 1,
+      ),
+    ).toBe(true);
     expect((await t.run((ctx) => ctx.db.get(challengeId)))?.rewardStatus).toBe(
       "complete",
     );

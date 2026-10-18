@@ -9,18 +9,32 @@ import {
 } from "@clik/scene";
 // Browser-only transport fixture. No test users, publications or emails are created remotely.
 // Business invariants are exercised against real Convex functions in backend tests.
-export async function challengeFixture(page: Page) {
+export async function challengeFixture(
+  page: Page,
+  options: {
+    day?: string;
+    podiumRanks?: (1 | 2 | 3 | null)[];
+    rewardPhase?: "pending" | "processing" | "complete";
+    thumbnails?: boolean;
+  } = {},
+) {
   const uploads: { projectId: string; bytes: { $bytes: string } }[] = [];
   const today = challengeDay(),
-    start = challengeStart(today);
+    start = challengeStart(options.day ?? today);
   const challenge = {
     _id: "challenge",
     _creationTime: start,
-    day: today,
+    day: options.day ?? today,
     opensAt: start,
     closesAt: start + 86400000,
     stock: challengeStock(today),
     generatorVersion: 1,
+    ...(options.rewardPhase
+      ? {
+          rewardStatus: options.rewardPhase,
+          rewardAt: start + 2 * 86400000,
+        }
+      : {}),
   };
   const user = {
     _id: "viewer",
@@ -42,7 +56,13 @@ export async function challengeFixture(page: Page) {
     voteCount: i,
     commentCount: 0,
     updatedAt: start + i,
-    thumbnailUrl: null,
+    thumbnailUrl: options.thumbnails
+      ? `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><path d="M95 135l105 50 105-50v72l-105 50-105-50" fill="${["#356ae6", "#559982", "#ca8d65", "#8b61c7"][i]}"/><path d="M95 135l105-50 105 50-105 50" fill="${["#86b0ff", "#9fd4bf", "#f0cba9", "#bd9ee9"][i]}"/><ellipse cx="172" cy="120" rx="21" ry="10" fill="#ffffff70"/><ellipse cx="226" cy="146" rx="21" ry="10" fill="#ffffff70"/><ellipse cx="225" cy="94" rx="21" ry="10" fill="#ffffff70"/></svg>`)}`
+      : null,
+    podiumRank:
+      options.rewardPhase === "complete"
+        ? (options.podiumRanks?.[i] ?? null)
+        : null,
   }));
   const project = {
     _id: "project",
@@ -381,6 +401,7 @@ export async function challengeFixture(page: Page) {
               commentCount: 0,
               updatedAt: Date.now(),
               thumbnailUrl: null,
+              podiumRank: null,
             });
           }
           result = publicationId;

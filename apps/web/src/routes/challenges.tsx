@@ -8,6 +8,7 @@ import {
 } from "@/lib/clik/use-public-pagination";
 import PublicMore from "@/components/clik/public-more";
 import ChallengeRewards from "@/components/challenges/rewards";
+import ChallengeEntryCard from "@/components/challenges/entry-card";
 import { useHydrated } from "@tanstack/react-router";
 import {
   Select,
@@ -36,20 +37,12 @@ import {
   CHALLENGE_DAY_MS,
   type PartType,
 } from "@clik/scene";
-import {
-  ArrowLeft,
-  ArrowRight,
-  ArrowUpRight,
-  Clock3,
-  MessageCircle,
-} from "lucide-react";
-import AuthorLink from "@/components/clik/author-link";
+import { ArrowLeft, ArrowRight, Clock3 } from "lucide-react";
 import PartPreview from "@/components/clik/part-preview";
 import { ChallengeDatePicker } from "@/components/challenges/date-picker";
 import {
   SignInTo,
   useServerNow,
-  VoteButton,
   VoteBricks,
 } from "@/components/challenges/shared";
 export const Route = createFileRoute("/challenges")({
@@ -445,61 +438,12 @@ function Entries({
       ) : (
         <div className="creation-grid group/creation-grid gap-6.5 grid grid-cols-3 max-sm-narrow:gap-3.75 max-sm-narrow:grid-cols-1 min-sm-narrow:max-lg-narrow:gap-3.75 min-sm-narrow:max-lg-narrow:grid-cols-2">
           {results.map((p) => (
-            <article
-              className="creation-card challenge-entry group/creation-card overflow-hidden border border-solid border-[#e4eaf2] rounded-[14px] bg-white"
+            <ChallengeEntryCard
               key={p._id}
-            >
-              <Link
-                className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 group/card-link"
-                to="/creations/$publicationId"
-                params={{ publicationId: p._id }}
-              >
-                <div className="thumbnail group/thumbnail aspect-4/3 bg-[#eef2f8] relative">
-                  {p.thumbnailUrl && (
-                    <img
-                      className="object-contain size-full"
-                      src={p.thumbnailUrl}
-                      alt={p.title}
-                      loading="lazy"
-                    />
-                  )}
-                  <span
-                    className="card-arrow group/card-arrow absolute bottom-3.75 right-3.75 bg-[#ffffffde] rounded-full grid place-items-center text-[#356ae6] [transition:background_150ms] size-8 group-hover/card-link:bg-[#356ae6] group-hover/card-link:text-white"
-                    aria-hidden="true"
-                  >
-                    <ArrowUpRight size={19} />
-                  </span>
-                </div>
-                <div className="card-meta group/card-meta px-5 py-4.5">
-                  <h3 className="text-base leading-[inherit] font-bold">
-                    {p.title}
-                  </h3>
-                </div>
-              </Link>
-              <p className="public-card-author group/public-card-author min-w-0 text-[#73829a] text-xs leading-[inherit] px-5 pt-0 pb-4">
-                par{" "}
-                <AuthorLink id={p.owner} name={p.author} avatar={p.avatar} />
-              </p>
-              <div className="challenge-entry-actions px-4 py-3 gap-2 flex justify-between items-center flex-wrap border-t border-solid border-t-[#edf0f6] bg-[#fcfcfe]">
-                <VoteButton
-                  publicationId={p._id}
-                  challengeId={challenge._id}
-                  owner={p.owner}
-                  count={p.voteCount}
-                  choices={choices}
-                />
-                <Link
-                  to="/creations/$publicationId"
-                  params={{ publicationId: p._id }}
-                  hash="comments"
-                  className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 challenge-entry-comments px-2.25 py-1.5 gap-1.5 inline-flex items-center justify-center min-h-9.5 min-w-9.5 ml-auto rounded-[10px] text-[#8792a5] text-xs tabular-nums hover:bg-[#eef1f8] hover:text-[#536c90] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 group/card-link leading-normal"
-                  aria-label={`${p.commentCount} commentaires sur ${p.title}`}
-                >
-                  <MessageCircle size={16} aria-hidden="true" />
-                  {p.commentCount}
-                </Link>
-              </div>
-            </article>
+              entry={p}
+              challengeId={challenge._id}
+              choices={choices}
+            />
           ))}
         </div>
       )}

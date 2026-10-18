@@ -183,24 +183,45 @@ export const entries = query({
               numItems: Math.min(24, args.paginationOpts.numItems),
             });
     const owners = results.page.map((p) => p.owner);
-    const [avatars, names] = await Promise.all([
+    const [avatars, names, challenge] = await Promise.all([
       readAvatars(ctx, owners),
       readAuthorNames(ctx, owners),
+      ctx.db.get(args.challengeId),
     ]);
     return {
       ...results,
       page: await Promise.all(
-        results.page.map(async (p) => ({
-          _id: p._id,
-          owner: p.owner,
-          title: p.title,
-          author: names.get(p.owner) ?? p.author,
-          avatar: avatars.get(p.owner)!,
-          voteCount: p.voteCount ?? 0,
-          commentCount: p.commentCount ?? 0,
-          updatedAt: p.updatedAt,
-          thumbnailUrl: await ctx.storage.getUrl(p.thumbnail),
-        })),
+        results.page.map(async (p) => {
+          const [thumbnailUrl, award] = await Promise.all([
+            ctx.storage.getUrl(p.thumbnail),
+            challenge?.rewardStatus === "complete"
+              ? ctx.db
+                  .query("challengeAwards")
+                  .withIndex("by_publication", (q) =>
+                    q.eq("publicationId", p._id),
+                  )
+                  .unique()
+              : null,
+          ]);
+          const podiumRank =
+            award?.challengeId === args.challengeId &&
+            award.owner === p.owner &&
+            (award.rank === 1 || award.rank === 2 || award.rank === 3)
+              ? award.rank
+              : null;
+          return {
+            _id: p._id,
+            owner: p.owner,
+            title: p.title,
+            author: names.get(p.owner) ?? p.author,
+            avatar: avatars.get(p.owner)!,
+            voteCount: p.voteCount ?? 0,
+            commentCount: p.commentCount ?? 0,
+            updatedAt: p.updatedAt,
+            thumbnailUrl,
+            podiumRank,
+          };
+        }),
       ),
     };
   },
