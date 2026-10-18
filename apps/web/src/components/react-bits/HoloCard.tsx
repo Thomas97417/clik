@@ -705,6 +705,21 @@ export default function HoloCard({
             );
       }
       rotor.style.transform = `perspective(${PERSPECTIVE}px) scale(${state.lift}) rotateX(${state.tiltX}deg) rotateY(${state.tiltY + state.turn}deg)`;
+      if (content) {
+        // Share the spring-smoothed light with backgrounds behind the DOM content.
+        rotor.style.setProperty(
+          "--hc-light-x",
+          `${(state.lightX * 100).toFixed(2)}%`,
+        );
+        rotor.style.setProperty(
+          "--hc-light-y",
+          `${(state.lightY * 100).toFixed(2)}%`,
+        );
+        rotor.style.setProperty(
+          "--hc-foil-angle",
+          `${(125 + (state.lightX - 0.5) * 40 - (state.lightY - 0.5) * 20).toFixed(2)}deg`,
+        );
+      }
       if (shadowRef.current) {
         shadowRef.current.style.transform = `translate(${-state.tiltY * 0.7}px, ${state.tiltX * 0.7}px) scale(${0.9 + (state.lift - 1) * 1.5})`;
       }

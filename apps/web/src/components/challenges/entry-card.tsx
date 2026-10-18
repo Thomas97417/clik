@@ -13,13 +13,13 @@ const metals = {
   1: {
     frame:
       "bg-[linear-gradient(#fff,#fff),linear-gradient(135deg,#e5c46c,#fff3cb_28%,#d9b35c_49%,#d8e8ee_72%,#ead09a)] shadow-[0_4px_20px_#b3872820]",
-    thumbnail: "bg-[radial-gradient(ellipse_at_50%_35%,#fffaf0,#eee9db)]",
+    thumbnail: "bg-[radial-gradient(ellipse_at_50%_35%,#fffaf0b3,#eee9db4d)]",
     badge: "border-[#e3cc93] bg-[#fffcf0]/95 text-[#8c671e]",
     author:
       "text-[#8c671e] hover:text-[#715113] focus-visible:outline-[#8c671e]",
     comments:
       "hover:bg-[#fbf4df] hover:text-[#8c671e] focus-visible:outline-[#8c671e]",
-    actions: "border-t-[#eee4cb] bg-[#fffdf7]",
+    actions: "border-t-[#eee4cb] bg-[#fffdf7]/75",
     arrow:
       "bg-[#fffcf0]/95 text-[#8c671e] group-hover/card-link:bg-[#8c671e] group-focus-visible/card-link:bg-[#8c671e]",
     vote: "[--vote-accent:#8c671e] [--vote-border:#e3cc93] [--vote-bg:#fffcf0] [--vote-hover-bg:#fbf4df] [--vote-active-bg:#f7ebc4] [--vote-active-hover-bg:#f0dfac] [--vote-muted:#9b864f] [--vote-count-bg:#f3ead2] [--vote-count-active-bg:#ead496]",
@@ -28,13 +28,13 @@ const metals = {
   2: {
     frame:
       "bg-[linear-gradient(#fff,#fff),linear-gradient(135deg,#b7c8dc,#f5f9ff_28%,#a9bdcf_49%,#ded4f0_72%,#bfdde5)] shadow-[0_4px_20px_#657b9a1c]",
-    thumbnail: "bg-[radial-gradient(ellipse_at_50%_35%,#f7faff,#e3e9f1)]",
+    thumbnail: "bg-[radial-gradient(ellipse_at_50%_35%,#f7faffb3,#e3e9f14d)]",
     badge: "border-[#cbd6e6] bg-[#f8fbff]/95 text-[#576c89]",
     author:
       "text-[#576c89] hover:text-[#41546e] focus-visible:outline-[#576c89]",
     comments:
       "hover:bg-[#edf2f8] hover:text-[#576c89] focus-visible:outline-[#576c89]",
-    actions: "border-t-[#e1e8f1] bg-[#f9fbfe]",
+    actions: "border-t-[#e1e8f1] bg-[#f9fbfe]/75",
     arrow:
       "bg-[#f8fbff]/95 text-[#576c89] group-hover/card-link:bg-[#576c89] group-focus-visible/card-link:bg-[#576c89]",
     vote: "[--vote-accent:#576c89] [--vote-border:#cbd6e6] [--vote-bg:#f8fbff] [--vote-hover-bg:#edf2f8] [--vote-active-bg:#e6edf5] [--vote-active-hover-bg:#dbe5f0] [--vote-muted:#8796ad] [--vote-count-bg:#eaf0f7] [--vote-count-active-bg:#cedaea]",
@@ -43,13 +43,13 @@ const metals = {
   3: {
     frame:
       "bg-[linear-gradient(#fff,#fff),linear-gradient(135deg,#cb9675,#ffead6_28%,#c5916f_49%,#e3d4ea_72%,#dfb995)] shadow-[0_4px_20px_#a36f4520]",
-    thumbnail: "bg-[radial-gradient(ellipse_at_50%_35%,#fff8f1,#eee2d8)]",
+    thumbnail: "bg-[radial-gradient(ellipse_at_50%_35%,#fff8f1b3,#eee2d84d)]",
     badge: "border-[#e0bfa7] bg-[#fff8f1]/95 text-[#955d3a]",
     author:
       "text-[#955d3a] hover:text-[#79482a] focus-visible:outline-[#955d3a]",
     comments:
       "hover:bg-[#faeddf] hover:text-[#955d3a] focus-visible:outline-[#955d3a]",
-    actions: "border-t-[#ecdfd4] bg-[#fffaf6]",
+    actions: "border-t-[#ecdfd4] bg-[#fffaf6]/75",
     arrow:
       "bg-[#fff8f1]/95 text-[#955d3a] group-hover/card-link:bg-[#955d3a] group-focus-visible/card-link:bg-[#955d3a]",
     vote: "[--vote-accent:#955d3a] [--vote-border:#e0bfa7] [--vote-bg:#fff8f1] [--vote-hover-bg:#faeddf] [--vote-active-bg:#f5e3d2] [--vote-active-hover-bg:#edd5be] [--vote-muted:#ac876c] [--vote-count-bg:#f2e5d9] [--vote-count-active-bg:#e8c9b0]",
@@ -73,11 +73,17 @@ export default memo(function ChallengeEntryCard({
       className={cn(
         "creation-card challenge-entry group/creation-card flex h-full flex-col overflow-hidden rounded-[14px] border border-solid border-[#e4eaf2] bg-white",
         metal &&
-          "border-2 border-transparent [background-origin:border-box] [background-clip:padding-box,border-box]",
+          "relative isolate border-2 border-transparent [background-origin:border-box] [background-clip:padding-box,border-box]",
         metal?.frame,
       )}
       data-podium-rank={rank ?? undefined}
     >
+      {metal && (
+        <span
+          className="challenge-podium-foil pointer-events-none absolute inset-0 -z-10 rounded-[inherit] opacity-35 [background-image:radial-gradient(ellipse_at_var(--hc-light-x,36%)_var(--hc-light-y,26%),#fff9,transparent_65%),repeating-linear-gradient(115deg,transparent_0_18px,#ffffff70_19px,transparent_20px_38px),linear-gradient(var(--hc-foil-angle,125deg),#e9caef,#c9e9eb_20%,#f8e8bf_40%,#f4d3de_60%,#ccdff7_80%,#e9caef)] [background-size:100%_100%,100%_100%,240%_240%] [background-position:center,center,var(--hc-light-x,36%)_var(--hc-light-y,26%)] transition-opacity duration-300 group-hover/creation-card:opacity-60 group-focus-within/creation-card:opacity-60 motion-reduce:transition-none"
+          aria-hidden="true"
+        />
+      )}
       <Link
         className="outline-offset-3 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] group/card-link"
         to="/creations/$publicationId"
@@ -86,6 +92,7 @@ export default memo(function ChallengeEntryCard({
         <div
           className={cn(
             "thumbnail group/thumbnail relative aspect-4/3 bg-[#eef2f8]",
+            metal && "bg-transparent",
             metal?.thumbnail,
           )}
         >
