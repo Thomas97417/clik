@@ -272,7 +272,7 @@ test("votes immédiats avant confirmation : compteurs, trois briques, limite et 
     await expect(button.locator(".challenge-vote-count")).toHaveText(
       String(index + 1),
     );
-    await expect(button).toContainText("Soutenue");
+    await expect(button).toHaveAccessibleName(/^Retirer mon vote/);
   }
   await expect.poll(() => fixture.voteRequests.length).toBe(3);
   await expect(cards.nth(3).getByRole("button")).toBeDisabled();
