@@ -13,7 +13,6 @@ const metals = {
   1: {
     frame:
       "bg-[linear-gradient(#fff,#fff),linear-gradient(135deg,#e5c46c,#fff3cb_28%,#d9b35c_49%,#d8e8ee_72%,#ead09a)] shadow-[0_4px_20px_#b3872820]",
-    thumbnail: "bg-[radial-gradient(ellipse_at_50%_35%,#fffaf0b3,#eee9db4d)]",
     badge: "border-[#e3cc93] bg-[#fffcf0]/95 text-[#8c671e]",
     author:
       "text-[#8c671e] hover:text-[#715113] focus-visible:outline-[#8c671e]",
@@ -28,7 +27,6 @@ const metals = {
   2: {
     frame:
       "bg-[linear-gradient(#fff,#fff),linear-gradient(135deg,#b7c8dc,#f5f9ff_28%,#a9bdcf_49%,#ded4f0_72%,#bfdde5)] shadow-[0_4px_20px_#657b9a1c]",
-    thumbnail: "bg-[radial-gradient(ellipse_at_50%_35%,#f7faffb3,#e3e9f14d)]",
     badge: "border-[#cbd6e6] bg-[#f8fbff]/95 text-[#576c89]",
     author:
       "text-[#576c89] hover:text-[#41546e] focus-visible:outline-[#576c89]",
@@ -43,7 +41,6 @@ const metals = {
   3: {
     frame:
       "bg-[linear-gradient(#fff,#fff),linear-gradient(135deg,#cb9675,#ffead6_28%,#c5916f_49%,#e3d4ea_72%,#dfb995)] shadow-[0_4px_20px_#a36f4520]",
-    thumbnail: "bg-[radial-gradient(ellipse_at_50%_35%,#fff8f1b3,#eee2d84d)]",
     badge: "border-[#e0bfa7] bg-[#fff8f1]/95 text-[#955d3a]",
     author:
       "text-[#955d3a] hover:text-[#79482a] focus-visible:outline-[#955d3a]",
@@ -93,7 +90,6 @@ export default memo(function ChallengeEntryCard({
           className={cn(
             "thumbnail group/thumbnail relative aspect-4/3 bg-[#eef2f8]",
             metal && "bg-transparent",
-            metal?.thumbnail,
           )}
         >
           {entry.thumbnailUrl && (
