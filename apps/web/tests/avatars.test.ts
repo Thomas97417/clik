@@ -1,25 +1,33 @@
 import { describe, expect, it } from "vitest";
 import {
   AVATAR_COLORS,
+  AVATAR_VERSION,
   AVATAR_PART_HEIGHT,
   assembleAvatar,
   avatarExposedStuds,
   avatarBottomSockets,
+  avatarTopStuds,
   avatarPartArea,
   avatarSignature,
   defaultAvatar,
   generateAvatar,
   isAvatarSeed,
   nextAvatar,
+  mirrorAvatarPart,
   type AvatarPart,
 } from "@clik/avatars";
 
+const legacyAvatar = (userId: string) => ({
+  ...defaultAvatar(userId),
+  version: 1 as const,
+});
+
 describe("Avatars Clik v1", () => {
   it("garde le même dessin pour une graine donnée, sans dépendre d’un nom ou d’un rendu", () => {
-    const avatar = defaultAvatar("alice");
+    const avatar = legacyAvatar("alice");
     expect(generateAvatar(avatar)).toEqual(generateAvatar({ ...avatar }));
     expect(avatarSignature(avatar)).not.toBe(
-      avatarSignature(defaultAvatar("bob")),
+      avatarSignature(legacyAvatar("bob")),
     );
     expect(generateAvatar(avatar)).toMatchSnapshot();
   });
@@ -27,7 +35,7 @@ describe("Avatars Clik v1", () => {
     const signatures = new Set<string>();
     let merged = 0;
     for (let i = 0; i < 1000; i++) {
-      const descriptor = defaultAvatar(`sample-${i}`);
+      const descriptor = legacyAvatar(`sample-${i}`);
       const { bricks, primary, accent } = generateAvatar(descriptor);
       const cells = new Map<string, string>();
       expect(AVATAR_COLORS).toContain(primary);
@@ -103,7 +111,7 @@ describe("Assemblage des avatars", () => {
     let combined = 0;
     let lowerSlopes = 0;
     for (let i = 0; i < 1000; i++) {
-      const descriptor = defaultAvatar(`assembly-${i}`);
+      const descriptor = legacyAvatar(`assembly-${i}`);
       const model = assembleAvatar(descriptor);
       const { parts, primary, accent } = model;
       if (
@@ -240,5 +248,128 @@ describe("Assemblage des avatars", () => {
     expect(avatarExposedStuds(parts[1], [parts[0], parts[1]])).toEqual([
       0, 1, 2, 3,
     ]);
+  });
+});
+
+describe("Assemblage des avatars v2", () => {
+  it("conserve le dessin de la version 2 pour les avatars enregistrés", () => {
+    expect(assembleAvatar(defaultAvatar("alice"))).toMatchSnapshot();
+  });
+
+  it("propose la nouvelle version tout en gardant les anciens choix et leurs accessoires", () => {
+    const previous = {
+      ...legacyAvatar("alice"),
+      crown: "gold" as const,
+      ring: "participation-1" as const,
+    };
+    const before = assembleAvatar(previous);
+    const next = nextAvatar(
+      previous,
+      () => "12345678-1234-4234-9234-123456789abc",
+    );
+    expect(defaultAvatar("alice").version).toBe(AVATAR_VERSION);
+    expect(next.version).toBe(2);
+    expect(assembleAvatar(previous)).toEqual(before);
+    expect(avatarSignature(next)).not.toBe(avatarSignature(previous));
+    expect(
+      assembleAvatar({ ...next, crown: "silver", ring: "participation-5" }),
+    ).toEqual(assembleAvatar(next));
+    expect(assembleAvatar(legacyAvatar("alice"))).toMatchSnapshot();
+  });
+
+  it("emploie toutes les nouvelles familles dans des compositions symétriques, soutenues et distinctes", () => {
+    const kinds = new Set<AvatarPart["kind"]>();
+    const signatures = new Set<string>();
+    let enriched = 0;
+    for (let i = 0; i < 1000; i++) {
+      const descriptor = defaultAvatar(`expanded-${i}`);
+      const model = assembleAvatar(descriptor);
+      expect(assembleAvatar(descriptor)).toEqual(model);
+      const { parts, primary, accent } = model;
+      const occupied = new Set<string>();
+      let area = 0,
+        accented = 0;
+      if (
+        parts.some(
+          (part) =>
+            !["brick", "plate", "tile", "slope", "arch"].includes(part.kind),
+        )
+      )
+        enriched++;
+      expect(parts.filter((part) => part.y === 0)).toEqual([
+        { kind: "plate", x: 0, y: 0, width: 6, color: accent },
+      ]);
+      for (const part of parts) {
+        kinds.add(part.kind);
+        const height = AVATAR_PART_HEIGHT[part.kind];
+        expect([primary, accent]).toContain(part.color);
+        expect(Number.isInteger(part.x)).toBe(true);
+        expect(Number.isInteger(part.y)).toBe(true);
+        expect(part.x).toBeGreaterThanOrEqual(0);
+        expect(part.x + part.width).toBeLessThanOrEqual(6);
+        expect(part.y).toBeGreaterThanOrEqual(0);
+        expect(part.y + height).toBeLessThanOrEqual(15);
+        expect(parts).toContainEqual(mirrorAvatarPart(part));
+        const partArea = avatarPartArea(part);
+        area += partArea;
+        if (part.color === accent) accented += partArea;
+        if (part.y > 0)
+          for (const socket of avatarBottomSockets(part)) {
+            const x = part.x + socket;
+            expect(
+              parts.some(
+                (support) =>
+                  support.y + AVATAR_PART_HEIGHT[support.kind] === part.y &&
+                  avatarTopStuds(support).includes(x - support.x),
+              ),
+            ).toBe(true);
+          }
+        for (let x = part.x; x < part.x + part.width; x++)
+          for (let y = part.y; y < part.y + height; y++) {
+            const cell = `${x},${y}`;
+            expect(occupied.has(cell)).toBe(false);
+            occupied.add(cell);
+          }
+      }
+      expect(accented).toBeGreaterThan(0);
+      expect(accented / area).toBeLessThanOrEqual(1 / 3 + 1e-10);
+      signatures.add(avatarSignature(descriptor));
+    }
+    expect([...kinds].sort()).toEqual(Object.keys(AVATAR_PART_HEIGHT).sort());
+    expect(signatures.size).toBeGreaterThan(950);
+    expect(enriched).toBeGreaterThan(600);
+  });
+
+  it("ne masque les plots d’une pente inversée que sous son talon et conserve les dessus lisses", () => {
+    const base: AvatarPart = {
+      kind: "plate",
+      x: 0,
+      y: 0,
+      width: 6,
+      color: "blue",
+    };
+    const left: AvatarPart = {
+      kind: "inverted-slope",
+      x: 0,
+      y: 1,
+      width: 3,
+      rise: 1,
+      color: "blue",
+    };
+    const right = mirrorAvatarPart(left);
+    expect(avatarBottomSockets(left)).toEqual([2]);
+    expect(avatarBottomSockets(right)).toEqual([0]);
+    expect(avatarExposedStuds(base, [base, left, right])).toEqual([0, 1, 4, 5]);
+    expect(avatarExposedStuds(left, [base, left, right])).toEqual([0, 1, 2]);
+    for (let i = 0; i < 100; i++) {
+      const { parts } = assembleAvatar(defaultAvatar(`smooth-${i}`));
+      for (const part of parts)
+        if (
+          ["curved-slope", "cone", "dome", "grille", "quarter-tile"].includes(
+            part.kind,
+          )
+        )
+          expect(avatarExposedStuds(part, parts)).toEqual([]);
+    }
   });
 });

@@ -33,6 +33,7 @@ export default function AvatarCard({ avatar }: { avatar: AvatarDescriptor }) {
   const displayed = draft ?? avatar;
   const changed =
     displayed.seed !== avatar.seed ||
+    displayed.version !== avatar.version ||
     displayed.crown !== avatar.crown ||
     displayed.ring !== avatar.ring;
   const choose = (patch: Partial<AvatarDescriptor>) =>
@@ -55,7 +56,8 @@ export default function AvatarCard({ avatar }: { avatar: AvatarDescriptor }) {
     setError("");
     try {
       await save({
-        ...(displayed.seed !== avatar.seed
+        ...(displayed.seed !== avatar.seed ||
+        displayed.version !== avatar.version
           ? { seed: displayed.seed, version: displayed.version }
           : {}),
         crown: displayed.crown ?? null,

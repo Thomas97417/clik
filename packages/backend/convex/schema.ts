@@ -19,6 +19,7 @@ export const origin = v.object({
   title: v.string(),
 });
 export const stockItem = v.object({ type: v.string(), quantity: v.number() });
+export const avatarVersion = v.union(v.literal(1), v.literal(2));
 export const importInput = v.object({
   id: v.string(),
   title: v.string(),
@@ -91,7 +92,7 @@ export default defineSchema({
   userAvatars: defineTable({
     owner: v.string(),
     seed: v.string(),
-    version: v.literal(1),
+    version: avatarVersion,
     crown: v.optional(crownId),
     ring: v.optional(ringId),
   }).index("by_owner", ["owner"]),

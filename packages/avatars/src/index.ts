@@ -1,3 +1,18 @@
+import { randomFor } from "./random";
+import { assembleAvatarV2 } from "./assembly-v2";
+import { AVATAR_PART_HEIGHT, avatarPartArea, type AvatarPart } from "./parts";
+export {
+  AVATAR_PART_HEIGHT,
+  AVATAR_ARCH_PROFILE,
+  avatarPartArea,
+  avatarBottomSockets,
+  avatarTopStuds,
+  avatarExposedStuds,
+  mirrorAvatarPart,
+  type AvatarPart,
+} from "./parts";
+
+export const AVATAR_VERSION = 2;
 export const CROWNS = [
   { id: "gold", name: "Or", rank: 1, color: "#edb83f", shade: "#9e681b" },
   { id: "silver", name: "Argent", rank: 2, color: "#c1cedc", shade: "#65778e" },
@@ -34,34 +49,11 @@ export type CrownId = (typeof CROWNS)[number]["id"];
 export type RingId = (typeof RINGS)[number]["id"];
 export type AvatarDescriptor = {
   seed: string;
-  version: 1;
+  version: 1 | 2;
   crown?: CrownId;
   ring?: RingId;
 };
 export type AvatarBrick = { x: number; y: number; width: 1 | 2; color: string };
-export const AVATAR_PART_HEIGHT = {
-  brick: 3,
-  plate: 1,
-  tile: 1,
-  slope: 3,
-  arch: 6,
-} as const;
-export const AVATAR_ARCH_PROFILE = {
-  legWidth: 1,
-  springHeight: 2,
-  rise: 3,
-} as const;
-export type AvatarPart = {
-  x: number;
-  /** Height from the base, in plate units. */
-  y: number;
-  width: 1 | 2 | 3 | 4 | 6;
-  color: string;
-} & (
-  | { kind: "brick" | "plate" | "tile" }
-  | { kind: "slope"; rise: -1 | 1 }
-  | { kind: "arch"; width: 4 | 6; opening?: "round" | "pointed" }
-);
 export const AVATAR_COLORS = [
   "#5787eb",
   "#f3b18e",
@@ -70,27 +62,14 @@ export const AVATAR_COLORS = [
 ] as const;
 export const AVATAR_BACKGROUND = "#f1f5fc";
 
-/** V1 is immutable: changes to its rules require a new generator version. */
-function randomFor(seed: string) {
-  let state = 2166136261;
-  for (let i = 0; i < seed.length; i++) {
-    state = Math.imul(state ^ seed.charCodeAt(i), 16777619);
-  }
-  return () => {
-    let value = (state += 0x6d2b79f5);
-    value = Math.imul(value ^ (value >>> 15), value | 1);
-    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
-    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
 export function defaultAvatar(userId: string): AvatarDescriptor {
-  return { seed: `clik:user:${userId}`, version: 1 };
+  return { seed: `clik:user:${userId}`, version: AVATAR_VERSION };
 }
 
 export function generateAvatar({ seed, version }: AvatarDescriptor) {
-  if (version !== 1) throw new Error("Unsupported avatar version");
-  const random = randomFor(`clik-avatar-v1:${seed}`);
+  if (version !== 1 && version !== 2)
+    throw new Error("Unsupported avatar version");
+  const random = randomFor(`clik-avatar-v${version}:${seed}`);
   const choose = (length: number) => Math.floor(random() * length);
   const primaryIndex = choose(AVATAR_COLORS.length);
   const primary = AVATAR_COLORS[primaryIndex];
@@ -173,7 +152,7 @@ const partitions = {
  * The v1 identity and palette stay stable; this is its assembled presentation.
  * Flat supporting pieces bind rows; arches connect only through their two feet.
  */
-export function assembleAvatar(avatar: AvatarDescriptor) {
+function assembleAvatarV1(avatar: AvatarDescriptor) {
   const { primary, accent, background } = generateAvatar(avatar);
   const random = randomFor(`clik-avatar-assembly:${avatar.seed}`);
   const choose = <T>(items: readonly T[]) =>
@@ -373,47 +352,16 @@ export function assembleAvatar(avatar: AvatarDescriptor) {
   return { parts, primary, accent, background };
 }
 
-/** Front silhouette area, excluding arch openings and the missing slope corner. */
-export function avatarPartArea(part: AvatarPart) {
-  if (part.kind === "arch") {
-    const { legWidth, springHeight, rise } = AVATAR_ARCH_PROFILE;
-    // A half-ellipse or two quadratic curves meeting at the pointed apex.
-    const curveArea = part.opening === "pointed" ? 2 / 3 : Math.PI / 4;
-    return (
-      part.width * AVATAR_PART_HEIGHT.arch -
-      (part.width - 2 * legWidth) * (springHeight + curveArea * rise)
-    );
-  }
-  if (part.kind === "slope")
-    return (part.width * (AVATAR_PART_HEIGHT.slope + 1)) / 2;
-  return part.width * AVATAR_PART_HEIGHT[part.kind];
-}
-
-/** Arches have sockets beneath their feet, never across their opening. */
-export function avatarBottomSockets(part: AvatarPart) {
-  if (part.kind === "arch") return [0, part.width - 1];
-  return Array.from({ length: part.width }, (_, index) => index);
-}
-
-/** Only unoccupied studs are visible; slopes and tiles have a smooth top. */
-export function avatarExposedStuds(
-  part: AvatarPart,
-  parts: readonly AvatarPart[],
-) {
-  if (part.kind === "tile" || part.kind === "slope") return [];
-  const top = part.y + AVATAR_PART_HEIGHT[part.kind];
-  return Array.from({ length: part.width }, (_, index) => index).filter(
-    (index) => {
-      const x = part.x + index + 0.5;
-      return !parts.some(
-        (other) =>
-          other.y === top &&
-          avatarBottomSockets(other).some(
-            (socket) => other.x + socket + 0.5 === x,
-          ),
-      );
-    },
-  );
+/** Stored v1 choices remain unchanged when a new assembly vocabulary is added. */
+export function assembleAvatar(avatar: AvatarDescriptor) {
+  if (avatar.version === 1) return assembleAvatarV1(avatar);
+  const { primary, accent, background } = generateAvatar(avatar);
+  return {
+    parts: assembleAvatarV2(avatar.seed, primary, accent),
+    primary,
+    accent,
+    background,
+  };
 }
 
 export function avatarSignature(avatar: AvatarDescriptor) {
@@ -430,7 +378,7 @@ export function nextAvatar(
   // A distinct deterministic suffix resolves even a (very unlikely) visual collision.
   for (let attempt = 0; ; attempt++) {
     const next: AvatarDescriptor = {
-      version: 1,
+      version: AVATAR_VERSION,
       seed: attempt ? `${seed}:${attempt}` : seed,
     };
     if (avatarSignature(next) !== signature) return next;

@@ -2,13 +2,13 @@ import { ConvexError, v } from "convex/values";
 import { defaultAvatar, isAvatarSeed } from "@clik/avatars";
 import { mutation } from "./_generated/server";
 import { authComponent } from "./auth";
-import { crownId, ringId } from "./schema";
+import { avatarVersion, crownId, ringId } from "./schema";
 import { readAvatar } from "./lib/avatars";
 
 export const save = mutation({
   args: {
     seed: v.optional(v.string()),
-    version: v.optional(v.literal(1)),
+    version: v.optional(avatarVersion),
     crown: v.optional(v.union(crownId, v.null())),
     ring: v.optional(v.union(ringId, v.null())),
   },

@@ -5,6 +5,10 @@ test("avatar : prévisualiser, annuler, réessayer et conserver le choix partout
   page,
 }, info) => {
   const fixture = await creatorsFixture(page, true);
+  fixture.setAvatar("viewer", {
+    seed: "abcdefab-1234-4234-9234-123456789abc",
+    version: 1,
+  });
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
@@ -14,6 +18,7 @@ test("avatar : prévisualiser, annuler, réessayer et conserver le choix partout
   });
   const headerAvatar = page.locator("header .header-avatar .brick-avatar");
   await expect(headerAvatar).toBeVisible();
+  await expect(headerAvatar).toHaveAttribute("data-avatar-version", "1");
   const original = await headerAvatar.getAttribute("data-avatar-seed");
   const openSettings = async () => {
     await account.click();
@@ -45,6 +50,7 @@ test("avatar : prévisualiser, annuler, réessayer et conserver le choix partout
   await shuffle.focus();
   await page.keyboard.press("Enter");
   await expect(preview).not.toHaveAttribute("data-avatar-seed", original!);
+  await expect(preview).toHaveAttribute("data-avatar-version", "2");
   const discarded = await preview.getAttribute("data-avatar-seed");
   await expect(headerAvatar).toHaveAttribute("data-avatar-seed", original!);
   expect(fixture.avatarSaves).toHaveLength(0);
@@ -69,6 +75,7 @@ test("avatar : prévisualiser, annuler, réessayer et conserver le choix partout
   await expect(dialog).toBeHidden();
   await expect(card.getByRole("status")).toHaveText("Avatar enregistré.");
   await expect(headerAvatar).toHaveAttribute("data-avatar-seed", chosen!);
+  await expect(headerAvatar).toHaveAttribute("data-avatar-version", "2");
   await expect(current).toHaveAttribute("data-avatar-seed", chosen!);
 
   for (const width of [1440, 390, 320]) {

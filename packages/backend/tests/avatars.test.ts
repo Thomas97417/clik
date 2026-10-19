@@ -27,7 +27,7 @@ const first = {
 };
 const second = {
   seed: "abcdefab-1234-4234-9234-123456789abc",
-  version: 1 as const,
+  version: 2 as const,
 };
 
 describe("Choix d’avatar", () => {
@@ -47,7 +47,7 @@ describe("Choix d’avatar", () => {
       alice.mutation(api.avatars.save, { ...first, seed: "not-a-seed" }),
     ).rejects.toThrow("invalide");
     await expect(
-      alice.mutation(api.avatars.save, { ...first, version: 2 as 1 }),
+      alice.mutation(api.avatars.save, { ...first, version: 3 as 1 }),
     ).rejects.toThrow();
     await expect(
       alice.mutation(api.avatars.save, {
@@ -56,6 +56,7 @@ describe("Choix d’avatar", () => {
       } as typeof first),
     ).rejects.toThrow();
     await alice.mutation(api.avatars.save, first);
+    expect(await t.run((ctx) => readAvatar(ctx, "alice"))).toEqual(first);
     await alice.mutation(api.avatars.save, second);
     expect(await t.run((ctx) => readAvatar(ctx, "alice"))).toEqual(second);
     expect(await t.run((ctx) => readAvatar(ctx, "bob"))).toEqual(

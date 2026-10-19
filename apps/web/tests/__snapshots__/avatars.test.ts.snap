@@ -1,5 +1,184 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`Assemblage des avatars v2 > conserve le dessin de la version 2 pour les avatars enregistrés 1`] = `
+{
+  "accent": "#f3b18e",
+  "background": "#f1f5fc",
+  "parts": [
+    {
+      "color": "#f3b18e",
+      "kind": "plate",
+      "width": 6,
+      "x": 0,
+      "y": 0,
+    },
+    {
+      "color": "#b38bde",
+      "kind": "brick",
+      "width": 1,
+      "x": 0,
+      "y": 1,
+    },
+    {
+      "color": "#b38bde",
+      "kind": "masonry",
+      "width": 2,
+      "x": 1,
+      "y": 1,
+    },
+    {
+      "color": "#b38bde",
+      "kind": "masonry",
+      "width": 2,
+      "x": 3,
+      "y": 1,
+    },
+    {
+      "color": "#b38bde",
+      "kind": "brick",
+      "width": 1,
+      "x": 5,
+      "y": 1,
+    },
+    {
+      "color": "#b38bde",
+      "kind": "quarter-plate",
+      "side": -1,
+      "width": 2,
+      "x": 0,
+      "y": 4,
+    },
+    {
+      "color": "#b38bde",
+      "kind": "plate",
+      "width": 2,
+      "x": 2,
+      "y": 4,
+    },
+    {
+      "color": "#b38bde",
+      "kind": "quarter-plate",
+      "side": 1,
+      "width": 2,
+      "x": 4,
+      "y": 4,
+    },
+    {
+      "color": "#b38bde",
+      "kind": "curved-slope",
+      "rise": 1,
+      "width": 2,
+      "x": 0,
+      "y": 5,
+    },
+    {
+      "color": "#f3b18e",
+      "kind": "brick",
+      "width": 1,
+      "x": 2,
+      "y": 5,
+    },
+    {
+      "color": "#f3b18e",
+      "kind": "brick",
+      "width": 1,
+      "x": 3,
+      "y": 5,
+    },
+    {
+      "color": "#b38bde",
+      "kind": "curved-slope",
+      "rise": -1,
+      "width": 2,
+      "x": 4,
+      "y": 5,
+    },
+    {
+      "color": "#b38bde",
+      "kind": "plate",
+      "width": 2,
+      "x": 2,
+      "y": 8,
+    },
+    {
+      "color": "#b38bde",
+      "kind": "brick",
+      "width": 2,
+      "x": 2,
+      "y": 9,
+    },
+    {
+      "color": "#b38bde",
+      "kind": "dome",
+      "width": 2,
+      "x": 2,
+      "y": 12,
+    },
+  ],
+  "primary": "#b38bde",
+}
+`;
+
+exports[`Assemblage des avatars v2 > propose la nouvelle version tout en gardant les anciens choix et leurs accessoires 1`] = `
+{
+  "accent": "#f3b18e",
+  "background": "#f1f5fc",
+  "parts": [
+    {
+      "color": "#f3b18e",
+      "kind": "plate",
+      "width": 6,
+      "x": 0,
+      "y": 0,
+    },
+    {
+      "color": "#f3b18e",
+      "kind": "brick",
+      "width": 1,
+      "x": 0,
+      "y": 1,
+    },
+    {
+      "color": "#f3b18e",
+      "kind": "brick",
+      "width": 1,
+      "x": 5,
+      "y": 1,
+    },
+    {
+      "color": "#81b79b",
+      "kind": "brick",
+      "width": 1,
+      "x": 0,
+      "y": 4,
+    },
+    {
+      "color": "#81b79b",
+      "kind": "brick",
+      "width": 1,
+      "x": 5,
+      "y": 4,
+    },
+    {
+      "color": "#81b79b",
+      "kind": "arch",
+      "opening": "pointed",
+      "width": 6,
+      "x": 0,
+      "y": 7,
+    },
+    {
+      "color": "#81b79b",
+      "kind": "plate",
+      "width": 6,
+      "x": 0,
+      "y": 13,
+    },
+  ],
+  "primary": "#81b79b",
+}
+`;
+
 exports[`Avatars Clik v1 > garde le même dessin pour une graine donnée, sans dépendre d’un nom ou d’un rendu 1`] = `
 {
   "accent": "#f3b18e",
