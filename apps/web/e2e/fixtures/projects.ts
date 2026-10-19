@@ -10,6 +10,8 @@ export async function projectsFixture(
     userName?: string;
     userEmail?: string;
     privateCount?: number;
+    updatedAt?: number;
+    privateUpdatedAt?: number;
   } = {},
 ) {
   const user = {
@@ -28,7 +30,7 @@ export async function projectsFixture(
       nodes: [makePart("brick-2x4", "#4079e8")],
     }),
     revision: 7,
-    updatedAt: Date.now(),
+    updatedAt: options.updatedAt ?? Date.now(),
     publicationId: (options.published ? "publication" : null) as string | null,
     challenge: null,
     imports: [] as ProjectImport[],
@@ -52,7 +54,7 @@ export async function projectsFixture(
       _id: `private-${i}`,
       title: `Création privée ${i + 1}`,
       publicationId: null,
-      updatedAt: project.updatedAt + 1000 + i,
+      updatedAt: options.privateUpdatedAt ?? project.updatedAt + 1000 + i,
     }),
   );
   const deleted = new Set<string>();

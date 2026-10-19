@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { listLocalCreations } from "@/lib/clik/local";
+import { mergeCreations } from "@/lib/clik/merge-creations";
 import ProjectCard, { type CreationItem } from "@/components/clik/project-card";
 import CreationGridSkeleton from "@/components/clik/creation-grid-skeleton";
 
@@ -115,19 +116,16 @@ function Projects({ pending = false }: { pending?: boolean } = {}) {
           },
         }))
       : [];
-  const creations = [...remote, ...local]
-    .filter((p) =>
-      filter === "published"
-        ? p.location === "online" && !!p.publicationId
-        : filter === "all" || filter === p.location,
-    )
-    .sort((a, b) => {
-      const difference = (a.updatedAt ?? 0) - (b.updatedAt ?? 0);
-      return (
-        (sort === "oldest" ? difference : -difference) ||
-        a.id.localeCompare(b.id)
-      );
-    });
+  const creations = mergeCreations(
+    remote,
+    local,
+    sort,
+    filter === "all" && isAuthenticated && status !== "Exhausted",
+  ).filter((p) =>
+    filter === "published"
+      ? p.location === "online" && !!p.publicationId
+      : filter === "all" || filter === p.location,
+  );
   const targetCount =
     publishedTarget.sort === sort ? publishedTarget.count : 12;
   const loadingPublished =

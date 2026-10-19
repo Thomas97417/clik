@@ -292,7 +292,7 @@ test("le tri combine les créations locales et en ligne et transmet l’ordre au
   await page.reload();
   const cards = page.locator(".project-card h2");
   await expect(cards).toHaveCount(5);
-  await expect(cards.first()).toHaveText("Un ancien défi");
+  await expect(cards.first()).toHaveText("Le phare bleu");
   const sort = page.getByRole("combobox", { name: "Trier par" });
   await sort.click();
   await page.getByRole("option", { name: "Les plus anciennes" }).click();
@@ -300,14 +300,14 @@ test("le tri combine les créations locales et en ligne et transmet l’ordre au
     "La tour des nuages",
     "Le pont des couleurs",
     "La maison solaire",
-    "Un ancien défi",
     "Le phare bleu",
+    "Un ancien défi",
   ]);
   await expect
     .poll(() => fixture.calls.lists.some((args) => args.sort === "oldest"))
     .toBe(true);
   await page.getByRole("button", { name: "En ligne", exact: true }).click();
-  await expect(cards).toHaveText(["Un ancien défi", "Le phare bleu"]);
+  await expect(cards).toHaveText(["Le phare bleu", "Un ancien défi"]);
   await sort.click();
   await page.getByRole("option", { name: "Les plus récentes" }).click();
   await expect(
@@ -316,6 +316,100 @@ test("le tri combine les créations locales et en ligne et transmet l’ordre au
   await expect
     .poll(() => fixture.calls.lists.some((args) => args.sort === "recent"))
     .toBe(true);
+});
+
+test("voir plus prolonge la collection mixte sans déplacer les cartes déjà visibles, dans les deux tris", async ({
+  page,
+}) => {
+  const base = 1700000000000;
+  await projectsFixture(page, { privateCount: 25, updatedAt: base });
+  await page.goto("/projects");
+  const cards = page.locator(".project-card h2");
+  await expect(cards).toHaveCount(12);
+  await page.evaluate(
+    async ({ base, scene }) => {
+      const db = await new Promise<IDBDatabase>((resolve, reject) => {
+        const request = indexedDB.open("clik", 1);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      await new Promise<void>((resolve, reject) => {
+        const tx = db.transaction("drafts", "readwrite");
+        for (const [id, title, updatedAt] of [
+          ["newer", "Locale récente", base + 2000],
+          ["middle", "Locale intermédiaire", base + 1010.5],
+          ["older", "Locale ancienne", base - 1000],
+        ] as const) {
+          tx.objectStore("drafts").put(
+            { scene, title, updatedAt, revision: 0, stamp: id, dirty: false },
+            `guest:${id}`,
+          );
+        }
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+      db.close();
+    },
+    { base, scene: models()[0]! },
+  );
+  for (const sort of ["recent", "oldest"] as const) {
+    await page.goto(sort === "recent" ? "/projects" : "/projects?sort=oldest");
+    await expect(cards).toHaveCount(13);
+    const first = sort === "recent" ? "Locale récente" : "Locale ancienne";
+    const last = sort === "recent" ? "Locale ancienne" : "Locale récente";
+    await expect(cards.first()).toHaveText(first);
+    await expect(cards.filter({ hasText: last })).toHaveCount(0);
+    await page
+      .getByRole("button", { name: "Sur cet appareil", exact: true })
+      .click();
+    await expect(cards).toHaveText([first, "Locale intermédiaire", last]);
+    await page.getByRole("button", { name: "Toutes", exact: true }).click();
+    await expect(cards).toHaveCount(13);
+    let previous = await cards.allTextContents();
+    for (const count of [26, 30]) {
+      await page.locator(".projects-load-more").click();
+      await expect(cards).toHaveCount(count);
+      const current = await cards.allTextContents();
+      expect(current.slice(0, previous.length)).toEqual(previous);
+      previous = current;
+    }
+    await expect(cards.last()).toHaveText(last);
+    await expect(page.locator(".projects-load-more")).toHaveCount(0);
+  }
+});
+
+test("voir plus conserve l’ordre fourni par le serveur lorsque plusieurs créations ont la même date", async ({
+  page,
+}) => {
+  const base = 1700000000000;
+  await projectsFixture(page, {
+    privateCount: 25,
+    updatedAt: base,
+    privateUpdatedAt: base + 1000,
+  });
+  const privateTitles = Array.from(
+    { length: 25 },
+    (_, i) => `Création privée ${i + 1}`,
+  );
+  const others = ["Le phare bleu", "Un ancien défi"];
+  for (const sort of ["recent", "oldest"] as const) {
+    const expected =
+      sort === "recent"
+        ? [...privateTitles, ...others]
+        : [...others, ...privateTitles];
+    await page.goto(sort === "recent" ? "/projects" : "/projects?sort=oldest");
+    const cards = page.locator(".project-card h2");
+    await expect(cards).toHaveText(expected.slice(0, 12));
+    for (const count of [24, 27]) {
+      const before = await cards.allTextContents();
+      await page.locator(".projects-load-more").click();
+      await expect(cards).toHaveText(expected.slice(0, count));
+      expect((await cards.allTextContents()).slice(0, before.length)).toEqual(
+        before,
+      );
+    }
+    await expect(page.locator(".projects-load-more")).toHaveCount(0);
+  }
 });
 
 test("le filtre galerie retrouve les publications après les pages privées et suit leur retrait", async ({
@@ -358,11 +452,9 @@ test("le filtre galerie retrouve les publications après les pages privées et s
       ),
     ).toBe(true);
     await expect(gallery).toBeInViewport();
-    await page
-      .locator(".projects-toolbar")
-      .screenshot({
-        path: `/tmp/clik-projects-gallery-filter-${width}-${info.project.name}.png`,
-      });
+    await page.locator(".projects-toolbar").screenshot({
+      path: `/tmp/clik-projects-gallery-filter-${width}-${info.project.name}.png`,
+    });
   }
   await page
     .getByRole("button", {
