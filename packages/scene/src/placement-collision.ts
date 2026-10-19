@@ -4,6 +4,10 @@ import {
   roundProfile,
   slopeCrease,
   slopeRoofHeight,
+  partFootprint,
+  verticalProfile,
+  radialSections,
+  partBoxes,
   type PartDimensions,
 } from "./part-shapes";
 
@@ -47,22 +51,140 @@ function compound(pieces: Body[]): Body {
 const solids = (body: Body): Body[] =>
   body.pieces ? body.pieces.flatMap(solids) : [body];
 
-function separatingAxes(a: Body, b: Body) {
-  const axes = [...a.normals, ...b.normals];
+function* separatingAxes(a: Body, b: Body) {
+  for (const normals of [a.normals, b.normals])
+    for (const axis of normals) if (axis.lengthSq() > 1e-12) yield axis;
   for (const edge of a.edges)
     for (const other of b.edges) {
       const axis = new Vector3().crossVectors(edge, other);
-      if (axis.lengthSq() > 1e-12) axes.push(axis.normalize());
+      if (axis.lengthSq() > 1e-12) yield axis.normalize();
     }
-  return axes;
 }
 
-// Studs intentionally enter sockets. Concave shapes are unions of convex solids.
+function projection(vertices: Vector3[], axis: Vector3): [number, number] {
+  let min = Infinity,
+    max = -Infinity;
+  for (const vertex of vertices) {
+    const value = vertex.dot(axis);
+    min = Math.min(min, value);
+    max = Math.max(max, value);
+  }
+  return [min, max];
+}
+
+function distinctDirections(directions: Vector3[]) {
+  const unique = new Map<string, Vector3>();
+  for (const vector of directions) {
+    if (vector.lengthSq() < 1e-12) continue;
+    vector.normalize();
+    const first = [vector.x, vector.y, vector.z].find(
+      (n) => Math.abs(n) > 1e-8,
+    )!;
+    if (first < 0) vector.negate();
+    unique.set(
+      vector
+        .toArray()
+        .map((n) => Math.round(n * 1e8))
+        .join(":"),
+      vector,
+    );
+  }
+  return [...unique.values()];
+}
+
+/** Small frusta avoid the quadratic edge count of a whole faceted dome. */
+function frustum(
+  dimensions: PartDimensions,
+  bottom: { y: number; scale: number },
+  top: { y: number; scale: number },
+  matrix: Matrix4,
+): Body {
+  const footprint = partFootprint(dimensions),
+    count = footprint.length;
+  const local = [bottom, top].flatMap(({ y, scale }) =>
+    footprint.map(([x, z]) => new Vector3(x * scale, y, z * scale)),
+  );
+  const normals = [new Vector3(0, 1, 0)],
+    edges: Vector3[] = [];
+  footprint.forEach((_, i) => {
+    const j = (i + 1) % count;
+    const edge = local[j].clone().sub(local[i]);
+    const rise = local[i + count].clone().sub(local[i]);
+    edges.push(edge, rise);
+    normals.push(new Vector3().crossVectors(edge, rise));
+  });
+  const vertices = [
+    ...new Map(local.map((v) => [v.toArray().join(":"), v])).values(),
+  ].map((v) => v.applyMatrix4(matrix));
+  return {
+    vertices,
+    edges: distinctDirections(edges).map((v) => v.transformDirection(matrix)),
+    normals: distinctDirections(normals).map((v) =>
+      v.transformDirection(matrix),
+    ),
+    bounds: new Box3().setFromPoints(vertices),
+  };
+}
+
+const bodyCache = new Map<string, Body>();
+
+/** Reuse unchanged world volumes while dragging or recoloring a large scene. */
 export function placementBody(
   dimensions: PartDimensions,
   matrix: Matrix4,
 ): Body {
+  const { w, d, h, shape, slopeRun } = dimensions;
+  const key = `${shape}:${w}:${d}:${h}:${slopeRun ?? ""}:${matrix.elements.join(",")}`;
+  const cached = bodyCache.get(key);
+  if (cached) {
+    bodyCache.delete(key);
+    bodyCache.set(key, cached);
+    return cached;
+  }
+  const body = buildPlacementBody(dimensions, matrix);
+  bodyCache.set(key, body);
+  if (bodyCache.size > 1200) bodyCache.delete(bodyCache.keys().next().value!);
+  return body;
+}
+
+// Studs intentionally enter sockets. Concave shapes are unions of convex solids.
+function buildPlacementBody(dimensions: PartDimensions, matrix: Matrix4): Body {
   const { w, d, h, shape } = dimensions;
+  if (shape === "quarter")
+    return prism(
+      partFootprint(dimensions).map(([x, z]) => new Vector3(x, 0, z)),
+      new Vector3(0, h, 0),
+      matrix,
+    );
+  if (shape === "inverted-slope" || shape === "curved-slope")
+    return prism(
+      verticalProfile(dimensions).map(([z, y]) => new Vector3(-w / 2, y, z)),
+      new Vector3(w, 0, 0),
+      matrix,
+    );
+  if (shape === "cone" || shape === "dome") {
+    const sections = radialSections(dimensions);
+    return compound(
+      sections
+        .slice(1)
+        .map((top, i) => frustum(dimensions, sections[i], top, matrix)),
+    );
+  }
+  if (shape === "grille")
+    return compound(
+      partBoxes(dimensions).map(({ min, max }) =>
+        prism(
+          [
+            [min[0], min[2]],
+            [max[0], min[2]],
+            [max[0], max[2]],
+            [min[0], max[2]],
+          ].map(([x, z]) => new Vector3(x, min[1], z)),
+          new Vector3(0, max[1] - min[1], 0),
+          matrix,
+        ),
+      ),
+    );
   if (shape === "round") {
     return prism(
       roundProfile(w, d).map(([x, z]) => new Vector3(x, 0, z)),
@@ -181,12 +303,10 @@ function penetrationLift(a: Body, b: Body, offset: number) {
   let lift = Infinity;
   for (let axis of separatingAxes(a, b)) {
     if (axis.y < 0) axis = axis.clone().negate();
-    const av = a.vertices.map((v) => v.dot(axis) + offset * axis.y);
-    const bv = b.vertices.map((v) => v.dot(axis));
-    const minA = Math.min(...av),
-      maxA = Math.max(...av);
-    const minB = Math.min(...bv),
-      maxB = Math.max(...bv);
+    const [lowA, highA] = projection(a.vertices, axis);
+    const minA = lowA + offset * axis.y,
+      maxA = highA + offset * axis.y;
+    const [minB, maxB] = projection(b.vertices, axis);
     if (maxA <= minB + 1e-8 || maxB <= minA + 1e-8) return 0;
     if (axis.y > 1e-8) lift = Math.min(lift, (maxB - minA) / axis.y);
   }
@@ -234,12 +354,8 @@ function verticalContact(a: Body, b: Body, direction: number, limit: number) {
   let enter = -Infinity,
     exit = Infinity;
   for (const axis of separatingAxes(a, b)) {
-    const av = a.vertices.map((v) => v.dot(axis));
-    const bv = b.vertices.map((v) => v.dot(axis));
-    const minA = Math.min(...av),
-      maxA = Math.max(...av),
-      minB = Math.min(...bv),
-      maxB = Math.max(...bv);
+    const [minA, maxA] = projection(a.vertices, axis);
+    const [minB, maxB] = projection(b.vertices, axis);
     const speed = direction * axis.y;
     if (Math.abs(speed) <= 1e-8) {
       if (maxA <= minB + 1e-8 || maxB <= minA + 1e-8) return limit;

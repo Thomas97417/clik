@@ -50,7 +50,7 @@ describe("collisions des pièces", () => {
       const moving = makePart("brick-2x2", "#ef4444", [
         CATALOG[type].shape === "arch" ? -(CATALOG[type].w - 1) / 2 : 0,
         0.1,
-        0,
+        CATALOG[type].shape === "curved-slope" ? (CATALOG[type].d - 2) / 2 : 0,
       ]);
       for (const enabled of [false, true]) {
         const preview = snapCandidate(scene, moving, enabled);

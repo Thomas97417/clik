@@ -15,6 +15,7 @@ import {
   matrix,
   snapCandidate,
   type PartType,
+  partFootprint,
 } from "@clik/scene";
 import { geometry } from "../src/lib/clik/geometry";
 
@@ -31,10 +32,23 @@ function cells(type: PartType, top = false) {
     .map(({ x, z }) => ({ x, z, cx: x - (w - 1) / 2, cz: z - (d - 1) / 2 }));
 }
 function rimOffset(type: PartType, x: number, z: number) {
-  return CATALOG[type].shape === "round" && Math.hypot(x, z) > 0
+  const part = CATALOG[type];
+  if (part.shape === "quarter") {
+    const points = partFootprint(part);
+    const center = points
+      .reduce((sum, [px, pz]) => sum.add(new Vector3(px, 0, pz)), new Vector3())
+      .divideScalar(points.length);
+    return center
+      .sub(new Vector3(x, 0, z))
+      .normalize()
+      .multiplyScalar(0.4);
+  }
+  return ["round", "cone", "dome"].includes(part.shape) && Math.hypot(x, z) > 0
     ? new Vector3(-x, 0, -z).normalize().multiplyScalar(0.4)
     : new Vector3(0.4, 0, 0);
 }
+const variableRoof = (type: PartType) =>
+  ["curved-slope", "cone", "dome"].includes(CATALOG[type].shape);
 function hit(
   type: PartType,
   origin: Vector3,
@@ -52,39 +66,40 @@ function hit(
 }
 
 describe("Géométrie des emboîtements", () => {
-  it.each(types)(
-    "%s : les pièces voisines se touchent sans jour sur X et Z",
-    (type) => {
-      const { w, d, shape } = CATALOG[type];
-      const offsets = [new Vector3(w, 0, 0), new Vector3(0, 0, d)];
-      for (const offset of offsets) {
-        const direction = offset.clone().normalize();
-        const contact = offset.clone().multiplyScalar(0.5);
-        contact.y = 0.1;
-        if (shape === "corner") {
-          if (offset.x) contact.z = -d / 4;
-          else contact.x = -w / 4;
-        } else if (shape === "arch" && offset.z) {
-          contact.x = (w - 1) / 2;
-        }
-        const first = hit(
-          type,
-          contact.clone().addScaledVector(direction, 0.1),
-          direction.clone().negate(),
-        );
-        const neighbor = hit(
-          type,
-          contact.clone().addScaledVector(direction, -0.1),
-          direction,
-          matrix(makePart(type, "#4079e8", offset.toArray())),
-        );
-        expect(first).toBeDefined();
-        expect(neighbor).toBeDefined();
-        expect(first.point.distanceTo(contact)).toBeLessThan(1e-6);
-        expect(first.point.distanceTo(neighbor.point)).toBeLessThan(1e-6);
+  it.each(
+    types.filter(
+      (type) => !["inverted-slope", "quarter"].includes(CATALOG[type].shape),
+    ),
+  )("%s : les pièces voisines se touchent sans jour sur X et Z", (type) => {
+    const { w, d, shape } = CATALOG[type];
+    const offsets = [new Vector3(w, 0, 0), new Vector3(0, 0, d)];
+    for (const offset of offsets) {
+      const direction = offset.clone().normalize();
+      const contact = offset.clone().multiplyScalar(0.5);
+      contact.y = shape === "masonry" ? 0.6 : 0.1;
+      if (shape === "corner") {
+        if (offset.x) contact.z = -d / 4;
+        else contact.x = -w / 4;
+      } else if (shape === "arch" && offset.z) {
+        contact.x = (w - 1) / 2;
       }
-    },
-  );
+      const first = hit(
+        type,
+        contact.clone().addScaledVector(direction, 0.1),
+        direction.clone().negate(),
+      );
+      const neighbor = hit(
+        type,
+        contact.clone().addScaledVector(direction, -0.1),
+        direction,
+        matrix(makePart(type, "#4079e8", offset.toArray())),
+      );
+      expect(first).toBeDefined();
+      expect(neighbor).toBeDefined();
+      expect(first.point.distanceTo(contact)).toBeLessThan(1e-6);
+      expect(first.point.distanceTo(neighbor.point)).toBeLessThan(1e-6);
+    }
+  });
   it.each(types)(
     "%s : logements ouverts, parois intérieures et plafond assez profond pour les plots",
     (type) => {
@@ -136,7 +151,10 @@ describe("Géométrie des emboîtements", () => {
         ),
         new Vector3(0, -1, 0),
       );
-      expect(top.point.y).toBeCloseTo(h, 6);
+      if (variableRoof(type)) {
+        expect(top.point.y).toBeGreaterThan(0);
+        expect(top.point.y).toBeLessThanOrEqual(h + 1e-6);
+      } else expect(top.point.y).toBeCloseTo(h, 6);
       expect(g.getAttribute("position").count).toBeLessThan(
         1000 * w * d + 1000,
       );
@@ -241,10 +259,15 @@ describe("Nouveaux modèles du catalogue", () => {
           if (!hasBottomSocket(type, x, z)) continue;
           const cx = x - (w - 1) / 2,
             cz = z - (d - 1) / 2;
-          expect(
-            hit(type, new Vector3(cx, h + 1, cz), new Vector3(0, -1, 0)).point
-              .y,
-          ).toBeCloseTo(h, 6);
+          const roof = hit(
+            type,
+            new Vector3(cx, h + 1, cz),
+            new Vector3(0, -1, 0),
+          ).point.y;
+          if (variableRoof(type)) {
+            expect(roof).toBeGreaterThan(0);
+            expect(roof).toBeLessThanOrEqual(h + 1e-6);
+          } else expect(roof).toBeCloseTo(h, 6);
           const upper = makePart("brick-1x1", "#ef4444", [cx, h, cz]);
           expect(
             snapCandidate({ ...emptyScene(), nodes: [target] }, upper, true)

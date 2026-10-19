@@ -248,8 +248,8 @@ describe("Projets privés et versions publiques", () => {
       t.query(api.projects.list, { paginationOpts }),
     ).rejects.toThrow("Connexion");
   });
-  it("sauvegarde le catalogue étendu dans un projet existant", async () => {
-    const { alice } = setup();
+  it("conserve le catalogue étendu à l’enregistrement, la publication et la reprise", async () => {
+    const { alice, bob, t } = setup();
     const id = await alice.mutation(api.projects.create, {
       title: "Catalogue",
       scene,
@@ -271,6 +271,29 @@ describe("Projets privés et versions publiques", () => {
     expect(validateScene(JSON.parse(saved.scene)).nodes).toHaveLength(
       Object.keys(CATALOG).length,
     );
+    const thumbnail = await t.run((ctx) =>
+      ctx.storage.store(new Blob(["test"], { type: "image/png" })),
+    );
+    await alice.mutation(internal.projects.registerThumbnail, {
+      projectId: id,
+      storageId: thumbnail,
+    });
+    const publication = await alice.mutation(api.projects.publish, {
+      id,
+      title: "Catalogue",
+      description: "Toutes les formes",
+      thumbnail,
+      revision: 1,
+    });
+    const version = await t.query(api.projects.creation, { id: publication });
+    expect(JSON.parse(version!.scene)).toEqual(JSON.parse(expanded));
+    const copyId = await bob.mutation(api.projects.remix, {
+      id: publication,
+      versionId: version!._id,
+    });
+    expect(
+      JSON.parse((await bob.query(api.projects.get, { id: copyId })).scene),
+    ).toEqual(JSON.parse(expanded));
   });
   it("refuse lectures et écritures aux visiteurs et aux autres propriétaires", async () => {
     const { t, alice, bob } = setup();

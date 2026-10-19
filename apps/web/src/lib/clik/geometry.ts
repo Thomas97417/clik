@@ -19,6 +19,7 @@ import {
   slopeRoofHeight,
   type PartType,
 } from "@clik/scene";
+import { profileGeometry } from "./profile-geometry";
 
 const geometries = new Map<PartType, BufferGeometry>();
 const STUD_RADIUS = 0.3;
@@ -80,6 +81,11 @@ function halfRoof(points: Vector2[], front: boolean, crease: number) {
 
 export function geometry(type: PartType) {
   if (geometries.has(type)) return geometries.get(type)!;
+  const profile = profileGeometry(type);
+  if (profile) {
+    geometries.set(type, profile);
+    return profile;
+  }
   const dimensions = CATALOG[type];
   const { w, d, h, shape } = dimensions;
   const slope = shape === "slope";

@@ -1105,7 +1105,7 @@ export default function Editor({
                   </div>
                 </div>
                 <div
-                  className="piece-tabs group/piece-tabs px-3 gap-1.25 grid grid-cols-[repeat(auto-fill,minmax(90px,1fr))] pt-0 pb-3"
+                  className="piece-tabs group/piece-tabs px-3 gap-1 grid grid-cols-[repeat(auto-fill,minmax(90px,1fr))] pt-0 pb-2"
                   role="group"
                   aria-label="Catégories de pièces"
                 >
@@ -1117,7 +1117,7 @@ export default function Editor({
                         "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
                         "outline-offset-3",
                         name === category ? "active group/active" : "",
-                        "focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:-outline-offset-2 text-xs leading-[inherit] px-2 py-1.25 gap-1 border border-solid border-transparent flex items-center justify-between min-h-8 text-[#68788e] rounded-[7px] text-left hover:bg-[#f5f7fb] [&[class~='group/active']]:border-[#dce6fc] [&[class~='group/active']]:bg-[#edf2ff] [&[class~='group/active']]:text-[#356ae6] [&[class~='group/active']]:font-[650]",
+                        "focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:-outline-offset-2 text-xs leading-4 px-2 py-0.5 gap-1 border border-solid border-transparent flex items-center justify-between min-h-6 text-[#68788e] rounded-[7px] text-left hover:bg-[#f5f7fb] [&[class~='group/active']]:border-[#dce6fc] [&[class~='group/active']]:bg-[#edf2ff] [&[class~='group/active']]:text-[#356ae6] [&[class~='group/active']]:font-[650]",
                       )}
                       aria-label={name}
                       aria-pressed={name === category}

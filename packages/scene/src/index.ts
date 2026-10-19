@@ -7,7 +7,7 @@ import {
   bodiesOverlap,
   verticalTravel,
 } from "./placement-collision";
-import { roundHasSocket } from "./part-shapes";
+import { roundHasSocket, footprintHasSocket } from "./part-shapes";
 export const CATALOG = {
   "brick-1x1": { name: "Brique 1 × 1", w: 1, d: 1, h: 1.2, shape: "block" },
   "brick-1x2": { name: "Brique 1 × 2", w: 2, d: 1, h: 1.2, shape: "block" },
@@ -20,6 +20,20 @@ export const CATALOG = {
   "brick-1x8": { name: "Brique 1 × 8", w: 8, d: 1, h: 1.2, shape: "block" },
   "brick-2x6": { name: "Brique 2 × 6", w: 6, d: 2, h: 1.2, shape: "block" },
   "brick-2x8": { name: "Brique 2 × 8", w: 8, d: 2, h: 1.2, shape: "block" },
+  "brick-masonry-1x2": {
+    name: "Brique maçonnerie 1 × 2",
+    w: 2,
+    d: 1,
+    h: 1.2,
+    shape: "masonry",
+  },
+  "brick-masonry-1x4": {
+    name: "Brique maçonnerie 1 × 4",
+    w: 4,
+    d: 1,
+    h: 1.2,
+    shape: "masonry",
+  },
   "plate-1x1": { name: "Plaque 1 × 1", w: 1, d: 1, h: 0.4, shape: "block" },
   "plate-1x2": { name: "Plaque 1 × 2", w: 2, d: 1, h: 0.4, shape: "block" },
   "plate-1x3": { name: "Plaque 1 × 3", w: 3, d: 1, h: 0.4, shape: "block" },
@@ -73,6 +87,51 @@ export const CATALOG = {
     shape: "slope",
     slopeRun: 0.5,
   },
+  "slope-inverted-2x1": {
+    name: "Pente inversée 2 × 1",
+    w: 1,
+    d: 2,
+    h: 1.2,
+    shape: "inverted-slope",
+  },
+  "slope-inverted-2x2": {
+    name: "Pente inversée 2 × 2",
+    w: 2,
+    d: 2,
+    h: 1.2,
+    shape: "inverted-slope",
+  },
+  "slope-inverted-3x2": {
+    name: "Pente inversée 3 × 2",
+    w: 2,
+    d: 3,
+    h: 1.2,
+    shape: "inverted-slope",
+  },
+  "slope-curved-2x1": {
+    name: "Pente courbe 2 × 1",
+    w: 1,
+    d: 2,
+    h: 0.8,
+    shape: "curved-slope",
+    smooth: true,
+  },
+  "slope-curved-2x2": {
+    name: "Pente courbe 2 × 2",
+    w: 2,
+    d: 2,
+    h: 0.8,
+    shape: "curved-slope",
+    smooth: true,
+  },
+  "slope-curved-3x2": {
+    name: "Pente courbe 3 × 2",
+    w: 2,
+    d: 3,
+    h: 1.2,
+    shape: "curved-slope",
+    smooth: true,
+  },
   "tile-1x1": { name: "Tuile lisse 1 × 1", w: 1, d: 1, h: 0.4, shape: "tile" },
   "tile-1x2": { name: "Tuile lisse 1 × 2", w: 2, d: 1, h: 0.4, shape: "tile" },
   "tile-2x2": { name: "Tuile lisse 2 × 2", w: 2, d: 2, h: 0.4, shape: "tile" },
@@ -83,6 +142,22 @@ export const CATALOG = {
   "tile-2x3": { name: "Tuile lisse 2 × 3", w: 3, d: 2, h: 0.4, shape: "tile" },
   "tile-2x4": { name: "Tuile lisse 2 × 4", w: 4, d: 2, h: 0.4, shape: "tile" },
   "tile-4x4": { name: "Tuile lisse 4 × 4", w: 4, d: 4, h: 0.4, shape: "tile" },
+  "tile-grille-1x2": {
+    name: "Tuile grille 1 × 2",
+    w: 2,
+    d: 1,
+    h: 0.4,
+    shape: "grille",
+    smooth: true,
+  },
+  "tile-grille-2x2": {
+    name: "Tuile grille 2 × 2",
+    w: 2,
+    d: 2,
+    h: 0.4,
+    shape: "grille",
+    smooth: true,
+  },
   "round-brick-1x1": {
     name: "Brique ronde 1 × 1",
     w: 1,
@@ -215,6 +290,68 @@ export const CATALOG = {
     shape: "round",
     smooth: true,
   },
+  "round-quarter-plate-2x2": {
+    name: "Plaque quart de cercle 2 × 2",
+    w: 2,
+    d: 2,
+    h: 0.4,
+    shape: "quarter",
+  },
+  "round-quarter-plate-4x4": {
+    name: "Plaque quart de cercle 4 × 4",
+    w: 4,
+    d: 4,
+    h: 0.4,
+    shape: "quarter",
+  },
+  "round-quarter-tile-2x2": {
+    name: "Tuile quart de cercle 2 × 2",
+    w: 2,
+    d: 2,
+    h: 0.4,
+    shape: "quarter",
+    smooth: true,
+  },
+  "round-quarter-tile-4x4": {
+    name: "Tuile quart de cercle 4 × 4",
+    w: 4,
+    d: 4,
+    h: 0.4,
+    shape: "quarter",
+    smooth: true,
+  },
+  "round-cone-1x1": {
+    name: "Cône 1 × 1",
+    w: 1,
+    d: 1,
+    h: 1.2,
+    shape: "cone",
+    smooth: true,
+  },
+  "round-cone-2x2": {
+    name: "Cône 2 × 2",
+    w: 2,
+    d: 2,
+    h: 2.4,
+    shape: "cone",
+    smooth: true,
+  },
+  "round-dome-2x2": {
+    name: "Dôme 2 × 2",
+    w: 2,
+    d: 2,
+    h: 1.2,
+    shape: "dome",
+    smooth: true,
+  },
+  "round-dome-4x4": {
+    name: "Dôme 4 × 4",
+    w: 4,
+    d: 4,
+    h: 2.4,
+    shape: "dome",
+    smooth: true,
+  },
   "corner-brick-2x2": {
     name: "Brique d’angle 2 × 2",
     w: 2,
@@ -249,6 +386,9 @@ export function hasBottomSocket(type: PartType, column: number, row: number) {
     return roundHasSocket(part.w, part.d, column, row);
   if (part.shape === "corner") return column === 0 || row === 0;
   if (part.shape === "arch") return column === 0 || column === part.w - 1;
+  if (part.shape === "inverted-slope") return row === part.d - 1;
+  if (["quarter", "cone", "dome"].includes(part.shape))
+    return footprintHasSocket(part, column, row);
   return true;
 }
 export function hasTopStud(type: PartType, row: number, column = 0) {
@@ -257,6 +397,7 @@ export function hasTopStud(type: PartType, row: number, column = 0) {
   if (part.shape === "round")
     return roundHasSocket(part.w, part.d, column, row);
   if (part.shape === "corner") return column === 0 || row === 0;
+  if (part.shape === "quarter") return footprintHasSocket(part, column, row);
   return part.shape !== "slope" || row === part.d - 1;
 }
 export const COLORS = [
@@ -1088,6 +1229,20 @@ export {
   roundProfile,
   slopeCrease,
   slopeRoofHeight,
+  partFootprint,
+  footprintContains,
+  bottomFootprints,
+  curvedRoofProfile,
+  profileRoofHeight,
+  verticalProfile,
+  radialSections,
+  partBoxes,
+  STUD_RADIUS,
+  STUD_HEIGHT,
+  SOCKET_RADIUS,
+  type PartDimensions,
+  type ProfilePoint,
+  type PartBox,
 } from "./part-shapes";
 
 export {

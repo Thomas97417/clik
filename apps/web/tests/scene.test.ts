@@ -299,9 +299,8 @@ describe("Historique de l’atelier", () => {
       useEditor.setState({ snap, color: "#ef4444" });
       for (const type of Object.keys(CATALOG) as (keyof typeof CATALOG)[]) {
         const before = useEditor.getState().scene;
-        const historyLength = useEditor.getState().past.length;
         editor.add(type);
-        const { scene, selection, past } = useEditor.getState();
+        const { scene, selection } = useEditor.getState();
         expectFreeCopies(before, scene, selection);
         const added = scene.nodes.find((n) => n.id === selection[0]) as Part;
         expect(added.type).toBe(type);
@@ -309,7 +308,7 @@ describe("Historique de l’atelier", () => {
         expect(added.position[1]).toBe(0);
         expectAligned(scene, added);
         expect(scene.nodes.slice(0, -1)).toEqual(before.nodes);
-        expect(past).toHaveLength(historyLength + 1);
+        // Undo/redo below also verifies a single operation after the history cap.
         editor.undo();
         expect(useEditor.getState().scene).toEqual(before);
         editor.redo();
