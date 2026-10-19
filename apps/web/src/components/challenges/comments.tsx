@@ -137,7 +137,7 @@ export default function Comments({
               <div className="comment-composer-field rounded-[10px] border border-[#dfe5ee] bg-[#f9fafc] transition-colors focus-within:border-[#86a8e9] focus-within:bg-white">
                 <Textarea
                   ref={composer}
-                  className="min-h-20 max-h-90 resize-y rounded-[10px] border-0 bg-transparent px-3.5 py-3 text-sm leading-relaxed text-[#2e405b] placeholder:text-[#8a98ab] focus-visible:border-transparent focus-visible:ring-0 md:text-sm md:leading-relaxed"
+                  className="min-h-20 max-h-90 resize-none rounded-[10px] border-0 bg-transparent px-3.5 py-3 text-sm leading-relaxed text-[#2e405b] placeholder:text-[#8a98ab] focus-visible:border-transparent focus-visible:ring-0 md:text-sm md:leading-relaxed"
                   id="new-comment"
                   value={body}
                   onChange={(event) => {
