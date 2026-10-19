@@ -20,7 +20,6 @@ import {
   GitBranch,
   Link2,
   LoaderCircle,
-  MessageCircle,
   MousePointer2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -238,20 +237,6 @@ function CreationDetail({
             </div>
           </div>
           <div className="creation-page-actions flex shrink-0 flex-wrap items-center gap-2 max-sm:w-full">
-            <a
-              href="#comments"
-              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-[#dfe5ee] px-3 text-xs font-medium whitespace-nowrap text-[#526783] transition-colors hover:border-[#bbcce5] hover:bg-[#f5f8fd] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 max-sm:flex-1 max-3xs:gap-1.5 max-3xs:px-2 max-3xs:text-[11px]"
-            >
-              <MessageCircle size={15} aria-hidden="true" />
-              Commenter
-              <span className="text-[11px] text-[#8190a5] tabular-nums">
-                {p.commentCount}
-                <span className="sr-only">
-                  {" "}
-                  commentaire{p.commentCount === 1 ? "" : "s"}
-                </span>
-              </span>
-            </a>
             <button
               type="button"
               className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-3 text-xs font-medium whitespace-nowrap text-[#526783] transition-colors hover:bg-[#f0f4fa] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 max-sm:flex-1 max-3xs:gap-1.5 max-3xs:px-2 max-3xs:text-[11px]"
