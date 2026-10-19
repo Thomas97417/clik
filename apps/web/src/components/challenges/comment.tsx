@@ -12,6 +12,7 @@ import BrickAvatar from "@/components/ui/brick-avatar";
 import AuthorLink from "@/components/clik/author-link";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDate, formatDateTime } from "@/lib/format-date";
+import { cn } from "@/lib/utils";
 import {
   actionClass,
   controlClass,
@@ -92,7 +93,7 @@ export default function Comment({
     return (
       <article
         id={`comment-${comment._id}`}
-        className="comment comment-deleted flex scroll-mt-6 gap-3 p-4.5 max-xs:gap-2.5 max-xs:p-3.5"
+        className="comment comment-deleted flex scroll-mt-6 gap-3 py-1 max-xs:gap-2.5"
       >
         <span
           className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-[#eef2f8] text-[#94a1b3]"
@@ -115,7 +116,7 @@ export default function Comment({
     <article
       id={`comment-${comment._id}`}
       tabIndex={-1}
-      className="comment flex scroll-mt-6 gap-3 p-4.5 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#a7c0f2] max-xs:gap-2.5 max-xs:p-3.5"
+      className="comment flex scroll-mt-6 gap-3 rounded-sm py-1 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#a7c0f2] max-xs:gap-2.5"
       data-mine={mine || undefined}
     >
       <div className="comment-avatar mt-0.5 shrink-0" aria-hidden="true">
@@ -130,7 +131,7 @@ export default function Comment({
             En réponse à {comment.replyTo?.author ?? "un commentaire supprimé"}
           </p>
         )}
-        <header className="mb-2 flex flex-wrap items-center gap-x-2.5 gap-y-1">
+        <header className="mb-1 flex flex-wrap items-center gap-x-2.5 gap-y-1">
           <strong className="text-[13px] text-[#334a6d] wrap-anywhere">
             <AuthorLink
               id={comment.owner}
@@ -139,12 +140,10 @@ export default function Comment({
             />
           </strong>
           {mine && (
-            <span className="rounded bg-[#eef2f8] px-1.5 py-0.5 text-[10px] font-medium text-[#63758f]">
-              Vous
-            </span>
+            <span className="text-[10px] font-medium text-[#8190a5]">Vous</span>
           )}
           <time
-            className="ml-auto text-[11px] text-[#71839c] max-sm:ml-0"
+            className="text-[11px] text-[#91a0b4]"
             dateTime={new Date(comment.createdAt).toISOString()}
             title={formatDateTime(comment.createdAt)}
           >
@@ -230,12 +229,12 @@ export default function Comment({
             </div>
           </form>
         ) : (
-          <p className="text-sm leading-[1.8] whitespace-pre-wrap text-[#526885] wrap-anywhere">
+          <p className="text-sm leading-[1.75] whitespace-pre-wrap text-[#44566f] wrap-anywhere">
             {comment.body}
           </p>
         )}
         {(mine || replyAction) && !editing && (
-          <div className="comment-actions mt-2.5">
+          <div className="comment-actions mt-1">
             {confirm ? (
               <div className="flex flex-wrap items-center gap-2 rounded-lg border border-[#efd5db] bg-[#fff8f9] p-2.5">
                 <span
@@ -277,13 +276,15 @@ export default function Comment({
                 </button>
               </div>
             ) : (
-              <div className="-ml-2 flex flex-wrap items-center gap-1">
+              <div className="-ml-1.5 flex flex-wrap items-center gap-1">
                 {replyAction}
                 {mine && (
                   <>
                     <button
                       ref={editButton}
-                      className={actionClass}
+                      className={cn(actionClass, "size-8 min-h-8 p-0")}
+                      aria-label="Modifier"
+                      title="Modifier le commentaire"
                       disabled={busy}
                       onClick={() => {
                         setBody(comment.body);
@@ -292,12 +293,16 @@ export default function Comment({
                         setEditing(true);
                       }}
                     >
-                      <Pencil size={13} aria-hidden="true" />
-                      Modifier
+                      <Pencil size={14} aria-hidden="true" />
                     </button>
                     <button
                       ref={removeButton}
-                      className={`${controlClass} min-h-9 text-[#63758f] hover:bg-[#fff4f6] hover:text-[#9d3d50]`}
+                      className={cn(
+                        controlClass,
+                        "size-8 min-h-8 p-0 text-[#8190a5] hover:bg-[#fff4f6] hover:text-[#9d3d50]",
+                      )}
+                      aria-label="Supprimer"
+                      title="Supprimer le commentaire"
                       disabled={busy}
                       onClick={() => {
                         focusRequest.current = "confirm";
@@ -306,8 +311,7 @@ export default function Comment({
                         setConfirm(true);
                       }}
                     >
-                      <Trash2 size={13} aria-hidden="true" />
-                      Supprimer
+                      <Trash2 size={14} aria-hidden="true" />
                     </button>
                   </>
                 )}

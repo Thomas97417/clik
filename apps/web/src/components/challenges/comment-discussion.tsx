@@ -7,6 +7,7 @@ import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import { usePublicPagination } from "@/lib/clik/use-public-pagination";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import Comment, { type CommentData } from "./comment";
 import { SignInTo } from "./shared";
 import {
@@ -69,7 +70,7 @@ export default function CommentDiscussion({
       return (
         <SignInTo
           returnHash={`comment-${comment._id}`}
-          className={`${actionClass} comment-reply`}
+          className={cn(actionClass, "comment-reply min-h-8 px-1.5")}
           label={label}
           title="Connectez-vous pour répondre"
         >
@@ -80,7 +81,7 @@ export default function CommentDiscussion({
     return (
       <button
         ref={message._id === comment._id ? rootReply : undefined}
-        className={`${actionClass} comment-reply`}
+        className={cn(actionClass, "comment-reply min-h-8 px-1.5")}
         type="button"
         disabled={!hydrated || sendingReply}
         aria-label={label}
@@ -112,7 +113,7 @@ export default function CommentDiscussion({
         }}
       />
       {!!replyCount && (
-        <div className="comment-thread-controls -mt-1 mr-4.5 mb-3 ml-13.5 max-sm:ml-3.5">
+        <div className="comment-thread-controls mt-1 mb-2 ml-10 max-xs:ml-9">
           <button
             ref={toggle}
             type="button"
@@ -143,7 +144,7 @@ export default function CommentDiscussion({
       )}
       <div
         id={repliesId}
-        className="comment-replies mr-4.5 mb-4.5 ml-8 border-l border-[#dce6f3] pl-2 max-sm:mr-2 max-sm:ml-3.5 max-sm:pl-1"
+        className="comment-replies mt-3 ml-4 border-l border-[#dce6f3] pl-6 max-xs:ml-3 max-xs:pl-3"
         hidden={!expanded}
         role="group"
         aria-label={
@@ -260,7 +261,7 @@ function Replies({
           </div>
         </div>
       ) : (
-        <div className="comment-replies-list divide-y divide-[#eef2f8]">
+        <div className="comment-replies-list space-y-4">
           {[...results].reverse().map((reply) => (
             <Comment
               key={reply._id}
@@ -311,7 +312,7 @@ function ReplyComposer({
 
   return (
     <form
-      className="comment-reply-form mx-3 mt-2 rounded-lg border border-[#e4eaf2] bg-[#fafbfd] p-3.5 max-sm:mx-2 max-sm:p-3"
+      className="comment-reply-form mt-4 rounded-lg bg-[#f6f8fb] p-3 max-xs:p-2.5"
       aria-busy={busy}
       onSubmit={async (event) => {
         event.preventDefault();

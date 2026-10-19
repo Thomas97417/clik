@@ -36,75 +36,69 @@ export default function PublicCreationCard({
     return (
       <article
         className={cn(
-          "creation-card public-creation-card creation-remix-card group/creation-card flex items-start gap-3 rounded-xl border border-[#e4eaf2] bg-white p-3 transition-colors hover:border-[#c7d5eb] max-xs:gap-2.5 max-xs:p-2.5",
+          "creation-card public-creation-card creation-remix-card group/creation-card flex min-w-0 flex-col",
           className,
         )}
       >
         <Link
           {...target}
-          className="thumbnail block size-20 shrink-0 overflow-hidden rounded-lg bg-[#eef2f8] max-xs:size-18"
-          tabIndex={-1}
-          aria-hidden="true"
+          className="public-creation-open group/inspiration block flex-1 rounded-lg text-[#25354e] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-[#356ae6] focus-visible:outline-offset-4"
+          aria-label={`Voir ${creation.title}`}
         >
-          {creation.thumbnailUrl ? (
-            <img
-              className="size-full object-cover"
-              src={creation.thumbnailUrl}
-              alt=""
-              loading="lazy"
-              decoding="async"
-              width={160}
-              height={160}
-            />
-          ) : (
-            <div className="grid h-full place-items-center text-[#91a3be]">
-              <Box size={25} />
-            </div>
-          )}
+          <div className="thumbnail relative aspect-4/3 overflow-hidden rounded-lg bg-[#f0f3f8]">
+            {creation.thumbnailUrl ? (
+              <img
+                className="size-full object-contain transition-transform duration-200 group-hover/inspiration:scale-105 motion-reduce:transition-none"
+                src={creation.thumbnailUrl}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                width={320}
+                height={240}
+              />
+            ) : (
+              <div
+                className="grid h-full place-items-center text-[#91a3be]"
+                aria-hidden="true"
+              >
+                <Box size={25} />
+              </div>
+            )}
+            {isAssembly && (
+              <AssemblyBadge
+                compact
+                className="pointer-events-none absolute top-2 left-2"
+              />
+            )}
+            <span
+              className="pointer-events-none absolute right-2 bottom-2 grid size-6 place-items-center rounded-full bg-white/90 text-[#526783] opacity-0 transition-opacity group-hover/inspiration:opacity-100 group-focus-visible/inspiration:opacity-100 motion-reduce:transition-none"
+              aria-hidden="true"
+            >
+              <ArrowUpRight size={14} />
+            </span>
+          </div>
+          <h3 className="mt-2 line-clamp-2 text-[13px] leading-snug font-semibold wrap-anywhere">
+            {creation.title}
+          </h3>
         </Link>
-        <div className="flex min-w-0 flex-1 flex-col">
-          <Link
-            {...target}
-            className="public-creation-open rounded-sm text-[#25354e] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-[#356ae6] focus-visible:outline-offset-3"
-            aria-label={`Voir ${creation.title}`}
-          >
-            <h3 className="line-clamp-2 text-sm leading-snug font-semibold wrap-anywhere">
-              {creation.title}
-            </h3>
-          </Link>
-          <p className="public-card-author mt-1 text-xs leading-normal text-[#73829a]">
-            par{" "}
+        <div className="public-card-footer mt-1 flex min-w-0 items-center justify-between gap-1">
+          <p className="public-card-author min-w-0 text-[11px] leading-relaxed text-[#8190a5]">
             <AuthorLink
               id={creation.owner}
               name={creation.author}
               showAvatar={false}
+              className="font-normal"
             />
           </p>
-          <div className="public-card-footer mt-1 flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-            <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-              {isAssembly ? (
-                <AssemblyBadge compact />
-              ) : (
-                <span className="creation-kind-badge text-[11px] leading-normal text-[#71839c]">
-                  Reprise
-                </span>
-              )}
-              {creation.challenge && (
-                <span className="text-[10px] leading-normal text-[#71839c]">
-                  Défi du {creation.challenge.day}
-                </span>
-              )}
-            </div>
-            <Link
-              {...target}
-              hash="comments"
-              className="public-card-comments -mr-1 inline-flex min-h-8 min-w-8 shrink-0 items-center justify-center gap-1 rounded-md px-1.5 text-[11px] text-[#71839c] tabular-nums hover:bg-[#edf3ff] hover:text-[#2458ce] focus-visible:outline-2 focus-visible:outline-[#356ae6] focus-visible:outline-offset-2"
-              aria-label={`${creation.commentCount ?? 0} commentaire${(creation.commentCount ?? 0) === 1 ? "" : "s"} sur ${creation.title}`}
-            >
-              <MessageCircle size={13} aria-hidden="true" />
-              <span>{creation.commentCount ?? 0}</span>
-            </Link>
-          </div>
+          <Link
+            {...target}
+            hash="comments"
+            className="public-card-comments -mr-1 inline-flex min-h-7 min-w-7 shrink-0 items-center justify-center gap-1 rounded-md px-1 text-[10px] text-[#8190a5] tabular-nums hover:bg-[#edf3ff] hover:text-[#2458ce] focus-visible:outline-2 focus-visible:outline-[#356ae6] focus-visible:outline-offset-2"
+            aria-label={`${creation.commentCount ?? 0} commentaire${(creation.commentCount ?? 0) === 1 ? "" : "s"} sur ${creation.title}`}
+          >
+            <MessageCircle size={12} aria-hidden="true" />
+            <span>{creation.commentCount ?? 0}</span>
+          </Link>
         </div>
       </article>
     );

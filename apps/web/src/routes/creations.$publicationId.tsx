@@ -11,11 +11,22 @@ import { ConvexError } from "convex/values";
 import { useMemo, useState } from "react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
-import { ArrowRight, GitBranch, MousePointer2 } from "lucide-react";
+import type { SceneDocument } from "@clik/scene";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Box,
+  ChevronRight,
+  GitBranch,
+  Link2,
+  LoaderCircle,
+  MessageCircle,
+  MousePointer2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import Comments from "@/components/challenges/comments";
-import { CreationChallenge } from "@/components/challenges/shared";
+import { CreationChallenge, SignInTo } from "@/components/challenges/shared";
 import AuthorLink from "@/components/clik/author-link";
 import ClientScene from "@/components/clik/client-scene";
 import CreationRemixes from "@/components/clik/creation-remixes";
@@ -98,7 +109,18 @@ function CreationDetail({
     remix = useMutation(api.projects.remix),
     [busy, setBusy] = useState(false);
   const p = live === undefined ? initial.creation : live;
-  const scene = useMemo(() => (p ? JSON.parse(p.scene) : null), [p?.scene]);
+  const scene = useMemo(
+    () => (p ? (JSON.parse(p.scene) as SceneDocument) : null),
+    [p?.scene],
+  );
+  const parts = useMemo(
+    () => scene?.nodes.filter((node) => node.kind === "part") ?? [],
+    [scene],
+  );
+  const colorCount = useMemo(
+    () => new Set(parts.map((part) => part.color.toLowerCase())).size,
+    [parts],
+  );
   if (p && !p.challenge && versionId !== p._id) setVersionId(p._id);
   if (p === undefined)
     return (
@@ -146,233 +168,291 @@ function CreationDetail({
       setBusy(false);
     }
   };
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        window.location.origin + window.location.pathname,
+      );
+      toast.success("Lien de la création copié.");
+    } catch {
+      toast.error(
+        "Le lien n’a pas pu être copié. Copiez l’adresse de cette page.",
+      );
+    }
+  };
   return (
-    <main className="creation-page px-[5%] m-auto max-w-350 pt-8.75 pb-16">
-      <div className="creation-layout gap-9 grid grid-cols-[minmax(0,1.8fr)_minmax(300px,1fr)] items-start max-lg-narrow:gap-6.25 max-lg-narrow:grid-cols-1 lg-start:max-xl-narrow:gap-6 lg-start:max-xl-narrow:grid-cols-[minmax(0,1.4fr)_minmax(280px,1fr)]">
-        <div className="creation-preview-panel min-w-0">
-          <div
-            className="public-scene overflow-hidden border border-solid border-[#e2e8f1] h-140 rounded-[20px] relative bg-[#edf1f7] max-sm-narrow:h-87.5 min-sm-narrow:max-lg-narrow:h-112.5"
-            role="region"
-            aria-label={`Aperçu 3D de ${p.title}`}
-          >
-            <ClientScene
-              scene={scene}
-              showGrid={false}
-              showViewControls
-              poster={p.thumbnailUrl}
-              title={p.title}
-            />
-            <p className="creation-view-hint gap-1.75 absolute bottom-1.25 left-3 right-27.5 min-h-7.5 flex justify-start items-center text-[11px] text-[#8190a5] leading-[1.6] pointer-events-none max-sm:gap-1.25 max-sm:left-2.5 max-sm:text-[10px]">
-              <MousePointer2
-                className="shrink-0"
-                size={14}
+    <main className="creation-page mx-auto max-w-340 px-8 pt-7 pb-16 max-sm:px-4 max-sm:pt-5">
+      <nav
+        className="mb-5 flex min-w-0 items-center gap-3 text-xs text-[#71839c] max-sm:mb-4"
+        aria-label="Fil d’Ariane"
+      >
+        <Link
+          to="/gallery"
+          className="inline-flex min-h-8 shrink-0 items-center gap-2 rounded-md font-medium transition-colors hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-[#356ae6] focus-visible:outline-offset-4"
+        >
+          <ArrowLeft size={14} aria-hidden="true" />
+          La galerie
+        </Link>
+        <ChevronRight
+          className="shrink-0 text-[#b4bfce]"
+          size={13}
+          aria-hidden="true"
+        />
+        <span className="truncate text-[#526783]" aria-current="page">
+          {p.title}
+        </span>
+      </nav>
+
+      <article
+        className="rounded-[22px] border border-[#e1e7ef] bg-white p-8 shadow-[0_4px_24px_#25354e04] max-lg-narrow:p-6 max-sm:rounded-2xl max-sm:p-4"
+        aria-labelledby="creation-title"
+      >
+        <header className="creation-details mb-7 flex items-center justify-between gap-x-8 gap-y-5 max-lg-narrow:flex-wrap max-sm:mb-5">
+          <div className="min-w-0">
+            {p.isAssembly && <AssemblyBadge className="mb-3" />}
+            <h1
+              id="creation-title"
+              className="text-[clamp(28px,3vw,40px)] leading-[1.15] font-extrabold tracking-[-1.2px] text-[#202e45] wrap-anywhere"
+            >
+              {p.title}
+            </h1>
+            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-[#71839c]">
+              <p className="author min-w-0">
+                <AuthorLink
+                  id={p.owner}
+                  name={p.author}
+                  avatar={p.avatar}
+                  className="gap-2 text-[13px] text-[#445a78]"
+                />
+              </p>
+              <span
+                className="size-0.75 rounded-full bg-[#c5cfdd] max-sm:hidden"
                 aria-hidden="true"
               />
-              <span>
-                Glissez pour explorer
-                <span className="creation-view-hint-zoom max-sm:hidden">
+              <p className="publication-date max-sm:w-full">
+                Publiée le{" "}
+                <time dateTime={new Date(p.createdAt).toISOString()}>
+                  {formatDate(p.createdAt, "long")}
+                </time>
+              </p>
+            </div>
+          </div>
+          <div className="creation-page-actions flex shrink-0 flex-wrap items-center gap-2 max-sm:w-full">
+            <a
+              href="#comments"
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-[#dfe5ee] px-3 text-xs font-medium whitespace-nowrap text-[#526783] transition-colors hover:border-[#bbcce5] hover:bg-[#f5f8fd] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 max-sm:flex-1 max-3xs:gap-1.5 max-3xs:px-2 max-3xs:text-[11px]"
+            >
+              <MessageCircle size={15} aria-hidden="true" />
+              Commenter
+              <span className="text-[11px] text-[#8190a5] tabular-nums">
+                {p.commentCount}
+                <span className="sr-only">
                   {" "}
-                  · Pincez ou défilez pour zoomer
+                  commentaire{p.commentCount === 1 ? "" : "s"}
                 </span>
               </span>
-            </p>
+            </a>
+            <button
+              type="button"
+              className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-3 text-xs font-medium whitespace-nowrap text-[#526783] transition-colors hover:bg-[#f0f4fa] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 max-sm:flex-1 max-3xs:gap-1.5 max-3xs:px-2 max-3xs:text-[11px]"
+              onClick={copyLink}
+            >
+              <Link2 size={15} aria-hidden="true" />
+              Copier le lien
+            </button>
           </div>
-        </div>
-        <aside className="creation-details min-w-0 max-lg-narrow:pb-7.5">
-          {p.isAssembly && <AssemblyBadge />}
-          <h1 className="mx-0 text-[clamp(28px,_3vw,_42px)] leading-[1.15] font-extrabold tracking-[-1.5px] mt-1.5 mb-4 wrap-anywhere">
-            {p.title}
-          </h1>
-          <p className="author text-[#6e84a3] text-sm leading-[inherit]">
-            par <AuthorLink id={p.owner} name={p.author} avatar={p.avatar} />
-          </p>
-          <p className="publication-date mx-0 text-xs leading-[inherit] text-[#96a2b5] mt-3 mb-5.5">
-            Publiée le{" "}
-            <time dateTime={new Date(p.createdAt).toISOString()}>
-              {formatDate(p.createdAt, "long")}
-            </time>
-          </p>
-          {p.description && (
-            <p className="description mx-0 my-6.25 text-[#63758f] text-[15px] whitespace-pre-wrap wrap-anywhere leading-[1.9]">
-              {p.description}
-            </p>
-          )}
-          {!!p.sources?.length ? (
-            <div className="creation-source-list mx-0 my-5 text-[#71839c] text-xs leading-[1.7]">
-              <p className="gap-1.75 flex items-center font-[650]">
-                <GitBranch size={15} aria-hidden="true" />
-                {p.isAssembly ? "Sources de l’assemblage" : "À partir de"}
-              </p>
-              <ul className="gap-1.5 grid mt-2.25 wrap-anywhere">
-                {p.sources.map((source) => (
-                  <li key={source.publicationId}>
-                    {source.available ? (
-                      <Link
-                        className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 text-[#356ae6] hover:underline hover:underline-offset-3"
-                        to="/creations/$publicationId"
-                        params={{ publicationId: source.publicationId }}
-                      >
-                        « {source.title} »
-                      </Link>
-                    ) : (
-                      <span>« {source.title} »</span>
-                    )}
-                    <span> par {source.author}</span>
-                  </li>
-                ))}
-              </ul>
+        </header>
+
+        <div className="creation-layout grid grid-cols-[minmax(0,1fr)_320px] items-start gap-8 max-lg-narrow:grid-cols-1 max-lg-narrow:gap-7 lg-start:max-xl-narrow:grid-cols-[minmax(0,1fr)_280px] lg-start:max-xl-narrow:gap-6">
+          <div className="creation-preview-panel min-w-0">
+            <div
+              className="public-scene relative h-130 overflow-hidden rounded-xl border border-[#e4eaf2] bg-[#edf1f7] max-sm-narrow:h-80 min-sm-narrow:max-lg-narrow:h-112"
+              role="region"
+              aria-label={`Aperçu 3D de ${p.title}`}
+            >
+              <ClientScene
+                scene={scene!}
+                showGrid={false}
+                showViewControls
+                poster={p.thumbnailUrl}
+                title={p.title}
+              />
+              <span
+                className="pointer-events-none absolute top-4 left-4 inline-flex items-center gap-2 text-[11px] font-medium text-[#647995] max-sm:top-3 max-sm:left-3"
+                aria-hidden="true"
+              >
+                <Box size={15} />
+                Vue 3D interactive
+              </span>
             </div>
-          ) : (
-            p.origin && (
-              <p className="attribution px-3.75 py-3 mx-0 my-3.75 gap-2 flex items-start text-xs leading-[1.7] bg-[#f0f4fb] text-[#7b8ea8] rounded-[6px] wrap-anywhere">
-                <GitBranch
-                  className="shrink-0 mt-0.5"
-                  size={16}
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-[11px] leading-relaxed text-[#71839c]">
+              <p className="creation-view-hint flex items-center gap-1.5">
+                <MousePointer2
+                  className="shrink-0"
+                  size={13}
                   aria-hidden="true"
                 />
-                <span>
-                  D’après « {p.origin.title} » de {p.origin.author}.
+                Glissez pour explorer
+                <span className="creation-view-hint-zoom max-sm:hidden">
+                  · Défilez pour zoomer
                 </span>
               </p>
-            )
-          )}
-          {p.challenge &&
-            p.updatedAt &&
-            p.submittedAt &&
-            p.updatedAt > p.submittedAt && (
-              <p className="publication-date mx-0 text-xs leading-[inherit] text-[#96a2b5] mt-3 mb-5.5">
-                Mise à jour le {formatDateTime(p.updatedAt)}. Les votes sont
-                conservés.
-              </p>
-            )}
-          <div className="creation-fork p-5 border border-solid border-[#dce6f7] mt-7 rounded-2xl bg-[#f0f5fd] lg-start:max-xl-narrow:p-4">
-            <div className="creation-fork-heading gap-3 flex items-center mb-4.5">
-              <svg
-                className="creation-fork-art w-12 h-15 shrink-0"
-                viewBox="0 0 56 68"
-                fill="none"
-                aria-hidden="true"
-                focusable="false"
+              {parts.length > 0 && (
+                <p className="creation-facts tabular-nums">
+                  {parts.length} pièce{parts.length === 1 ? "" : "s"}
+                  <span className="mx-2 text-[#bac5d4]" aria-hidden="true">
+                    /
+                  </span>
+                  {colorCount} couleur{colorCount === 1 ? "" : "s"}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <aside className="creation-sidebar min-w-0">
+            {p.description && (
+              <section
+                aria-labelledby="creation-description-title"
+                className="mb-6"
               >
-                <path
-                  d="M14 12v44"
-                  stroke="#b4c6e5"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M14 48c0-23 28-8 28-34"
-                  stroke="#356ae6"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                />
-                <rect
-                  x="8"
-                  y="6"
-                  width="12"
-                  height="12"
-                  rx="3"
-                  fill="#dbe6f8"
-                  stroke="#a6badc"
-                  strokeWidth="2"
-                />
-                <rect
-                  x="8"
-                  y="50"
-                  width="12"
-                  height="12"
-                  rx="3"
-                  fill="#dbe6f8"
-                  stroke="#a6badc"
-                  strokeWidth="2"
-                />
-                <rect
-                  x="35"
-                  y="5"
-                  width="14"
-                  height="14"
-                  rx="3"
-                  fill="#356ae6"
-                />
-                <path
-                  d="M39 12h6m-3-3v6"
-                  stroke="white"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div>
-                <h2 className="text-[17px] font-[750] tracking-[-0.4px] leading-[1.4]">
-                  Et si vous imaginiez la suite ?
+                <h2
+                  id="creation-description-title"
+                  className="mb-3 text-sm font-semibold tracking-[-0.2px] text-[#263b58]"
+                >
+                  À propos de cette création
                 </h2>
-                <p className="text-xs text-[#71839c] mt-1.25 leading-[1.7]">
-                  Une nouvelle branche, votre propre version.
+                <p className="description text-[14px] leading-[1.85] whitespace-pre-wrap text-[#63758f] wrap-anywhere">
+                  {p.description}
+                </p>
+              </section>
+            )}
+            {!!p.sources?.length ? (
+              <div className="creation-source-list mb-6 text-xs leading-[1.7] text-[#71839c]">
+                <p className="gap-1.75 flex items-center font-[650]">
+                  <GitBranch size={15} aria-hidden="true" />
+                  {p.isAssembly ? "Sources de l’assemblage" : "À partir de"}
+                </p>
+                <ul className="gap-1.5 grid mt-2.25 wrap-anywhere">
+                  {p.sources.map((source) => (
+                    <li key={source.publicationId}>
+                      {source.available ? (
+                        <Link
+                          className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 text-[#356ae6] hover:underline hover:underline-offset-3"
+                          to="/creations/$publicationId"
+                          params={{ publicationId: source.publicationId }}
+                        >
+                          « {source.title} »
+                        </Link>
+                      ) : (
+                        <span>« {source.title} »</span>
+                      )}
+                      <span> par {source.author}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              p.origin && (
+                <p className="attribution mb-6 flex items-start gap-2 text-xs leading-[1.7] text-[#71839c] wrap-anywhere">
+                  <GitBranch
+                    className="shrink-0 mt-0.5"
+                    size={16}
+                    aria-hidden="true"
+                  />
+                  <span>
+                    D’après « {p.origin.title} » de {p.origin.author}.
+                  </span>
+                </p>
+              )
+            )}
+            {p.challenge &&
+              p.updatedAt &&
+              p.submittedAt &&
+              p.updatedAt > p.submittedAt && (
+                <p className="mb-6 text-[11px] leading-relaxed text-[#8190a5]">
+                  Mise à jour le {formatDateTime(p.updatedAt)}. Les votes sont
+                  conservés.
+                </p>
+              )}
+            <div className="creation-fork border-t border-[#e8edf3] pt-6 first:border-t-0 first:pt-0">
+              <div className="creation-fork-heading mb-4">
+                <h2 className="text-[17px] leading-snug font-bold tracking-[-0.3px] text-[#263b58]">
+                  Construisez votre version
+                </h2>
+                <p className="mt-2 text-xs leading-[1.75] text-[#71839c]">
+                  Ouvrez une copie dans l’atelier et apportez-y votre touche.
                 </p>
               </div>
+              {isAuthenticated ? (
+                <Button
+                  className="creation-fork-button h-auto min-h-11 w-full justify-between gap-2 rounded-lg bg-[#356ae6] px-3.5 py-3 text-xs leading-normal font-semibold whitespace-normal text-white hover:bg-[#2458ce]"
+                  disabled={busy}
+                  aria-busy={busy}
+                  onClick={createVersion}
+                >
+                  {busy ? (
+                    <LoaderCircle
+                      className="size-4 shrink-0 animate-spin motion-reduce:animate-none"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <GitBranch className="size-4 shrink-0" aria-hidden="true" />
+                  )}
+                  <span className="flex-1 text-left">
+                    {busy ? "Création de votre version…" : "Créer ma version"}
+                  </span>
+                  <ArrowRight
+                    className="size-4 pointer-events-none shrink-0"
+                    size={16}
+                    aria-hidden="true"
+                  />
+                </Button>
+              ) : (
+                <SignInTo className="creation-fork-button flex min-h-11 w-full justify-between gap-2 rounded-lg bg-[#356ae6] px-3.5 py-3 text-xs leading-normal font-semibold text-white hover:bg-[#2458ce]">
+                  <GitBranch
+                    className="shrink-0"
+                    size={17}
+                    aria-hidden="true"
+                  />{" "}
+                  <span className="flex-1 text-left">
+                    Se connecter pour créer
+                  </span>
+                  <ArrowRight
+                    className="shrink-0"
+                    size={16}
+                    aria-hidden="true"
+                  />
+                </SignInTo>
+              )}
+              <p className="creation-fork-note mt-2.5 text-[11px] leading-relaxed text-[#8190a5]">
+                Copie privée. L’auteur d’origine reste crédité.
+              </p>
             </div>
-            {isAuthenticated ? (
-              <Button
-                className="creation-fork-button p-3 gap-2 flex justify-center w-full min-h-11 h-auto rounded-[10px] bg-[#356ae6] text-white text-xs font-[650] whitespace-normal leading-normal hover:bg-[#2859cd]"
-                disabled={busy}
-                aria-busy={busy}
-                onClick={createVersion}
-              >
-                <GitBranch
-                  className="size-4 pointer-events-none shrink-0"
-                  size={17}
-                  aria-hidden="true"
-                />
-                {busy
-                  ? "Création de votre version…"
-                  : "Continuer cette création"}
-                <ArrowRight
-                  className="size-4 pointer-events-none shrink-0"
-                  size={16}
-                  aria-hidden="true"
-                />
-              </Button>
-            ) : (
-              <Link
-                to="/sign-in"
-                onClick={() =>
-                  sessionStorage.setItem(
-                    "clik-return-to",
-                    window.location.pathname,
-                  )
-                }
-                className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 primary-link creation-fork-button group/primary-link items-center justify-center bg-[#356ae6] text-white font-[650] p-3 gap-2 flex w-full min-h-11 h-auto rounded-[10px] text-xs whitespace-normal leading-normal hover:bg-[#2859cd]"
-              >
-                <GitBranch className="shrink-0" size={17} aria-hidden="true" />{" "}
-                Se connecter pour continuer
-              </Link>
+            {p.challenge && (
+              <CreationChallenge
+                day={p.challenge.day}
+                publicationId={publicationId}
+                owner={p.owner}
+                count={p.voteCount}
+              />
             )}
-            <p className="creation-fork-note mt-3 text-[#7889a3] text-[11px] leading-[1.7]">
-              Une copie privée rejoint vos créations. L’auteur d’origine reste
-              crédité.
-            </p>
-          </div>
-        </aside>
-      </div>
-      {p.challenge && (
-        <CreationChallenge
-          day={p.challenge.day}
-          publicationId={publicationId}
-          owner={p.owner}
-          count={p.voteCount}
-        />
-      )}
-      <CreationRemixes
-        initial={initial.remixes}
-        publicationId={publicationId}
-        isAuthenticated={isAuthenticated}
-        creatingVersion={busy}
-        onCreateVersion={createVersion}
-      />
-      <Comments
-        initial={initial.comments}
-        publicationId={publicationId}
-        count={p.commentCount}
-      />
+          </aside>
+        </div>
+        <div className="creation-community mt-9 grid grid-cols-[minmax(0,1fr)_320px] items-start gap-8 border-t border-[#e8edf3] pt-8 max-lg-narrow:grid-cols-1 max-lg-narrow:gap-8 max-sm:mt-7 max-sm:pt-6 lg-start:max-xl-narrow:grid-cols-[minmax(0,1fr)_280px] lg-start:max-xl-narrow:gap-6">
+          <Comments
+            initial={initial.comments}
+            publicationId={publicationId}
+            count={p.commentCount}
+          />
+          <CreationRemixes
+            initial={initial.remixes}
+            publicationId={publicationId}
+            isAuthenticated={isAuthenticated}
+            creatingVersion={busy}
+            onCreateVersion={createVersion}
+          />
+        </div>
+      </article>
     </main>
   );
 }

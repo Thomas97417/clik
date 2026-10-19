@@ -105,10 +105,10 @@ test("reprises : pagination, repli au clavier, retrait et navigation", async ({
   fixture.setPublished("creation-8", false);
   await page.goto("/creations/creation-0");
   const section = page.getByRole("region", {
-    name: "À partir de cette création",
+    name: "Créations inspirées",
   });
   const toggle = section.getByRole("button", {
-    name: "À partir de cette création",
+    name: "Créations inspirées",
   });
   const cards = section.locator(".public-creation-card");
   await expect(cards).toHaveCount(6);
@@ -153,10 +153,10 @@ test("reprises : pagination, repli au clavier, retrait et navigation", async ({
     "Le petit phare 2",
   );
   await expect(
-    section.getByText("La prochaine version pourrait être la vôtre."),
+    section.getByText("Aucune reprise pour le moment."),
   ).toBeVisible();
   await toggle.click();
   await expect(
-    section.getByText("La prochaine version pourrait être la vôtre."),
+    section.getByText("Aucune reprise pour le moment."),
   ).toBeHidden();
 });

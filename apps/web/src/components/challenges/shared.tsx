@@ -225,56 +225,71 @@ export function CreationChallenge({
   const used = data?.choices.length ?? 0;
   const formattedDay = formatChallengeDay(day);
   return (
-    <div className="creation-challenge px-4 py-2.5 mx-0 overflow-hidden border border-solid border-[#e4dbee] flex items-center justify-between gap-y-3 gap-x-6 mt-5 mb-0 rounded-[12px] bg-[#f6f2fb] max-sm:px-3.5 max-sm:py-3 max-sm:flex-wrap peer/creation-challenge">
+    <section
+      className="creation-challenge mt-6 rounded-xl border border-[#e2e9f4] bg-[#f7f9fd] p-4"
+      aria-label="Cette création participe à un défi"
+    >
       <Link
-        className="[transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 creation-challenge-heading px-0 py-0.5 gap-2.5 flex items-center rounded-[6px] text-[#644780] max-sm:w-full hover:bg-[#eee6f7] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#9672c0] focus-visible:[outline-offset:-3px]"
+        className="creation-challenge-heading group/creation-challenge-heading flex items-center gap-3 rounded-md text-[#334c70] transition-colors hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-[#356ae6] focus-visible:outline-offset-4"
         to="/challenges"
         search={{ date: day }}
       >
         <svg
-          className="creation-challenge-art shrink-0 size-8 last:ml-1 last:shrink-0 last:text-[#9982b2] max-sm:last:ml-auto"
+          className="creation-challenge-art size-9 shrink-0"
           viewBox="0 0 56 56"
           fill="none"
           aria-hidden="true"
           focusable="false"
         >
-          <path d="m5 22 25 12 21-10v20L30 54 5 42Z" fill="#b39ad7" />
-          <path d="M30 34 51 24v20L30 54Z" fill="#9272bc" />
-          <path d="M5 22 26 12 51 24 30 34Z" fill="#dfd0f2" />
-          <path d="M18 13v6a10 5 0 0 0 20 0v-6" fill="#aa8bce" />
+          <path d="m5 22 25 12 21-10v20L30 54 5 42Z" fill="#7ba2ec" />
+          <path d="M30 34 51 24v20L30 54Z" fill="#4c79ce" />
+          <path d="M5 22 26 12 51 24 30 34Z" fill="#c7dcff" />
+          <path d="M18 13v6a10 5 0 0 0 20 0v-6" fill="#8eafea" />
           <ellipse
             cx="28"
             cy="13"
             rx="10"
             ry="5"
-            fill="#dfd0f2"
+            fill="#c7dcff"
             stroke="#fff9"
           />
           <path
             d="m17 32 2 5 5 2-4 2 1 5-4-4-4 1 1-5-4-4 5 1Z"
-            fill="#fff3cd"
+            fill="#ffffff"
           />
         </svg>
         <span className="min-w-0">
-          <span className="creation-challenge-label block text-[11px] text-[#9987aa] mb-0.5">
+          <span className="creation-challenge-label mb-0.5 block text-[11px] text-[#71839c]">
             Création du défi
           </span>
           <time
-            className="block text-[13px] font-bold leading-[1.4]"
+            className="block text-[13px] leading-snug font-semibold"
             dateTime={day}
           >
             {formattedDay}
           </time>
         </span>
         <ArrowUpRight
-          className="last:ml-1 last:shrink-0 last:text-[#9982b2] max-sm:last:ml-auto"
-          size={17}
+          className="ml-auto shrink-0 text-[#8da1bd] transition-transform group-hover/creation-challenge-heading:translate-x-0.5 group-hover/creation-challenge-heading:-translate-y-0.5 motion-reduce:transition-none"
+          size={16}
           aria-hidden="true"
         />
       </Link>
-      <div className="creation-challenge-voting gap-4.5 flex justify-between items-center flex-wrap max-sm:w-full max-sm:pt-2.5 max-sm:border-t max-sm:border-t-[#ded1ec]">
+      <div className="creation-challenge-voting mt-4 border-t border-[#e2e9f4] pt-2.5">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-xs font-medium text-[#526783]">
+            Soutenir cette création
+          </p>
+          <VoteButton
+            publicationId={publicationId}
+            challengeId={data?.challenge?._id}
+            owner={owner}
+            count={count}
+            choices={data?.choices ?? []}
+          />
+        </div>
         <div
-          className="challenge-vote-budget gap-1.25 flex flex-col text-[#9989a8] text-[10px] leading-normal"
+          className="challenge-vote-budget mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] leading-relaxed text-[#71839c]"
           title="Vous pouvez soutenir trois créations par défi et retirer un vote pour changer de choix."
         >
           <VoteBricks used={isAuthenticated ? used : 0} />
@@ -286,14 +301,7 @@ export function CreationChallenge({
               : "3 votes par défi"}
           </span>
         </div>
-        <VoteButton
-          publicationId={publicationId}
-          challengeId={data?.challenge?._id}
-          owner={owner}
-          count={count}
-          choices={data?.choices ?? []}
-        />
       </div>
-    </div>
+    </section>
   );
 }

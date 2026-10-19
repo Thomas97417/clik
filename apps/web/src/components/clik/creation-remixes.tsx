@@ -2,13 +2,7 @@ import { usePublicPagination } from "@/lib/clik/use-public-pagination";
 import type { PublicData } from "@/lib/seo/public-data";
 import { useId, useState } from "react";
 import { useHydrated } from "@tanstack/react-router";
-import {
-  ArrowRight,
-  ChevronDown,
-  GitBranch,
-  LoaderCircle,
-  Plus,
-} from "lucide-react";
+import { ArrowRight, ChevronDown, LoaderCircle, Plus } from "lucide-react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
@@ -17,7 +11,7 @@ import { SignInTo } from "@/components/challenges/shared";
 import PublicCreationCard from "./public-creation-card";
 
 const gridClass =
-  "creation-grid grid grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))] gap-3";
+  "creation-grid grid grid-cols-2 gap-x-3 gap-y-5 max-3xs:grid-cols-1";
 
 export default function CreationRemixes({
   publicationId,
@@ -44,30 +38,29 @@ export default function CreationRemixes({
   );
   return (
     <section
-      className="creation-remixes mt-10 border-t border-[#e4eaf2] pt-6 peer-[&]/creation-challenge:mt-7"
+      className="creation-remixes min-w-0 border-l border-[#e8edf3] pl-7 max-lg-narrow:border-t max-lg-narrow:border-l-0 max-lg-narrow:pt-7 max-lg-narrow:pl-0 lg-start:max-xl-narrow:pl-5"
       aria-labelledby={`${id}-title`}
     >
       <h2 id={`${id}-title`}>
         <button
-          className="creation-remixes-toggle group/creation-remixes-toggle flex w-full cursor-pointer items-center gap-3 rounded-lg text-left text-[#25354e] transition-colors hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-[#356ae6] focus-visible:outline-offset-5 disabled:cursor-not-allowed max-xs:gap-2.5"
+          className="creation-remixes-toggle group/creation-remixes-toggle flex min-h-8 w-full cursor-pointer items-center gap-2 rounded-sm text-left text-[#25354e] transition-colors hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-[#356ae6] focus-visible:outline-offset-4 disabled:cursor-not-allowed"
           type="button"
           disabled={!hydrated}
           aria-expanded={expanded}
           aria-controls={`${id}-content`}
+          title={
+            expanded
+              ? "Replier les créations inspirées"
+              : "Déplier les créations inspirées"
+          }
           onClick={() => setExpanded((value) => !value)}
         >
-          <span
-            className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#edf3ff] text-[#356ae6]"
-            aria-hidden="true"
-          >
-            <GitBranch size={18} />
+          <span className="creation-remixes-title min-w-0 text-[17px] leading-snug font-bold tracking-[-0.3px]">
+            Créations inspirées
           </span>
-          <span className="creation-remixes-title min-w-0 text-xl leading-snug font-bold tracking-[-0.4px] max-xs:text-lg">
-            À partir de cette création
-          </span>
-          {!!results.length && (
+          {status !== "LoadingFirstPage" && (
             <span
-              className="shrink-0 rounded-md bg-[#eef2f8] px-2 py-1 text-xs font-medium text-[#63758f] tabular-nums max-xs:hidden"
+              className="shrink-0 text-[11px] font-medium text-[#8190a5] tabular-nums"
               aria-hidden="true"
               title="Versions affichées"
             >
@@ -76,12 +69,9 @@ export default function CreationRemixes({
             </span>
           )}
           <span
-            className="creation-remixes-action ml-auto inline-flex min-h-9 shrink-0 items-center gap-2 rounded-lg px-2 text-xs font-medium text-[#71839c] group-hover/creation-remixes-toggle:bg-[#edf3ff] group-hover/creation-remixes-toggle:text-[#356ae6]"
+            className="creation-remixes-action ml-auto inline-flex size-7 shrink-0 items-center justify-center rounded-md text-[#8190a5] group-hover/creation-remixes-toggle:bg-[#f0f4fa] group-hover/creation-remixes-toggle:text-[#356ae6]"
             aria-hidden="true"
           >
-            <span className="max-sm:hidden">
-              {expanded ? "Replier" : "Déplier"}
-            </span>
             <ChevronDown
               className="transition-transform group-aria-expanded/creation-remixes-toggle:rotate-180 motion-reduce:transition-none"
               size={16}
@@ -90,8 +80,8 @@ export default function CreationRemixes({
         </button>
       </h2>
       <div id={`${id}-content`} hidden={!expanded}>
-        <p className="creation-remixes-intro mt-2 mb-5 text-[13px] leading-relaxed text-[#71839c]">
-          Les reprises et assemblages inspirés par cette idée.
+        <p className="creation-remixes-intro mt-1 mb-5 text-[11px] leading-relaxed text-[#8190a5]">
+          Reprises et assemblages de la communauté.
         </p>
         {status === "LoadingFirstPage" ? (
           <div
@@ -103,16 +93,10 @@ export default function CreationRemixes({
             </span>
             <div className={gridClass} aria-hidden="true">
               {Array.from({ length: 6 }, (_, index) => (
-                <div
-                  key={index}
-                  className="flex gap-3 rounded-xl border border-[#e4eaf2] bg-white p-3"
-                >
-                  <Skeleton className="size-20 shrink-0 rounded-lg bg-[#eef2f8] max-xs:size-18" />
-                  <div className="flex-1 space-y-2 pt-1">
-                    <Skeleton className="h-4 w-3/4 rounded bg-[#eef2f8]" />
-                    <Skeleton className="h-3 w-1/2 rounded bg-[#eef2f8]" />
-                    <Skeleton className="mt-4 h-3 w-1/3 rounded bg-[#eef2f8]" />
-                  </div>
+                <div key={index} className="min-w-0">
+                  <Skeleton className="aspect-4/3 w-full rounded-lg bg-[#eef2f8]" />
+                  <Skeleton className="mt-3 h-3 w-4/5 rounded bg-[#eef2f8]" />
+                  <Skeleton className="mt-2 h-3 w-1/2 rounded bg-[#eef2f8]" />
                 </div>
               ))}
             </div>
@@ -128,19 +112,19 @@ export default function CreationRemixes({
             ))}
           </div>
         ) : (
-          <div className="creation-remixes-empty flex flex-wrap items-center justify-between gap-x-6 gap-y-4 rounded-xl border border-[#e4eaf2] bg-[#f8fafc] p-5 max-xs:p-4">
+          <div className="creation-remixes-empty border-t border-[#edf0f5] pt-5">
             <div>
-              <p className="text-sm font-medium text-[#526885]">
-                La prochaine version pourrait être la vôtre.
+              <p className="text-[13px] font-medium text-[#526783]">
+                Aucune reprise pour le moment.
               </p>
-              <p className="mt-1 text-[13px] leading-relaxed text-[#71839c]">
-                Reprenez cette idée et apportez-y votre touche.
+              <p className="mt-2 text-xs leading-relaxed text-[#8190a5]">
+                Proposez la première version de cette construction.
               </p>
             </div>
             {isAuthenticated ? (
               <Button
-                variant="outline"
-                className="creation-remixes-create min-h-10 gap-2 rounded-lg border-[#dce6f7] bg-white px-3 text-xs font-semibold text-[#356ae6] hover:border-[#b4c6e5] hover:bg-[#edf3ff]"
+                variant="ghost"
+                className="creation-remixes-create mt-3 h-auto min-h-9 max-w-full justify-start gap-2 rounded-md px-0 text-xs font-semibold whitespace-normal text-[#356ae6] hover:bg-transparent hover:text-[#2458ce] hover:underline hover:underline-offset-4"
                 disabled={!hydrated || creatingVersion}
                 aria-busy={creatingVersion}
                 onClick={onCreateVersion}
@@ -160,7 +144,7 @@ export default function CreationRemixes({
               </Button>
             ) : (
               <SignInTo
-                className="creation-remixes-create min-h-10 gap-2 rounded-lg border border-[#dce6f7] bg-white px-3 hover:border-[#b4c6e5] hover:bg-[#edf3ff]"
+                className="creation-remixes-create mt-3 min-h-9 justify-start gap-2 rounded-md text-xs hover:text-[#2458ce] hover:underline hover:underline-offset-4"
                 title="Connectez-vous pour créer votre version"
               >
                 Créer votre version <ArrowRight size={14} aria-hidden="true" />
@@ -170,8 +154,8 @@ export default function CreationRemixes({
         )}
         {(status === "CanLoadMore" || status === "LoadingMore") && (
           <Button
-            className="creation-remixes-more mx-auto mt-5 flex min-h-10 gap-2 rounded-lg border-[#dfe5ef] bg-white px-4 text-[#526885] hover:border-[#b4c6e5] hover:bg-[#edf3ff] hover:text-[#356ae6]"
-            variant="outline"
+            className="creation-remixes-more mt-5 flex h-auto min-h-9 w-full gap-2 rounded-md px-2 text-xs text-[#63758f] hover:bg-[#f1f4f9] hover:text-[#356ae6]"
+            variant="ghost"
             disabled={!hydrated || status === "LoadingMore"}
             aria-busy={status === "LoadingMore"}
             onClick={() => loadMore(6)}
