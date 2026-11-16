@@ -1045,7 +1045,7 @@ export default function Editor({
                 <div className="relative min-h-0 flex-1">
                   <div
                     inert={playback.active}
-                    className="scene-toolbar p-1.25 gap-0.75 border border-solid border-white absolute top-5 left-1/2 transform-[translateX(-50%)] z-3 flex items-center bg-[#ffffffed] [box-shadow:0_4px_15px_#53668114] rounded-[10px] [&[inert]]:opacity-40"
+                    className="scene-toolbar p-1.25 gap-0.75 border border-solid border-white absolute top-5 left-1/2 transform-[translateX(-50%)] z-3 flex items-center bg-[#ffffffed] [box-shadow:0_4px_15px_#53668114] rounded-[10px] transition-opacity duration-200 motion-reduce:transition-none [&[inert]]:opacity-40"
                   >
                     <div className="tool-group flex border-r border-solid border-r-[#e7ecf2] pr-1 mr-0.5">
                       <button
@@ -1184,6 +1184,7 @@ export default function Editor({
                       scene={playback.scene ?? s.scene}
                       framingScene={s.scene}
                       editable={!closed && !tourActive && !playback.active}
+                      editorView
                       keyboardNavigation={!busy && !publishing && !tourActive}
                       showGrid={s.showGrid}
                       cameraRef={camera}
@@ -1220,7 +1221,7 @@ export default function Editor({
                     )}
                     <div
                       inert={playback.active}
-                      className="view-select gap-2 ml-auto max-w-full flex items-center justify-end flex-wrap pointer-events-none [&[inert]]:opacity-40"
+                      className="view-select gap-2 ml-auto max-w-full flex items-center justify-end flex-wrap pointer-events-none transition-opacity duration-200 motion-reduce:transition-none [&[inert]]:opacity-40"
                     >
                       <Select
                         items={cameraViews}
@@ -1350,7 +1351,7 @@ export default function Editor({
           </ConstructionPlayer>
           <div
             inert={playbackActive}
-            className="editor-side editor-side-right relative min-w-0 min-h-0 bg-white group/editor-side-right border-l border-solid border-l-[#e4e9f1] group-data-[inspector-collapsed=true]/editor-body:border-0 group-data-[inspector-collapsed=true]/editor-body:border-none group-data-[inspector-collapsed=true]/editor-body:border-current [&[inert]]:opacity-50"
+            className="editor-side editor-side-right relative min-w-0 min-h-0 bg-white group/editor-side-right border-l border-solid border-l-[#e4e9f1] group-data-[inspector-collapsed=true]/editor-body:border-0 group-data-[inspector-collapsed=true]/editor-body:border-none group-data-[inspector-collapsed=true]/editor-body:border-current transition-opacity duration-200 motion-reduce:transition-none [&[inert]]:opacity-50"
           >
             <button
               className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 side-panel-toggle group/side-panel-toggle border border-solid border-[#e4e9f1] absolute top-3 right-2 z-4 grid place-items-center rounded-[7px] bg-white text-[#68788e] hover:border-[#cddcfa] hover:bg-[#edf3ff] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 aria-[expanded=false]:top-5 aria-[expanded=false]:right-3 aria-[expanded=false]:[box-shadow:0_2px_8px_#23334d14] size-7.5"

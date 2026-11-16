@@ -145,7 +145,13 @@ Pour isoler les données de recette entre plusieurs worktrees, `CLIK_E2E_PUBLIC_
 
 Les onze contrôles existants d’import et de publication passent aussi sous Chromium avec ce transport isolé, dont le rechargement après import, l’annulation/rétablissement, la miniature, la révision, le transfert local vers le compte et la mise à jour d’une publication.
 
-La suite navigateur exhaustive n’est pas validée par ce passage : deux anciens scénarios de `editor.spec.ts` ont un sélecteur global de statut devenu ambigu, un scénario d’accueil attend un ancien titre, et le scénario de galerie sans fixture nécessite un backend accessible. Ces échecs sont distincts des neuf scénarios du lecteur.
+La suite navigateur exhaustive n’est pas validée par ce passage : deux anciens scénarios de `editor.spec.ts` ont un sélecteur global de statut devenu ambigu, un scénario d’accueil attend un ancien titre, et le scénario de galerie sans fixture nécessite un backend accessible. Ces échecs sont distincts des scénarios du lecteur.
+
+## Lecteur compact et continuité de la vue
+
+La barre est contrôlée sur ordinateur et mobile : hauteur de 40 px, commandes alignées sur une ligne, absence de débordement, vitesse cyclique au clic et au clavier, et place du retour à l’édition conservée. Le curseur personnalisé reste manipulable à la souris, au toucher et au clavier sur les trois moteurs.
+
+Les 15 contrôles navigateur ciblés passent sous Chromium, Firefox et WebKit (12 pour le lecteur, 3 pour les contrôles de vue publics). Un scénario compare les pixels avant, pendant et après le mode lecture avec une vue de dessus cadrée et l’éclairage uniforme activé : surface des pièces, centre et couleurs restent identiques dans les tolérances de rendu, ainsi que les dimensions exactes du canvas. Les captures du lecteur compact ont été inspectées sur ordinateur et mobile. Les 1 133 tests automatisés, TypeScript et le build client/serveur passent également.
 
 ## Limites et contrôles de recette restants
 

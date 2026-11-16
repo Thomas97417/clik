@@ -285,6 +285,7 @@ function Stage({
   scene,
   framingScene,
   editable,
+  editorView,
   keyboardNavigation,
   showGrid,
   onViewControls,
@@ -295,6 +296,7 @@ function Stage({
   scene: SceneDocument;
   framingScene?: SceneDocument;
   editable: boolean;
+  editorView: boolean;
   keyboardNavigation: boolean;
   showGrid: boolean;
   onViewControls?: (actions: ViewActions | null) => void;
@@ -329,8 +331,8 @@ function Stage({
   );
   const [resetView, setResetView] = useState(0);
   // Rotate the original light around Y, keeping its elevation and intensity.
-  const lightAngle = ((editable ? s.lightAngle : 0) * Math.PI) / 180;
-  const uniformLighting = editable && s.uniformLighting;
+  const lightAngle = ((editorView ? s.lightAngle : 0) * Math.PI) / 180;
+  const uniformLighting = editorView && s.uniformLighting;
   const [library, setLibrary] = useState<{
     preview: SelectionPreview | null;
     free: Part | null;
@@ -377,8 +379,8 @@ function Stage({
       camera.updateProjectionMatrix();
     }
   });
-  const frame = editable ? s.frame : 0,
-    view = editable ? s.view : "perspective";
+  const frame = editorView ? s.frame : 0,
+    view = editorView ? s.view : "perspective";
   useEffect(() => {
     const framing = framingScene ?? scene;
     const boxes = framing.nodes
@@ -401,7 +403,7 @@ function Stage({
     const center = box.getCenter(new Vector3()),
       aspect = "aspect" in camera ? (camera.aspect as number) : 1,
       size = Math.max(
-        editable ? 25 : 9,
+        editorView ? 25 : 9,
         box.getSize(new Vector3()).length() * 1.6 * Math.max(1, 1 / aspect),
       );
     const direction =
@@ -425,7 +427,7 @@ function Stage({
     camera.near = 0.1;
     camera.far = Math.max(1000, size * 4);
     camera.updateProjectionMatrix();
-    if (!editable) camera.up.set(0, 1, 0);
+    if (!editorView) camera.up.set(0, 1, 0);
     camera.lookAt(center);
     controls.current?.target.copy(center);
     controls.current?.update();
@@ -453,7 +455,7 @@ function Stage({
     <>
       <color attach="background" args={["#edf1f7"]} />
       {/* Fill shadowed faces from every direction while keeping the key light's relief. */}
-      <ambientLight intensity={editable ? 2.6 : 1.6} />
+      <ambientLight intensity={editorView ? 2.6 : 1.6} />
       {uniformLighting ? (
         // Shadow-free fill on all six sides, including underneath. Slightly
         // different strengths per axis keep edges and curved studs readable.
@@ -482,7 +484,7 @@ function Stage({
           shadow-bias={-0.0005}
         />
       )}
-      {(editable ? s.showGrid : showGrid) && <GroundGrid step={gridStep} />}
+      {(editorView ? s.showGrid : showGrid) && <GroundGrid step={gridStep} />}
       {!uniformLighting && (
         <mesh
           rotation={[-Math.PI / 2, 0, 0]}
@@ -538,7 +540,7 @@ function Stage({
       <KeyboardCamera controls={controls} enabled={keyboardNavigation} />
       {/* Remounting cancels a pending axis tween that would override the reset. */}
       <GizmoHelper
-        key={editable ? "editor" : resetView}
+        key={editorView ? "editor" : resetView}
         alignment="bottom-right"
         margin={CAMERA_GIZMO_MARGIN}
       >
@@ -554,6 +556,7 @@ export default function Scene({
   scene,
   framingScene,
   editable = false,
+  editorView = editable,
   keyboardNavigation = false,
   showGrid = true,
   showViewControls = false,
@@ -562,6 +565,7 @@ export default function Scene({
   scene: SceneDocument;
   framingScene?: SceneDocument;
   editable?: boolean;
+  editorView?: boolean;
   keyboardNavigation?: boolean;
   showGrid?: boolean;
   showViewControls?: boolean;
@@ -604,6 +608,7 @@ export default function Scene({
           scene={liveScene}
           framingScene={framingScene}
           editable={editable}
+          editorView={editorView}
           keyboardNavigation={keyboardNavigation}
           showGrid={showGrid}
           onViewControls={showViewControls ? setViewActions : undefined}

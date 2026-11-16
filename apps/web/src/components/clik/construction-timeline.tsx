@@ -1,10 +1,14 @@
-import { History, Pause, Play, SkipBack } from "lucide-react";
+import { useId, type CSSProperties } from "react";
+import { Pause, PencilLine, Play, SkipBack } from "lucide-react";
 import type { ConstructionPlayback } from "@/lib/clik/use-construction-playback";
 import { playbackTime } from "@/lib/clik/construction-timeline";
 import { cn } from "@/lib/utils";
+import "./construction-timeline.css";
 
 const controlClass =
-  "grid size-8 shrink-0 cursor-pointer place-items-center rounded-lg text-[#64758d] transition-colors hover:bg-[#edf2fc] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#356ae6] disabled:cursor-not-allowed disabled:opacity-40";
+  "grid size-7 shrink-0 cursor-pointer place-items-center rounded-md text-[#7b8ba3] transition-colors duration-150 hover:bg-[#edf2fc] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#356ae6] disabled:cursor-not-allowed disabled:opacity-30 motion-reduce:transition-none";
+const speeds = [0.5, 1, 2, 4];
+const speedLabel = (speed: number) => `${String(speed).replace(".", ",")}×`;
 
 export default function ConstructionTimeline({
   playback,
@@ -17,6 +21,7 @@ export default function ConstructionTimeline({
   disabled?: boolean;
   className?: string;
 }) {
+  const descriptionId = useId();
   if (!playback.available || !playback.timeline) return null;
   const { timeline } = playback;
   const count =
@@ -24,104 +29,124 @@ export default function ConstructionTimeline({
     timeline.steps
       .slice(0, playback.step)
       .reduce((sum, step) => sum + step.ids.length, 0);
+  const nextSpeed =
+    speeds[(speeds.indexOf(playback.speed) + 1) % speeds.length];
   return (
     <div
       className={cn(
-        "construction-timeline shrink-0 bg-white px-4 py-3 text-[#64758d]",
+        "construction-timeline flex h-10 min-w-0 shrink-0 items-center gap-1 bg-white/75 px-2.5 text-[#7b8ba3]",
         className,
       )}
       role="group"
       aria-label="Lecture de la construction"
+      aria-describedby={descriptionId}
+      data-active={playback.active}
       onKeyDown={(event) => {
         // Playback shortcuts must never reach the editor's mutation shortcuts.
         event.stopPropagation();
         if (event.key === "Escape" && editor) playback.stop();
       }}
     >
-      <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px]">
-        <span className="flex items-center gap-1.5 font-semibold text-[#354d70]">
-          <History size={14} aria-hidden="true" />
-          Évolution de la construction
-        </span>
-        <span className="construction-progress ml-auto tabular-nums">
-          {count} / {timeline.total} pièces
-        </span>
-        {editor && playback.active && (
-          <button
-            type="button"
-            className="cursor-pointer rounded text-[#356ae6] underline underline-offset-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#356ae6]"
-            onClick={playback.stop}
-          >
-            Revenir à l’édition
-          </button>
+      <button
+        type="button"
+        className={cn(
+          controlClass,
+          "relative rounded-full text-[#526f9d] data-[playing=true]:bg-[#eaf0fc] data-[playing=true]:text-[#356ae6]",
         )}
-      </div>
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          className={cn(
-            controlClass,
-            "bg-[#356ae6] text-white hover:bg-[#2458ce] hover:text-white",
-          )}
-          aria-label={
-            playback.playing
-              ? "Mettre en pause la construction"
-              : "Lire la construction"
-          }
-          disabled={disabled}
-          onClick={playback.toggle}
-        >
-          {playback.playing ? (
-            <Pause size={16} aria-hidden="true" />
-          ) : (
-            <Play size={16} aria-hidden="true" />
-          )}
-        </button>
-        <button
-          type="button"
-          className={controlClass}
-          aria-label="Revenir au début de la construction"
-          disabled={disabled}
-          onClick={() => playback.seek(0)}
-        >
-          <SkipBack size={16} aria-hidden="true" />
-        </button>
-        <input
-          type="range"
-          className="min-w-10 flex-1 cursor-pointer accent-[#356ae6] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#356ae6] disabled:cursor-not-allowed disabled:opacity-40"
-          aria-label="Progression de la construction"
-          aria-valuetext={`${count} pièces sur ${timeline.total}, ${playbackTime(playback.time)} sur ${playbackTime(playback.duration)}`}
-          min={0}
-          max={playback.duration}
-          step={1}
-          value={playback.time}
-          disabled={disabled}
-          onChange={(event) => playback.seek(Number(event.currentTarget.value))}
-        />
-        <span className="shrink-0 text-[10px] tabular-nums" aria-hidden="true">
-          {playbackTime(playback.time)} / {playbackTime(playback.duration)}
-        </span>
-        <select
-          className="h-8 cursor-pointer rounded-md border border-[#e1e7f0] bg-white px-1 text-[11px] focus-visible:outline-2 focus-visible:outline-[#356ae6] disabled:opacity-40"
-          aria-label="Vitesse de lecture"
-          value={playback.speed}
-          disabled={disabled}
-          onChange={(event) =>
-            playback.setSpeed(Number(event.currentTarget.value))
-          }
-        >
-          {[0.5, 1, 2, 4].map((speed) => (
-            <option key={speed} value={speed}>
-              {String(speed).replace(".", ",")}×
-            </option>
-          ))}
-        </select>
-      </div>
-      <p
-        className="mt-2 text-[10px] leading-relaxed text-[#8190a5]"
-        title="Les pièces apparaissent dans leur ordre de pose, à leur position actuelle. Les longues pauses sont raccourcies."
+        aria-label={
+          playback.playing
+            ? "Mettre en pause la construction"
+            : "Lire la construction"
+        }
+        title={playback.playing ? "Pause" : "Revoir la construction"}
+        data-playing={playback.playing}
+        disabled={disabled}
+        onClick={playback.toggle}
       >
-        Pièces à leur position actuelle · pauses raccourcies
+        <Play
+          size={14}
+          aria-hidden="true"
+          className={cn(
+            "absolute transition-[opacity,transform] duration-150 motion-reduce:transition-none",
+            playback.playing ? "scale-75 opacity-0" : "scale-100 opacity-100",
+          )}
+        />
+        <Pause
+          size={14}
+          aria-hidden="true"
+          className={cn(
+            "absolute transition-[opacity,transform] duration-150 motion-reduce:transition-none",
+            playback.playing ? "scale-100 opacity-100" : "scale-75 opacity-0",
+          )}
+        />
+      </button>
+      <button
+        type="button"
+        className={controlClass}
+        aria-label="Revenir au début de la construction"
+        title="Revenir au début"
+        disabled={disabled}
+        onClick={() => playback.seek(0)}
+      >
+        <SkipBack size={13} aria-hidden="true" />
+      </button>
+      <input
+        type="range"
+        className="construction-range mx-1 h-6 min-w-8 flex-1 cursor-pointer appearance-none bg-transparent focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#356ae6] disabled:cursor-not-allowed disabled:opacity-40"
+        aria-label="Progression de la construction"
+        aria-valuetext={`${count} pièces sur ${timeline.total}, ${playbackTime(playback.time)} sur ${playbackTime(playback.duration)}`}
+        title={`${count} / ${timeline.total} pièces`}
+        min={0}
+        max={playback.duration}
+        step={1}
+        value={playback.time}
+        style={
+          {
+            "--construction-progress": `${(playback.time / playback.duration) * 100}%`,
+          } as CSSProperties
+        }
+        disabled={disabled}
+        onChange={(event) => playback.seek(Number(event.currentTarget.value))}
+      />
+      <span
+        className="shrink-0 whitespace-nowrap px-1 text-right text-[10px] tabular-nums"
+        style={{
+          minWidth: `${playbackTime(playback.duration).length * 2 + 3}ch`,
+        }}
+        aria-hidden="true"
+      >
+        {playbackTime(playback.time)} / {playbackTime(playback.duration)}
+      </span>
+      <button
+        type="button"
+        className={cn(controlClass, "w-9 text-[11px] font-medium tabular-nums")}
+        aria-label={`Vitesse de lecture : ${speedLabel(playback.speed)}`}
+        title={`Vitesse ${speedLabel(playback.speed)} · passer à ${speedLabel(nextSpeed)}`}
+        disabled={disabled}
+        onClick={() => playback.setSpeed(nextSpeed)}
+      >
+        {speedLabel(playback.speed)}
+      </button>
+      {editor && (
+        <button
+          type="button"
+          className={cn(controlClass, "enabled:text-[#356ae6]")}
+          aria-label="Revenir à l’édition"
+          title={
+            playback.active ? "Revenir à l’édition (Échap)" : "Mode édition"
+          }
+          disabled={!playback.active || disabled}
+          onClick={playback.stop}
+        >
+          <PencilLine size={14} aria-hidden="true" />
+        </button>
+      )}
+      <span className="construction-progress sr-only">
+        {count} / {timeline.total} pièces
+      </span>
+      <p id={descriptionId} className="sr-only">
+        Les pièces apparaissent dans leur ordre de pose, à leur position
+        actuelle. Les longues pauses sont raccourcies.
         {timeline.baseline > 0 ? " · pièces antérieures déjà présentes" : ""}
       </p>
     </div>

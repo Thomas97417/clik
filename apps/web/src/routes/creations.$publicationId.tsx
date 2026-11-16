@@ -278,7 +278,7 @@ function CreationDetail({
                   </div>
                   <ConstructionTimeline
                     playback={playback}
-                    className="mt-3 rounded-xl border border-[#e4eaf2]"
+                    className="mt-2 rounded-lg border border-[#e9edf4]"
                   />
                 </>
               )}

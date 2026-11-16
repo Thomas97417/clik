@@ -38,6 +38,7 @@ export default function ClientScene(props: {
   scene: SceneDocument;
   framingScene?: SceneDocument;
   editable?: boolean;
+  editorView?: boolean;
   keyboardNavigation?: boolean;
   showGrid?: boolean;
   showViewControls?: boolean;

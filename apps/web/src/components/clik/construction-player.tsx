@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, type ReactNode } from "react";
 import type { SceneDocument } from "@clik/scene";
 import {
   useConstructionPlayback,
@@ -16,7 +16,7 @@ export default function ConstructionPlayer({
   children: (playback: ConstructionPlayback) => ReactNode;
 }) {
   const playback = useConstructionPlayback(scene);
-  useEffect(() => {
+  useLayoutEffect(() => {
     onActiveChange?.(playback.active);
   }, [playback.active, onActiveChange]);
   useEffect(() => {

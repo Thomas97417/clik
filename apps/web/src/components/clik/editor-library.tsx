@@ -343,7 +343,7 @@ const EditorLibrary = memo(function EditorLibrary({
                       key={part.id}
                       type="button"
                       className={cn(
-                        "piece-card group/piece-card relative flex h-24.5 min-w-0 touch-none select-none flex-col items-center justify-center gap-0.5 rounded-lg border border-solid border-transparent bg-white px-1 py-1.5 text-[#253249] transition-colors cursor-grab hover:border-[#c3d4fb] hover:bg-[#eef3ff] active:cursor-grabbing disabled:cursor-default disabled:opacity-40 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#356ae6]",
+                        "piece-card group/piece-card relative flex h-24.5 min-w-0 touch-none select-none flex-col items-center justify-center gap-0.5 rounded-lg border border-solid border-transparent bg-white px-1 py-1.5 text-[#253249] transition-[background-color,border-color,opacity] duration-200 motion-reduce:transition-none cursor-grab hover:border-[#c3d4fb] hover:bg-[#eef3ff] active:cursor-grabbing disabled:cursor-default disabled:opacity-40 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#356ae6]",
                         pending === part.id &&
                           "active border-[#8dacf1] bg-[#eef3ff]",
                       )}

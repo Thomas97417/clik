@@ -17,6 +17,35 @@ async function scrub(page: Page, slider: Locator, fraction: number) {
   await page.mouse.up();
 }
 
+async function expectSingleLine(timeline: Locator) {
+  const metrics = await timeline.evaluate((element) => {
+    const controls = [...element.querySelectorAll("button, input")].map(
+      (control) => {
+        const box = control.getBoundingClientRect();
+        return box.y + box.height / 2;
+      },
+    );
+    return {
+      height: element.getBoundingClientRect().height,
+      overflow: element.scrollWidth > element.clientWidth,
+      spread: Math.max(...controls) - Math.min(...controls),
+    };
+  });
+  expect(metrics.height).toBeLessThanOrEqual(42);
+  expect(metrics.overflow).toBe(false);
+  expect(metrics.spread).toBeLessThan(1);
+  await expect(timeline.getByRole("combobox")).toHaveCount(0);
+}
+
+async function setSpeed(timeline: Locator, speed: string) {
+  const button = timeline.getByRole("button", { name: /^Vitesse de lecture/ });
+  for (let attempt = 0; attempt < 4; attempt++) {
+    if ((await button.textContent()) === speed) return;
+    await button.click();
+  }
+  await expect(button).toHaveText(speed);
+}
+
 test("atelier : dates persistantes, lecture, pause, déplacement souris et retour à l’édition sans modification", async ({
   page,
 }, info) => {
@@ -65,6 +94,17 @@ test("atelier : dates persistantes, lecture, pause, déplacement souris et retou
   const slider = timeline.getByRole("slider");
   const canvas = page.locator(".viewport canvas");
   await expect(canvas).toHaveAttribute("data-rendered", "3");
+  await expectSingleLine(timeline);
+  const speedButton = timeline.getByRole("button", {
+    name: /^Vitesse de lecture/,
+  });
+  await expect(speedButton).toHaveText("1×");
+  await speedButton.press("Enter");
+  await expect(speedButton).toHaveText("2×");
+  for (const speed of ["4×", "0,5×", "1×"]) {
+    await speedButton.click();
+    await expect(speedButton).toHaveText(speed);
+  }
   await expect(timeline.locator(".construction-progress")).toHaveText(
     "3 / 3 pièces",
   );
@@ -102,7 +142,7 @@ test("atelier : dates persistantes, lecture, pause, déplacement souris et retou
   await slider.focus();
   await slider.press("End");
   await expect(canvas).toHaveAttribute("data-rendered", "3");
-  await timeline.getByLabel("Vitesse de lecture").selectOption("4");
+  await setSpeed(timeline, "4×");
   await timeline
     .getByRole("button", { name: "Lire la construction", exact: true })
     .click();
@@ -118,7 +158,7 @@ test("atelier : dates persistantes, lecture, pause, déplacement souris et retou
   await expect(canvas).toHaveAttribute("data-rendered", "3");
   await expect(
     timeline.getByRole("button", { name: "Revenir à l’édition" }),
-  ).toHaveCount(0);
+  ).toBeDisabled();
   await expect(
     page
       .getByRole("complementary", { name: "Bibliothèque de pièces" })
@@ -165,6 +205,7 @@ test("galerie : lecture publique, timeline tactile et clavier sur mobile", async
   await expect(canvas).toHaveAttribute("data-rendered", "3");
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 1000 });
+    await expectSingleLine(timeline);
     const slider = timeline.getByRole("slider");
     await timeline
       .getByRole("button", { name: "Revenir au début de la construction" })
@@ -185,7 +226,7 @@ test("galerie : lecture publique, timeline tactile et clavier sur mobile", async
     await slider.focus();
     await slider.press("End");
     await expect(canvas).toHaveAttribute("data-rendered", "3");
-    await timeline.getByLabel("Vitesse de lecture").selectOption("4");
+    await setSpeed(timeline, "4×");
     await timeline
       .getByRole("button", { name: "Lire la construction", exact: true })
       .click();
@@ -208,6 +249,101 @@ test("galerie : lecture publique, timeline tactile et clavier sur mobile", async
       path: `/tmp/clik-construction-public-${info.project.name}-${width}.png`,
     });
   }
+});
+
+test("atelier : la lecture conserve la caméra, l’éclairage et la taille du canvas", async ({
+  page,
+}) => {
+  await page.goto("/editor?draft=playback-view");
+  for (const name of ["Brique 1 × 1", "Brique 2 × 2", "Brique 2 × 4"])
+    await page.getByRole("button", { name, exact: true }).click();
+  const canvas = page.locator(".viewport canvas");
+  await expect(canvas).toHaveAttribute("data-rendered", "3");
+  // Clear the selection so its tint does not affect the lighting comparison.
+  await canvas.click({ position: { x: 20, y: 100 } });
+  await expect(page.locator(".tree-row.selected")).toHaveCount(0);
+  await page.keyboard.press("f");
+  await page.getByRole("combobox", { name: "Vue de la caméra" }).click();
+  await page.getByRole("option", { name: "Dessus", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Tout éclairer", exact: true })
+    .click();
+  const pixels = () =>
+    canvas.evaluate((canvas: HTMLCanvasElement) => {
+      const copy = document.createElement("canvas");
+      copy.width = canvas.width;
+      copy.height = canvas.height;
+      const context = copy.getContext("2d")!;
+      context.drawImage(canvas, 0, 0);
+      const { data } = context.getImageData(0, 0, copy.width, copy.height);
+      let count = 0,
+        x = 0,
+        y = 0,
+        red = 0,
+        green = 0,
+        blue = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i + 2] > data[i] * 1.2 && data[i + 2] > data[i + 1] * 1.1) {
+          count++;
+          x += (i / 4) % copy.width;
+          y += Math.floor(i / 4 / copy.width);
+          red += data[i];
+          green += data[i + 1];
+          blue += data[i + 2];
+        }
+      }
+      return {
+        count,
+        x: x / count,
+        y: y / count,
+        red: red / count,
+        green: green / count,
+        blue: blue / count,
+      };
+    });
+  const frame = Number(await canvas.getAttribute("data-frames"));
+  await expect
+    .poll(async () => Number(await canvas.getAttribute("data-frames")))
+    .toBeGreaterThan(frame + 5);
+  const before = await pixels();
+  const bounds = await canvas.boundingBox();
+  const timeline = page.getByRole("group", {
+    name: "Lecture de la construction",
+    exact: true,
+  });
+  const slider = timeline.getByRole("slider");
+  await slider.focus();
+  await slider.press("Home");
+  await slider.press("End");
+  await expect(
+    timeline.getByRole("button", { name: "Revenir à l’édition" }),
+  ).toBeEnabled();
+  const expectSameView = async () => {
+    await expect
+      .poll(async () => {
+        const current = await pixels();
+        return Math.max(
+          ...["x", "y", "red", "green", "blue"].map((key) =>
+            Math.abs(
+              current[key as keyof typeof current] -
+                before[key as keyof typeof before],
+            ),
+          ),
+        );
+      })
+      .toBeLessThan(0.5);
+    expect(
+      Math.abs((await pixels()).count - before.count) / before.count,
+    ).toBeLessThan(0.01);
+    expect(await canvas.boundingBox()).toEqual(bounds);
+    await expectSingleLine(timeline);
+  };
+  await expectSameView();
+  await timeline.getByRole("button", { name: "Revenir à l’édition" }).click();
+  await expectSameView();
+  await expect(
+    page.getByRole("button", { name: "Tout éclairer", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
 });
 
 test("les publications anciennes sans dates n’affichent pas de lecteur", async ({
