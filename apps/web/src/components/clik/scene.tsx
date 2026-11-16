@@ -286,6 +286,7 @@ function Stage({
   framingScene,
   editable,
   editorView,
+  onEdit,
   keyboardNavigation,
   showGrid,
   onViewControls,
@@ -297,6 +298,7 @@ function Stage({
   framingScene?: SceneDocument;
   editable: boolean;
   editorView: boolean;
+  onEdit?: () => void;
   keyboardNavigation: boolean;
   showGrid: boolean;
   onViewControls?: (actions: ViewActions | null) => void;
@@ -521,8 +523,9 @@ function Stage({
       {editable && s.tool === "rotate" && !s.boxSelect && (
         <Manipulator rotation={rotation} />
       )}
-      {editable && (
+      {(editable || onEdit) && (
         <Gestures
+          onEdit={onEdit}
           controls={controls}
           rotation={rotation}
           onLibraryPreview={onLibraryPreview}
@@ -557,6 +560,7 @@ export default function Scene({
   framingScene,
   editable = false,
   editorView = editable,
+  onEdit,
   keyboardNavigation = false,
   showGrid = true,
   showViewControls = false,
@@ -566,6 +570,7 @@ export default function Scene({
   framingScene?: SceneDocument;
   editable?: boolean;
   editorView?: boolean;
+  onEdit?: () => void;
   keyboardNavigation?: boolean;
   showGrid?: boolean;
   showViewControls?: boolean;
@@ -609,6 +614,7 @@ export default function Scene({
           framingScene={framingScene}
           editable={editable}
           editorView={editorView}
+          onEdit={onEdit}
           keyboardNavigation={keyboardNavigation}
           showGrid={showGrid}
           onViewControls={showViewControls ? setViewActions : undefined}

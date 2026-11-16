@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, type ReactNode } from "react";
+import { useLayoutEffect, type ReactNode, type RefObject } from "react";
 import type { SceneDocument } from "@clik/scene";
 import {
   useConstructionPlayback,
@@ -8,24 +8,22 @@ import {
 /** Keep animation frames out of the editor's library, tree and inspector. */
 export default function ConstructionPlayer({
   scene,
-  onActiveChange,
+  stopRef,
+  editing = false,
   children,
 }: {
   scene: SceneDocument;
-  onActiveChange?: (active: boolean) => void;
+  stopRef?: RefObject<(() => void) | null>;
+  editing?: boolean;
   children: (playback: ConstructionPlayback) => ReactNode;
 }) {
-  const playback = useConstructionPlayback(scene);
+  const playback = useConstructionPlayback(scene, editing);
   useLayoutEffect(() => {
-    onActiveChange?.(playback.active);
-  }, [playback.active, onActiveChange]);
-  useEffect(() => {
-    if (!playback.active || !onActiveChange) return;
-    const key = (event: KeyboardEvent) => {
-      if (event.key === "Escape") playback.stop();
+    if (!stopRef) return;
+    stopRef.current = playback.stop;
+    return () => {
+      if (stopRef.current === playback.stop) stopRef.current = null;
     };
-    window.addEventListener("keydown", key);
-    return () => window.removeEventListener("keydown", key);
-  }, [playback.active, onActiveChange, playback.stop]);
+  }, [stopRef, playback.stop]);
   return children(playback);
 }

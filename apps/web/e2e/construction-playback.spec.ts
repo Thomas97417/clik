@@ -1,8 +1,20 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { emptyScene, makePart } from "@clik/scene";
 import { creatorsFixture } from "./fixtures/creators";
+import { dragLibrary } from "./drag-library";
+import { selectCameraView } from "./camera-view";
 
 test.use({ hasTouch: true });
+
+test.beforeEach(async ({ page }) => {
+  // Local editor tests must stay anonymous even while the public HTTP fixture is running.
+  await page.route("**/api/auth/get-session*", (route) =>
+    route.fulfill({ json: null }),
+  );
+  await page.route("**/api/auth/convex/token*", (route) =>
+    route.fulfill({ json: { token: null } }),
+  );
+});
 
 async function scrub(page: Page, slider: Locator, fraction: number) {
   const box = (await slider.boundingBox())!;
@@ -112,19 +124,17 @@ test("atelier : dates persistantes, lecture, pause, déplacement souris et retou
     .getByRole("button", { name: "Revenir au début de la construction" })
     .click();
   await expect(canvas).toHaveAttribute("data-rendered", "0");
-  await page.keyboard.press("Delete");
-  await page.keyboard.press("Control+d");
   await expect(
     page
       .getByRole("complementary", { name: "Bibliothèque de pièces" })
       .getByRole("button", { name: "Brique 1 × 1", exact: true }),
-  ).toBeDisabled();
+  ).toBeEnabled();
   await expect(
     page.getByRole("button", { name: "Importer un projet", exact: true }),
-  ).toBeDisabled();
+  ).toBeEnabled();
   await expect(
     page.getByRole("button", { name: "Aide de l’atelier", exact: true }),
-  ).toBeDisabled();
+  ).toBeEnabled();
   await timeline
     .getByRole("button", { name: "Lire la construction", exact: true })
     .click();
@@ -249,6 +259,248 @@ test("galerie : lecture publique, timeline tactile et clavier sur mobile", async
       path: `/tmp/clik-construction-public-${info.project.name}-${width}.png`,
     });
   }
+});
+
+test("atelier : prendre une pièce interrompt la lecture et conserve un dépôt unique annulable", async ({
+  page,
+}) => {
+  await page.goto("/editor?draft=playback-drop");
+  const library = page.getByRole("complementary", {
+    name: "Bibliothèque de pièces",
+  });
+  for (const name of ["Brique 1 × 1", "Brique 2 × 2"])
+    await library.getByRole("button", { name, exact: true }).click();
+  const timeline = page.getByRole("group", {
+    name: "Lecture de la construction",
+    exact: true,
+  });
+  const canvas = page.locator(".viewport canvas");
+  await expect(canvas).toHaveAttribute("data-rendered", "2");
+  await setSpeed(timeline, "0,5×");
+  const bounds = (await canvas.boundingBox())!;
+  let count = 2;
+  for (const mode of ["playing", "paused", "finished"]) {
+    await timeline
+      .getByRole("button", { name: "Revenir au début de la construction" })
+      .click();
+    if (mode === "playing")
+      await timeline
+        .getByRole("button", { name: "Lire la construction", exact: true })
+        .click();
+    if (mode === "finished") await timeline.getByRole("slider").press("End");
+    await expect(timeline).toHaveAttribute("data-active", "true");
+    await dragLibrary(
+      page,
+      "Plaque 2 × 2",
+      bounds.x + bounds.width / 2,
+      bounds.y + bounds.height / 2,
+    );
+    await expect(timeline).toHaveAttribute("data-active", "false");
+    await expect(canvas).toHaveAttribute("data-rendered", String(count));
+    await page.mouse.up();
+    await expect(canvas).toHaveAttribute("data-rendered", String(++count));
+    await expect(page.locator(".piece-card.active")).toHaveCount(0);
+    await expect(
+      timeline.getByRole("button", {
+        name: "Lire la construction",
+        exact: true,
+      }),
+    ).toBeEnabled();
+    await page.keyboard.press("Control+z");
+    await expect(canvas).toHaveAttribute("data-rendered", String(count - 1));
+    await page.keyboard.press("Control+Shift+z");
+    await expect(canvas).toHaveAttribute("data-rendered", String(count));
+  }
+  // Clicks and keyboard additions also leave playback without an explicit mode change.
+  const card = library.getByRole("button", {
+    name: "Brique 1 × 1",
+    exact: true,
+  });
+  for (const action of ["click", "keyboard"]) {
+    await timeline
+      .getByRole("button", { name: "Revenir au début de la construction" })
+      .click();
+    if (action === "click") await card.click();
+    else await card.press("Enter");
+    await expect(timeline).toHaveAttribute("data-active", "false");
+    await expect(canvas).toHaveAttribute("data-rendered", String(++count));
+    await expect(
+      timeline.getByRole("button", {
+        name: "Lire la construction",
+        exact: true,
+      }),
+    ).toBeEnabled();
+  }
+  await expect(
+    page.getByLabel("Projet et sauvegarde").getByRole("status"),
+  ).toContainText("Enregistré");
+  await page.reload();
+  await expect(canvas).toHaveAttribute("data-rendered", String(count));
+});
+
+test("atelier : annuler une pose après lecture ne bloque ni la bibliothèque ni le lecteur", async ({
+  page,
+}) => {
+  await page.goto("/editor?draft=playback-cancel-drop");
+  await page.locator('.piece-card[aria-label="Brique 2 × 2"]').click();
+  const timeline = page.getByRole("group", {
+    name: "Lecture de la construction",
+    exact: true,
+  });
+  const canvas = page.locator(".viewport canvas");
+  await expect(canvas).toHaveAttribute("data-rendered", "1");
+  const bounds = (await canvas.boundingBox())!;
+  await page.evaluate(() =>
+    window.addEventListener(
+      "pointerdown",
+      (event) => {
+        document.body.dataset.libraryPointerId = String(event.pointerId);
+      },
+      true,
+    ),
+  );
+  for (const action of ["escape", "outside", "blur", "cancel", "capture"]) {
+    await timeline
+      .getByRole("button", { name: "Revenir au début de la construction" })
+      .click();
+    await dragLibrary(
+      page,
+      "Brique 1 × 4",
+      bounds.x + bounds.width / 2,
+      bounds.y + bounds.height / 2,
+    );
+    if (action === "escape") await page.keyboard.press("Escape");
+    if (action === "outside")
+      await page.mouse.move(180, bounds.y + bounds.height / 2);
+    if (action === "blur")
+      await page.evaluate(() => window.dispatchEvent(new Event("blur")));
+    if (action === "cancel")
+      await page.locator(".piece-card.active").evaluate((card) => {
+        card.dispatchEvent(
+          new PointerEvent("pointercancel", {
+            pointerId: Number(document.body.dataset.libraryPointerId),
+            bubbles: true,
+          }),
+        );
+      });
+    if (action === "capture")
+      await page.locator(".piece-card.active").evaluate((card) => {
+        card.releasePointerCapture(
+          Number(document.body.dataset.libraryPointerId),
+        );
+      });
+    await page.mouse.up();
+    await expect(canvas).toHaveAttribute("data-rendered", "1");
+    await expect(page.locator(".piece-card.active")).toHaveCount(0);
+    await expect(timeline).toHaveAttribute("data-active", "false");
+    await expect(
+      timeline.getByRole("button", {
+        name: "Lire la construction",
+        exact: true,
+      }),
+    ).toBeEnabled();
+  }
+  // Reproduce an interrupted press arriving while the reader is already active.
+  await timeline
+    .getByRole("button", { name: "Revenir au début de la construction" })
+    .click();
+  await page.evaluate(async () => {
+    const path = "/src/lib/clik/store.ts";
+    const { useEditor } = await import(/* @vite-ignore */ path);
+    useEditor.setState({
+      pending: "brick-1x4",
+      libraryPointer: { id: 123, type: "brick-1x4", x: 0, y: 0 },
+    });
+  });
+  await expect(timeline).toHaveAttribute("data-active", "false");
+  await expect(canvas).toHaveAttribute("data-rendered", "1");
+  await page.keyboard.press("Escape");
+  await expect(
+    timeline.getByRole("button", { name: "Lire la construction", exact: true }),
+  ).toBeEnabled();
+  await expect(page.locator(".piece-card.active")).toHaveCount(0);
+  await page.locator('.piece-card[aria-label="Brique 1 × 4"]').click();
+  await expect(canvas).toHaveAttribute("data-rendered", "2");
+});
+
+test("atelier : déplacer une pièce visible quitte la lecture, tourner la caméra la conserve", async ({
+  page,
+}) => {
+  await page.goto("/editor?draft=playback-move");
+  await page.locator('.piece-card[aria-label="Brique 2 × 2"]').click();
+  await selectCameraView(page, "top");
+  await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
+  const position = () =>
+    Promise.all(
+      ["X", "Y", "Z"].map((axis) =>
+        page.getByLabel(`position ${axis}`, { exact: true }).inputValue(),
+      ),
+    );
+  const before = await position();
+  const timeline = page.getByRole("group", {
+    name: "Lecture de la construction",
+    exact: true,
+  });
+  const canvas = page.locator(".viewport canvas");
+  await timeline
+    .getByRole("button", { name: "Revenir au début de la construction" })
+    .click();
+  await timeline.getByRole("slider").press("End");
+  await expect(canvas).toHaveAttribute("data-rendered", "1");
+  const box = (await canvas.boundingBox())!;
+  await page.mouse.move(box.x + 20, box.y + 100);
+  await page.mouse.down();
+  await page.mouse.move(box.x + 60, box.y + 120, { steps: 8 });
+  await page.mouse.up();
+  await expect(timeline).toHaveAttribute("data-active", "true");
+  const x = box.x + box.width / 2,
+    y = box.y + box.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + 100, y + 30, { steps: 12 });
+  await expect(timeline).toHaveAttribute("data-active", "false");
+  await expect(canvas).toHaveAttribute("data-dragging", "true");
+  const frames = Number(await canvas.getAttribute("data-frames"));
+  await expect
+    .poll(async () => Number(await canvas.getAttribute("data-frames")))
+    .toBeGreaterThan(frames + 2);
+  await page.mouse.up();
+  expect(await position()).not.toEqual(before);
+  await expect(canvas).toHaveAttribute("data-rendered", "1");
+  await page.keyboard.press("Control+z");
+  await page.locator(".tree-name").first().click();
+  expect(await position()).toEqual(before);
+});
+
+test("atelier : propriétés et raccourcis interrompent la lecture pour modifier la scène complète", async ({
+  page,
+}) => {
+  await page.goto("/editor?draft=playback-edit");
+  await page.locator('.piece-card[aria-label="Brique 2 × 2"]').click();
+  await page.locator('.piece-card[aria-label="Brique 1 × 1"]').click();
+  const timeline = page.getByRole("group", {
+    name: "Lecture de la construction",
+    exact: true,
+  });
+  const canvas = page.locator(".viewport canvas");
+  await timeline
+    .getByRole("button", { name: "Revenir au début de la construction" })
+    .click();
+  const input = page.getByLabel("position X", { exact: true });
+  await input.fill("12");
+  await input.press("Tab");
+  await expect(timeline).toHaveAttribute("data-active", "false");
+  await expect(canvas).toHaveAttribute("data-rendered", "2");
+  await expect(input).toHaveValue("12");
+  await timeline
+    .getByRole("button", { name: "Revenir au début de la construction" })
+    .click();
+  await page.evaluate(() => (document.activeElement as HTMLElement)?.blur());
+  await page.keyboard.press("Control+d");
+  await expect(timeline).toHaveAttribute("data-active", "false");
+  await expect(canvas).toHaveAttribute("data-rendered", "3");
+  await page.keyboard.press("Control+z");
+  await expect(canvas).toHaveAttribute("data-rendered", "2");
 });
 
 test("atelier : la lecture conserve la caméra, l’éclairage et la taille du canvas", async ({

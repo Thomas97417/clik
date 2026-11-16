@@ -139,7 +139,7 @@ Les parcours existants vérifient que les cartes de « Mes créations » restent
 
 Les dates de pose sont vérifiées pour les ajouts, duplications, collages et imports, les changements d’horloge, les gestes annulés, les modifications de couleur et de hiérarchie, l’annulation/rétablissement et la reprise d’un brouillon. Les fonctions Convex conservent les dates lors de la création, de la sauvegarde, de la publication et du remix ; une sauvegarde ultérieure ne modifie pas la version publique précédente. Les anciennes scènes restent valides sans dates. Les 1 133 tests automatisés passent (1 070 frontend, 63 backend), ainsi que TypeScript et le build client/serveur.
 
-Les neuf scénarios navigateur du lecteur passent sous Chromium, Firefox et WebKit : lecture, pause, reprise à vitesse modifiée, déplacement réel à la souris et au toucher, accès clavier, retour à l’édition par le bouton et Échap, commandes de modification désactivées, rendu public depuis la galerie sur ordinateur/mobile, et absence de lecteur sur une ancienne publication. La scène et le stamp IndexedDB sont comparés avant/après lecture et restent identiques. Les captures ordinateur/mobile ont été inspectées : `/tmp/clik-construction-editor-<moteur>.png` et `/tmp/clik-construction-public-<moteur>-<largeur>.png`.
+Les scénarios initiaux du lecteur couvrent lecture, pause, reprise à vitesse modifiée, déplacement réel à la souris et au toucher, accès clavier, retour à l’édition par le bouton et Échap, rendu public depuis la galerie sur ordinateur/mobile, et absence de lecteur sur une ancienne publication. La scène et le stamp IndexedDB sont comparés avant/après lecture et restent identiques. Les captures ordinateur/mobile ont été inspectées : `/tmp/clik-construction-editor-<moteur>.png` et `/tmp/clik-construction-public-<moteur>-<largeur>.png`.
 
 Pour isoler les données de recette entre plusieurs worktrees, `CLIK_E2E_PUBLIC_PORT` permet de changer le port HTTP du transport simulé (3219 par défaut) ; lancer Vite avec `VITE_CONVEX_URL` et `VITE_CONVEX_SITE_URL` pointant vers le même port. Aucun compte ni aucune publication réelle ne sont créés.
 
@@ -152,6 +152,14 @@ La suite navigateur exhaustive n’est pas validée par ce passage : deux ancien
 La barre est contrôlée sur ordinateur et mobile : hauteur de 40 px, commandes alignées sur une ligne, absence de débordement, vitesse cyclique au clic et au clavier, et place du retour à l’édition conservée. Le curseur personnalisé reste manipulable à la souris, au toucher et au clavier sur les trois moteurs.
 
 Les 15 contrôles navigateur ciblés passent sous Chromium, Firefox et WebKit (12 pour le lecteur, 3 pour les contrôles de vue publics). Un scénario compare les pixels avant, pendant et après le mode lecture avec une vue de dessus cadrée et l’éclairage uniforme activé : surface des pièces, centre et couleurs restent identiques dans les tolérances de rendu, ainsi que les dimensions exactes du canvas. Les captures du lecteur compact ont été inspectées sur ordinateur et mobile. Les 1 133 tests automatisés, TypeScript et le build client/serveur passent également.
+
+## Retour automatique à la construction
+
+Les 24 contrôles du lecteur et les 15 contrôles de glissement depuis la bibliothèque passent sous Chromium, Firefox et WebKit. Ils couvrent la prise d’une nouvelle pièce pendant la lecture, pendant une pause et après la fin, l’ajout par clic et au clavier, le déplacement d’une pièce visible, les propriétés, les raccourcis et l’annulation/rétablissement d’un dépôt unique. Le nombre de pièces est conservé après rechargement. Tourner la caméra à la souris conserve la lecture.
+
+Échap, une sortie du canvas, une perte de focus, `pointercancel` et une perte de capture ne laissent plus de placement en attente. Un état de pose injecté pendant une lecture active reproduit la course initiale : la scène complète revient et Échap libère les commandes. Quatre tests du hook vérifient aussi que la pose a priorité sur la lecture et que sa fin ne relance pas la vidéo. Les 1 137 tests automatisés passent (1 074 frontend, 63 backend), ainsi que TypeScript et le build client/serveur.
+
+Les tests anonymes du lecteur simulent explicitement la session pour isoler WebKit du serveur HTTP des données publiques. Les 19 tests de gestes Chromium donnent 16 réussites et trois échecs de coordonnées fixes (empilement, prise décentrée et accroche tournée). Ces trois échecs ont été reproduits à l’identique avec les sources du commit précédent `122a8f3`, servies dans un environnement de comparaison isolé sans modifier les fichiers de travail.
 
 ## Limites et contrôles de recette restants
 

@@ -1,5 +1,12 @@
 import { cn } from "@/lib/utils";
-import { useEffect, useMemo, useRef, useState, useId } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useId,
+} from "react";
 import { useTreeDrag } from "./use-tree-drag";
 import EditorPanels from "./editor-panels";
 import EditorLibrary from "./editor-library";
@@ -201,7 +208,17 @@ export default function Editor({
     ),
     project = useProject(projectId, draftId),
     navigate = useNavigate();
-  const [playbackActive, setPlaybackActive] = useState(false);
+  const stopPlayback = useRef<(() => void) | null>(null);
+  const beginEditing = useCallback(() => stopPlayback.current?.(), []);
+  const editIntent = (event: { target: EventTarget | null }) => {
+    if (
+      event.target instanceof Element &&
+      event.target.closest(
+        ".editor-top, .editor-side, .scene-toolbar, .viewport-bottom",
+      )
+    )
+      beginEditing();
+  };
   const [publishing, setPublishing] = useState(false),
     [busy, setBusy] = useState(false),
     [pubTitle, setPubTitle] = useState(""),
@@ -247,7 +264,6 @@ export default function Editor({
       closed ||
       publishing ||
       busy ||
-      playbackActive ||
       inspectorCollapsed ||
       !!s.gesture,
     collapsed: collapsedGroups,
@@ -312,15 +328,6 @@ export default function Editor({
     publish = useMutation(api.projects.publish);
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
-      if (playbackActive) {
-        if (
-          ["Backspace", "Delete"].includes(e.key) ||
-          ((e.ctrlKey || e.metaKey) &&
-            ["d", "z", "y", "v"].includes(e.key.toLowerCase()))
-        )
-          e.preventDefault();
-        return;
-      }
       // Safari can otherwise navigate back on Backspace while the tour has focus.
       if (tourActive && ["Backspace", "Delete"].includes(e.key))
         e.preventDefault();
@@ -343,7 +350,12 @@ export default function Editor({
         return;
       const state = useEditor.getState(),
         mod = e.ctrlKey || e.metaKey;
+      const edit = (action: () => unknown) => {
+        beginEditing();
+        safe(action);
+      };
       if (e.key === "Escape") {
+        beginEditing();
         state.cancel();
         return;
       }
@@ -357,7 +369,7 @@ export default function Editor({
         )
           return;
         e.preventDefault();
-        state.selectAll();
+        edit(state.selectAll);
       } else if (e.key.toLowerCase() === "r" && !mod && !e.altKey) {
         const target = e.target instanceof HTMLElement ? e.target : null;
         if (
@@ -370,7 +382,7 @@ export default function Editor({
         )
           return;
         e.preventDefault();
-        safe(() => state.rotate(e.shiftKey ? -1 : 1));
+        edit(() => state.rotate(e.shiftKey ? -1 : 1));
       } else if (
         ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)
       ) {
@@ -393,22 +405,22 @@ export default function Editor({
           ? [0, -direction * 1.2, 0]
           : cameraRelativeStep(e.key, camera.current);
         e.preventDefault();
-        safe(() => state.nudge(delta));
+        edit(() => state.nudge(delta));
       } else if (e.key === "Delete" || e.key === "Backspace") {
         e.preventDefault();
-        safe(state.remove);
+        edit(state.remove);
       } else if (mod && e.key.toLowerCase() === "z") {
         e.preventDefault();
-        safe(e.shiftKey ? state.redo : state.undo);
+        edit(e.shiftKey ? state.redo : state.undo);
       } else if (mod && e.key.toLowerCase() === "y") {
         e.preventDefault();
-        safe(state.redo);
+        edit(state.redo);
       } else if (mod && e.key.toLowerCase() === "c") {
         e.preventDefault();
         safe(state.copy);
       } else if (mod && e.key.toLowerCase() === "v") {
         e.preventDefault();
-        safe(state.paste);
+        edit(state.paste);
       } else if (mod && e.key.toLowerCase() === "d" && !e.altKey) {
         if (
           !project.ready ||
@@ -419,7 +431,7 @@ export default function Editor({
         )
           return;
         e.preventDefault();
-        safe(state.duplicate);
+        edit(state.duplicate);
       } else if (e.key.toLowerCase() === "g" && !e.altKey) {
         if (
           !project.ready ||
@@ -431,13 +443,13 @@ export default function Editor({
         )
           return;
         e.preventDefault();
-        safe(mod && e.shiftKey ? state.ungroup : state.group);
+        edit(mod && e.shiftKey ? state.ungroup : state.group);
       } else if (e.key.toLowerCase() === "f")
-        useEditor.setState({ frame: state.frame + 1 });
+        edit(() => useEditor.setState({ frame: state.frame + 1 }));
     };
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
-  }, [publishing, busy, project.ready, closed, tourActive, playbackActive]);
+  }, [publishing, busy, project.ready, closed, tourActive, beginEditing]);
   const selected = s.scene.nodes.find((n) => n.id === s.selection[0]);
   const selectionRoots = roots(s.scene, s.selection);
   const selectionParents = new Set(
@@ -714,7 +726,11 @@ export default function Editor({
           Voir la galerie
         </Link>
       </div>
-      <main className="editor h-full min-h-150 flex flex-col bg-white max-lg-narrow:hidden">
+      <main
+        className="editor h-full min-h-150 flex flex-col bg-white max-lg-narrow:hidden"
+        onPointerDownCapture={editIntent}
+        onKeyDownCapture={editIntent}
+      >
         <header
           className="editor-top px-4.5 py-2 gap-4 min-h-13 flex items-center border-b border-solid border-b-[#ebeff5] shrink-0 bg-white max-xl-narrow:px-4 max-xl-narrow:gap-3"
           aria-label="Projet et sauvegarde"
@@ -723,7 +739,7 @@ export default function Editor({
             <ProjectTitle
               key={`${projectId}-${project.ready}-${s.title}`}
               title={s.title}
-              disabled={!project.ready || closed || busy || playbackActive}
+              disabled={!project.ready || closed || busy}
               onCommit={(title) => s.commit(s.scene, title)}
             />
             {(projectId ||
@@ -781,7 +797,6 @@ export default function Editor({
               disabled={
                 !project.ready ||
                 !!s.challenge ||
-                playbackActive ||
                 !!s.gesture ||
                 !!s.pending ||
                 !!s.libraryPointer ||
@@ -802,7 +817,6 @@ export default function Editor({
             <EditorHelp
               disabled={
                 !project.ready ||
-                playbackActive ||
                 busy ||
                 publishing ||
                 importing ||
@@ -1025,11 +1039,10 @@ export default function Editor({
             collapsed={libraryCollapsed}
             onCollapsedChange={setLibraryCollapsed}
             ready={project.ready}
-            closed={closed || playbackActive}
+            closed={closed}
             colorsDisabled={
               !project.ready ||
               closed ||
-              playbackActive ||
               !!project.conflict ||
               busy ||
               publishing
@@ -1038,15 +1051,19 @@ export default function Editor({
           />
           <ConstructionPlayer
             scene={s.scene}
-            onActiveChange={setPlaybackActive}
+            stopRef={stopPlayback}
+            editing={
+              !!s.gesture ||
+              !!s.pending ||
+              !!s.libraryPointer ||
+              s.boxSelecting ||
+              treeDrag.active
+            }
           >
             {(playback) => (
               <section className="viewport overflow-hidden relative bg-[#edf1f7] min-w-0 flex flex-col">
                 <div className="relative min-h-0 flex-1">
-                  <div
-                    inert={playback.active}
-                    className="scene-toolbar p-1.25 gap-0.75 border border-solid border-white absolute top-5 left-1/2 transform-[translateX(-50%)] z-3 flex items-center bg-[#ffffffed] [box-shadow:0_4px_15px_#53668114] rounded-[10px] transition-opacity duration-200 motion-reduce:transition-none [&[inert]]:opacity-40"
-                  >
+                  <div className="scene-toolbar p-1.25 gap-0.75 border border-solid border-white absolute top-5 left-1/2 transform-[translateX(-50%)] z-3 flex items-center bg-[#ffffffed] [box-shadow:0_4px_15px_#53668114] rounded-[10px]">
                     <div className="tool-group flex border-r border-solid border-r-[#e7ecf2] pr-1 mr-0.5">
                       <button
                         className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] hover:bg-[#f0f4fa]"
@@ -1185,6 +1202,7 @@ export default function Editor({
                       framingScene={s.scene}
                       editable={!closed && !tourActive && !playback.active}
                       editorView
+                      onEdit={!closed && !tourActive ? beginEditing : undefined}
                       keyboardNavigation={!busy && !publishing && !tourActive}
                       showGrid={s.showGrid}
                       cameraRef={camera}
@@ -1219,10 +1237,7 @@ export default function Editor({
                         Chevauchement existant à corriger
                       </span>
                     )}
-                    <div
-                      inert={playback.active}
-                      className="view-select gap-2 ml-auto max-w-full flex items-center justify-end flex-wrap pointer-events-none transition-opacity duration-200 motion-reduce:transition-none [&[inert]]:opacity-40"
-                    >
+                    <div className="view-select gap-2 ml-auto max-w-full flex items-center justify-end flex-wrap pointer-events-none">
                       <Select
                         items={cameraViews}
                         value={s.view}
@@ -1349,10 +1364,7 @@ export default function Editor({
               </section>
             )}
           </ConstructionPlayer>
-          <div
-            inert={playbackActive}
-            className="editor-side editor-side-right relative min-w-0 min-h-0 bg-white group/editor-side-right border-l border-solid border-l-[#e4e9f1] group-data-[inspector-collapsed=true]/editor-body:border-0 group-data-[inspector-collapsed=true]/editor-body:border-none group-data-[inspector-collapsed=true]/editor-body:border-current transition-opacity duration-200 motion-reduce:transition-none [&[inert]]:opacity-50"
-          >
+          <div className="editor-side editor-side-right relative min-w-0 min-h-0 bg-white group/editor-side-right border-l border-solid border-l-[#e4e9f1] group-data-[inspector-collapsed=true]/editor-body:border-0 group-data-[inspector-collapsed=true]/editor-body:border-none group-data-[inspector-collapsed=true]/editor-body:border-current">
             <button
               className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 side-panel-toggle group/side-panel-toggle border border-solid border-[#e4e9f1] absolute top-3 right-2 z-4 grid place-items-center rounded-[7px] bg-white text-[#68788e] hover:border-[#cddcfa] hover:bg-[#edf3ff] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 aria-[expanded=false]:top-5 aria-[expanded=false]:right-3 aria-[expanded=false]:[box-shadow:0_2px_8px_#23334d14] size-7.5"
               aria-label={

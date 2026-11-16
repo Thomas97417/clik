@@ -170,6 +170,12 @@ const EditorLibrary = memo(function EditorLibrary({
     resetScroll();
     search.current?.focus();
   };
+  // The card owns the capture even if the canvas changes mode or has not mounted
+  // its listeners yet. Never leave that press pending after release/cancellation.
+  const releaseLibraryPointer = (event: { pointerId: number }) => {
+    const state = useEditor.getState();
+    if (state.libraryPointer?.id === event.pointerId) state.cancel();
+  };
 
   return (
     <div className="editor-side editor-side-left relative min-w-0 min-h-0 bg-white group/editor-side-left border-r border-solid border-r-[#e4e9f1] group-data-[library-collapsed=true]/editor-body:border-0 group-data-[library-collapsed=true]/editor-body:border-none group-data-[library-collapsed=true]/editor-body:border-current">
@@ -352,6 +358,9 @@ const EditorLibrary = memo(function EditorLibrary({
                       aria-label={part.name}
                       title={`${part.name} — glisser dans la scène ou cliquer pour ajouter`}
                       onDragStart={(event) => event.preventDefault()}
+                      onPointerUp={releaseLibraryPointer}
+                      onPointerCancel={releaseLibraryPointer}
+                      onLostPointerCapture={releaseLibraryPointer}
                       onPointerDown={(event) => {
                         if (event.button !== 0 || !event.isPrimary) return;
                         event.currentTarget.setPointerCapture(event.pointerId);

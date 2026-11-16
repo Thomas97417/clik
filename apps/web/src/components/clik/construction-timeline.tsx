@@ -135,7 +135,7 @@ export default function ConstructionTimeline({
           title={
             playback.active ? "Revenir à l’édition (Échap)" : "Mode édition"
           }
-          disabled={!playback.active || disabled}
+          disabled={!playback.active}
           onClick={playback.stop}
         >
           <PencilLine size={14} aria-hidden="true" />
