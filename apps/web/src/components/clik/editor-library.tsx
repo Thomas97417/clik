@@ -314,7 +314,7 @@ const EditorLibrary = memo(function EditorLibrary({
           </Select>
         </header>
         <div
-          className="library-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain bg-[#f5f7fb] p-2 [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:#c4cede_transparent] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#356ae6]"
+          className="library-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain bg-[#f5f7fb] px-2 pb-2 [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:#c4cede_transparent] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#356ae6]"
           ref={scroll}
           role="region"
           aria-label="Modèles de pièces"
