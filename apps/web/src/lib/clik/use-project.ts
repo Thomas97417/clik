@@ -267,7 +267,9 @@ export function useProject(projectId?: string, draftId?: string) {
       throw e;
     } finally {
       busy.current = false;
-      setRetry((n) => n + 1);
+      // Only schedule another send for edits made during this request. A
+      // rejected snapshot waits for a new edit, reconnect or explicit flush.
+      if (useEditor.getState().serial !== sentSerial) setRetry((n) => n + 1);
     }
   };
   useEffect(() => {

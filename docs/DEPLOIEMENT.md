@@ -367,11 +367,13 @@ Si Google affiche `redirect_uri_mismatch`, comparer l’URL demandée avec **Aut
 
 ### Depuis le dépôt Git connecté à Cloudflare
 
-1. Déployer Convex si le backend a changé.
+1. Déployer Convex si le backend ou `packages/scene` a changé. Ce paquet est aussi intégré au backend : ses validateurs et son catalogue doivent accepter les mêmes données que le frontend. Le déployer avant le frontend lorsqu’une modification ajoute des couleurs ou des types de pièces.
 2. Commiter les changements et pousser vers la branche de production configurée dans Cloudflare.
 3. Suivre le build et la publication dans le tableau de bord du Worker.
 
 Pour relancer un échec : **Workers & Pages → clik → Deployments → View Build History → build concerné → Retry build**.
+
+Si une couleur personnalisée s’affiche dans l’éditeur mais provoque une erreur `projects:save`, consulter les journaux de production (`bunx --bun convex logs --prod --history 100`). Une `ZodError` sur `nodes.…color` qui énumère les 12 couleurs d’origine signale un backend ancien : déployer Convex avec la version de `packages/scene` qui accepte les teintes RGB. Une republication du frontend seule ne corrige pas ce décalage.
 
 Un retry applique les réglages de build actuels au commit sélectionné. Si les fichiers ont changé depuis ce commit, pousser les corrections et utiliser le nouveau build. [Relancer un build Cloudflare](https://developers.cloudflare.com/workers/ci-cd/builds/troubleshoot/), [Application des réglages de build](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/)
 
