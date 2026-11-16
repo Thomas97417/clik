@@ -45,10 +45,14 @@ export async function publicHttpFixture(query: typeof read) {
         }
       });
       server.once("error", reject);
-      server.listen(3219, "127.0.0.1", () => {
-        server.unref();
-        resolve();
-      });
+      server.listen(
+        Number(process.env.CLIK_E2E_PUBLIC_PORT ?? 3219),
+        "127.0.0.1",
+        () => {
+          server.unref();
+          resolve();
+        },
+      );
     });
   await started;
 }

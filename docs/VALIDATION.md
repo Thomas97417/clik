@@ -135,6 +135,40 @@ Les tests comparent les pixels de l’aperçu après rotation à la souris, zoom
 
 Les parcours existants vérifient que les cartes de « Mes créations » restent statiques, que la copie créée après manipulation conserve exactement les pièces du modèle et que les publications conservent leur miniature automatique. Les 33 contrôles ciblés passent sous Chromium, Firefox et WebKit, ainsi que les 496 tests du frontend, TypeScript et le build.
 
+## Lecture de la construction
+
+Les dates de pose sont vérifiées pour les ajouts, duplications, collages et imports, les changements d’horloge, les gestes annulés, les modifications de couleur et de hiérarchie, l’annulation/rétablissement et la reprise d’un brouillon. Les fonctions Convex conservent les dates lors de la création, de la sauvegarde, de la publication et du remix ; une sauvegarde ultérieure ne modifie pas la version publique précédente. Les anciennes scènes restent valides sans dates. Les 1 133 tests automatisés passent (1 070 frontend, 63 backend), ainsi que TypeScript et le build client/serveur.
+
+Les scénarios initiaux du lecteur couvrent lecture, pause, reprise à vitesse modifiée, déplacement réel à la souris et au toucher, accès clavier, retour à l’édition par le bouton et Échap, rendu public depuis la galerie sur ordinateur/mobile, et absence de lecteur sur une ancienne publication. La scène et le stamp IndexedDB sont comparés avant/après lecture et restent identiques. Les captures ordinateur/mobile ont été inspectées : `/tmp/clik-construction-editor-<moteur>.png` et `/tmp/clik-construction-public-<moteur>-<largeur>.png`.
+
+Pour isoler les données de recette entre plusieurs worktrees, `CLIK_E2E_PUBLIC_PORT` permet de changer le port HTTP du transport simulé (3219 par défaut) ; lancer Vite avec `VITE_CONVEX_URL` et `VITE_CONVEX_SITE_URL` pointant vers le même port. Aucun compte ni aucune publication réelle ne sont créés.
+
+Les onze contrôles existants d’import et de publication passent aussi sous Chromium avec ce transport isolé, dont le rechargement après import, l’annulation/rétablissement, la miniature, la révision, le transfert local vers le compte et la mise à jour d’une publication.
+
+La suite navigateur exhaustive n’est pas validée par ce passage : deux anciens scénarios de `editor.spec.ts` ont un sélecteur global de statut devenu ambigu, un scénario d’accueil attend un ancien titre, et le scénario de galerie sans fixture nécessite un backend accessible. Ces échecs sont distincts des scénarios du lecteur.
+
+## Lecteur compact et continuité de la vue
+
+La barre est contrôlée sur ordinateur et mobile : hauteur de 40 px, commandes alignées sur une ligne, absence de débordement, vitesse cyclique au clic et au clavier, et place du retour à l’édition conservée. Le curseur personnalisé reste manipulable à la souris, au toucher et au clavier sur les trois moteurs.
+
+Les 15 contrôles navigateur ciblés passent sous Chromium, Firefox et WebKit (12 pour le lecteur, 3 pour les contrôles de vue publics). Un scénario compare les pixels avant, pendant et après le mode lecture avec une vue de dessus cadrée et l’éclairage uniforme activé : surface des pièces, centre et couleurs restent identiques dans les tolérances de rendu, ainsi que les dimensions exactes du canvas. Les captures du lecteur compact ont été inspectées sur ordinateur et mobile. Les 1 133 tests automatisés, TypeScript et le build client/serveur passent également.
+
+## Retour automatique à la construction
+
+Les 24 contrôles du lecteur et les 15 contrôles de glissement depuis la bibliothèque passent sous Chromium, Firefox et WebKit. Ils couvrent la prise d’une nouvelle pièce pendant la lecture, pendant une pause et après la fin, l’ajout par clic et au clavier, le déplacement d’une pièce visible, les propriétés, les raccourcis et l’annulation/rétablissement d’un dépôt unique. Le nombre de pièces est conservé après rechargement. Tourner la caméra à la souris conserve la lecture.
+
+Échap, une sortie du canvas, une perte de focus, `pointercancel` et une perte de capture ne laissent plus de placement en attente. Un état de pose injecté pendant une lecture active reproduit la course initiale : la scène complète revient et Échap libère les commandes. Quatre tests du hook vérifient aussi que la pose a priorité sur la lecture et que sa fin ne relance pas la vidéo. Les 1 137 tests automatisés passent (1 074 frontend, 63 backend), ainsi que TypeScript et le build client/serveur.
+
+Les tests anonymes du lecteur simulent explicitement la session pour isoler WebKit du serveur HTTP des données publiques. Un premier passage des 19 tests de gestes Chromium donnait 16 réussites et trois échecs de coordonnées fixes (empilement, prise décentrée et accroche tournée). Ces trois échecs avaient été reproduits à l’identique avec les sources du commit précédent `122a8f3`, servies dans un environnement de comparaison isolé sans modifier les fichiers de travail. Ils sont corrigés par le recalibrage décrit ci-dessous.
+
+## Ciblage des gestes sur la scène rendue
+
+Les trois scénarios utilisent désormais la caméra active de React Three Fiber et les transformations mondiales des pièces pour projeter leurs points de prise et de dépôt dans le canvas. L’outil reste dans les fichiers de recette et n’est pas importé par l’application. Les tests attendent plusieurs images rendues après les changements de vue et avant de relâcher le pointeur, afin de déposer l’aperçu réellement affiché.
+
+L’empilement vérifie les quatre plots d’accroche et les trois coordonnées finales. La prise décentrée compare la translation obtenue au petit déplacement demandé, avec une tolérance correspondant à l’arrondi des événements de pointeur ; elle conserve aussi la rotation initiale. L’accroche tournée vérifie les quatre plots, les angles et la matrice mondiale complète de la pièce déposée par rapport à son support. Le cadrage, le zoom et le format du canvas ne sont plus encodés dans des décalages de souris fixes.
+
+La suite complète de gestes passe sous Chromium, Firefox et WebKit : 57 contrôles sur 57 (19 par moteur). Les trois scénarios corrigés passent aussi sous Chromium dans une fenêtre réduite à 1 100 × 760 px. TypeScript passe également. La capture d’empilement a été inspectée : les quatre plots sont éclairés et les briques sont alignées.
+
 ## Limites et contrôles de recette restants
 
 - WebKit est le moteur utilisé par Safari ; ce test ne remplace pas une recette dans l’application Safari réelle et sur un appareil iOS.

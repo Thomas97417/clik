@@ -170,6 +170,12 @@ const EditorLibrary = memo(function EditorLibrary({
     resetScroll();
     search.current?.focus();
   };
+  // The card owns the capture even if the canvas changes mode or has not mounted
+  // its listeners yet. Never leave that press pending after release/cancellation.
+  const releaseLibraryPointer = (event: { pointerId: number }) => {
+    const state = useEditor.getState();
+    if (state.libraryPointer?.id === event.pointerId) state.cancel();
+  };
 
   return (
     <div className="editor-side editor-side-left relative min-w-0 min-h-0 bg-white group/editor-side-left border-r border-solid border-r-[#e4e9f1] group-data-[library-collapsed=true]/editor-body:border-0 group-data-[library-collapsed=true]/editor-body:border-none group-data-[library-collapsed=true]/editor-body:border-current">
@@ -343,7 +349,7 @@ const EditorLibrary = memo(function EditorLibrary({
                       key={part.id}
                       type="button"
                       className={cn(
-                        "piece-card group/piece-card relative flex h-24.5 min-w-0 touch-none select-none flex-col items-center justify-center gap-0.5 rounded-lg border border-solid border-transparent bg-white px-1 py-1.5 text-[#253249] transition-colors cursor-grab hover:border-[#c3d4fb] hover:bg-[#eef3ff] active:cursor-grabbing disabled:cursor-default disabled:opacity-40 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#356ae6]",
+                        "piece-card group/piece-card relative flex h-24.5 min-w-0 touch-none select-none flex-col items-center justify-center gap-0.5 rounded-lg border border-solid border-transparent bg-white px-1 py-1.5 text-[#253249] transition-[background-color,border-color,opacity] duration-200 motion-reduce:transition-none cursor-grab hover:border-[#c3d4fb] hover:bg-[#eef3ff] active:cursor-grabbing disabled:cursor-default disabled:opacity-40 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#356ae6]",
                         pending === part.id &&
                           "active border-[#8dacf1] bg-[#eef3ff]",
                       )}
@@ -352,6 +358,9 @@ const EditorLibrary = memo(function EditorLibrary({
                       aria-label={part.name}
                       title={`${part.name} — glisser dans la scène ou cliquer pour ajouter`}
                       onDragStart={(event) => event.preventDefault()}
+                      onPointerUp={releaseLibraryPointer}
+                      onPointerCancel={releaseLibraryPointer}
+                      onLostPointerCapture={releaseLibraryPointer}
                       onPointerDown={(event) => {
                         if (event.button !== 0 || !event.isPrimary) return;
                         event.currentTarget.setPointerCapture(event.pointerId);

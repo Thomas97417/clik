@@ -31,6 +31,64 @@ const scene = JSON.stringify(
   validateScene({ ...emptyScene(), nodes: [makePart("brick-2x2", "#4079e8")] }),
 );
 describe("Projets privés et versions publiques", () => {
+  it("conserve les dates de pose dans les sauvegardes, versions publiques et reprises", async () => {
+    const { alice, bob, t } = setup();
+    const first = { ...makePart("brick-2x2", "#4079e8"), createdAt: 1000 };
+    const document = { ...emptyScene(), nodes: [first] };
+    const id = await alice.mutation(api.projects.create, {
+      title: "Évolution",
+      scene: JSON.stringify(document),
+    });
+    expect(
+      JSON.parse((await alice.query(api.projects.get, { id })).scene),
+    ).toEqual(document);
+    document.nodes.push({
+      ...makePart("brick-1x1", "#ef4444", [0, 1.2, 0]),
+      createdAt: 5000,
+    });
+    await alice.mutation(api.projects.save, {
+      id,
+      title: "Évolution",
+      scene: JSON.stringify(document),
+      revision: 0,
+    });
+    const thumbnail = await t.run((ctx) =>
+      ctx.storage.store(new Blob(["test"], { type: "image/png" })),
+    );
+    await alice.mutation(internal.projects.registerThumbnail, {
+      projectId: id,
+      storageId: thumbnail,
+    });
+    const publication = await alice.mutation(api.projects.publish, {
+      id,
+      title: "Évolution",
+      description: "",
+      thumbnail,
+      revision: 1,
+    });
+    const version = await t.query(api.projects.creation, { id: publication });
+    expect(JSON.parse(version!.scene)).toEqual(document);
+    const copy = await bob.mutation(api.projects.remix, {
+      id: publication,
+      versionId: version!._id,
+    });
+    expect(
+      JSON.parse((await bob.query(api.projects.get, { id: copy })).scene),
+    ).toEqual(document);
+    // Publishing a subsequent edit must not mutate the previous replay.
+    document.nodes[0].createdAt = 9999;
+    await alice.mutation(api.projects.save, {
+      id,
+      title: "Évolution",
+      scene: JSON.stringify(document),
+      revision: 1,
+    });
+    expect(
+      JSON.parse(
+        (await t.query(api.projects.creation, { id: publication }))!.scene,
+      ).nodes[0].createdAt,
+    ).toBe(1000);
+  });
   it("conserve les couleurs personnalisées et les anciens blancs à l’enregistrement, la publication et la reprise", async () => {
     const { alice, bob, t } = setup();
     const colors = ["#123abc", "#f5f5f3", "#f2e8d5", "#8b5e3c"];

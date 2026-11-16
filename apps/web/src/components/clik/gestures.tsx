@@ -67,11 +67,13 @@ type BoxGesture = {
 };
 
 export function Gestures({
+  onEdit,
   controls,
   rotation,
   onLibraryPreview,
   onBoxPreview,
 }: {
+  onEdit?: () => void;
   controls: Controls;
   rotation: Rotation;
   onLibraryPreview: (
@@ -239,6 +241,7 @@ export function Gestures({
       onBoxPreview({ rect, ids: box.previewIds });
     };
     const startBox = (e: PointerEvent, hit?: string) => {
+      onEdit?.();
       stop(e);
       const state = useEditor.getState();
       // Finish orbit damping before freezing the camera for the whole selection.
@@ -374,6 +377,7 @@ export function Gestures({
       }
       stop(e);
       const part = hit.object.userData.parts[hit.instanceId ?? 0] as Part;
+      onEdit?.();
       const selected = descendants(state.scene, state.selection).includes(
         part.id,
       );
@@ -783,6 +787,15 @@ export function Gestures({
       window.removeEventListener("blur", cancel);
       window.removeEventListener("resize", clearBox);
     };
-  }, [camera, gl, scene, controls, rotation, onLibraryPreview, onBoxPreview]);
+  }, [
+    camera,
+    gl,
+    scene,
+    controls,
+    rotation,
+    onLibraryPreview,
+    onBoxPreview,
+    onEdit,
+  ]);
   return null;
 }

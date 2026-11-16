@@ -12,13 +12,18 @@ import {
   challengeStock,
   emptyScene,
   makePart,
+  type SceneDocument,
 } from "@clik/scene";
 
 // Browser transport only. The real visibility rules are tested with Convex functions.
 export async function creatorsFixture(
   page: Page,
   authenticated = false,
-  options: { now?: number; ownPublication?: boolean } = {},
+  options: {
+    now?: number;
+    ownPublication?: boolean;
+    scene?: SceneDocument;
+  } = {},
 ) {
   const now = options.now ?? Date.now(),
     day = challengeDay(now),
@@ -304,10 +309,12 @@ export async function creatorsFixture(
             publicationId: p._id,
             createdAt: p.publishedAt,
             description: "Une construction imaginée pour partager des idées.",
-            scene: JSON.stringify({
-              ...emptyScene(),
-              nodes: [makePart("brick-2x4", "#4079e8")],
-            }),
+            scene: JSON.stringify(
+              options.scene ?? {
+                ...emptyScene(),
+                nodes: [makePart("brick-2x4", "#4079e8")],
+              },
+            ),
             sources: p.sources.map((source) => ({
               ...source,
               available: !!publications.find(

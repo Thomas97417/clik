@@ -1,5 +1,12 @@
 import { cn } from "@/lib/utils";
-import { useEffect, useMemo, useRef, useState, useId } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useId,
+} from "react";
 import { useTreeDrag } from "./use-tree-drag";
 import EditorPanels from "./editor-panels";
 import EditorLibrary from "./editor-library";
@@ -85,6 +92,8 @@ import ClientScene from "./client-scene";
 import { sceneLayoutKey } from "@/lib/clik/scene-layout";
 import { cameraRelativeStep } from "@/lib/clik/camera-relative-movement";
 import { editorShortcutTarget } from "@/lib/clik/editor-keyboard";
+import ConstructionPlayer from "./construction-player";
+import ConstructionTimeline from "./construction-timeline";
 
 const cameraViews = [
   { value: "perspective", label: "Perspective" },
@@ -199,6 +208,17 @@ export default function Editor({
     ),
     project = useProject(projectId, draftId),
     navigate = useNavigate();
+  const stopPlayback = useRef<(() => void) | null>(null);
+  const beginEditing = useCallback(() => stopPlayback.current?.(), []);
+  const editIntent = (event: { target: EventTarget | null }) => {
+    if (
+      event.target instanceof Element &&
+      event.target.closest(
+        ".editor-top, .editor-side, .scene-toolbar, .viewport-bottom",
+      )
+    )
+      beginEditing();
+  };
   const [publishing, setPublishing] = useState(false),
     [busy, setBusy] = useState(false),
     [pubTitle, setPubTitle] = useState(""),
@@ -330,7 +350,12 @@ export default function Editor({
         return;
       const state = useEditor.getState(),
         mod = e.ctrlKey || e.metaKey;
+      const edit = (action: () => unknown) => {
+        beginEditing();
+        safe(action);
+      };
       if (e.key === "Escape") {
+        beginEditing();
         state.cancel();
         return;
       }
@@ -344,7 +369,7 @@ export default function Editor({
         )
           return;
         e.preventDefault();
-        state.selectAll();
+        edit(state.selectAll);
       } else if (e.key.toLowerCase() === "r" && !mod && !e.altKey) {
         const target = e.target instanceof HTMLElement ? e.target : null;
         if (
@@ -357,7 +382,7 @@ export default function Editor({
         )
           return;
         e.preventDefault();
-        safe(() => state.rotate(e.shiftKey ? -1 : 1));
+        edit(() => state.rotate(e.shiftKey ? -1 : 1));
       } else if (
         ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)
       ) {
@@ -380,22 +405,22 @@ export default function Editor({
           ? [0, -direction * 1.2, 0]
           : cameraRelativeStep(e.key, camera.current);
         e.preventDefault();
-        safe(() => state.nudge(delta));
+        edit(() => state.nudge(delta));
       } else if (e.key === "Delete" || e.key === "Backspace") {
         e.preventDefault();
-        safe(state.remove);
+        edit(state.remove);
       } else if (mod && e.key.toLowerCase() === "z") {
         e.preventDefault();
-        safe(e.shiftKey ? state.redo : state.undo);
+        edit(e.shiftKey ? state.redo : state.undo);
       } else if (mod && e.key.toLowerCase() === "y") {
         e.preventDefault();
-        safe(state.redo);
+        edit(state.redo);
       } else if (mod && e.key.toLowerCase() === "c") {
         e.preventDefault();
         safe(state.copy);
       } else if (mod && e.key.toLowerCase() === "v") {
         e.preventDefault();
-        safe(state.paste);
+        edit(state.paste);
       } else if (mod && e.key.toLowerCase() === "d" && !e.altKey) {
         if (
           !project.ready ||
@@ -406,7 +431,7 @@ export default function Editor({
         )
           return;
         e.preventDefault();
-        safe(state.duplicate);
+        edit(state.duplicate);
       } else if (e.key.toLowerCase() === "g" && !e.altKey) {
         if (
           !project.ready ||
@@ -418,13 +443,13 @@ export default function Editor({
         )
           return;
         e.preventDefault();
-        safe(mod && e.shiftKey ? state.ungroup : state.group);
+        edit(mod && e.shiftKey ? state.ungroup : state.group);
       } else if (e.key.toLowerCase() === "f")
-        useEditor.setState({ frame: state.frame + 1 });
+        edit(() => useEditor.setState({ frame: state.frame + 1 }));
     };
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
-  }, [publishing, busy, project.ready, closed, tourActive]);
+  }, [publishing, busy, project.ready, closed, tourActive, beginEditing]);
   const selected = s.scene.nodes.find((n) => n.id === s.selection[0]);
   const selectionRoots = roots(s.scene, s.selection);
   const selectionParents = new Set(
@@ -701,7 +726,11 @@ export default function Editor({
           Voir la galerie
         </Link>
       </div>
-      <main className="editor h-full min-h-150 flex flex-col bg-white max-lg-narrow:hidden">
+      <main
+        className="editor h-full min-h-150 flex flex-col bg-white max-lg-narrow:hidden"
+        onPointerDownCapture={editIntent}
+        onKeyDownCapture={editIntent}
+      >
         <header
           className="editor-top px-4.5 py-2 gap-4 min-h-13 flex items-center border-b border-solid border-b-[#ebeff5] shrink-0 bg-white max-xl-narrow:px-4 max-xl-narrow:gap-3"
           aria-label="Projet et sauvegarde"
@@ -1020,270 +1049,321 @@ export default function Editor({
             }
             tourActive={tourActive}
           />
-          <section className="viewport overflow-hidden relative bg-[#edf1f7] min-w-0">
-            <div className="scene-toolbar p-1.25 gap-0.75 border border-solid border-white absolute top-5 left-1/2 transform-[translateX(-50%)] z-3 flex items-center bg-[#ffffffed] [box-shadow:0_4px_15px_#53668114] rounded-[10px]">
-              <div className="tool-group flex border-r border-solid border-r-[#e7ecf2] pr-1 mr-0.5">
-                <button
-                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] hover:bg-[#f0f4fa]"
-                  title="Annuler (⌘/Ctrl Z)"
-                  disabled={!s.past.length}
-                  onClick={s.undo}
-                >
-                  <Undo2 className="shrink-0" size={18} />
-                </button>
-                <button
-                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] hover:bg-[#f0f4fa]"
-                  title="Rétablir"
-                  disabled={!s.future.length}
-                  onClick={s.redo}
-                >
-                  <Redo2 className="shrink-0" size={18} />
-                </button>
-              </div>
-              <div className="tool-group flex border-r border-solid border-r-[#e7ecf2] pr-1 mr-0.5">
-                <button
-                  type="button"
-                  aria-label="Sélection par cadre"
-                  title="Sélection par cadre (Maj + glisser sur le fond)"
-                  aria-pressed={s.boxSelect}
-                  disabled={
-                    !project.ready ||
-                    closed ||
-                    busy ||
-                    publishing ||
-                    !!s.gesture ||
-                    !!s.pending ||
-                    s.boxSelecting
-                  }
-                  className="flex h-8.25 min-w-8.5 cursor-pointer items-center justify-center rounded-[6px] px-1.75 text-[#7a879d] transition-colors hover:bg-[#f0f4fa] aria-pressed:bg-[#eaf0ff] aria-pressed:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#356ae6] disabled:cursor-not-allowed disabled:opacity-40"
-                  onClick={() =>
-                    useEditor.setState({ boxSelect: !s.boxSelect })
-                  }
-                >
-                  <SquareDashedMousePointer
-                    className="shrink-0"
-                    size={19}
-                    aria-hidden="true"
-                  />
-                </button>
-                <button
-                  title="Déplacer"
-                  className={cn(
-                    "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
-                    "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
-                    "outline-offset-3",
-                    s.tool === "translate" && !s.boxSelect
-                      ? "active group/active"
-                      : "",
-                    "px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] [&[class~='group/active']]:bg-[#eaf0ff] [&[class~='group/active']]:text-[#356ae6] hover:bg-[#f0f4fa]",
-                  )}
-                  onClick={() =>
-                    useEditor.setState({ tool: "translate", boxSelect: false })
-                  }
-                >
-                  <Move3D className="shrink-0" size={19} />
-                </button>
-                <button
-                  title="Tourner"
-                  className={cn(
-                    "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
-                    "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
-                    "outline-offset-3",
-                    s.tool === "rotate" && !s.boxSelect
-                      ? "active group/active"
-                      : "",
-                    "px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] [&[class~='group/active']]:bg-[#eaf0ff] [&[class~='group/active']]:text-[#356ae6] hover:bg-[#f0f4fa]",
-                  )}
-                  onClick={() =>
-                    useEditor.setState({ tool: "rotate", boxSelect: false })
-                  }
-                >
-                  <Rotate3D className="shrink-0" size={19} />
-                </button>
-              </div>
-              <button
-                title="Aimantation"
-                aria-pressed={s.snap}
-                className={cn(
-                  "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
-                  "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
-                  "outline-offset-3",
-                  s.snap ? "active group/active" : "",
-                  "px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] [&[class~='group/active']]:bg-[#eaf0ff] [&[class~='group/active']]:text-[#356ae6] hover:bg-[#f0f4fa]",
-                )}
-                onClick={() => useEditor.setState({ snap: !s.snap })}
-              >
-                <Magnet className="shrink-0" size={18} />
-                <span className="text-sm! leading-[inherit]! whitespace-nowrap max-xl-narrow:hidden">
-                  Aimantation
-                </span>
-              </button>
-              <button
-                title={s.showGrid ? "Masquer la grille" : "Afficher la grille"}
-                aria-label="Grille"
-                aria-pressed={s.showGrid}
-                className={cn(
-                  "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
-                  "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
-                  "outline-offset-3",
-                  s.showGrid ? "active group/active" : "",
-                  "px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] [&[class~='group/active']]:bg-[#eaf0ff] [&[class~='group/active']]:text-[#356ae6] hover:bg-[#f0f4fa]",
-                )}
-                onClick={() => useEditor.setState({ showGrid: !s.showGrid })}
-              >
-                <Grid2X2 className="shrink-0" size={18} />
-                <span className="text-sm! leading-[inherit]! whitespace-nowrap max-xl-narrow:hidden">
-                  Grille
-                </span>
-              </button>
-              <button
-                className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] hover:bg-[#f0f4fa]"
-                title="Cadrer la sélection (F)"
-                onClick={() => useEditor.setState({ frame: s.frame + 1 })}
-              >
-                <Scan className="shrink-0" size={18} />
-              </button>
-            </div>
-            {project.ready ? (
-              <ClientScene
-                scene={s.scene}
-                editable={!closed && !tourActive}
-                keyboardNavigation={!busy && !publishing && !tourActive}
-                cameraRef={camera}
-              />
-            ) : (
-              <div className="empty-state px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0]">
-                Chargement de la création…
-              </div>
-            )}
-            {project.ready && !count && !s.pending && (
-              <div className="canvas-empty absolute left-1/2 top-[46%] transform-[translate(-50%,-50%)] pointer-events-none text-center w-full text-[#8291a9]">
-                <span className="font-bold text-[26px] tracking-[-0.7px] leading-[1.4]">
-                  Une idée commence
-                  <br />
-                  par une brique.
-                </span>
-                <p className="text-xs leading-[inherit] mt-3">
-                  Choisissez votre première pièce à gauche.
-                </p>
-              </div>
-            )}
-            <div className="viewport-bottom gap-2 absolute left-4.5 bottom-3.75 right-4.5 z-3 flex items-center flex-wrap pointer-events-none text-xs leading-[inherit] text-[#8591a3]">
-              <span className="first:px-2.25 first:py-1.5 first:border first:border-solid first:border-[#dce3ed] first:rounded-[6px] first:bg-[#ffffff91] first:text-[#6e7f96]">
-                {count} /{" "}
-                {stock
-                  ? stock.reduce((sum, item) => sum + item.quantity, 0)
-                  : 500}{" "}
-                pièces
-              </span>
-              {overlap && (
-                <span className="overlap group/overlap first:px-2.25 first:py-1.5 first:border first:border-solid first:border-[#dce3ed] first:rounded-[6px] first:bg-[#ffffff91] first:text-[#6e7f96] text-[10px] text-[#956f21]">
-                  Chevauchement existant à corriger
-                </span>
-              )}
-              <div className="view-select gap-2 ml-auto max-w-full flex items-center justify-end flex-wrap pointer-events-none">
-                <Select
-                  items={cameraViews}
-                  value={s.view}
-                  onValueChange={(view) => {
-                    if (
-                      view === "perspective" ||
-                      view === "top" ||
-                      view === "front" ||
-                      view === "right"
-                    )
-                      useEditor.setState({ view });
-                  }}
-                >
-                  <SelectTrigger
-                    className="scene-view-trigger group/scene-view-trigger pointer-events-auto hover:border-[#b9cbed] hover:bg-white hover:text-[#356ae6] aria-expanded:border-[#b9cbed] aria-expanded:bg-white aria-expanded:text-[#356ae6] px-2.5 py-0 border border-solid border-[#dce5f0] h-9.5 w-33 text-xs bg-[#fffffff0] rounded-[8px] [box-shadow:0_2px_8px_#53668108] text-[#64758d] data-[size=default]:h-9.5"
-                    aria-label="Vue de la caméra"
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent
-                    className="scene-view-menu p-1.25 min-w-38 rounded-[10px] bg-white [box-shadow:0_8px_24px_#33476b24]"
-                    side="top"
-                    align="end"
-                    sideOffset={8}
-                    alignItemWithTrigger={false}
-                  >
-                    {cameraViews.map((view) => (
-                      <SelectItem
-                        className="py-1.75 min-h-8 pr-7.5 pl-2.5 rounded-[6px] text-[#536580] text-xs cursor-pointer data-highlighted:bg-[#eef3ff] data-highlighted:text-[#356ae6] data-selected:bg-[#eef3ff] data-selected:text-[#356ae6]"
-                        key={view.value}
-                        value={view.value}
+          <ConstructionPlayer
+            scene={s.scene}
+            stopRef={stopPlayback}
+            editing={
+              !!s.gesture ||
+              !!s.pending ||
+              !!s.libraryPointer ||
+              s.boxSelecting ||
+              treeDrag.active
+            }
+          >
+            {(playback) => (
+              <section className="viewport overflow-hidden relative bg-[#edf1f7] min-w-0 flex flex-col">
+                <div className="relative min-h-0 flex-1">
+                  <div className="scene-toolbar p-1.25 gap-0.75 border border-solid border-white absolute top-5 left-1/2 transform-[translateX(-50%)] z-3 flex items-center bg-[#ffffffed] [box-shadow:0_4px_15px_#53668114] rounded-[10px]">
+                    <div className="tool-group flex border-r border-solid border-r-[#e7ecf2] pr-1 mr-0.5">
+                      <button
+                        className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] hover:bg-[#f0f4fa]"
+                        title="Annuler (⌘/Ctrl Z)"
+                        disabled={!s.past.length}
+                        onClick={s.undo}
                       >
-                        {view.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <div
-                  className="scene-light-control py-0.75 gap-2.5 border border-solid border-[#dce5f0] flex items-center h-9.5 pr-2 pl-0.75 rounded-[8px] bg-[#fffffff0] text-[#64758d] [box-shadow:0_2px_8px_#53668108] whitespace-nowrap pointer-events-auto"
-                  role="group"
-                  aria-label="Éclairage"
-                >
-                  <button
-                    type="button"
-                    className="disabled:cursor-not-allowed disabled:opacity-40 outline-offset-3 scene-light-icon px-2.5 py-0 gap-1.75 border border-solid border-[#dce6fc] inline-flex items-center justify-center h-7.5 shrink-0 rounded-[5px] bg-[#edf2ff] text-[#356ae6] text-[11px] font-semibold cursor-pointer [transition:background_150ms,color_150ms,border-color_150ms] hover:border-[#b8ccfc] hover:bg-[#dfe9ff] aria-pressed:border-[#356ae6] aria-pressed:bg-[#356ae6] aria-pressed:text-white [&[aria-pressed='true']:hover]:border-[#2858c9] [&[aria-pressed='true']:hover]:bg-[#2858c9] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3"
-                    aria-label="Tout éclairer"
-                    aria-pressed={s.uniformLighting}
-                    title={
-                      s.uniformLighting
-                        ? "Revenir à la lumière orientable"
-                        : "Éclairer les pièces de tous les côtés"
-                    }
-                    onClick={() =>
-                      useEditor.setState({
-                        uniformLighting: !s.uniformLighting,
-                      })
-                    }
-                  >
-                    <Sun className="shrink-0" size={16} aria-hidden="true" />
-                    <span>Tout éclairer</span>
-                  </button>
-                  <div
-                    className="scene-light-direction gap-1.75 flex items-center pl-2.5 border-l border-solid border-l-[#e6ebf3] data-[disabled=true]:opacity-35"
-                    data-disabled={s.uniformLighting}
-                  >
-                    <input
-                      className="outline-offset-3 p-0 m-0 border-0 border-none border-current appearance-none [-webkit-appearance:none] w-23 h-6.5 rounded-none [background-image:repeating-linear-gradient(to_right,#cad4e3_0_1px,transparent_1px_25%)] bg-size-[calc(100%-1px)_2px] bg-no-repeat bg-position-[center_bottom_2px] cursor-ew-resize [&::-webkit-slider-runnable-track]:h-0.5 [&::-webkit-slider-runnable-track]:rounded-[1px] [&::-webkit-slider-runnable-track]:[background:linear-gradient(to_right,#356ae6_var(--light-progress),#dce3ef_var(--light-progress))] [&::-moz-range-track]:h-0.5 [&::-moz-range-track]:rounded-[1px] [&::-moz-range-track]:bg-[#dce3ef] [&::-moz-range-progress]:h-0.5 [&::-moz-range-progress]:bg-[#356ae6] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-solid [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:[-webkit-appearance:none] [&::-webkit-slider-thumb]:box-border [&::-webkit-slider-thumb]:w-2.25 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:-mt-1.5 [&::-webkit-slider-thumb]:rounded-[3px] [&::-webkit-slider-thumb]:bg-[#356ae6] [&::-webkit-slider-thumb]:[box-shadow:0_0_0_1px_#b9cbed] [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-solid [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:box-border [&::-moz-range-thumb]:w-2.25 [&::-moz-range-thumb]:h-3.5 [&::-moz-range-thumb]:rounded-[3px] [&::-moz-range-thumb]:bg-[#356ae6] [&::-moz-range-thumb]:[box-shadow:0_0_0_1px_#b9cbed] [&:enabled:hover::-webkit-slider-thumb]:[box-shadow:0_0_0_1px_#356ae6] [&:enabled:hover::-moz-range-thumb]:[box-shadow:0_0_0_1px_#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 focus-visible:rounded-[3px] disabled:cursor-not-allowed"
-                      type="range"
-                      aria-label="Angle de l’éclairage"
-                      aria-valuetext={`${s.lightAngle} degrés`}
-                      title={
-                        s.uniformLighting
-                          ? "Réactivez la lumière orientable pour régler son angle"
-                          : "Tourner la lumière autour de la construction"
-                      }
-                      disabled={s.uniformLighting}
-                      min={0}
-                      max={360}
-                      step={5}
-                      value={s.lightAngle}
-                      style={
-                        {
-                          "--light-progress": `${(s.lightAngle / 360) * 100}%`,
-                        } as CSSProperties
-                      }
-                      onChange={(e) =>
-                        useEditor.setState({
-                          lightAngle: Number(e.target.value),
-                        })
-                      }
-                    />
-                    <output
-                      className="scene-light-angle min-w-7.75 text-[#64758d] text-[10px] text-right tabular-nums"
-                      aria-hidden="true"
+                        <Undo2 className="shrink-0" size={18} />
+                      </button>
+                      <button
+                        className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] hover:bg-[#f0f4fa]"
+                        title="Rétablir"
+                        disabled={!s.future.length}
+                        onClick={s.redo}
+                      >
+                        <Redo2 className="shrink-0" size={18} />
+                      </button>
+                    </div>
+                    <div className="tool-group flex border-r border-solid border-r-[#e7ecf2] pr-1 mr-0.5">
+                      <button
+                        type="button"
+                        aria-label="Sélection par cadre"
+                        title="Sélection par cadre (Maj + glisser sur le fond)"
+                        aria-pressed={s.boxSelect}
+                        disabled={
+                          !project.ready ||
+                          closed ||
+                          busy ||
+                          publishing ||
+                          !!s.gesture ||
+                          !!s.pending ||
+                          s.boxSelecting
+                        }
+                        className="flex h-8.25 min-w-8.5 cursor-pointer items-center justify-center rounded-[6px] px-1.75 text-[#7a879d] transition-colors hover:bg-[#f0f4fa] aria-pressed:bg-[#eaf0ff] aria-pressed:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#356ae6] disabled:cursor-not-allowed disabled:opacity-40"
+                        onClick={() =>
+                          useEditor.setState({ boxSelect: !s.boxSelect })
+                        }
+                      >
+                        <SquareDashedMousePointer
+                          className="shrink-0"
+                          size={19}
+                          aria-hidden="true"
+                        />
+                      </button>
+                      <button
+                        title="Déplacer"
+                        className={cn(
+                          "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
+                          "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
+                          "outline-offset-3",
+                          s.tool === "translate" && !s.boxSelect
+                            ? "active group/active"
+                            : "",
+                          "px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] [&[class~='group/active']]:bg-[#eaf0ff] [&[class~='group/active']]:text-[#356ae6] hover:bg-[#f0f4fa]",
+                        )}
+                        onClick={() =>
+                          useEditor.setState({
+                            tool: "translate",
+                            boxSelect: false,
+                          })
+                        }
+                      >
+                        <Move3D className="shrink-0" size={19} />
+                      </button>
+                      <button
+                        title="Tourner"
+                        className={cn(
+                          "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
+                          "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
+                          "outline-offset-3",
+                          s.tool === "rotate" && !s.boxSelect
+                            ? "active group/active"
+                            : "",
+                          "px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] [&[class~='group/active']]:bg-[#eaf0ff] [&[class~='group/active']]:text-[#356ae6] hover:bg-[#f0f4fa]",
+                        )}
+                        onClick={() =>
+                          useEditor.setState({
+                            tool: "rotate",
+                            boxSelect: false,
+                          })
+                        }
+                      >
+                        <Rotate3D className="shrink-0" size={19} />
+                      </button>
+                    </div>
+                    <button
+                      title="Aimantation"
+                      aria-pressed={s.snap}
+                      className={cn(
+                        "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
+                        "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
+                        "outline-offset-3",
+                        s.snap ? "active group/active" : "",
+                        "px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] [&[class~='group/active']]:bg-[#eaf0ff] [&[class~='group/active']]:text-[#356ae6] hover:bg-[#f0f4fa]",
+                      )}
+                      onClick={() => useEditor.setState({ snap: !s.snap })}
                     >
-                      {s.uniformLighting ? "—" : `${s.lightAngle}°`}
-                    </output>
+                      <Magnet className="shrink-0" size={18} />
+                      <span className="text-sm! leading-[inherit]! whitespace-nowrap max-xl-narrow:hidden">
+                        Aimantation
+                      </span>
+                    </button>
+                    <button
+                      title={
+                        s.showGrid ? "Masquer la grille" : "Afficher la grille"
+                      }
+                      aria-label="Grille"
+                      aria-pressed={s.showGrid}
+                      className={cn(
+                        "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
+                        "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
+                        "outline-offset-3",
+                        s.showGrid ? "active group/active" : "",
+                        "px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] [&[class~='group/active']]:bg-[#eaf0ff] [&[class~='group/active']]:text-[#356ae6] hover:bg-[#f0f4fa]",
+                      )}
+                      onClick={() =>
+                        useEditor.setState({ showGrid: !s.showGrid })
+                      }
+                    >
+                      <Grid2X2 className="shrink-0" size={18} />
+                      <span className="text-sm! leading-[inherit]! whitespace-nowrap max-xl-narrow:hidden">
+                        Grille
+                      </span>
+                    </button>
+                    <button
+                      className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] outline-offset-3 px-1.75 py-0 gap-1.5 h-8.25 min-w-8.5 flex items-center justify-center rounded-[6px] text-[#7a879d] hover:bg-[#f0f4fa]"
+                      title="Cadrer la sélection (F)"
+                      onClick={() => useEditor.setState({ frame: s.frame + 1 })}
+                    >
+                      <Scan className="shrink-0" size={18} />
+                    </button>
+                  </div>
+                  {project.ready ? (
+                    <ClientScene
+                      scene={playback.scene ?? s.scene}
+                      framingScene={s.scene}
+                      editable={!closed && !tourActive && !playback.active}
+                      editorView
+                      onEdit={!closed && !tourActive ? beginEditing : undefined}
+                      keyboardNavigation={!busy && !publishing && !tourActive}
+                      showGrid={s.showGrid}
+                      cameraRef={camera}
+                    />
+                  ) : (
+                    <div className="empty-state px-6.25 py-17.5 gap-5 min-h-75 flex flex-col items-center justify-center text-center text-[#7d8ba0]">
+                      Chargement de la création…
+                    </div>
+                  )}
+                  {project.ready && !count && !s.pending && (
+                    <div className="canvas-empty absolute left-1/2 top-[46%] transform-[translate(-50%,-50%)] pointer-events-none text-center w-full text-[#8291a9]">
+                      <span className="font-bold text-[26px] tracking-[-0.7px] leading-[1.4]">
+                        Une idée commence
+                        <br />
+                        par une brique.
+                      </span>
+                      <p className="text-xs leading-[inherit] mt-3">
+                        Choisissez votre première pièce à gauche.
+                      </p>
+                    </div>
+                  )}
+                  <div className="viewport-bottom gap-2 absolute left-4.5 bottom-3.75 right-4.5 z-3 flex items-center flex-wrap pointer-events-none text-xs leading-[inherit] text-[#8591a3]">
+                    <span className="first:px-2.25 first:py-1.5 first:border first:border-solid first:border-[#dce3ed] first:rounded-[6px] first:bg-[#ffffff91] first:text-[#6e7f96]">
+                      {count} /{" "}
+                      {stock
+                        ? stock.reduce((sum, item) => sum + item.quantity, 0)
+                        : 500}{" "}
+                      pièces
+                    </span>
+                    {overlap && (
+                      <span className="overlap group/overlap first:px-2.25 first:py-1.5 first:border first:border-solid first:border-[#dce3ed] first:rounded-[6px] first:bg-[#ffffff91] first:text-[#6e7f96] text-[10px] text-[#956f21]">
+                        Chevauchement existant à corriger
+                      </span>
+                    )}
+                    <div className="view-select gap-2 ml-auto max-w-full flex items-center justify-end flex-wrap pointer-events-none">
+                      <Select
+                        items={cameraViews}
+                        value={s.view}
+                        onValueChange={(view) => {
+                          if (
+                            view === "perspective" ||
+                            view === "top" ||
+                            view === "front" ||
+                            view === "right"
+                          )
+                            useEditor.setState({ view });
+                        }}
+                      >
+                        <SelectTrigger
+                          className="scene-view-trigger group/scene-view-trigger pointer-events-auto hover:border-[#b9cbed] hover:bg-white hover:text-[#356ae6] aria-expanded:border-[#b9cbed] aria-expanded:bg-white aria-expanded:text-[#356ae6] px-2.5 py-0 border border-solid border-[#dce5f0] h-9.5 w-33 text-xs bg-[#fffffff0] rounded-[8px] [box-shadow:0_2px_8px_#53668108] text-[#64758d] data-[size=default]:h-9.5"
+                          aria-label="Vue de la caméra"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent
+                          className="scene-view-menu p-1.25 min-w-38 rounded-[10px] bg-white [box-shadow:0_8px_24px_#33476b24]"
+                          side="top"
+                          align="end"
+                          sideOffset={8}
+                          alignItemWithTrigger={false}
+                        >
+                          {cameraViews.map((view) => (
+                            <SelectItem
+                              className="py-1.75 min-h-8 pr-7.5 pl-2.5 rounded-[6px] text-[#536580] text-xs cursor-pointer data-highlighted:bg-[#eef3ff] data-highlighted:text-[#356ae6] data-selected:bg-[#eef3ff] data-selected:text-[#356ae6]"
+                              key={view.value}
+                              value={view.value}
+                            >
+                              {view.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <div
+                        className="scene-light-control py-0.75 gap-2.5 border border-solid border-[#dce5f0] flex items-center h-9.5 pr-2 pl-0.75 rounded-[8px] bg-[#fffffff0] text-[#64758d] [box-shadow:0_2px_8px_#53668108] whitespace-nowrap pointer-events-auto"
+                        role="group"
+                        aria-label="Éclairage"
+                      >
+                        <button
+                          type="button"
+                          className="disabled:cursor-not-allowed disabled:opacity-40 outline-offset-3 scene-light-icon px-2.5 py-0 gap-1.75 border border-solid border-[#dce6fc] inline-flex items-center justify-center h-7.5 shrink-0 rounded-[5px] bg-[#edf2ff] text-[#356ae6] text-[11px] font-semibold cursor-pointer [transition:background_150ms,color_150ms,border-color_150ms] hover:border-[#b8ccfc] hover:bg-[#dfe9ff] aria-pressed:border-[#356ae6] aria-pressed:bg-[#356ae6] aria-pressed:text-white [&[aria-pressed='true']:hover]:border-[#2858c9] [&[aria-pressed='true']:hover]:bg-[#2858c9] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3"
+                          aria-label="Tout éclairer"
+                          aria-pressed={s.uniformLighting}
+                          title={
+                            s.uniformLighting
+                              ? "Revenir à la lumière orientable"
+                              : "Éclairer les pièces de tous les côtés"
+                          }
+                          onClick={() =>
+                            useEditor.setState({
+                              uniformLighting: !s.uniformLighting,
+                            })
+                          }
+                        >
+                          <Sun
+                            className="shrink-0"
+                            size={16}
+                            aria-hidden="true"
+                          />
+                          <span>Tout éclairer</span>
+                        </button>
+                        <div
+                          className="scene-light-direction gap-1.75 flex items-center pl-2.5 border-l border-solid border-l-[#e6ebf3] data-[disabled=true]:opacity-35"
+                          data-disabled={s.uniformLighting}
+                        >
+                          <input
+                            className="outline-offset-3 p-0 m-0 border-0 border-none border-current appearance-none [-webkit-appearance:none] w-23 h-6.5 rounded-none [background-image:repeating-linear-gradient(to_right,#cad4e3_0_1px,transparent_1px_25%)] bg-size-[calc(100%-1px)_2px] bg-no-repeat bg-position-[center_bottom_2px] cursor-ew-resize [&::-webkit-slider-runnable-track]:h-0.5 [&::-webkit-slider-runnable-track]:rounded-[1px] [&::-webkit-slider-runnable-track]:[background:linear-gradient(to_right,#356ae6_var(--light-progress),#dce3ef_var(--light-progress))] [&::-moz-range-track]:h-0.5 [&::-moz-range-track]:rounded-[1px] [&::-moz-range-track]:bg-[#dce3ef] [&::-moz-range-progress]:h-0.5 [&::-moz-range-progress]:bg-[#356ae6] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-solid [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:[-webkit-appearance:none] [&::-webkit-slider-thumb]:box-border [&::-webkit-slider-thumb]:w-2.25 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:-mt-1.5 [&::-webkit-slider-thumb]:rounded-[3px] [&::-webkit-slider-thumb]:bg-[#356ae6] [&::-webkit-slider-thumb]:[box-shadow:0_0_0_1px_#b9cbed] [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-solid [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:box-border [&::-moz-range-thumb]:w-2.25 [&::-moz-range-thumb]:h-3.5 [&::-moz-range-thumb]:rounded-[3px] [&::-moz-range-thumb]:bg-[#356ae6] [&::-moz-range-thumb]:[box-shadow:0_0_0_1px_#b9cbed] [&:enabled:hover::-webkit-slider-thumb]:[box-shadow:0_0_0_1px_#356ae6] [&:enabled:hover::-moz-range-thumb]:[box-shadow:0_0_0_1px_#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-3 focus-visible:rounded-[3px] disabled:cursor-not-allowed"
+                            type="range"
+                            aria-label="Angle de l’éclairage"
+                            aria-valuetext={`${s.lightAngle} degrés`}
+                            title={
+                              s.uniformLighting
+                                ? "Réactivez la lumière orientable pour régler son angle"
+                                : "Tourner la lumière autour de la construction"
+                            }
+                            disabled={s.uniformLighting}
+                            min={0}
+                            max={360}
+                            step={5}
+                            value={s.lightAngle}
+                            style={
+                              {
+                                "--light-progress": `${(s.lightAngle / 360) * 100}%`,
+                              } as CSSProperties
+                            }
+                            onChange={(e) =>
+                              useEditor.setState({
+                                lightAngle: Number(e.target.value),
+                              })
+                            }
+                          />
+                          <output
+                            className="scene-light-angle min-w-7.75 text-[#64758d] text-[10px] text-right tabular-nums"
+                            aria-hidden="true"
+                          >
+                            {s.uniformLighting ? "—" : `${s.lightAngle}°`}
+                          </output>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </section>
+                {project.ready && (
+                  <ConstructionTimeline
+                    playback={playback}
+                    editor
+                    disabled={
+                      !!s.gesture ||
+                      !!s.pending ||
+                      !!s.libraryPointer ||
+                      s.boxSelecting ||
+                      treeDrag.active ||
+                      busy ||
+                      publishing ||
+                      tourActive
+                    }
+                    className="border-t border-[#e0e7f1]"
+                  />
+                )}
+              </section>
+            )}
+          </ConstructionPlayer>
           <div className="editor-side editor-side-right relative min-w-0 min-h-0 bg-white group/editor-side-right border-l border-solid border-l-[#e4e9f1] group-data-[inspector-collapsed=true]/editor-body:border-0 group-data-[inspector-collapsed=true]/editor-body:border-none group-data-[inspector-collapsed=true]/editor-body:border-current">
             <button
               className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 side-panel-toggle group/side-panel-toggle border border-solid border-[#e4e9f1] absolute top-3 right-2 z-4 grid place-items-center rounded-[7px] bg-white text-[#68788e] hover:border-[#cddcfa] hover:bg-[#edf3ff] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 aria-[expanded=false]:top-5 aria-[expanded=false]:right-3 aria-[expanded=false]:[box-shadow:0_2px_8px_#23334d14] size-7.5"
