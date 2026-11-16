@@ -251,6 +251,7 @@ export default function Editor({
   );
   const treeId = useId();
   const propertiesId = useId();
+  const parentGroupId = useId();
   const [propertiesCollapsed, setPropertiesCollapsed] = useState(false);
   const [libraryCollapsed, setLibraryCollapsed] = useState(false);
   const [inspectorCollapsed, setInspectorCollapsed] = useState(false);
@@ -458,6 +459,16 @@ export default function Editor({
     ),
   );
   const selectionBranches = new Set(descendants(s.scene, selectionRoots));
+  const parentGroups = s.scene.nodes.filter(
+    (node) => node.kind === "group" && node.id !== selected?.id,
+  );
+  const parentGroupItems = [
+    ...(selectionParents.size > 1
+      ? [{ value: "mixed", label: "Plusieurs groupes" }]
+      : []),
+    { value: "", label: "Racine" },
+    ...parentGroups.map((node) => ({ value: node.id, label: node.name })),
+  ];
   const count = s.scene.nodes.filter((n) => n.kind === "part").length;
   const layoutKey = useMemo(() => sceneLayoutKey(s.scene), [s.scene]);
   const overlap = useMemo(() => hasOverlappingParts(s.scene), [layoutKey]);
@@ -1588,45 +1599,50 @@ export default function Editor({
                           }
                         />
                       </label>
-                      <label className="text-sm! leading-[inherit]! text-[#7c899d] block mb-3">
-                        Groupe parent
-                        <select
-                          className="outline-offset-3 p-1.75 border border-solid border-[#e1e6ee] block rounded-[6px] text-sm! leading-[inherit]! mt-1.25 w-full"
+                      <div className="text-sm! leading-[inherit]! text-[#7c899d] mb-3">
+                        <label htmlFor={parentGroupId}>Groupe parent</label>
+                        <Select
+                          items={parentGroupItems}
                           value={
                             selectionParents.size > 1
                               ? "mixed"
                               : ([...selectionParents][0] ?? "")
                           }
-                          onChange={(e) =>
+                          onValueChange={(parentId) =>
                             safe(() =>
-                              s.reparent(selected.id, e.target.value || null),
+                              s.reparent(selected.id, parentId || null),
                             )
                           }
                         >
-                          {selectionParents.size > 1 && (
-                            <option value="mixed" disabled>
-                              Plusieurs groupes
-                            </option>
-                          )}
-                          <option value="">Racine</option>
-                          {s.scene.nodes
-                            .filter(
-                              (n) => n.kind === "group" && n.id !== selected.id,
-                            )
-                            .map((n) => (
-                              <option
-                                key={n.id}
-                                value={n.id}
+                          <SelectTrigger
+                            id={parentGroupId}
+                            className="mt-1.25 w-full min-w-0 rounded-[6px] border-[#e1e6ee] bg-white text-sm! leading-[inherit]! data-[size=default]:h-9"
+                          >
+                            <SelectValue className="min-w-0 truncate" />
+                          </SelectTrigger>
+                          <SelectContent
+                            align="start"
+                            alignItemWithTrigger={false}
+                            className="rounded-[9px] border border-solid border-[#dfe6f2] bg-white p-1 text-[#536580] [box-shadow:0_8px_24px_#33476b24] ring-0"
+                          >
+                            {parentGroupItems.map((item) => (
+                              <SelectItem
+                                key={item.value}
+                                value={item.value}
                                 disabled={
-                                  selectionBranches.has(n.id) ||
-                                  inherited(s.scene, n.id, "locked")
+                                  item.value === "mixed" ||
+                                  selectionBranches.has(item.value) ||
+                                  (!!item.value &&
+                                    inherited(s.scene, item.value, "locked"))
                                 }
+                                className="cursor-pointer rounded-[5px] py-2 pl-2.5 text-sm data-highlighted:bg-[#eef3ff] data-highlighted:text-[#356ae6] data-selected:bg-[#eef3ff] data-selected:text-[#356ae6] [&_[data-slot=select-item-text]]:min-w-0"
                               >
-                                {n.name}
-                              </option>
+                                <span className="truncate">{item.label}</span>
+                              </SelectItem>
                             ))}
-                        </select>
-                      </label>
+                          </SelectContent>
+                        </Select>
+                      </div>
                       {(["position", "rotation"] as const).map((field) => (
                         <div
                           className="transform-fields mt-4.25 text-sm! leading-[inherit]! text-[#7c899d]"

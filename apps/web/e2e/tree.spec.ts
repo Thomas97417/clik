@@ -6,6 +6,13 @@ const row = (page: Page, name: string) =>
     .locator(".tree-row")
     .filter({ has: page.getByRole("button", { name, exact: true }) });
 
+async function selectParentGroup(page: Page, name: string) {
+  await page
+    .getByRole("combobox", { name: "Groupe parent", exact: true })
+    .click();
+  await page.getByRole("option", { name, exact: true }).click();
+}
+
 test("créer un groupe vide puis y ranger une pièce, avec annuler et rétablir", async ({
   page,
 }) => {
@@ -32,14 +39,11 @@ test("créer un groupe vide puis y ranger une pièce, avec annuler et rétablir"
   const target = row(page, "Nouveau groupe");
   await target.locator(".tree-name").click();
   await rename(page, "Structure");
-  const targetId = (await row(page, "Structure").getAttribute("data-node-id"))!;
   await page.locator('.piece-card[aria-label="Brique 2 × 2"]').click();
   await expect(
     page.getByRole("button", { name: "Grouper", exact: true }),
   ).toBeEnabled();
-  await page
-    .getByRole("combobox", { name: "Groupe parent", exact: true })
-    .selectOption(targetId);
+  await selectParentGroup(page, "Structure");
   await expect(row(page, "Structure").locator(".tree-count")).toHaveText("1");
 });
 
@@ -124,22 +128,19 @@ for (const method of ["glisser", "propriétés"]) {
       .click({ modifiers: ["Shift"] });
     await expect(page.locator(".tree-row.selected")).toHaveCount(2);
     const target = row(page, "Assemblage");
-    const targetId = (await target.getAttribute("data-node-id"))!;
     if (method === "glisser") {
       await page
         .getByRole("button", { name: "Tout replier", exact: true })
         .click();
       await row(page, "Pente 2 × 2").dragTo(target);
     } else {
-      await page
-        .getByRole("combobox", { name: "Groupe parent", exact: true })
-        .selectOption(targetId);
+      await selectParentGroup(page, "Assemblage");
     }
     await expect(target.locator(".tree-count")).toHaveText("4");
     await expect(page.locator(".tree-row.selected")).toHaveCount(2);
     await expect(
       page.getByRole("combobox", { name: "Groupe parent", exact: true }),
-    ).toHaveValue(targetId);
+    ).toHaveText("Assemblage");
     await page
       .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
       .click();
@@ -148,7 +149,7 @@ for (const method of ["glisser", "propriétés"]) {
       await row(page, name).locator(".tree-name").click();
       await expect(
         page.getByRole("combobox", { name: "Groupe parent", exact: true }),
-      ).toHaveValue("");
+      ).toHaveText("Racine");
     }
     await page.getByRole("button", { name: "Rétablir", exact: true }).click();
     await expect(target.locator(".tree-count")).toHaveText("4");
@@ -309,7 +310,7 @@ test("déposer dans un groupe replié le déplie et conserve la position", async
   await expect(row(page, "Assemblage").locator(".tree-count")).toHaveText("3");
   await expect(
     page.getByRole("combobox", { name: "Groupe parent", exact: true }),
-  ).not.toHaveValue("");
+  ).toHaveText("Assemblage");
   const after = await Promise.all(
     ["X", "Y", "Z"].map((axis) =>
       page.getByLabel(`position ${axis}`, { exact: true }).inputValue(),
@@ -322,7 +323,7 @@ test("déposer dans un groupe replié le déplie et conserve la position", async
   await row(page, "Pente 2 × 2").locator(".tree-name").click();
   await expect(
     page.getByRole("combobox", { name: "Groupe parent", exact: true }),
-  ).toHaveValue("");
+  ).toHaveText("Racine");
   await expect(row(page, "Assemblage").locator(".tree-count")).toHaveText("2");
 });
 
@@ -369,9 +370,7 @@ test("groupes verrouillés ou vides : repli indépendant du masquage", async ({
     .getByTitle("Déverrouiller", { exact: true })
     .click();
   await row(page, "Châssis").locator(".tree-name").click();
-  await page
-    .getByRole("combobox", { name: "Groupe parent", exact: true })
-    .selectOption("");
+  await selectParentGroup(page, "Racine");
   await expect(row(page, "Assemblage").locator(".tree-count")).toHaveText("0");
   await page
     .getByRole("button", { name: "Replier Assemblage", exact: true })
