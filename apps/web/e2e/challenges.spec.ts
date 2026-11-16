@@ -2,6 +2,71 @@ import { selectCameraView } from "./camera-view";
 import { test, expect } from "@playwright/test";
 import { CATALOG } from "@clik/scene";
 
+test("défi : sélection des 17 pièces par cadre et sauvegarde d’une couleur personnelle", async ({
+  page,
+}) => {
+  const { challengeFixture } = await import("./fixtures/challenges");
+  await challengeFixture(page);
+  await page.goto("/editor/project");
+  const brick = page.locator('.piece-card[aria-label="Brique 1 × 1"]');
+  for (let i = 0; i < 16; i++) await brick.click();
+  await page.getByRole("button", { name: "Brique 1 × 2", exact: true }).click();
+  const canvas = page.locator("canvas").first();
+  await expect(canvas).toHaveAttribute("data-rendered", "17");
+  await selectCameraView(page, "top");
+  await page
+    .getByRole("button", { name: "Tout sélectionner", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
+  await page
+    .getByRole("button", { name: "Sélection par cadre", exact: true })
+    .click();
+  const box = (await canvas.boundingBox())!;
+  await page.mouse.move(box.x + 15, box.y + 75);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width - 15, box.y + box.height - 60, {
+    steps: 15,
+  });
+  await expect(page.locator(".selection-box")).toHaveAttribute(
+    "data-count",
+    "17",
+  );
+  await page.mouse.up();
+  await expect(page.locator(".tree-row.selected")).toHaveCount(17);
+
+  await page
+    .getByRole("button", {
+      name: "Ajouter la couleur personnelle 1",
+      exact: true,
+    })
+    .click();
+  const input = page.getByRole("textbox", {
+    name: "Code hexadécimal",
+    exact: true,
+  });
+  await input.fill("#ff0051");
+  await input.press("Enter");
+  await page
+    .getByRole("button", { name: "Enregistrer et utiliser", exact: true })
+    .click();
+  const status = page.locator(".save-status");
+  await expect(status).toHaveAttribute("data-state", "saved");
+  await expect(status).toHaveAttribute("data-sync-state", "synced");
+  const colors = () =>
+    page
+      .locator(".tree-row .part-dot")
+      .evaluateAll((dots) =>
+        dots.map((dot) => (dot as HTMLElement).style.backgroundColor),
+      );
+  await expect.poll(colors).toEqual(Array(17).fill("rgb(255, 0, 81)"));
+  await page.reload();
+  await expect.poll(colors).toEqual(Array(17).fill("rgb(255, 0, 81)"));
+  await expect(status).toHaveAttribute("data-sync-state", "synced");
+  await expect(
+    page.locator("[data-sonner-toast][data-type=error]"),
+  ).toHaveCount(0);
+});
+
 test("participer : créer, proposer et mettre à jour la même création", async ({
   page,
 }) => {

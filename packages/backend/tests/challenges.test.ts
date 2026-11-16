@@ -141,6 +141,35 @@ describe("Défis et publications", () => {
     const p = await u.query(api.projects.get, { id });
     expect(p.revision).toBe(0);
   });
+  it("sauvegarde les 17 pièces d’un défi après leur recoloration personnalisée", async () => {
+    const { user } = setup();
+    const u = user("alice");
+    const date = "2026-11-16";
+    vi.setSystemTime(challengeStart(date) + 3600000);
+    const id = await u.mutation(api.challenges.start, { day: date });
+    const scene = {
+      ...emptyScene(),
+      nodes: Array.from({ length: 16 }, (_, i) =>
+        makePart("brick-1x1", "#4079e8", [i * 2, 0, 0]),
+      ).concat(makePart("brick-1x2", "#ef4444", [0, 0, 4])),
+    };
+    const revision = await u.mutation(api.projects.save, {
+      id,
+      title: "Mon défi",
+      scene: JSON.stringify(scene),
+      revision: 0,
+    });
+    scene.nodes = scene.nodes.map((node) => ({ ...node, color: "#ff0051" }));
+    const nextRevision = await u.mutation(api.projects.save, {
+      id,
+      title: "Mon défi",
+      scene: JSON.stringify(scene),
+      revision,
+    });
+    const saved = await u.query(api.projects.get, { id });
+    expect(saved.revision).toBe(nextRevision);
+    expect(JSON.parse(saved.scene)).toEqual(scene);
+  });
   it("refuse les dépôts vides et les dépôts à minuit, sans empêcher la sauvegarde privée", async () => {
     const { t, user, publish, doc } = setup();
     const u = user("empty"),

@@ -66,6 +66,7 @@ vi.mock("../src/lib/clik/local", () => ({
 }));
 vi.mock("sonner", () => ({ toast: { error: vi.fn(), info: vi.fn() } }));
 import { useProject } from "../src/lib/clik/use-project";
+import { toast } from "sonner";
 beforeEach(() => {
   localStorage.clear();
   mocks.drafts.clear();
@@ -82,6 +83,7 @@ beforeEach(() => {
   mocks.userLoading = false;
   mocks.writeError = undefined;
   mocks.writeGates = [];
+  vi.mocked(toast.error).mockClear();
   Object.defineProperty(navigator, "onLine", {
     value: true,
     configurable: true,
@@ -339,6 +341,35 @@ it("conserve la confirmation locale si la synchronisation échoue", async () => 
     dirty: true,
     scene: { nodes: [expect.objectContaining({ type: "brick-1x1" })] },
   });
+});
+
+it("ne renvoie pas en boucle une sauvegarde rejetée et reprend à la prochaine modification", async () => {
+  const { result } = renderHook(() => useProject("project"));
+  await waitFor(() => expect(result.current.localStatus).toBe("saved"));
+  mocks.save.mockRejectedValue(Error("Server Error"));
+  vi.useFakeTimers();
+  await act(async () => useEditor.getState().add("brick-1x1"));
+  await act(async () => vi.advanceTimersByTimeAsync(1000));
+  expect(mocks.save).toHaveBeenCalledOnce();
+  expect(toast.error).toHaveBeenCalledOnce();
+  const stamp = mocks.drafts.get("project:alice:project").stamp;
+
+  await act(async () => vi.advanceTimersByTimeAsync(60_000));
+  expect(mocks.save).toHaveBeenCalledOnce();
+  expect(toast.error).toHaveBeenCalledOnce();
+  expect(result.current.localStatus).toBe("saved");
+  expect(result.current.syncStatus).toBe("error");
+  expect(mocks.drafts.get("project:alice:project").stamp).toBe(stamp);
+
+  mocks.save.mockResolvedValue(4);
+  await act(async () => useEditor.getState().setColor("#ff0051"));
+  await act(async () => vi.advanceTimersByTimeAsync(1000));
+  expect(mocks.save).toHaveBeenCalledTimes(2);
+  expect(JSON.parse(mocks.save.mock.calls[1][0].scene).nodes[0].color).toBe(
+    "#ff0051",
+  );
+  expect(result.current.syncStatus).toBe("synced");
+  expect(mocks.drafts.get("project:alice:project").dirty).toBe(false);
 });
 
 it("recharge la version en ligne après un conflit et rétablit les deux confirmations", async () => {
