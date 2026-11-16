@@ -135,6 +135,18 @@ Les tests comparent les pixels de l’aperçu après rotation à la souris, zoom
 
 Les parcours existants vérifient que les cartes de « Mes créations » restent statiques, que la copie créée après manipulation conserve exactement les pièces du modèle et que les publications conservent leur miniature automatique. Les 33 contrôles ciblés passent sous Chromium, Firefox et WebKit, ainsi que les 496 tests du frontend, TypeScript et le build.
 
+## Lecture de la construction
+
+Les dates de pose sont vérifiées pour les ajouts, duplications, collages et imports, les changements d’horloge, les gestes annulés, les modifications de couleur et de hiérarchie, l’annulation/rétablissement et la reprise d’un brouillon. Les fonctions Convex conservent les dates lors de la création, de la sauvegarde, de la publication et du remix ; une sauvegarde ultérieure ne modifie pas la version publique précédente. Les anciennes scènes restent valides sans dates. Les 1 133 tests automatisés passent (1 070 frontend, 63 backend), ainsi que TypeScript et le build client/serveur.
+
+Les neuf scénarios navigateur du lecteur passent sous Chromium, Firefox et WebKit : lecture, pause, reprise à vitesse modifiée, déplacement réel à la souris et au toucher, accès clavier, retour à l’édition par le bouton et Échap, commandes de modification désactivées, rendu public depuis la galerie sur ordinateur/mobile, et absence de lecteur sur une ancienne publication. La scène et le stamp IndexedDB sont comparés avant/après lecture et restent identiques. Les captures ordinateur/mobile ont été inspectées : `/tmp/clik-construction-editor-<moteur>.png` et `/tmp/clik-construction-public-<moteur>-<largeur>.png`.
+
+Pour isoler les données de recette entre plusieurs worktrees, `CLIK_E2E_PUBLIC_PORT` permet de changer le port HTTP du transport simulé (3219 par défaut) ; lancer Vite avec `VITE_CONVEX_URL` et `VITE_CONVEX_SITE_URL` pointant vers le même port. Aucun compte ni aucune publication réelle ne sont créés.
+
+Les onze contrôles existants d’import et de publication passent aussi sous Chromium avec ce transport isolé, dont le rechargement après import, l’annulation/rétablissement, la miniature, la révision, le transfert local vers le compte et la mise à jour d’une publication.
+
+La suite navigateur exhaustive n’est pas validée par ce passage : deux anciens scénarios de `editor.spec.ts` ont un sélecteur global de statut devenu ambigu, un scénario d’accueil attend un ancien titre, et le scénario de galerie sans fixture nécessite un backend accessible. Ces échecs sont distincts des neuf scénarios du lecteur.
+
 ## Limites et contrôles de recette restants
 
 - WebKit est le moteur utilisé par Safari ; ce test ne remplace pas une recette dans l’application Safari réelle et sur un appareil iOS.

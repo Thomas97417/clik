@@ -36,6 +36,7 @@ class SceneBoundary extends Component<
 }
 export default function ClientScene(props: {
   scene: SceneDocument;
+  framingScene?: SceneDocument;
   editable?: boolean;
   keyboardNavigation?: boolean;
   showGrid?: boolean;

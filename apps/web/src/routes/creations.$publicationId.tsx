@@ -28,6 +28,8 @@ import Comments from "@/components/challenges/comments";
 import { CreationChallenge, SignInTo } from "@/components/challenges/shared";
 import AuthorLink from "@/components/clik/author-link";
 import ClientScene from "@/components/clik/client-scene";
+import ConstructionTimeline from "@/components/clik/construction-timeline";
+import ConstructionPlayer from "@/components/clik/construction-player";
 import CreationRemixes from "@/components/clik/creation-remixes";
 import AssemblyBadge from "@/components/clik/assembly-badge";
 import { formatDate, formatDateTime } from "@/lib/format-date";
@@ -250,26 +252,37 @@ function CreationDetail({
 
         <div className="creation-layout grid grid-cols-[minmax(0,1fr)_320px] items-start gap-8 max-lg-narrow:grid-cols-1 max-lg-narrow:gap-7 lg-start:max-xl-narrow:grid-cols-[minmax(0,1fr)_280px] lg-start:max-xl-narrow:gap-6">
           <div className="creation-preview-panel min-w-0">
-            <div
-              className="public-scene relative h-130 overflow-hidden rounded-xl border border-[#e4eaf2] bg-[#edf1f7] max-sm-narrow:h-80 min-sm-narrow:max-lg-narrow:h-112"
-              role="region"
-              aria-label={`Aperçu 3D de ${p.title}`}
-            >
-              <ClientScene
-                scene={scene!}
-                showGrid={false}
-                showViewControls
-                poster={p.thumbnailUrl}
-                title={p.title}
-              />
-              <span
-                className="pointer-events-none absolute top-4 left-4 inline-flex items-center gap-2 text-[11px] font-medium text-[#647995] max-sm:top-3 max-sm:left-3"
-                aria-hidden="true"
-              >
-                <Box size={15} />
-                Vue 3D interactive
-              </span>
-            </div>
+            <ConstructionPlayer scene={scene!}>
+              {(playback) => (
+                <>
+                  <div
+                    className="public-scene relative h-130 overflow-hidden rounded-xl border border-[#e4eaf2] bg-[#edf1f7] max-sm-narrow:h-80 min-sm-narrow:max-lg-narrow:h-112"
+                    role="region"
+                    aria-label={`Aperçu 3D de ${p.title}`}
+                  >
+                    <ClientScene
+                      scene={playback.scene ?? scene!}
+                      framingScene={scene!}
+                      showGrid={false}
+                      showViewControls
+                      poster={p.thumbnailUrl}
+                      title={p.title}
+                    />
+                    <span
+                      className="pointer-events-none absolute top-4 left-4 inline-flex items-center gap-2 text-[11px] font-medium text-[#647995] max-sm:top-3 max-sm:left-3"
+                      aria-hidden="true"
+                    >
+                      <Box size={15} />
+                      Vue 3D interactive
+                    </span>
+                  </div>
+                  <ConstructionTimeline
+                    playback={playback}
+                    className="mt-3 rounded-xl border border-[#e4eaf2]"
+                  />
+                </>
+              )}
+            </ConstructionPlayer>
             <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-[11px] leading-relaxed text-[#71839c]">
               <p className="creation-view-hint flex items-center gap-1.5">
                 <MousePointer2

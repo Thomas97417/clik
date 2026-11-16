@@ -283,6 +283,7 @@ function Manipulator({
 }
 function Stage({
   scene,
+  framingScene,
   editable,
   keyboardNavigation,
   showGrid,
@@ -292,6 +293,7 @@ function Stage({
   onBoxPreview,
 }: {
   scene: SceneDocument;
+  framingScene?: SceneDocument;
   editable: boolean;
   keyboardNavigation: boolean;
   showGrid: boolean;
@@ -378,11 +380,12 @@ function Stage({
   const frame = editable ? s.frame : 0,
     view = editable ? s.view : "perspective";
   useEffect(() => {
-    const boxes = scene.nodes
+    const framing = framingScene ?? scene;
+    const boxes = framing.nodes
       .filter(
         (n) =>
           n.kind === "part" &&
-          !inherited(scene, n.id, "hidden") &&
+          !inherited(framing, n.id, "hidden") &&
           (!editable || !s.selection.length || selectedIds.has(n.id)),
       )
       .map((n) => {
@@ -390,7 +393,7 @@ function Stage({
         return new Box3(
           new Vector3(-w / 2, 0, -d / 2),
           new Vector3(w / 2, h + 0.2, d / 2),
-        ).applyMatrix4(worldMatrix(scene, n.id));
+        ).applyMatrix4(worldMatrix(framing, n.id));
       });
     const box = boxes.reduce((total, next) => total.union(next), new Box3());
     if (box.isEmpty())
@@ -549,6 +552,7 @@ function Stage({
 }
 export default function Scene({
   scene,
+  framingScene,
   editable = false,
   keyboardNavigation = false,
   showGrid = true,
@@ -556,6 +560,7 @@ export default function Scene({
   cameraRef,
 }: {
   scene: SceneDocument;
+  framingScene?: SceneDocument;
   editable?: boolean;
   keyboardNavigation?: boolean;
   showGrid?: boolean;
@@ -597,6 +602,7 @@ export default function Scene({
       >
         <Stage
           scene={liveScene}
+          framingScene={framingScene}
           editable={editable}
           keyboardNavigation={keyboardNavigation}
           showGrid={showGrid}

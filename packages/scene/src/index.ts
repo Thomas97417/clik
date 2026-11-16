@@ -458,6 +458,8 @@ const nodeSchema = z.discriminatedUnion("kind", [
       kind: z.literal("part"),
       type: z.enum(Object.keys(CATALOG) as [PartType, ...PartType[]]),
       color: colorSchema,
+      // Optional so scenes made before construction playback remain readable.
+      createdAt: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(),
     })
     .strict(),
   z.object({ ...base, kind: z.literal("group") }).strict(),

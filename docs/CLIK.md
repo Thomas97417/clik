@@ -63,6 +63,14 @@ Raccourcis : Supprimer / Retour arrière, Échap, F pour cadrer, D pour duplique
 
 Les flèches déplacent la sélection d’une case sur les axes fixes du quadrillage : gauche/droite sur X, haut/bas sur Z. Maj + haut/bas monte ou descend de 1,2 unité, soit la hauteur d’une brique. Les groupes restent rigides et conservent leur rotation ; les branches verrouillées restent immobiles. Une destination occupée ou sous le sol est refusée sans créer d’historique. Chaque pas accepté s’annule normalement. Les flèches restent réservées à la saisie dans les champs, aux contrôles et aux fenêtres modales ; elles ne modifient pas une manipulation en cours.
 
+## Lecture de la construction
+
+Chaque nouvelle pièce posée dans l’atelier reçoit un `createdAt` en millisecondes Unix à la validation de l’ajout. Les duplications, collages et imports reçoivent une nouvelle date ; les pièces d’un même import apparaissent ensemble. Les déplacements, changements de couleur et de hiérarchie conservent cette date. Annuler/rétablir, les brouillons IndexedDB, les sauvegardes Convex, les publications et les reprises la préservent.
+
+Le lecteur sous la scène est disponible dans l’éditeur et sur les pages de créations ouvertes depuis la galerie, les pages de créateurs et les défis. Il propose lecture/pause, retour au début, déplacement à la souris, au toucher ou au clavier dans la timeline, et vitesses de 0,5× à 4×. Les longues pauses entre poses sont raccourcies. La caméra reste cadrée sur la construction complète. Dans l’atelier, la lecture désactive les modifications ; « Revenir à l’édition » ou Échap rétablit la scène complète sans modifier la sauvegarde ni l’historique d’annulation.
+
+La lecture fait apparaître les pièces encore présentes, à leur position et dans leur couleur actuelles. Elle ne rejoue pas les déplacements ni les suppressions passés. Les anciennes pièces sans date restent une base déjà présente ; aucune date rétrospective n’est inventée. Une scène entièrement dépourvue de dates n’affiche pas de lecteur. Le champ est facultatif dans le format version 1 ; déployer le validateur Convex mis à jour avant le frontend qui envoie les dates.
+
 ## Modèle et sécurité
 
 `packages/scene` définit `SceneDocument` version 1, catalogue `clik-1`, positions et rotations Euler XYZ en radians. Chaque nœud référence un parent ; les matrices locales sont composées dans l’ordre de la hiérarchie. Le validateur partagé contrôle les valeurs finies, couleurs, modèles, unicité des identifiants, existence des parents, absence de cycle, 500 pièces et 512 Kio en UTF-8. Les groupes sont limités par le plafond de 1 000 nœuds total.

@@ -38,6 +38,7 @@ import { Matrix4, Vector3 } from "three";
 import { moveTreeBranches } from "./tree-order";
 import { FIRST_CREATION_TITLE } from "./creation-name";
 import { completeGroupSelection, withoutSelection } from "./selection";
+import { timestampNewParts } from "./construction-timeline";
 type Snapshot = {
   scene: SceneDocument;
   title: string;
@@ -182,9 +183,10 @@ export const useEditor = create<State>((set, get) => ({
       gestureIds: [],
     }),
   commit: (scene, title = get().title, provenance = get().provenance) => {
+    const s = get();
+    scene = timestampNewParts(s.scene, scene);
     validateScene(scene);
     validateProvenance(provenance);
-    const s = get();
     checkChallenge(scene, s.challenge);
     if (
       JSON.stringify(scene) === JSON.stringify(s.scene) &&
