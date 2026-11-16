@@ -1,3 +1,4 @@
+import { selectPieceFamily } from "./piece-family";
 import { selectCameraView } from "./camera-view";
 import { test, expect } from "@playwright/test";
 import { CATALOG } from "@clik/scene";
@@ -17,7 +18,7 @@ for (const [label, height] of [
       await page.goto("/editor");
       const canvas = page.locator("canvas").first();
       await expect(canvas).toHaveAttribute("data-rendered", "0");
-      await page.getByRole("button", { name: "Rondes", exact: true }).click();
+      await selectPieceFamily(page, "Rondes");
       await expect(page.locator(".piece-card")).toHaveCount(
         Object.keys(CATALOG).filter((type) => type.startsWith("round-")).length,
       );

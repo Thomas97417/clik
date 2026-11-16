@@ -1,3 +1,4 @@
+import { selectPieceFamily } from "./piece-family";
 import { test, expect } from "@playwright/test";
 import { selectCameraView } from "./camera-view";
 import { dragLibrary } from "./drag-library";
@@ -21,7 +22,7 @@ test("nouvelles familles : glisser, tourner, emboîter et annuler chaque forme",
     ["Tuiles", "Tuile grille 1 × 2", 2],
     ["Briques", "Brique maçonnerie 1 × 2", 2],
   ] as const) {
-    await page.getByRole("button", { name: category, exact: true }).click();
+    await selectPieceFamily(page, category);
     await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
     const bounds = (await canvas.boundingBox())!;
     await dragLibrary(

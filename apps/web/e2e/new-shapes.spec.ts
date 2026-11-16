@@ -1,3 +1,4 @@
+import { selectPieceFamily } from "./piece-family";
 import { test, expect } from "@playwright/test";
 import { dragLibrary } from "./drag-library";
 
@@ -13,7 +14,7 @@ test("rondes, angles et arches : glisser, tourner et annuler depuis la biblioth�
     ["Angles", "Plaque d’angle 2 × 2"],
     ["Arches", "Arche 1 × 6 × 3"],
   ]) {
-    await page.getByRole("button", { name: category, exact: true }).click();
+    await selectPieceFamily(page, category);
     await dragLibrary(
       page,
       name,
@@ -40,11 +41,11 @@ test("une arche permet de construire sous son ouverture mais protège sa voûte"
   page,
 }, info) => {
   await page.goto("/editor");
-  await page.getByRole("button", { name: "Arches", exact: true }).click();
+  await selectPieceFamily(page, "Arches");
   await page
     .getByRole("button", { name: "Arche 1 × 4 × 3", exact: true })
     .click();
-  await page.getByRole("button", { name: "Briques", exact: true }).click();
+  await selectPieceFamily(page, "Briques");
   await page.getByRole("button", { name: "Brique 1 × 1", exact: true }).click();
   await page.getByRole("button", { name: "Rouge", exact: true }).click();
   for (const [axis, value] of [

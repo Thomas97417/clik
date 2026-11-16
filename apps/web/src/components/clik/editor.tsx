@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
-import { memo, useEffect, useMemo, useRef, useState, useId } from "react";
+import { useEffect, useMemo, useRef, useState, useId } from "react";
 import { useTreeDrag } from "./use-tree-drag";
 import EditorPanels from "./editor-panels";
-import EditorColors from "./editor-colors";
+import EditorLibrary from "./editor-library";
 import EditorHelp from "./editor-help";
 import EditorSaveStatus from "./editor-save-status";
 import EditorShortcutsPopover from "./editor-shortcuts-popover";
@@ -16,15 +16,12 @@ import { ConvexError } from "convex/values";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import {
-  CATALOG,
-  countStock,
   inherited,
   ancestors,
   descendants,
   roots,
   hasOverlappingParts,
   type SceneNode,
-  type PartType,
   type Vec3,
   projectSources,
 } from "@clik/scene";
@@ -41,15 +38,12 @@ import {
   FolderPlus,
   Grid2X2,
   Globe2,
-  Grip,
   Layers,
   ListChecks,
   LockKeyhole,
   LoaderCircle,
   Magnet,
   Move3D,
-  PanelLeftClose,
-  PanelLeftOpen,
   PanelRightClose,
   PanelRightOpen,
   Plus,
@@ -88,33 +82,10 @@ import type { Camera } from "three";
 import { useEditor } from "@/lib/clik/store";
 import { useProject } from "@/lib/clik/use-project";
 import ClientScene from "./client-scene";
-import PartPreview from "./part-preview";
 import { sceneLayoutKey } from "@/lib/clik/scene-layout";
 import { cameraRelativeStep } from "@/lib/clik/camera-relative-movement";
 import { editorShortcutTarget } from "@/lib/clik/editor-keyboard";
 
-const LibraryPartPreview = memo(function LibraryPartPreview({
-  type,
-}: {
-  type: PartType;
-}) {
-  const color = useEditor((state) => state.color);
-  return <PartPreview type={type} color={color} />;
-});
-const catalog = Object.entries(CATALOG) as [
-  PartType,
-  (typeof CATALOG)[PartType],
-][];
-const pieceCategories = [
-  { name: "Toutes", prefix: "" },
-  { name: "Briques", prefix: "brick" },
-  { name: "Plaques", prefix: "plate" },
-  { name: "Pentes", prefix: "slope" },
-  { name: "Tuiles", prefix: "tile" },
-  { name: "Rondes", prefix: "round" },
-  { name: "Angles", prefix: "corner" },
-  { name: "Arches", prefix: "arch" },
-];
 const cameraViews = [
   { value: "perspective", label: "Perspective" },
   { value: "top", label: "Dessus" },
@@ -228,8 +199,7 @@ export default function Editor({
     ),
     project = useProject(projectId, draftId),
     navigate = useNavigate();
-  const [category, setCategory] = useState("Toutes"),
-    [publishing, setPublishing] = useState(false),
+  const [publishing, setPublishing] = useState(false),
     [busy, setBusy] = useState(false),
     [pubTitle, setPubTitle] = useState(""),
     [description, setDescription] = useState("");
@@ -255,25 +225,6 @@ export default function Editor({
     }
   }, [closed]);
   const stock = s.challenge?.stock;
-  const used = countStock(s.scene);
-  const availableCatalog = useMemo(
-    () =>
-      catalog.filter(
-        ([id]) => !stock || stock.some((item) => item.type === id),
-      ),
-    [stock],
-  );
-  const remaining = (type: PartType) =>
-    stock
-      ? (stock.find((item) => item.type === type)?.quantity ?? 0) -
-        (used[type] ?? 0)
-      : 500;
-  const visibleParts = useMemo(() => {
-    const prefix =
-      pieceCategories.find((c) => c.name === category)?.prefix ?? "";
-    return availableCatalog.filter(([id]) => id.startsWith(prefix));
-  }, [category, availableCatalog]);
-  const libraryScroll = useRef<HTMLDivElement>(null);
   // Presentation state only: folding never changes the scene or its history.
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
     () => new Set(),
@@ -1054,185 +1005,21 @@ export default function Editor({
           libraryId={libraryId}
           inspectorId={inspectorId}
         >
-          <div className="editor-side editor-side-left relative min-w-0 min-h-0 bg-white group/editor-side-left border-r border-solid border-r-[#e4e9f1] group-data-[library-collapsed=true]/editor-body:border-0 group-data-[library-collapsed=true]/editor-body:border-none group-data-[library-collapsed=true]/editor-body:border-current">
-            <button
-              className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 side-panel-toggle group/side-panel-toggle border border-solid border-[#e4e9f1] absolute top-3 right-2 z-4 grid place-items-center rounded-[7px] bg-white text-[#68788e] hover:border-[#cddcfa] hover:bg-[#edf3ff] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-2 aria-[expanded=false]:top-5 aria-[expanded=false]:[box-shadow:0_2px_8px_#23334d14] size-7.5 aria-[expanded=false]:left-3 aria-[expanded=false]:right-auto"
-              aria-label={
-                libraryCollapsed
-                  ? "Déplier la bibliothèque"
-                  : "Replier la bibliothèque"
-              }
-              title={
-                libraryCollapsed
-                  ? "Déplier la bibliothèque"
-                  : "Replier la bibliothèque"
-              }
-              aria-expanded={!libraryCollapsed}
-              aria-controls={libraryId}
-              onClick={() => setLibraryCollapsed((collapsed) => !collapsed)}
-            >
-              {libraryCollapsed ? (
-                <PanelLeftOpen
-                  className="shrink-0"
-                  size={17}
-                  aria-hidden="true"
-                />
-              ) : (
-                <PanelLeftClose
-                  className="shrink-0"
-                  size={17}
-                  aria-hidden="true"
-                />
-              )}
-            </button>
-            <aside
-              id={libraryId}
-              data-editor-tour="library"
-              className="library overflow-hidden flex flex-col min-h-0 bg-white min-w-0 h-full [&[hidden]]:hidden"
-              aria-label="Bibliothèque de pièces"
-              hidden={libraryCollapsed}
-            >
-              <div className="library-header shrink-0 border-b border-solid border-b-[#edf0f5]">
-                <div className="panel-heading panel-heading-collapsible group/panel-heading-collapsible group/panel-heading flex items-center justify-between py-2.5 min-h-13.5 px-3.5 gap-2 pt-4.25 pb-3">
-                  <div>
-                    <h2 className="text-sm font-[750] leading-4.5">
-                      Les pièces
-                    </h2>
-                    <span className="block mt-0.5 text-[#68788e] text-[11px] leading-3.5">
-                      {visibleParts.length} modèle
-                      {visibleParts.length === 1 ? "" : "s"}
-                    </span>
-                  </div>
-                </div>
-                <div
-                  className="piece-tabs group/piece-tabs px-3 gap-1 grid grid-cols-[repeat(auto-fill,minmax(90px,1fr))] pt-0 pb-2"
-                  role="group"
-                  aria-label="Catégories de pièces"
-                >
-                  {pieceCategories.map(({ name, prefix }) => (
-                    <button
-                      key={name}
-                      className={cn(
-                        "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
-                        "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
-                        "outline-offset-3",
-                        name === category ? "active group/active" : "",
-                        "focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:-outline-offset-2 text-xs leading-4 px-2 py-0.5 gap-1 border border-solid border-transparent flex items-center justify-between min-h-6 text-[#68788e] rounded-[7px] text-left hover:bg-[#f5f7fb] [&[class~='group/active']]:border-[#dce6fc] [&[class~='group/active']]:bg-[#edf2ff] [&[class~='group/active']]:text-[#356ae6] [&[class~='group/active']]:font-[650]",
-                      )}
-                      aria-label={name}
-                      aria-pressed={name === category}
-                      onClick={() => {
-                        setCategory(name);
-                        if (libraryScroll.current)
-                          libraryScroll.current.scrollTop = 0;
-                      }}
-                    >
-                      <span>{name}</span>
-                      <span
-                        className="category-count text-[10px] tabular-nums opacity-80"
-                        aria-hidden="true"
-                      >
-                        {
-                          availableCatalog.filter(([id]) =>
-                            id.startsWith(prefix),
-                          ).length
-                        }
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div
-                className="library-scroll flex-1 min-h-0 overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:#c4cede_transparent] overscroll-contain focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:-outline-offset-2"
-                ref={libraryScroll}
-                role="region"
-                aria-label="Modèles de pièces"
-                tabIndex={0}
-              >
-                <div className="piece-grid p-3 gap-2 grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] content-start">
-                  {visibleParts.map(([id, p]) => (
-                    <button
-                      className={cn(
-                        "cursor-pointer disabled:cursor-not-allowed disabled:opacity-40",
-                        "[transition:background_0.15s,color_0.15s,box-shadow_0.15s] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6]",
-                        "outline-offset-3",
-                        "piece-card group/piece-card px-0.75 py-2 gap-1.25 border border-solid border-[#e7ebf1] touch-none select-none min-w-0 min-h-25 rounded-[9px] flex flex-col items-center justify-center bg-[#fbfcfe] cursor-grab 2xl-narrow:min-h-26.5 hover:border-[#8dacf1] hover:bg-[#f0f5ff] [&[class~='group/active']]:border-[#8dacf1] [&[class~='group/active']]:bg-[#f0f5ff] active:cursor-grabbing disabled:cursor-default",
-                        s.pending === id ? "active group/active" : "",
-                        "focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:-outline-offset-2",
-                      )}
-                      key={id}
-                      draggable={false}
-                      disabled={
-                        !project.ready ||
-                        closed ||
-                        count >= 500 ||
-                        remaining(id) <= 0
-                      }
-                      aria-label={p.name}
-                      title={`${p.name} — glisser dans la scène ou cliquer pour ajouter`}
-                      onDragStart={(e) => e.preventDefault()}
-                      onPointerDown={(e) => {
-                        if (e.button !== 0 || !e.isPrimary) return;
-                        e.currentTarget.setPointerCapture(e.pointerId);
-                        useEditor.setState({
-                          pending: null,
-                          libraryPointer: {
-                            id: e.pointerId,
-                            type: id,
-                            x: e.clientX,
-                            y: e.clientY,
-                          },
-                          libraryClickSuppressed: false,
-                        });
-                      }}
-                      onClick={(e) => {
-                        if (
-                          e.detail === 0 ||
-                          !useEditor.getState().libraryClickSuppressed
-                        )
-                          safe(() => s.add(id));
-                      }}
-                    >
-                      {stock && (
-                        <span className="piece-stock block text-[#356ae6] text-[10px] leading-[1.3] mb-0.75 last:text-[13px]! last:leading-[1.4] last:text-[#65738a] last:whitespace-normal last:max-w-full last:wrap-anywhere last:text-center">
-                          {remaining(id)} restante{remaining(id) > 1 ? "s" : ""}
-                        </span>
-                      )}
-                      <span className="piece-preview flex items-center justify-center w-full h-14 shrink-0 pointer-events-none last:text-[13px]! last:leading-[1.4] last:text-[#65738a] last:whitespace-normal last:max-w-full last:wrap-anywhere last:text-center">
-                        <LibraryPartPreview type={id} />
-                      </span>
-                      <span className="piece-name last:text-[13px]! last:leading-[1.4] last:text-[#65738a] last:whitespace-normal last:max-w-full last:wrap-anywhere last:text-center">
-                        {p.name.replace(/ \d.*$/, "")}
-                        <span className="piece-dimensions block whitespace-nowrap text-[11px] text-[#8290a4] mt-0.5">
-                          {p.name.match(/\d.*$/)?.[0]}
-                        </span>
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="library-footer shrink-0 border-t border-solid border-t-[#e7ecf3] bg-white">
-                <EditorColors
-                  forceExpanded={tourActive}
-                  disabled={
-                    !project.ready ||
-                    closed ||
-                    project.conflict ||
-                    busy ||
-                    publishing
-                  }
-                />
-                <div className="library-tip group/library-tip px-3.5 gap-2 pt-2 pb-3 flex items-center text-[#68788e] bg-[#f8faff]">
-                  <Grip className="shrink-0" size={16} aria-hidden="true" />
-                  <p className="text-[11px] leading-[1.6]">
-                    Clic : ajouter une pièce.
-                    <br />
-                    Glisser : choisir sa place.
-                  </p>
-                </div>
-              </div>
-            </aside>
-          </div>
+          <EditorLibrary
+            id={libraryId}
+            collapsed={libraryCollapsed}
+            onCollapsedChange={setLibraryCollapsed}
+            ready={project.ready}
+            closed={closed}
+            colorsDisabled={
+              !project.ready ||
+              closed ||
+              !!project.conflict ||
+              busy ||
+              publishing
+            }
+            tourActive={tourActive}
+          />
           <section className="viewport overflow-hidden relative bg-[#edf1f7] min-w-0">
             <div className="scene-toolbar p-1.25 gap-0.75 border border-solid border-white absolute top-5 left-1/2 transform-[translateX(-50%)] z-3 flex items-center bg-[#ffffffed] [box-shadow:0_4px_15px_#53668114] rounded-[10px]">
               <div className="tool-group flex border-r border-solid border-r-[#e7ecf2] pr-1 mr-0.5">

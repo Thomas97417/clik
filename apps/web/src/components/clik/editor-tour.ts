@@ -97,7 +97,7 @@ export function startEditorTour(onClose: () => void) {
         popover: {
           title: "Les pièces et leurs couleurs",
           description:
-            "<p>Le panneau de gauche rassemble les modèles, classés par catégories, et la palette de couleurs.</p>" +
+            "<p>Retrouvez les pièces par famille, ou recherchez un nom ou des dimensions. La palette de couleurs reste accessible en bas du panneau.</p>" +
             "<p>Vous pouvez le replier ou agrandir la bibliothèque en tirant sa bordure vers la scène.</p>",
           side: "right",
           align: "center",

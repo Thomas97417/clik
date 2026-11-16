@@ -1,0 +1,4 @@
+# Local configuration copied into Codex-managed worktrees.
+apps/web/.env
+apps/web/.env.local
+packages/backend/.env.local

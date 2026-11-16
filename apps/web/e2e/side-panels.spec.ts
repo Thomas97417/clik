@@ -1,5 +1,6 @@
 import { selectCameraView } from "./camera-view";
 import { test, expect, type Locator, type Page } from "@playwright/test";
+import { selectPieceFamily } from "./piece-family";
 
 const panelWidth = async (panel: Locator) => (await panel.boundingBox())!.width;
 
@@ -18,7 +19,7 @@ test("panneaux indépendants, scène agrandie et état conservé à la réouvert
 }, info) => {
   await page.goto("/editor");
   await page.locator('.piece-card[aria-label="Brique 2 × 2"]').click();
-  await page.getByRole("button", { name: "Pentes", exact: true }).click();
+  await selectPieceFamily(page, "Pentes");
   const position = () =>
     Promise.all(
       ["X", "Y", "Z"].map((axis) =>
@@ -104,8 +105,8 @@ test("panneaux indépendants, scène agrandie et état conservé à la réouvert
   await openLibrary.focus();
   await openLibrary.press("Space");
   await expect(
-    page.getByRole("button", { name: "Pentes", exact: true }),
-  ).toHaveAttribute("aria-pressed", "true");
+    page.getByRole("combobox", { name: "Famille de pièces", exact: true }),
+  ).toHaveText("Pentes");
   await expect
     .poll(async () => (await canvas.boundingBox())!.width)
     .toBe(originalWidth);

@@ -1,5 +1,6 @@
 import { selectCameraView } from "./camera-view";
 import { test, expect } from "@playwright/test";
+import { CATALOG } from "@clik/scene";
 
 test("participer : créer, proposer et mettre à jour la même création", async ({
   page,
@@ -199,7 +200,9 @@ test("stock dans l’éditeur : clic, duplication, suppression et annulation", a
   });
   await expect(page.getByLabel("Nom du projet")).toBeDisabled();
   await page.reload();
-  await expect(page.locator(".piece-card")).toHaveCount(63);
+  await expect(page.locator(".piece-card")).toHaveCount(
+    Object.keys(CATALOG).length,
+  );
 });
 
 test("tri des participations : souris, clavier et menu mobile", async ({

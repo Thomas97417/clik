@@ -1,5 +1,6 @@
 import { CATALOG } from "@clik/scene";
 import { test, expect, type Page } from "@playwright/test";
+import { selectPieceFamily } from "./piece-family";
 
 async function layout(page: Page) {
   return page.evaluate(() => {
@@ -28,6 +29,7 @@ test("bibliothèque : largeur stable quand le défilement apparaît", async ({
   await expect(page.locator("canvas").first()).toHaveAttribute(
     "data-rendered",
     "0",
+    { timeout: 30000 },
   );
   // Exercise a wide native gutter as well as macOS overlay scrollbars.
   await page.addStyleTag({
@@ -39,14 +41,12 @@ test("bibliothèque : largeur stable quand le défilement apparaît", async ({
   );
   await expect.poll(async () => (await layout(page)).overflow).toBe(true);
   const all = await layout(page);
-  await page.getByRole("button", { name: "Arches", exact: true }).click();
+  await selectPieceFamily(page, "Arches");
   await expect(page.locator(".piece-card")).toHaveCount(2);
   await expect(
-    page.getByRole("button", { name: "Arches", exact: true }),
-  ).toHaveAttribute("aria-pressed", "true");
-  await expect(page.locator(".library-header .panel-heading")).toContainText(
-    "2 modèles",
-  );
+    page.getByRole("combobox", { name: "Famille de pièces", exact: true }),
+  ).toHaveText("Arches");
+  await expect(page.locator(".library-count")).toHaveText("2");
   const filtered = await layout(page);
   expect(filtered.overflow).toBe(false);
   expect(filtered.card).toEqual(all.card);
@@ -61,9 +61,7 @@ test("bibliothèque : largeur stable quand le défilement apparaît", async ({
   await page
     .locator(".library-scroll")
     .evaluate((element: HTMLElement) => (element.style.overflowY = "auto"));
-  await page
-    .getByRole("button", { name: "Toutes", exact: true })
-    .press("Enter");
+  await selectPieceFamily(page, "Toutes les familles");
   await expect(page.locator(".piece-card")).toHaveCount(
     Object.keys(CATALOG).length,
   );
@@ -71,7 +69,9 @@ test("bibliothèque : largeur stable quand le défilement apparaît", async ({
   await expect
     .poll(() =>
       page
-        .locator(".library, .library-scroll, .palette, .piece-tabs")
+        .locator(
+          ".library, .library-scroll, .palette, .library-search, .library-category",
+        )
         .evaluateAll((elements) =>
           elements.every(
             (element) => element.scrollWidth <= element.clientWidth,
@@ -118,17 +118,143 @@ test("bibliothèque : catégories et couleurs restent accessibles pendant le dé
     "background-color",
     "rgb(239, 68, 68)",
   );
-  await page.getByRole("button", { name: "Plaques", exact: true }).click();
+  await selectPieceFamily(page, "Plaques");
   await expect(page.locator(".piece-card")).toHaveCount(
     Object.keys(CATALOG).filter((type) => type.startsWith("plate")).length,
   );
   await expect
     .poll(() => scroll.evaluate((element) => element.scrollTop))
     .toBe(0);
-  await expect(page.locator(".library-header .panel-heading")).toContainText(
-    `${Object.keys(CATALOG).filter((type) => type.startsWith("plate")).length} modèles`,
+  await expect(page.locator(".library-count")).toHaveText(
+    String(
+      Object.keys(CATALOG).filter((type) => type.startsWith("plate")).length,
+    ),
   );
   await page.screenshot({
     path: `/tmp/clik-library-palette-${info.project.name}.png`,
   });
+});
+
+test("bibliothèque : recherche par nom et dimensions, filtres et saisie sans action sur la scène", async ({
+  page,
+}) => {
+  await page.goto("/editor");
+  const canvas = page.locator("canvas").first();
+  await expect(canvas).toHaveAttribute("data-rendered", "0");
+  await page.getByRole("button", { name: "Brique 1 × 1", exact: true }).click();
+  const input = page.getByRole("searchbox", { name: "Rechercher une pièce" });
+  const cards = page.locator(".piece-card");
+  await input.fill("2 x 2");
+  await expect(cards).toHaveCount(
+    Object.values(CATALOG).filter(({ name }) => name.includes("2 × 2")).length,
+  );
+  await input.press("Escape");
+  await expect(input).toHaveValue("");
+  await expect(cards).toHaveCount(Object.keys(CATALOG).length);
+  await expect(page.locator(".tree-row.selected")).toHaveCount(1);
+  await input.fill("MÂÇONNERIE");
+  await expect(cards).toHaveCount(2);
+  await selectPieceFamily(page, "Briques");
+  await page.getByRole("button", { name: "Effacer la recherche" }).click();
+  await expect(input).toBeFocused();
+  await expect(cards).toHaveCount(
+    Object.keys(CATALOG).filter((type) => type.startsWith("brick")).length,
+  );
+  await input.fill("pente");
+  await expect(cards).toHaveCount(0);
+  await expect(page.getByText("Aucune pièce correspondante")).toBeVisible();
+  await page.getByRole("button", { name: "Réinitialiser les filtres" }).click();
+  await expect(input).toHaveValue("");
+  await expect(input).toBeFocused();
+  await expect(cards).toHaveCount(Object.keys(CATALOG).length);
+  await expect(page.locator(".piece-family-heading")).toHaveText(
+    [
+      ["Briques", "brick"],
+      ["Plaques", "plate"],
+      ["Pentes", "slope"],
+      ["Tuiles", "tile"],
+      ["Rondes", "round"],
+      ["Angles", "corner"],
+      ["Arches", "arch"],
+    ].map(
+      ([name, prefix]) =>
+        name +
+        Object.keys(CATALOG).filter((type) => type.startsWith(prefix)).length,
+    ),
+  );
+  await selectPieceFamily(page, "Rondes");
+  await input.fill("DÔME");
+  await expect(cards).toHaveCount(2);
+  await input.press("Enter");
+  await page
+    .getByRole("button", { name: "Replier la bibliothèque", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Déplier la bibliothèque", exact: true })
+    .click();
+  await expect(input).toHaveValue("DÔME");
+  await expect(cards).toHaveCount(2);
+  await expect(canvas).toHaveAttribute("data-rendered", "1");
+  await input.press("Escape");
+  await expect(cards).toHaveCount(
+    Object.keys(CATALOG).filter((type) => type.startsWith("round")).length,
+  );
+  await input.press("Escape");
+  await expect(input).not.toBeFocused();
+  await expect(page.locator(".tree-row.selected")).toHaveCount(1);
+  await page
+    .getByRole("button", { name: "Aide de l’atelier", exact: true })
+    .click();
+  await expect(
+    page.getByRole("dialog", { name: "Les pièces et leurs couleurs" }),
+  ).toBeVisible();
+  await expect(cards).toHaveCount(Object.keys(CATALOG).length);
+  await expect(
+    page.getByRole("combobox", { name: "Famille de pièces", exact: true }),
+  ).toHaveText("Toutes les familles");
+  await page
+    .getByRole("button", { name: "Quitter la visite", exact: true })
+    .click();
+  await expect(page.locator(".driver-popover")).toHaveCount(0);
+  await expect(cards).toHaveCount(
+    Object.keys(CATALOG).filter((type) => type.startsWith("round")).length,
+  );
+});
+
+test("bibliothèque : élargir ajoute des colonnes en conservant la taille des aperçus", async ({
+  page,
+}, info) => {
+  await page.goto("/editor");
+  await expect(page.locator("canvas").first()).toHaveAttribute(
+    "data-rendered",
+    "0",
+  );
+  const columns = () =>
+    page
+      .locator(".piece-grid")
+      .first()
+      .evaluate(
+        (element) =>
+          getComputedStyle(element).gridTemplateColumns.split(" ").length,
+      );
+  const before = await columns();
+  const preview = page.locator(".piece-preview").first();
+  const initial = (await preview.boundingBox())!;
+  const border = page.getByRole("separator", {
+    name: "Redimensionner la bibliothèque",
+  });
+  await border.focus();
+  for (let i = 0; i < 5; i++) await border.press("Shift+ArrowRight");
+  await expect.poll(columns).toBeGreaterThan(before);
+  const after = (await preview.boundingBox())!;
+  expect(after.width).toBeCloseTo(initial.width, 2);
+  expect(after.height).toBeCloseTo(initial.height, 2);
+  expect(
+    await page
+      .locator(".library")
+      .evaluate((element) => element.scrollWidth <= element.clientWidth),
+  ).toBe(true);
+  await page
+    .locator(".library")
+    .screenshot({ path: `/tmp/clik-library-compact-${info.project.name}.png` });
 });

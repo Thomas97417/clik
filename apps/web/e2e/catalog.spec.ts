@@ -1,3 +1,4 @@
+import { selectPieceFamily } from "./piece-family";
 import { test, expect } from "@playwright/test";
 import { CATALOG } from "@clik/scene";
 
@@ -22,7 +23,7 @@ test("catalogue étendu : aperçus entiers, ajout et restauration de chaque mod�
     ["Angles", "corner"],
     ["Arches", "arch"],
   ]) {
-    await page.getByRole("button", { name: category, exact: true }).click();
+    await selectPieceFamily(page, category);
     const models = Object.entries(CATALOG).filter(([type]) =>
       type.startsWith(prefix),
     );
