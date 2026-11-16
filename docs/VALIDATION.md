@@ -159,7 +159,15 @@ Les 24 contrôles du lecteur et les 15 contrôles de glissement depuis la biblio
 
 Échap, une sortie du canvas, une perte de focus, `pointercancel` et une perte de capture ne laissent plus de placement en attente. Un état de pose injecté pendant une lecture active reproduit la course initiale : la scène complète revient et Échap libère les commandes. Quatre tests du hook vérifient aussi que la pose a priorité sur la lecture et que sa fin ne relance pas la vidéo. Les 1 137 tests automatisés passent (1 074 frontend, 63 backend), ainsi que TypeScript et le build client/serveur.
 
-Les tests anonymes du lecteur simulent explicitement la session pour isoler WebKit du serveur HTTP des données publiques. Les 19 tests de gestes Chromium donnent 16 réussites et trois échecs de coordonnées fixes (empilement, prise décentrée et accroche tournée). Ces trois échecs ont été reproduits à l’identique avec les sources du commit précédent `122a8f3`, servies dans un environnement de comparaison isolé sans modifier les fichiers de travail.
+Les tests anonymes du lecteur simulent explicitement la session pour isoler WebKit du serveur HTTP des données publiques. Un premier passage des 19 tests de gestes Chromium donnait 16 réussites et trois échecs de coordonnées fixes (empilement, prise décentrée et accroche tournée). Ces trois échecs avaient été reproduits à l’identique avec les sources du commit précédent `122a8f3`, servies dans un environnement de comparaison isolé sans modifier les fichiers de travail. Ils sont corrigés par le recalibrage décrit ci-dessous.
+
+## Ciblage des gestes sur la scène rendue
+
+Les trois scénarios utilisent désormais la caméra active de React Three Fiber et les transformations mondiales des pièces pour projeter leurs points de prise et de dépôt dans le canvas. L’outil reste dans les fichiers de recette et n’est pas importé par l’application. Les tests attendent plusieurs images rendues après les changements de vue et avant de relâcher le pointeur, afin de déposer l’aperçu réellement affiché.
+
+L’empilement vérifie les quatre plots d’accroche et les trois coordonnées finales. La prise décentrée compare la translation obtenue au petit déplacement demandé, avec une tolérance correspondant à l’arrondi des événements de pointeur ; elle conserve aussi la rotation initiale. L’accroche tournée vérifie les quatre plots, les angles et la matrice mondiale complète de la pièce déposée par rapport à son support. Le cadrage, le zoom et le format du canvas ne sont plus encodés dans des décalages de souris fixes.
+
+La suite complète de gestes passe sous Chromium, Firefox et WebKit : 57 contrôles sur 57 (19 par moteur). Les trois scénarios corrigés passent aussi sous Chromium dans une fenêtre réduite à 1 100 × 760 px. TypeScript passe également. La capture d’empilement a été inspectée : les quatre plots sont éclairés et les briques sont alignées.
 
 ## Limites et contrôles de recette restants
 

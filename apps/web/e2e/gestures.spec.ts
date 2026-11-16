@@ -1,6 +1,26 @@
 import { selectCameraView } from "./camera-view";
 import { dragLibrary } from "./drag-library";
 import { test, expect, type Page } from "@playwright/test";
+import { Matrix4 } from "three";
+import { worldMatrix } from "@clik/scene";
+import type { PartPoint } from "./rendered-scene";
+
+async function renderedFrame(page: Page) {
+  const canvas = page.locator("canvas").first();
+  const frames = Number(await canvas.getAttribute("data-frames"));
+  await expect
+    .poll(async () => Number(await canvas.getAttribute("data-frames")))
+    .toBeGreaterThan(frames + 2);
+}
+
+async function partPoints(page: Page, points: PartPoint[]) {
+  await renderedFrame(page);
+  return page.evaluate(async (points) => {
+    const path = "/e2e/rendered-scene.ts";
+    const { projectPartPoints } = await import(/* @vite-ignore */ path);
+    return projectPartPoints(points) as { x: number; y: number }[];
+  }, points);
+}
 
 async function setup(page: Page) {
   await page.goto("/editor");
@@ -241,7 +261,7 @@ test("retour au point de départ, sortie du canvas et annulation de caméra cons
 test("empilement : plots éclairés, dépôt et désactivation de l’aimantation", async ({
   page,
 }, info) => {
-  const { canvas, x, y } = await setup(page);
+  const { canvas } = await setup(page);
   await page.locator('.piece-card[aria-label="Brique 2 × 2"]').click();
   await page.getByLabel("position Z", { exact: true }).fill("-3");
   await page.getByLabel("position Z", { exact: true }).press("Tab");
@@ -251,11 +271,19 @@ test("empilement : plots éclairés, dépôt et désactivation de l’aimantatio
   await page.getByLabel("position Y", { exact: true }).press("Tab");
   await page.locator(".tree-name").first().click();
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
-  await page.mouse.move(x, y);
+  const { scene } = await projectState(page);
+  const [moving, support] = scene.nodes;
+  const [start, target] = await partPoints(page, [
+    { id: moving.id, local: [0, 1.2, 0] },
+    { id: support.id, local: [0, 1.2, 0] },
+  ]);
+  await page.mouse.move(start.x, start.y);
   await page.mouse.down();
-  await page.mouse.move(x + 320, y, { steps: 25 });
+  await page.mouse.move(target.x, target.y, { steps: 25 });
+  await expect(canvas).toHaveAttribute("data-dragging", "true");
   await expect(canvas).toHaveAttribute("data-snap-kind", "attachment");
-  await expect(canvas).toHaveAttribute("data-snap-points", /[1-9]/);
+  await expect(canvas).toHaveAttribute("data-snap-points", "4");
+  await renderedFrame(page);
   await page.screenshot({
     path: `/tmp/clik-attachment-${info.project.name}.png`,
   });
@@ -263,13 +291,22 @@ test("empilement : plots éclairés, dépôt et désactivation de l’aimantatio
   await expect(page.getByLabel("position Y", { exact: true })).toHaveValue(
     "1.2",
   );
+  await expect(page.getByLabel("position X", { exact: true })).toHaveValue("0");
+  await expect(page.getByLabel("position Z", { exact: true })).toHaveValue(
+    "-3",
+  );
   await page.getByRole("button", { name: "Aimantation", exact: true }).click();
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
-  await page.mouse.move(x, y);
+  const [freeStart, freeTarget] = await partPoints(page, [
+    { id: moving.id, local: [0, 1.2, 0] },
+    { id: moving.id, local: [0, 1.2, 0], offset: [2, 0, 0] },
+  ]);
+  await page.mouse.move(freeStart.x, freeStart.y);
   await page.mouse.down();
-  await page.mouse.move(x + 60, y + 30, { steps: 6 });
+  await page.mouse.move(freeTarget.x, freeTarget.y, { steps: 6 });
   await expect(canvas).toHaveAttribute("data-dragging", "true");
   await expect(canvas).toHaveAttribute("data-snap-kind", "none");
+  await renderedFrame(page);
   await page.mouse.up();
 });
 
@@ -346,22 +383,28 @@ test("anneaux de rotation : aperçu, annulation et caméra prioritaire", async (
 });
 
 test("prise décentrée sans saut et orientation conservée", async ({ page }) => {
-  const { canvas, x, y } = await setup(page);
+  const { canvas } = await setup(page);
   await page.getByLabel("rotation Y", { exact: true }).fill("30");
   await page.getByLabel("rotation Y", { exact: true }).press("Tab");
   await page.getByRole("button", { name: "Aimantation", exact: true }).click();
-  await page.mouse.move(x + 40, y - 20);
+  const { scene } = await projectState(page);
+  const moving = scene.nodes[0];
+  const offset: [number, number, number] = [0, 0, -0.2];
+  const [start, target] = await partPoints(page, [
+    { id: moving.id, local: [0.45, 1.2, 0.1] },
+    { id: moving.id, local: [0.45, 1.2, 0.1], offset },
+  ]);
+  expect(Math.hypot(target.x - start.x, target.y - start.y)).toBeGreaterThan(4);
+  await page.mouse.move(start.x, start.y);
   await page.mouse.down();
-  const frames = Number(await canvas.getAttribute("data-frames"));
-  await page.mouse.move(x + 45, y - 20);
+  await page.mouse.move(target.x, target.y);
   await expect(canvas).toHaveAttribute("data-dragging", "true");
-  await expect
-    .poll(async () => Number(await canvas.getAttribute("data-frames")))
-    .toBeGreaterThan(frames + 1);
+  await renderedFrame(page);
   await page.mouse.up();
   const delta = (await position(page)).map(Number);
-  expect(Math.hypot(...delta)).toBeLessThan(0.1);
-  expect(Math.hypot(...delta)).toBeGreaterThan(0.001);
+  // A short drag must follow the requested translation, without rebasing the
+  // part's center under an off-center pointer. Allow CSS-pixel input rounding.
+  delta.forEach((value, axis) => expect(value).toBeCloseTo(offset[axis], 1));
   await expect(page.getByLabel("rotation Y", { exact: true })).toHaveValue(
     "30",
   );
@@ -370,7 +413,7 @@ test("prise décentrée sans saut et orientation conservée", async ({ page }) =
 test("accroche sur une surface tournée autour de plusieurs axes", async ({
   page,
 }) => {
-  const { canvas, x, y } = await setup(page);
+  const { canvas } = await setup(page);
   await page.locator('.piece-card[aria-label="Brique 2 × 2"]').click();
   await page.getByLabel("position X", { exact: true }).fill("0");
   await page.getByLabel("position X", { exact: true }).press("Tab");
@@ -384,16 +427,33 @@ test("accroche sur une surface tournée autour de plusieurs axes", async ({
   }
   await page.locator(".tree-name").first().click();
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
-  await page.mouse.move(x, y);
+  const { scene } = await projectState(page);
+  const [moving, support] = scene.nodes;
+  const [start, target] = await partPoints(page, [
+    { id: moving.id, local: [0, 1.2, 0] },
+    { id: support.id, local: [0, 1.2, 0] },
+  ]);
+  await page.mouse.move(start.x, start.y);
   await page.mouse.down();
-  await page.mouse.move(x + 320, y, { steps: 25 });
+  await page.mouse.move(target.x, target.y, { steps: 25 });
+  await expect(canvas).toHaveAttribute("data-dragging", "true");
   await expect(canvas).toHaveAttribute("data-snap-kind", "attachment");
+  await expect(canvas).toHaveAttribute("data-snap-points", "4");
+  await renderedFrame(page);
   await page.mouse.up();
   await expect(page.getByLabel("rotation X", { exact: true })).toHaveValue(
     "20",
   );
   await expect(page.getByLabel("rotation Z", { exact: true })).toHaveValue(
     "15",
+  );
+  const saved = await projectState(page);
+  const actual = worldMatrix(saved.scene, moving.id);
+  const expected = worldMatrix(saved.scene, support.id).multiply(
+    new Matrix4().makeTranslation(0, 1.2, 0),
+  );
+  actual.elements.forEach((value, index) =>
+    expect(value).toBeCloseTo(expected.elements[index], 6),
   );
 });
 
