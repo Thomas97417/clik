@@ -70,6 +70,24 @@ test("la première pièce et son annulation gardent le canvas et ses commandes e
   });
   await expect(canvas).toHaveAttribute("data-rendered", "0");
   await expect(timeline).toBeHidden();
+  const viewport = (await page.locator(".viewport").boundingBox())!;
+  const strip = {
+    x: Math.ceil(viewport.x + viewport.width / 4),
+    y: Math.floor(viewport.y + viewport.height) - 24,
+    width: Math.floor(viewport.width / 2),
+    height: 20,
+  };
+  const grid = page.getByRole("button", { name: "Grille", exact: true });
+  await expect(grid).toHaveAttribute("aria-pressed", "true");
+  await grid.press("Space");
+  await waitForSceneUpdate(page);
+  const withoutGrid = await page.screenshot({ clip: strip });
+  await grid.press("Space");
+  await expect
+    .poll(async () =>
+      (await page.screenshot({ clip: strip })).equals(withoutGrid),
+    )
+    .toBe(false);
   const bounds = () =>
     Promise.all([canvas.boundingBox(), controls.boundingBox()]);
   const initial = await bounds();

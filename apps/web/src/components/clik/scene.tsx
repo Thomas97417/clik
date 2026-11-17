@@ -46,7 +46,7 @@ import {
 } from "@clik/scene";
 import { useEditor } from "@/lib/clik/store";
 import { toast } from "sonner";
-import { CAMERA_GIZMO_MARGIN, Gestures } from "./gestures";
+import { EDITOR_GIZMO_MARGIN, Gestures } from "./gestures";
 import { SnapPreview } from "./snap-preview";
 import { GroundGrid } from "./ground-grid";
 import { KeyboardCamera } from "./keyboard-camera";
@@ -555,7 +555,7 @@ function Stage({
       <GizmoHelper
         key={editorView ? "editor" : resetView}
         alignment="bottom-right"
-        margin={CAMERA_GIZMO_MARGIN}
+        margin={editorView ? EDITOR_GIZMO_MARGIN : [65, 135]}
       >
         <GizmoViewport
           axisColors={["#ed6a65", "#60b58a", "#5c8fe3"]}

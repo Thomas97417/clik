@@ -516,7 +516,7 @@ test("le repère d’orientation conserve la sélection et l’historique", asyn
   page,
 }) => {
   const { box } = await setup(page);
-  await page.mouse.click(box.x + box.width - 65, box.y + box.height - 25);
+  await page.mouse.click(box.x + box.width - 65, box.y + box.height - 175);
   await expect(page.locator(".tree-row.selected")).toHaveCount(1);
   expect(await position(page)).toEqual(["0", "0", "0"]);
   await page
