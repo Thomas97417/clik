@@ -6,6 +6,10 @@ import {
   continuationHref,
 } from "@/lib/clik/use-public-pagination";
 import PublicMore from "@/components/clik/public-more";
+import {
+  useCollectionReturn,
+  useCollectionVisit,
+} from "@/lib/clik/use-collection-return";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import { ArrowRight, GitBranch, Plus } from "lucide-react";
 import GallerySortSelect, {
@@ -37,12 +41,19 @@ function Gallery({ pending = false }: { pending?: boolean } = {}) {
   const { sort = "recent", cursor } = Route.useSearch();
   const navigate = Route.useNavigate();
   const initial = Route.useLoaderData();
+  const visit = useCollectionVisit("/gallery");
   const { results, status, loadMore, nextCursor } = usePublicPagination(
     api.projects.gallery,
     pending ? "skip" : { sort },
     pending ? undefined : initial,
     cursor,
   );
+  useCollectionReturn(visit, {
+    count: results.length,
+    ready: !pending && status !== "LoadingFirstPage",
+    status,
+    loadMore,
+  });
   return (
     <main className="collection-page gallery-page px-[5%] py-16 m-auto max-w-330 max-lg-narrow:pt-10">
       <header className="gallery-hero gap-8 grid grid-cols-[1.2fr_1fr] items-start pb-10 max-sm:px-0 max-sm:block max-sm:pb-7 max-sm:relative max-sm:pt-0">
