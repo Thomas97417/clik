@@ -141,6 +141,8 @@ Le nom de l’auteur ouvre cette page depuis la galerie, les défis, une créati
 
 Chaque journée UTC propose un lot commun de 100 pièces réparties sur 12 modèles. Les couleurs sont libres et utiliser tout le stock n’est pas obligatoire. Le tirage est déterministe et versionné ; le lot enregistré ne change plus. Le cron Convex crée le défi à minuit UTC ; l’ouverture de la page initialise aussi celui du jour si nécessaire, sans créer d’archives rétroactives.
 
+Le générateur V2 fait tourner les 89 références du catalogue, nouveaux modèles compris. Quatre répartitions alternent les proportions de briques, plaques, pentes, tuiles et pièces rondes, avec une pièce d’angle ou une arche. Chaque lot conserve au moins deux modèles de briques et deux de plaques ; deux journées V2 consécutives ne partagent aucun modèle, et toutes les références apparaissent en vingt jours au plus. Les défis déjà créés conservent leur stock et leur version.
+
 Un compte dispose d’un projet et d’une participation par défi. L’éditeur limite tous les ajouts, duplications, collages et annulations au stock disponible, y compris les pièces masquées et groupées. Convex contrôle aussi les quantités et la clôture lors de la publication. Une participation peut être mise à jour jusqu’à minuit UTC en conservant ses votes et commentaires. Après clôture, le projet devient consultable et peut être copié dans une création libre ; les modifications privées non publiées restent conservées.
 
 Chaque compte peut soutenir trois créations par défi, retirer un vote pour changer de choix, et voter sur les journées précédentes sans partager leurs quotas. Voter pour sa propre création est interdit. Retirer une publication invalide ses votes et libère les quotas ; la republier ne restaure pas ces votes.

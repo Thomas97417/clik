@@ -18,6 +18,7 @@ import {
   challengeStart,
   challengeStock,
   CHALLENGE_DAY_MS,
+  CHALLENGE_GENERATOR_VERSION,
   emptyScene,
 } from "@clik/scene";
 
@@ -39,7 +40,7 @@ async function ensure(ctx: MutationCtx) {
     day,
     opensAt,
     closesAt: opensAt + CHALLENGE_DAY_MS,
-    generatorVersion: 1,
+    generatorVersion: CHALLENGE_GENERATOR_VERSION,
     stock: challengeStock(day),
     ...(day >= config.firstDay
       ? {

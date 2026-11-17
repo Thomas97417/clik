@@ -438,7 +438,7 @@ const EditorLibrary = memo(function EditorLibrary({
         </div>
         <div className="library-footer shrink-0 border-t border-solid border-[#e7ecf3] bg-white">
           <EditorColors forceExpanded={tourActive} disabled={colorsDisabled} />
-          <div className="library-tip flex items-center gap-1.5 border-t border-solid border-[#edf0f5] px-3 py-2 text-[#8290a4]">
+          <div className="library-tip flex h-10 shrink-0 items-center gap-1.5 border-t border-solid border-[#edf0f5] px-3 text-[#8290a4]">
             <Grip size={14} className="shrink-0" aria-hidden="true" />
             <p className="text-[11px] leading-4">
               Cliquer ou glisser pour ajouter

@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   CATALOG,
+  CHALLENGE_DAY_MS,
+  CHALLENGE_GENERATOR_VERSION,
+  challengeDay,
   challengeStock,
   challengeStart,
   countStock,
@@ -16,6 +19,8 @@ afterEach(() => {
 describe("Lots quotidiens", () => {
   it("génère des lots stables, variés et compatibles avec le catalogue", () => {
     const lots = new Set<string>();
+    const profiles = new Set<string>();
+    let previous = new Set<string>();
     for (let n = 0; n < 366; n++) {
       const day = new Date(Date.UTC(2026, 0, 1 + n)).toISOString().slice(0, 10);
       const lot = challengeStock(day);
@@ -23,11 +28,65 @@ describe("Lots quotidiens", () => {
       expect(lot).toHaveLength(12);
       expect(new Set(lot.map((i) => i.type)).size).toBe(12);
       expect(lot.reduce((s, i) => s + i.quantity, 0)).toBe(100);
-      for (const item of lot) expect(CATALOG[item.type]).toBeDefined();
+      for (const item of lot) {
+        expect(CATALOG[item.type]).toBeDefined();
+        expect(Number.isInteger(item.quantity) && item.quantity > 0).toBe(true);
+        expect(previous.has(item.type)).toBe(false);
+      }
+      const count = (prefix: string) =>
+        lot.filter((item) => item.type.startsWith(prefix)).length;
+      expect(count("brick-")).toBeGreaterThanOrEqual(2);
+      expect(count("plate-")).toBeGreaterThanOrEqual(2);
+      profiles.add(
+        JSON.stringify(
+          ["brick-", "plate-", "slope-", "round-", "tile-"].map(count),
+        ),
+      );
       lots.add(JSON.stringify(lot));
+      previous = new Set(lot.map((item) => item.type));
     }
     expect(lots.size).toBeGreaterThan(350);
+    expect(profiles.size).toBeGreaterThanOrEqual(4);
     expect(() => challengeStart("2026-02-30")).toThrow();
+  });
+  it.each(["1969-12-25", "2026-11-15", "2026-12-25", "2028-02-20"])(
+    "fait tourner tout le catalogue en 20 jours à partir du %s, sans répétition consécutive",
+    (start) => {
+      const seen = new Set<string>();
+      let previous = new Set<string>();
+      for (let n = 0; n < 20; n++) {
+        const day = challengeDay(challengeStart(start) + n * CHALLENGE_DAY_MS);
+        const lot = challengeStock(day);
+        for (const { type } of lot) {
+          seen.add(type);
+          expect(previous.has(type)).toBe(false);
+        }
+        previous = new Set(lot.map((item) => item.type));
+      }
+      // New catalogue references must be included when the generator is updated.
+      expect([...seen].sort()).toEqual(Object.keys(CATALOG).sort());
+    },
+  );
+  it("conserve les tirages historiques et versionne les nouveaux lots", () => {
+    expect(challengeStock("2026-10-01", 1)).toEqual([
+      { type: "brick-1x1", quantity: 16 },
+      { type: "brick-1x2", quantity: 14 },
+      { type: "brick-2x2", quantity: 12 },
+      { type: "brick-2x4", quantity: 10 },
+      { type: "plate-1x2", quantity: 10 },
+      { type: "plate-4x4", quantity: 8 },
+      { type: "plate-4x6", quantity: 6 },
+      { type: "slope-2x3", quantity: 6 },
+      { type: "slope-low-2x2", quantity: 6 },
+      { type: "arch-1x6x3", quantity: 4 },
+      { type: "round-plate-2x2", quantity: 4 },
+      { type: "corner-plate-2x2", quantity: 4 },
+    ]);
+    expect(challengeStock("2026-10-01")).toEqual(
+      challengeStock("2026-10-01", CHALLENGE_GENERATOR_VERSION),
+    );
+    expect(() => challengeStock("2026-10-01", 999)).toThrow("Version");
+    expect(() => challengeStock("2026-02-30")).toThrow("Date");
   });
 });
 describe("Stock de l’éditeur", () => {

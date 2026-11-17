@@ -1540,9 +1540,9 @@ export default function Editor({
               </span>
               <div
                 data-editor-tour="properties"
-                className="properties px-4.25 py-0 border-t border-solid border-t-[#e9edf3] shrink-0"
+                className="properties shrink-0"
               >
-                <div className="panel-heading group/panel-heading flex items-center justify-between px-0 py-4.75">
+                <div className="panel-heading group/panel-heading flex h-10 items-center justify-between border-t border-solid border-t-[#e9edf3] px-4.25">
                   <h2 className="text-sm font-[750] leading-normal">
                     <button
                       className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 [transition:background_0.15s,color_0.15s,box-shadow_0.15s] outline-offset-3 properties-toggle gap-1.5 text-[13px] font-[650] text-[#34435c] flex items-center rounded-[4px] hover:text-[#356ae6] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-[#356ae6] focus-visible:outline-offset-4 group/properties-toggle"
@@ -1578,7 +1578,7 @@ export default function Editor({
                 </div>
                 <div
                   id={propertiesId}
-                  className="properties-content pb-5"
+                  className="properties-content px-4.25 pb-5"
                   hidden={propertiesCollapsed}
                 >
                   {selected ? (
