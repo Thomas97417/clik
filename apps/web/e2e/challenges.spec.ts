@@ -6,7 +6,7 @@ test("défi : sélection des 17 pièces par cadre et sauvegarde d’une couleur 
   page,
 }) => {
   const { challengeFixture } = await import("./fixtures/challenges");
-  await challengeFixture(page);
+  await challengeFixture(page, { generatorVersion: 1 });
   await page.goto("/editor/project");
   const brick = page.locator('.piece-card[aria-label="Brique 1 × 1"]');
   for (let i = 0; i < 16; i++) await brick.click();
@@ -76,7 +76,12 @@ test("participer : créer, proposer et mettre à jour la même création", async
   await page.getByRole("button", { name: "Participer au défi" }).click();
   await expect(page).toHaveURL(/\/editor\/project$/);
   await expect(page.locator(".piece-card")).toHaveCount(12);
-  await page.locator('.piece-card[aria-label="Brique 2 × 4"]').click();
+  await page
+    .getByRole("button", {
+      name: CATALOG[fixture.stock[0].type].name,
+      exact: true,
+    })
+    .click();
   await expect(page.locator("canvas").first()).toHaveAttribute(
     "data-rendered",
     "1",

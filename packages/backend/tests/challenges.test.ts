@@ -3,11 +3,15 @@ import { convexTest } from "convex-test";
 import schema from "../convex/schema";
 import { api, internal } from "../convex/_generated/api";
 import {
+  CATALOG,
   challengeDay,
   challengeStart,
+  challengeStock,
   CHALLENGE_DAY_MS,
+  CHALLENGE_GENERATOR_VERSION,
   emptyScene,
   makePart,
+  type PartType,
 } from "@clik/scene";
 import type { Id } from "../convex/_generated/dataModel";
 vi.mock("../convex/auth", () => ({
@@ -40,7 +44,10 @@ function setup() {
     const revision = await u.mutation(api.projects.save, {
       id: projectId,
       title: owner,
-      scene: doc,
+      scene: JSON.stringify({
+        ...emptyScene(),
+        nodes: [makePart(p.challenge!.stock[0].type as PartType, "#4079e8")],
+      }),
       revision: p.revision,
     });
     const thumbnail = await t.run((ctx) =>
@@ -101,7 +108,13 @@ describe("Défis et publications", () => {
       challengeStart(day) + CHALLENGE_DAY_MS,
     );
     expect(info.challenge?.stock.reduce((n, x) => n + x.quantity, 0)).toBe(100);
+    expect(info.challenge?.generatorVersion).toBe(CHALLENGE_GENERATOR_VERSION);
+    expect(info.challenge?.stock).toEqual(challengeStock(day));
     expect(info.projectId).toBe(a);
+    const otherId = await user("bob").mutation(api.challenges.start, { day });
+    expect(
+      (await user("bob").query(api.projects.get, { id: otherId })).challenge,
+    ).toEqual(info.challenge);
     await expect(t.mutation(api.challenges.start, { day })).rejects.toThrow(
       "Connexion",
     );
@@ -112,23 +125,75 @@ describe("Défis et publications", () => {
       t.query(api.challenges.day, { day: "2026-02-30" }),
     ).rejects.toThrow("Date");
   });
+  it("conserve le lot déjà ouvert en version 1 et renouvelle le lendemain en version 2", async () => {
+    const { t, user } = setup();
+    const stock = challengeStock(day, 1);
+    const id = await t.run((ctx) =>
+      ctx.db.insert("challenges", {
+        day,
+        opensAt: challengeStart(day),
+        closesAt: challengeStart(day) + CHALLENGE_DAY_MS,
+        generatorVersion: 1,
+        stock,
+      }),
+    );
+    const before = await t.run((ctx) => ctx.db.get(id));
+    expect(await t.mutation(api.challenges.ensureToday, {})).toBe(id);
+    const u = user("alice");
+    const projectId = await u.mutation(api.challenges.start, { day });
+    expect(await t.run((ctx) => ctx.db.get(id))).toEqual(before);
+    // A legacy reference remains usable even when absent from the new draw.
+    const legacyPart = stock.find(
+      (item) => !challengeStock(day).some((next) => next.type === item.type),
+    )!;
+    const scene = JSON.stringify({
+      ...emptyScene(),
+      nodes: [makePart(legacyPart.type, "#4079e8")],
+    });
+    await u.mutation(api.projects.save, {
+      id: projectId,
+      title: "Ancien lot",
+      scene,
+      revision: 0,
+    });
+    vi.setSystemTime(challengeStart(day) + CHALLENGE_DAY_MS);
+    const nextId = await t.mutation(api.challenges.ensureToday, {});
+    const next = await t.run((ctx) => ctx.db.get(nextId));
+    expect(next?.generatorVersion).toBe(CHALLENGE_GENERATOR_VERSION);
+    expect(next?.stock).toEqual(challengeStock(challengeDay()));
+    // Archived projects still validate against their persisted stock.
+    await u.mutation(api.projects.save, {
+      id: projectId,
+      title: "Ancien lot recoloré",
+      scene: JSON.stringify({
+        ...JSON.parse(scene),
+        nodes: [makePart(legacyPart.type, "#ff0051")],
+      }),
+      revision: 1,
+    });
+  });
   it("refuse un stock dépassé, même pour des pièces masquées et via les API ordinaires", async () => {
     const { user } = setup(),
       u = user("alice");
     const id = await u.mutation(api.challenges.start, { day });
+    const stock = (await u.query(api.projects.get, { id })).challenge!.stock;
+    const { type, quantity } = stock[0];
     const scene = JSON.stringify({
       ...emptyScene(),
-      nodes: Array.from({ length: 17 }, () => ({
-        ...makePart("brick-1x1", "#4079e8"),
+      nodes: Array.from({ length: quantity + 1 }, () => ({
+        ...makePart(type as PartType, "#4079e8"),
         hidden: true,
       })),
     });
     await expect(
       u.mutation(api.projects.save, { id, title: "Stock", scene, revision: 0 }),
-    ).rejects.toThrow("16 exemplaires");
+    ).rejects.toThrow(`${quantity} exemplaires`);
+    const absent = (Object.keys(CATALOG) as PartType[]).find(
+      (type) => !stock.some((item) => item.type === type),
+    )!;
     const invalid = JSON.stringify({
       ...emptyScene(),
-      nodes: [makePart("brick-2x8", "#4079e8")],
+      nodes: [makePart(absent, "#4079e8")],
     });
     await expect(
       u.mutation(api.projects.save, {
@@ -147,11 +212,16 @@ describe("Défis et publications", () => {
     const date = "2026-11-16";
     vi.setSystemTime(challengeStart(date) + 3600000);
     const id = await u.mutation(api.challenges.start, { day: date });
+    const stock = (await u.query(api.projects.get, { id })).challenge!.stock;
     const scene = {
       ...emptyScene(),
-      nodes: Array.from({ length: 16 }, (_, i) =>
-        makePart("brick-1x1", "#4079e8", [i * 2, 0, 0]),
-      ).concat(makePart("brick-1x2", "#ef4444", [0, 0, 4])),
+      nodes: stock
+        .flatMap(({ type, quantity }) =>
+          Array.from({ length: quantity }, (_, i) =>
+            makePart(type as PartType, "#4079e8", [i * 10, 0, 0]),
+          ),
+        )
+        .slice(0, 17),
     };
     const revision = await u.mutation(api.projects.save, {
       id,
@@ -171,7 +241,7 @@ describe("Défis et publications", () => {
     expect(JSON.parse(saved.scene)).toEqual(scene);
   });
   it("refuse les dépôts vides et les dépôts à minuit, sans empêcher la sauvegarde privée", async () => {
-    const { t, user, publish, doc } = setup();
+    const { t, user, publish } = setup();
     const u = user("empty"),
       id = await u.mutation(api.challenges.start, { day });
     const thumb = await t.run((ctx) => ctx.storage.store(new Blob(["test"])));
@@ -189,6 +259,8 @@ describe("Défis et publications", () => {
       }),
     ).rejects.toThrow("visible");
     const entry = await publish("alice");
+    const doc = (await entry.u.query(api.projects.get, { id: entry.projectId }))
+      .scene;
     vi.setSystemTime(challengeStart(day) + CHALLENGE_DAY_MS);
     const revision = await entry.u.mutation(api.projects.save, {
       id: entry.projectId,

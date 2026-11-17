@@ -1,6 +1,7 @@
 import { publicHttpFixture } from "./public-http";
 import type { Page } from "@playwright/test";
 import {
+  CHALLENGE_GENERATOR_VERSION,
   challengeDay,
   challengeStart,
   challengeStock,
@@ -13,6 +14,7 @@ export async function challengeFixture(
   page: Page,
   options: {
     day?: string;
+    generatorVersion?: 1 | 2;
     podiumRanks?: (1 | 2 | 3 | null)[];
     rewardPhase?: "pending" | "processing" | "complete";
     thumbnails?: boolean;
@@ -27,8 +29,8 @@ export async function challengeFixture(
     day: options.day ?? today,
     opensAt: start,
     closesAt: start + 86400000,
-    stock: challengeStock(today),
-    generatorVersion: 1,
+    stock: challengeStock(options.day ?? today, options.generatorVersion),
+    generatorVersion: options.generatorVersion ?? CHALLENGE_GENERATOR_VERSION,
     ...(options.rewardPhase
       ? {
           rewardStatus: options.rewardPhase,
@@ -444,6 +446,7 @@ export async function challengeFixture(
     });
   });
   return {
+    stock: challenge.stock,
     uploads,
     voteRequests,
     holdVotes: (value: boolean) => {

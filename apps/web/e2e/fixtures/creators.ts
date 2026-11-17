@@ -7,6 +7,7 @@ import {
 } from "@clik/avatars";
 import type { Page } from "@playwright/test";
 import {
+  CHALLENGE_GENERATOR_VERSION,
   challengeDay,
   challengeStart,
   challengeStock,
@@ -35,7 +36,7 @@ export async function creatorsFixture(
     opensAt: start,
     closesAt: start + 86400000,
     stock: challengeStock(day),
-    generatorVersion: 1,
+    generatorVersion: CHALLENGE_GENERATOR_VERSION,
     rewardAt: undefined as number | undefined,
     rewardStatus: undefined as "pending" | "complete" | undefined,
   };
