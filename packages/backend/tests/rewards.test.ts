@@ -5,6 +5,7 @@ import {
   challengeStart,
   emptyScene,
   makePart,
+  type PartType,
 } from "@clik/scene";
 import { defaultAvatar } from "@clik/avatars";
 import schema from "../convex/schema";
@@ -48,13 +49,16 @@ async function setup() {
     const projectId = await u.mutation(api.challenges.start, {
       day: challengeDay(),
     });
+    const project = await u.query(api.projects.get, { id: projectId });
     const revision = await u.mutation(api.projects.save, {
       id: projectId,
       title: owner,
       revision: 0,
       scene: JSON.stringify({
         ...emptyScene(),
-        nodes: [makePart("brick-2x4", "#4079e8")],
+        nodes: [
+          makePart(project.challenge!.stock[0].type as PartType, "#4079e8"),
+        ],
       }),
     });
     const thumbnail = await t.run((ctx) =>

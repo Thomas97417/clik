@@ -1254,5 +1254,6 @@ export {
   countStock,
   validateChallengeStock,
   CHALLENGE_DAY_MS,
+  CHALLENGE_GENERATOR_VERSION,
   type ChallengeStock,
 } from "./challenges";
