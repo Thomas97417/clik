@@ -2,6 +2,41 @@ import { CATALOG } from "@clik/scene";
 import { test, expect, type Page } from "@playwright/test";
 import { selectPieceFamily } from "./piece-family";
 
+test("la bibliothèque permet de poser et de sauvegarder la 1 000e pièce", async ({
+  page,
+}) => {
+  await page.goto("/editor?draft=mille-pieces");
+  const canvas = page.locator(".viewport canvas");
+  await expect(canvas).toHaveAttribute("data-rendered", "0");
+  await page.evaluate(async () => {
+    const path = "/e2e/performance-scene.ts";
+    const { loadHierarchyBenchmark } = await import(/* @vite-ignore */ path);
+    loadHierarchyBenchmark(1, 999);
+  });
+  const counter = page.getByRole("meter", {
+    name: "Pièces dans la construction",
+  });
+  const brick = page
+    .getByRole("complementary", { name: "Bibliothèque de pièces" })
+    .getByRole("button", { name: "Brique 1 × 1", exact: true });
+  await expect(counter).toHaveAttribute("aria-valuenow", "999");
+  await brick.click();
+  await expect(counter).toHaveText("1 000 / 1 000 pièces");
+  await expect(brick).toBeDisabled();
+  await page
+    .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
+    .click();
+  await expect(brick).toBeEnabled();
+  await page.getByRole("button", { name: "Rétablir", exact: true }).click();
+  await expect(brick).toBeDisabled();
+  await expect(
+    page.getByLabel("Projet et sauvegarde").getByRole("status"),
+  ).toContainText("Enregistré");
+  await page.reload();
+  await expect(counter).toHaveText("1 000 / 1 000 pièces");
+  await expect(canvas).toHaveAttribute("data-rendered", "1001"); // Includes the group.
+});
+
 async function layout(page: Page) {
   return page.evaluate(() => {
     const rect = (selector: string) => {
@@ -113,7 +148,7 @@ test("bibliothèque : catégories et couleurs restent accessibles pendant le dé
     "Rouge",
   );
   await page.locator('.piece-card[aria-label="Pente 2 × 2"]').click();
-  await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("1 / 1 000");
   await expect(page.locator(".tree-row.selected .part-dot")).toHaveCSS(
     "background-color",
     "rgb(239, 68, 68)",

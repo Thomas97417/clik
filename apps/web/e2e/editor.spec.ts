@@ -10,7 +10,7 @@ test("construction, couleurs, historique et récupération du brouillon", async 
     page.getByRole("button", { name: "Brique 1 × 1" }),
   ).toBeEnabled();
   await page.getByRole("button", { name: "Brique 1 × 1" }).click();
-  await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("1 / 1 000");
   await expect(page.locator("canvas").first()).toBeVisible();
   await page.getByRole("button", { name: "Rouge", exact: true }).click();
   await page.keyboard.down("Control");
@@ -18,7 +18,7 @@ test("construction, couleurs, historique et récupération du brouillon", async 
   await page.keyboard.down("d"); // Holding Ctrl+D must create only one copy.
   await page.keyboard.up("d");
   await page.keyboard.up("Control");
-  await expect(page.locator(".viewport-bottom")).toContainText("2 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("2 / 1 000");
   await expect(page.getByLabel("position X", { exact: true })).toHaveValue(
     "2.5",
   );
@@ -26,16 +26,16 @@ test("construction, couleurs, historique et récupération du brouillon", async 
   await page
     .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
     .click();
-  await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("1 / 1 000");
   await page.getByRole("button", { name: "Rétablir", exact: true }).click();
-  await expect(page.locator(".viewport-bottom")).toContainText("2 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("2 / 1 000");
   await page.getByLabel("Nom du projet").fill("Ma construction test");
   await page.getByLabel("Nom du projet").press("Tab");
   await expect(
     page.getByLabel("Projet et sauvegarde").getByRole("status"),
   ).toContainText("Enregistré");
   await page.reload();
-  await expect(page.locator(".viewport-bottom")).toContainText("2 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("2 / 1 000");
   await expect(page.getByLabel("Nom du projet")).toHaveValue(
     "Ma construction test",
   );
@@ -58,7 +58,7 @@ test("un formulaire ne déclenche pas les raccourcis de suppression ou duplicati
   await input.press("Backspace");
   await input.press("d");
   await expect(input).toHaveValue(/d/);
-  await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("1 / 1 000");
 });
 test("conflit entre deux onglets sans écrasement silencieux", async ({
   page,
@@ -69,11 +69,11 @@ test("conflit entre deux onglets sans écrasement silencieux", async ({
   await expect(page.getByRole("status")).toContainText("Enregistré");
   const second = await context.newPage();
   await second.goto("/editor");
-  await expect(second.locator(".viewport-bottom")).toContainText("1 / 500");
+  await expect(second.locator(".viewport-bottom")).toContainText("1 / 1 000");
   await page.getByRole("button", { name: "Brique 2 × 2" }).click();
   await expect(second.getByRole("alert")).toContainText("autre onglet");
   await second.getByRole("button", { name: "Recharger", exact: true }).click();
-  await expect(second.locator(".viewport-bottom")).toContainText("2 / 500");
+  await expect(second.locator(".viewport-bottom")).toContainText("2 / 1 000");
   await second.close();
 });
 test("galerie et consultation mobile", async ({ page }) => {
@@ -102,7 +102,7 @@ test("hors ligne : le brouillon local reste enregistré", async ({
   await context.setOffline(false);
   await expect(status).toHaveText("Enregistré sur cet appareil");
   await page.reload();
-  await expect(page.locator(".viewport-bottom")).toContainText("2 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("2 / 1 000");
 });
 test("copie locale en cas de conflit conserve les deux brouillons", async ({
   page,
@@ -115,15 +115,15 @@ test("copie locale en cas de conflit conserve les deux brouillons", async ({
   ).toContainText("Enregistré");
   const second = await context.newPage();
   await second.goto("/editor");
-  await expect(second.locator(".viewport-bottom")).toContainText("1 / 500");
+  await expect(second.locator(".viewport-bottom")).toContainText("1 / 1 000");
   await page.getByRole("button", { name: "Brique 2 × 2", exact: true }).click();
   await expect(second.getByRole("alert")).toContainText("autre onglet");
   await second
     .getByRole("button", { name: "Sauvegarder une copie locale" })
     .click();
   await expect(second).toHaveURL(/draft=/);
-  await expect(second.locator(".viewport-bottom")).toContainText("1 / 500");
-  await expect(page.locator(".viewport-bottom")).toContainText("2 / 500");
+  await expect(second.locator(".viewport-bottom")).toContainText("1 / 1 000");
+  await expect(page.locator(".viewport-bottom")).toContainText("2 / 1 000");
   await second.close();
 });
 
@@ -140,10 +140,10 @@ test("déposer une pièce et annuler un placement avec Échap", async ({
   await page.keyboard.press("Escape");
   await expect(page.locator(".piece-card.active")).toHaveCount(0);
   await page.mouse.up();
-  await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("0 / 1 000");
   await dragLibrary(page, "Brique 2 × 4", x, y);
   await page.mouse.up();
-  await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("1 / 1 000");
 });
 test("groupement, propriétés numériques et dissociation", async ({ page }) => {
   await page.goto("/editor");
@@ -210,16 +210,16 @@ test("duplication d’un groupe à côté de l’original, annuler et rétablir"
     .click({ modifiers: ["Shift"] });
   await page.getByRole("button", { name: "Grouper", exact: true }).click();
   await page.getByRole("button", { name: "Dupliquer", exact: true }).click();
-  await expect(page.locator(".viewport-bottom")).toContainText("4 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("4 / 1 000");
   await expect(page.getByLabel("position Z", { exact: true })).toHaveValue("3");
   await expect(page.locator(".overlap")).toHaveCount(0);
   await expect(page.locator(".tree-name")).toHaveCount(6);
   await page
     .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
     .click();
-  await expect(page.locator(".viewport-bottom")).toContainText("2 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("2 / 1 000");
   await page.getByRole("button", { name: "Rétablir", exact: true }).click();
-  await expect(page.locator(".viewport-bottom")).toContainText("4 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("4 / 1 000");
   await expect(page.locator(".overlap")).toHaveCount(0);
 });
 
@@ -239,7 +239,7 @@ test("ajouts par clic dans un espace libre, avec et sans aimantation", async ({
         .click();
     await page.locator(`.piece-card[aria-label="${name}"]`).click();
     await expect(page.locator(".viewport-bottom")).toContainText(
-      `${i + 1} / 500`,
+      `${i + 1} / 1 000`,
     );
     await expect(page.locator(".overlap")).toHaveCount(0);
     await expect(page.locator(".tree-row.selected .tree-name")).toHaveText(
@@ -260,14 +260,14 @@ test("ajouts par clic dans un espace libre, avec et sans aimantation", async ({
   await page
     .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
     .click();
-  await expect(page.locator(".viewport-bottom")).toContainText("3 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("3 / 1 000");
   await page.getByRole("button", { name: "Rétablir", exact: true }).click();
-  await expect(page.locator(".viewport-bottom")).toContainText("4 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("4 / 1 000");
   await page.locator(".tree-name").last().click();
   expect(await position()).toEqual(addedPosition);
   await expect(page.getByRole("status")).toContainText("Enregistré");
   await page.reload();
-  await expect(page.locator(".viewport-bottom")).toContainText("4 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("4 / 1 000");
   await expect(page.locator(".overlap")).toHaveCount(0);
   await page.locator(".tree-name").last().click();
   expect(await position()).toEqual(addedPosition);

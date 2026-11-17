@@ -44,7 +44,7 @@ test("conserver un projet le déplace vers le compte, sans doublon local et avec
   await save.press("Enter");
   await expect(page.getByRole("menuitem")).toHaveCount(2);
   await page.keyboard.press("Delete");
-  await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("1 / 1 000");
   await page.keyboard.press("Escape");
   await expect(save).toBeFocused();
   expect(fixture.calls.creations).toHaveLength(0);
@@ -71,7 +71,7 @@ test("conserver un projet le déplace vers le compte, sans doublon local et avec
     .click();
   await expect(page).toHaveURL(/\/editor\/imported$/);
   await expect(title).toHaveValue("Ma construction transférée");
-  await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("1 / 1 000");
   expect(await localProject(page)).toBeNull();
   expect(fixture.calls.creations).toHaveLength(2);
   expect(fixture.calls.creations[0].localSourceId).toBe(
@@ -188,7 +188,7 @@ test("annuler la publication garde le projet privé et ne rouvre pas la fenêtre
   await page.reload();
   await expect(page.getByLabel("Nom du projet")).toBeEnabled();
   await expect(dialog).toHaveCount(0);
-  await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("1 / 1 000");
   await page.getByRole("button", { name: "Publier", exact: true }).click();
   await expect(dialog).toBeVisible();
   expect(fixture.calls.creations).toHaveLength(1);

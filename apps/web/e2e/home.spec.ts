@@ -150,7 +150,7 @@ test("parcours mobile, clavier et démarrage sur une page blanche", async ({
     .focus();
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/editor\?draft=/);
-  await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("0 / 1 000");
 });
 
 test("sans WebGL, la découverte reste accessible", async ({ page }) => {

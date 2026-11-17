@@ -23,6 +23,7 @@ import { ConvexError } from "convex/values";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import {
+  MAX_SCENE_PARTS,
   inherited,
   ancestors,
   descendants,
@@ -199,7 +200,7 @@ export default function Editor({
   publishOnLoad?: boolean;
 }) {
   // The canvas subscribes to live transforms. Keep the tree and inspector stable
-  // during a gesture so a 500-part document does not rebuild its UI each frame.
+  // during a gesture so large documents do not rebuild their UI each frame.
   const s = useEditor(
       useShallow(({ color: _color, ...state }) => ({
         ...state,
@@ -471,7 +472,8 @@ export default function Editor({
     ...parentGroups.map((node) => ({ value: node.id, label: node.name })),
   ];
   const count = s.scene.nodes.filter((n) => n.kind === "part").length;
-  const partLimit = stock?.reduce((sum, item) => sum + item.quantity, 0) ?? 500;
+  const partLimit =
+    stock?.reduce((sum, item) => sum + item.quantity, 0) ?? MAX_SCENE_PARTS;
   const layoutKey = useMemo(() => sceneLayoutKey(s.scene), [s.scene]);
   const overlap = useMemo(() => hasOverlappingParts(s.scene), [layoutKey]);
   const sources = projectSources(s.provenance);
@@ -1244,7 +1246,7 @@ export default function Editor({
                       aria-valuemin={0}
                       aria-valuenow={count}
                       aria-valuemax={partLimit}
-                      aria-valuetext={`${count} sur ${partLimit}`}
+                      aria-valuetext={`${count.toLocaleString("fr-FR")} sur ${partLimit.toLocaleString("fr-FR")}`}
                       className="inline-flex h-9.5 shrink-0 items-center gap-2 rounded-lg border border-[#dce5f0] bg-white/95 px-2.5 text-[11px] font-medium whitespace-nowrap text-[#64758d] shadow-[0_2px_8px_#53668108] tabular-nums"
                     >
                       <ToyBrick
@@ -1254,10 +1256,10 @@ export default function Editor({
                       />
                       <span>
                         <strong className="text-sm font-bold text-[#32445f]">
-                          {count}
+                          {count.toLocaleString("fr-FR")}
                         </strong>
                         <span className="text-[#8998ad]"> / </span>
-                        {partLimit} pièces
+                        {partLimit.toLocaleString("fr-FR")} pièces
                       </span>
                     </span>
                     {overlap && (

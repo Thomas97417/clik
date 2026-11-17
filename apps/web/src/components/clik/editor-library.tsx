@@ -1,5 +1,10 @@
 import { memo, useId, useMemo, useRef, useState } from "react";
-import { CATALOG, countStock, type PartType } from "@clik/scene";
+import {
+  CATALOG,
+  countStock,
+  MAX_SCENE_PARTS,
+  type PartType,
+} from "@clik/scene";
 import {
   Grip,
   PanelLeftClose,
@@ -343,7 +348,7 @@ const EditorLibrary = memo(function EditorLibrary({
                   const amount = stock
                     ? (stock.find((item) => item.type === part.id)?.quantity ??
                         0) - (used[part.id] ?? 0)
-                    : 500;
+                    : MAX_SCENE_PARTS - count;
                   return (
                     <button
                       key={part.id}
@@ -354,7 +359,12 @@ const EditorLibrary = memo(function EditorLibrary({
                           "active border-[#8dacf1] bg-[#eef3ff]",
                       )}
                       draggable={false}
-                      disabled={!ready || closed || count >= 500 || amount <= 0}
+                      disabled={
+                        !ready ||
+                        closed ||
+                        count >= MAX_SCENE_PARTS ||
+                        amount <= 0
+                      }
                       aria-label={part.name}
                       title={`${part.name} — glisser dans la scène ou cliquer pour ajouter`}
                       onDragStart={(event) => event.preventDefault()}

@@ -73,7 +73,7 @@ test("la première pièce et son annulation gardent le canvas et ses commandes e
   });
   await expect(canvas).toHaveAttribute("data-rendered", "0");
   await expect(counter).toHaveAttribute("aria-valuenow", "0");
-  await expect(counter).toHaveAttribute("aria-valuemax", "500");
+  await expect(counter).toHaveAttribute("aria-valuemax", "1000");
   await expect(timeline).toBeHidden();
   const viewport = (await page.locator(".viewport").boundingBox())!;
   const strip = {
@@ -99,7 +99,7 @@ test("la première pièce et son annulation gardent le canvas et ses commandes e
 
   await page.getByRole("button", { name: "Brique 1 × 1", exact: true }).click();
   await expect(canvas).toHaveAttribute("data-rendered", "1");
-  await expect(counter).toHaveText("1 / 500 pièces");
+  await expect(counter).toHaveText("1 / 1 000 pièces");
   await expect(timeline).toBeVisible();
   expect(await bounds()).toEqual(initial);
 

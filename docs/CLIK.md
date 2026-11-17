@@ -77,7 +77,7 @@ La lecture fait apparaître les pièces encore présentes, à leur position et d
 
 ## Modèle et sécurité
 
-`packages/scene` définit `SceneDocument` version 1, catalogue `clik-1`, positions et rotations Euler XYZ en radians. Chaque nœud référence un parent ; les matrices locales sont composées dans l’ordre de la hiérarchie. Le validateur partagé contrôle les valeurs finies, couleurs, modèles, unicité des identifiants, existence des parents, absence de cycle, 500 pièces et 512 Kio en UTF-8. Les groupes sont limités par le plafond de 1 000 nœuds total.
+`packages/scene` définit `SceneDocument` version 1, catalogue `clik-1`, positions et rotations Euler XYZ en radians. Chaque nœud référence un parent ; les matrices locales sont composées dans l’ordre de la hiérarchie. Le validateur partagé contrôle les valeurs finies, les couleurs, les modèles, l’unicité des identifiants, l’existence des parents et l’absence de cycle. Une construction accepte jusqu’à 1 000 pièces et 1 000 groupes, dans la limite de 512 Kio en UTF-8.
 
 Chaque lecture et mutation privée vérifie le propriétaire via Better Auth. Les sauvegardes utilisent une révision comparée atomiquement côté Convex. Aucun écrasement forcé n’est exposé. IndexedDB conserve les changements non envoyés et détecte les écritures concurrentes dans une transaction. BroadcastChannel informe les autres onglets.
 

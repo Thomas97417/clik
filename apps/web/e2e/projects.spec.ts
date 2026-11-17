@@ -159,7 +159,7 @@ test("une nouvelle création préserve les précédentes et obtient son propre a
     .getByRole("button", { name: "Nouvelle création", exact: true })
     .click();
   await expect(page).toHaveURL(/draft=/);
-  await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("0 / 1 000");
   await page.locator('.piece-card[aria-label="Brique 2 × 2"]').click();
   await page.getByLabel("Nom du projet").fill("Nouvelle sculpture");
   await page.getByLabel("Nom du projet").press("Enter");

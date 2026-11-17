@@ -469,11 +469,25 @@ const nodeSchema = z.discriminatedUnion("kind", [
     .strict(),
   z.object({ ...base, kind: z.literal("group") }).strict(),
 ]);
+export const MAX_SCENE_PARTS = 1_000;
+const MAX_SCENE_GROUPS = 1_000;
+
+function checkSceneCapacity(parts: number, nodes: number, detail = "") {
+  if (parts > MAX_SCENE_PARTS)
+    throw Error(
+      `Limite de ${MAX_SCENE_PARTS.toLocaleString("fr-FR")} pièces atteinte.${detail}`,
+    );
+  if (nodes - parts > MAX_SCENE_GROUPS)
+    throw Error(
+      `Limite de ${MAX_SCENE_GROUPS.toLocaleString("fr-FR")} groupes atteinte.${detail}`,
+    );
+}
+
 export const sceneSchema = z
   .object({
     version: z.literal(1),
     catalog: z.literal("clik-1"),
-    nodes: z.array(nodeSchema).max(1000),
+    nodes: z.array(nodeSchema).max(MAX_SCENE_PARTS + MAX_SCENE_GROUPS),
   })
   .strict();
 export type SceneDocument = z.infer<typeof sceneSchema>;
@@ -488,8 +502,10 @@ export function validateScene(value: unknown): SceneDocument {
   if (new TextEncoder().encode(JSON.stringify(value)).length > 512 * 1024)
     throw Error("La scène dépasse 512 Kio.");
   const scene = sceneSchema.parse(value);
-  if (scene.nodes.filter((n) => n.kind === "part").length > 500)
-    throw Error("Limite de 500 pièces atteinte.");
+  checkSceneCapacity(
+    scene.nodes.filter((n) => n.kind === "part").length,
+    scene.nodes.length,
+  );
   const map = new Map(scene.nodes.map((n) => [n.id, n]));
   if (map.size !== scene.nodes.length) throw Error("Identifiants dupliqués.");
   const validGroups = new Set<string>();
@@ -838,12 +854,11 @@ export function importAssembly(
   const parts = source.nodes.filter((n): n is Part => n.kind === "part");
   if (!parts.length)
     throw Error("Ce projet ne contient aucune pièce à importer.");
-  if (into.nodes.length + source.nodes.length + 1 > 1000)
-    throw Error(
-      "Limite de 1 000 éléments atteinte. L’import n’a pas été ajouté.",
-    );
-  if (into.nodes.filter((n) => n.kind === "part").length + parts.length > 500)
-    throw Error("Limite de 500 pièces atteinte. L’import n’a pas été ajouté.");
+  checkSceneCapacity(
+    into.nodes.filter((n) => n.kind === "part").length + parts.length,
+    into.nodes.length + source.nodes.length + 1,
+    " L’import n’a pas été ajouté.",
+  );
   const bounds = new Box3();
   for (const part of parts) bounds.union(partBounds(source, part));
   const center = bounds.getCenter(new Vector3());

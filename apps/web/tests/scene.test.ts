@@ -177,7 +177,7 @@ describe("SceneDocument et transformations", () => {
     );
     expect(snapPart({ ...emptyScene(), nodes: [target] }, p, false)).toEqual(p);
   });
-  it("charge les anciens chevauchements mais refuse cycles, couleurs et plus de 500 pièces", () => {
+  it("charge les anciens chevauchements mais refuse cycles, couleurs et plus de 1 000 pièces", () => {
     const p = makePart("brick-1x1", "#4079e8");
     expect(
       validateScene({ ...emptyScene(), nodes: [p, { ...p, id: "b" }] }),
@@ -190,9 +190,12 @@ describe("SceneDocument et transformations", () => {
     expect(() =>
       validateScene({
         ...emptyScene(),
-        nodes: Array.from({ length: 501 }, (_, i) => ({ ...p, id: String(i) })),
+        nodes: Array.from({ length: 1001 }, (_, i) => ({
+          ...p,
+          id: String(i),
+        })),
       }),
-    ).toThrow("500");
+    ).toThrow(/1\s?000 pièces/);
   });
   it("rejette NaN, parents inexistants, ids dupliqués et dépassement en octets", () => {
     const p = makePart("brick-1x1", "#4079e8");
@@ -340,14 +343,14 @@ describe("Historique de l’atelier", () => {
     const part = makePart("brick-1x1", "#4079e8");
     const scene = {
       ...emptyScene(),
-      nodes: Array.from({ length: 500 }, (_, i) => ({
+      nodes: Array.from({ length: 1000 }, (_, i) => ({
         ...part,
         id: String(i),
       })),
     };
     const editor = useEditor.getState();
     editor.load(scene, "Test");
-    expect(() => editor.add("brick-2x2")).toThrow("500");
+    expect(() => editor.add("brick-2x2")).toThrow(/1\s?000 pièces/);
     expect(useEditor.getState().scene).toEqual(scene);
     expect(useEditor.getState().past).toHaveLength(0);
     expect(useEditor.getState().selection).toEqual([]);

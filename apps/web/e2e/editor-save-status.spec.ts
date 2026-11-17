@@ -108,5 +108,5 @@ test("sauvegarde : la création locale garde un indicateur stable et fonctionne 
   expect(fixture.calls.saves).toHaveLength(0);
   await context.setOffline(false);
   await page.reload();
-  await expect(page.locator(".viewport-bottom")).toContainText("2 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("2 / 1 000");
 });

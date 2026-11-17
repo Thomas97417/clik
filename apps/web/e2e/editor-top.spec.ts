@@ -21,7 +21,7 @@ for (const draft of [undefined, "my-workshop"]) {
     await expect(page.getByLabel("Nom du projet")).toHaveValue(
       "Nouvelle création",
     );
-    await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+    await expect(page.locator(".viewport-bottom")).toContainText("0 / 1 000");
     await expect(
       page.getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true }),
     ).toBeDisabled();
@@ -36,10 +36,10 @@ for (const draft of [undefined, "my-workshop"]) {
     await expect(page.getByLabel("Nom du projet")).toHaveValue(
       "Ma construction conservée",
     );
-    await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
+    await expect(page.locator(".viewport-bottom")).toContainText("1 / 1 000");
     await expect(page.locator(".tree-name")).toContainText("Brique 2 × 4");
     await page.goto(nextUrl);
-    await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
+    await expect(page.locator(".viewport-bottom")).toContainText("1 / 1 000");
     await expect(page.locator(".tree-name")).toContainText("Brique 1 × 1");
   });
 }

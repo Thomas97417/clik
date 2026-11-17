@@ -8,7 +8,7 @@ import {
 } from "@clik/scene";
 import { useEditor } from "../src/lib/clik/store";
 
-export function loadHierarchyBenchmark(depth = 100) {
+export function loadHierarchyBenchmark(depth = 100, partCount = 500) {
   const nodes: SceneNode[] = [
     ...Array.from({ length: depth }, (_, i): SceneNode => ({
       id: `g${i}`,
@@ -20,7 +20,7 @@ export function loadHierarchyBenchmark(depth = 100) {
       hidden: false,
       locked: false,
     })),
-    ...Array.from({ length: 500 }, (_, i) => ({
+    ...Array.from({ length: partCount }, (_, i) => ({
       ...makePart("brick-2x4", "#4079e8", [
         (i % 20) * 5,
         0,
