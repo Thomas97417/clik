@@ -87,6 +87,36 @@ Les miniatures passent par une action authentifiée qui vérifie le projet, la s
 
 La publication depuis l’atelier et depuis « Mes créations » utilise le même rendu PNG de 640 × 480 : cadrage automatique sur toutes les pièces visibles, fond transparent, éclairage fixe et aucun quadrillage ni outil de sélection. La caméra et l’éclairage choisis dans l’atelier n’affectent pas la miniature. Les images déjà publiées sont renouvelées lors de la prochaine mise à jour de leur publication.
 
+## Performances des collections et de l’atelier
+
+« Mes créations » et le sélecteur d’import demandent `projects.list` avec
+`summaryOnly: true`. Cette réponse contient les métadonnées et le nombre de pièces,
+sans les scènes ni les reçus d’import. Les scènes privées sont chargées à la demande
+pour les aperçus visibles ; les images en mémoire sont réutilisées. Une miniature
+publiée sert directement d’aperçu lorsqu’elle correspond à la révision du projet.
+La publication depuis une carte relit la scène et vérifie sa révision.
+
+Le filtre « Dans la galerie » utilise l’index `by_owner_published`, dans le même
+ordre de modification que les autres collections. Le cron `migrateCollection`
+initialise les anciens projets par lots de 12. Tant que `collectionReady` indique
+une migration en cours pour le propriétaire, le frontend conserve le filtrage
+historique. Sans `summaryOnly`, la requête conserve son ancienne réponse pour les
+clients déjà ouverts pendant le déploiement.
+
+Les transformations des nœuds sont indexées et les matrices mondiales sont
+réutilisées. Chaque passe de rendu ou de collision résout les ancêtres communs
+une seule fois. Les appels isolés continuent de vérifier les changements de
+coordonnées et de parent, y compris en place ; les matrices retournées sont des
+copies afin qu’une inversion ne modifie pas le cache.
+
+Le canvas fonctionne à la demande : il s’arrête au repos et reste animé pendant
+une manipulation ou un déplacement de caméra. Les changements de scène,
+sélection, cadrage, éclairage, grille et taille relancent le rendu. La navigation
+au clavier mesure le temps depuis la pression, sans inclure le temps de repos.
+
+Les mesures locales avant/après sont conservées dans
+[`performance-audit.json`](../apps/web/reports/performance-audit.json).
+
 ## Vérifications
 
 ```sh

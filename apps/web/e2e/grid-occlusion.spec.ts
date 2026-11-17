@@ -1,3 +1,4 @@
+import { waitForSceneUpdate } from "./wait-for-scene";
 import { selectCameraView } from "./camera-view";
 import { test, expect } from "@playwright/test";
 
@@ -17,15 +18,13 @@ test("une pièce opaque masque la grille pendant le zoom sous plusieurs angles",
   for (const view of ["top", "perspective", "front"]) {
     await selectCameraView(page, view);
     await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
-    const ready = Number(await canvas.getAttribute("data-frames"));
-    await expect
-      .poll(async () => Number(await canvas.getAttribute("data-frames")))
-      .toBeGreaterThan(ready + 2);
+
+    await waitForSceneUpdate(page);
     const recording = page.evaluate(async () => {
       const canvas = document.querySelector("canvas")!;
       const surface = document.createElement("canvas");
-      surface.width = 20;
-      surface.height = 20;
+      surface.width = 10;
+      surface.height = 10;
       const ctx = surface.getContext("2d")!;
       (window as any).__stopOcclusionRecording = false;
       const frames: number[] = [];
@@ -33,23 +32,23 @@ test("une pièce opaque masque la grille pendant le zoom sous plusieurs angles",
         await new Promise<void>((resolve) =>
           requestAnimationFrame(() => resolve()),
         );
-        // The central patch stays inside the solid red tile at every tested zoom.
+        // Stay inside the thin front face, including the editor's wider framing.
         ctx.drawImage(
           canvas,
-          canvas.width / 2 - 10,
-          canvas.height / 2 - 10,
-          20,
-          20,
+          canvas.width / 2 - 5,
+          canvas.height / 2 - 5,
+          10,
+          10,
           0,
           0,
-          20,
-          20,
+          10,
+          10,
         );
-        const { data } = ctx.getImageData(0, 0, 20, 20);
+        const { data } = ctx.getImageData(0, 0, 10, 10);
         let uncovered = 0;
         for (let i = 0; i < data.length; i += 4)
-          if (data[i] < data[i + 1] * 1.3 || data[i] < data[i + 2] * 1.3)
-            uncovered++;
+          // Selection and tone mapping lighten red; grid pixels stay neutral.
+          if (data[i] - Math.max(data[i + 1], data[i + 2]) < 20) uncovered++;
         frames.push(uncovered);
       }
       return frames;

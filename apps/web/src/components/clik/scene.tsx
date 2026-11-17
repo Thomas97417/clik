@@ -35,9 +35,9 @@ import type { BoxSelectionPreview } from "@/lib/clik/box-selection";
 import {
   CATALOG,
   descendants,
-  inherited,
   matrix,
   movableRoots,
+  sceneTransforms,
   type SelectionPreview,
   worldMatrix,
   type Part,
@@ -71,12 +71,12 @@ function selectionGeometry(type: PartType) {
 
 function SelectionOutline({
   type,
-  scene,
+  transforms,
   parts,
   layoutKey,
 }: {
   type: PartType;
-  scene: SceneDocument;
+  transforms: ReturnType<typeof sceneTransforms>;
   parts: Part[];
   layoutKey: string;
 }) {
@@ -87,7 +87,7 @@ function SelectionOutline({
     parts.forEach((part, index) =>
       mesh.current!.setMatrixAt(
         index,
-        part.parentId ? worldMatrix(scene, part.id) : matrix(part),
+        part.parentId ? transforms.worldMatrix(part.id) : matrix(part),
       ),
     );
     mesh.current.instanceMatrix.needsUpdate = true;
@@ -121,12 +121,14 @@ function Batch({
   editable,
   layoutKey,
   selectedIds,
+  transforms,
 }: {
   type: PartType;
   scene: SceneDocument;
   editable: boolean;
   layoutKey: string;
   selectedIds: ReadonlySet<string>;
+  transforms: ReturnType<typeof sceneTransforms>;
 }) {
   const ref = useRef<InstancedMesh>(null);
   const previous = useRef<{
@@ -143,9 +145,9 @@ function Batch({
           n.kind === "part" &&
           n.type === type &&
           !n.hidden &&
-          (!n.parentId || !inherited(scene, n.parentId, "hidden")),
+          (!n.parentId || !transforms.inherited(n.parentId, "hidden")),
       ),
-    [scene, type],
+    [scene, type, transforms],
   );
   const selection = useMemo(
     () => (editable ? parts.filter((part) => selectedIds.has(part.id)) : []),
@@ -171,7 +173,7 @@ function Batch({
       ) {
         mesh.setMatrixAt(
           i,
-          part.parentId ? worldMatrix(scene, part.id) : matrix(part),
+          part.parentId ? transforms.worldMatrix(part.id) : matrix(part),
         );
         moved = true;
       }
@@ -213,7 +215,7 @@ function Batch({
       {selection.length > 0 && (
         <SelectionOutline
           type={type}
-          scene={scene}
+          transforms={transforms}
           parts={selection}
           layoutKey={layoutKey}
         />
@@ -306,7 +308,7 @@ function Stage({
   boxSelection: BoxSelectionPreview | null;
   onBoxPreview: (preview: BoxSelectionPreview | null) => void;
 }) {
-  const { camera, gl, scene: threeScene } = useThree(),
+  const { camera, gl, scene: threeScene, invalidate } = useThree(),
     controls = useRef<ComponentRef<typeof OrbitControls>>(null),
     s = useEditor(),
     rotation = useRef<ComponentRef<typeof TransformControls>>(null);
@@ -319,6 +321,7 @@ function Stage({
   }, [camera, cameraRef]);
   const [gridStep, setGridStep] = useState(1);
   const layoutKey = useMemo(() => sceneLayoutKey(scene), [scene]);
+  const transforms = useMemo(() => sceneTransforms(scene), [scene]);
   // A gesture changes positions or colors, never ancestry. Keep selection
   // membership stable through its previews, including nested assemblies.
   const selectionScene = editable ? (s.gesture?.scene ?? scene) : scene;
@@ -331,6 +334,7 @@ function Stage({
       new Set(boxSelection?.ids ?? descendants(selectionScene, s.selection)),
     [selectionLayoutKey, s.selection, boxSelection?.ids],
   );
+  useLayoutEffect(() => invalidate(), [scene, selectedIds, invalidate]);
   const [resetView, setResetView] = useState(0);
   // Rotate the original light around Y, keeping its elevation and intensity.
   const lightAngle = ((editorView ? s.lightAngle : 0) * Math.PI) / 180;
@@ -363,6 +367,8 @@ function Stage({
     };
   }, [threeScene, gl, scene.nodes.length]);
   useFrame(() => {
+    // Keep pointer previews smooth while a gesture is active; stop on release.
+    if (editable && (s.gesture || s.pending || s.boxSelecting)) invalidate();
     if (!controls.current) return;
     // OrbitControls permits zooming well beyond the initial far plane. Keep
     // both clipping planes proportional to the viewing distance, also on zoom-in.
@@ -385,11 +391,13 @@ function Stage({
     view = editorView ? s.view : "perspective";
   useEffect(() => {
     const framing = framingScene ?? scene;
+    const framingTransforms =
+      framing === scene ? transforms : sceneTransforms(framing);
     const boxes = framing.nodes
       .filter(
         (n) =>
           n.kind === "part" &&
-          !inherited(framing, n.id, "hidden") &&
+          !framingTransforms.inherited(n.id, "hidden") &&
           (!editable || !s.selection.length || selectedIds.has(n.id)),
       )
       .map((n) => {
@@ -397,7 +405,7 @@ function Stage({
         return new Box3(
           new Vector3(-w / 2, 0, -d / 2),
           new Vector3(w / 2, h + 0.2, d / 2),
-        ).applyMatrix4(worldMatrix(framing, n.id));
+        ).applyMatrix4(framingTransforms.worldMatrix(n.id));
       });
     const box = boxes.reduce((total, next) => total.union(next), new Box3());
     if (box.isEmpty())
@@ -434,6 +442,7 @@ function Stage({
     controls.current?.target.copy(center);
     controls.current?.update();
     if (orbit) orbit.enableDamping = damping!;
+    invalidate();
   }, [frame, view, resetView]);
   useEffect(() => {
     if (!onViewControls || editable) return;
@@ -506,6 +515,7 @@ function Stage({
           editable={editable}
           layoutKey={layoutKey}
           selectedIds={selectedIds}
+          transforms={transforms}
         />
       ))}
       {editable && s.pending && library.free && (
@@ -604,6 +614,7 @@ export default function Scene({
   return (
     <>
       <Canvas
+        frameloop="demand"
         shadows
         dpr={[1, 1.5]}
         camera={{ position: [11, 10, 11], fov: 40, near: 0.1, far: 1000 }}

@@ -1,3 +1,4 @@
+import { waitForSceneUpdate } from "./wait-for-scene";
 import { selectCameraView } from "./camera-view";
 import { test, expect } from "@playwright/test";
 import { dragLibrary } from "./drag-library";
@@ -59,10 +60,8 @@ for (const library of [false, true]) {
     await page.keyboard.press("Shift+R");
     await page.keyboard.press("Shift+R");
     await page.mouse.move(x + 15, y + 10, { steps: 5 });
-    const frame = Number(await canvas.getAttribute("data-frames"));
-    await expect
-      .poll(async () => Number(await canvas.getAttribute("data-frames")))
-      .toBeGreaterThan(frame + 2);
+
+    await waitForSceneUpdate(page);
     await page.mouse.up();
     await expect(page.getByLabel("rotation Y", { exact: true })).toHaveValue(
       "-90",

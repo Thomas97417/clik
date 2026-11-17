@@ -30,6 +30,149 @@ const setup = () => {
 const scene = JSON.stringify(
   validateScene({ ...emptyScene(), nodes: [makePart("brick-2x2", "#4079e8")] }),
 );
+
+describe("Collections paginées", () => {
+  it("filtre les publications dans l’index et conserve tri, révision et retrait", async () => {
+    const { alice, bob, t } = setup();
+    const largeScene = JSON.stringify({
+      ...emptyScene(),
+      nodes: Array.from({ length: 500 }, (_, i) =>
+        makePart("brick-2x4", "#4079e8", [i * 5, 0, 0]),
+      ),
+    });
+    for (let i = 0; i < 120; i++)
+      await alice.mutation(api.projects.create, {
+        title: `Privée ${i}`,
+        scene: largeScene,
+      });
+    const published = [];
+    for (let i = 0; i < 13; i++) {
+      const id = await alice.mutation(api.projects.create, {
+        title: `Publiée ${i}`,
+        scene: largeScene,
+      });
+      const thumbnail = await t.run((ctx) =>
+        ctx.storage.store(new Blob(["image"])),
+      );
+      await alice.mutation(internal.projects.registerThumbnail, {
+        projectId: id,
+        storageId: thumbnail,
+      });
+      const publicationId = await alice.mutation(api.projects.publish, {
+        id,
+        title: `Publiée ${i}`,
+        description: "",
+        thumbnail,
+        revision: 0,
+      });
+      await t.run((ctx) => ctx.db.patch(id, { updatedAt: 1000 + i }));
+      published.push({ id, publicationId });
+    }
+    expect(await alice.query(api.projects.collectionReady, {})).toBe(true);
+    const args = {
+      publishedOnly: true,
+      summaryOnly: true,
+      paginationOpts: { numItems: 12, cursor: null },
+    };
+    const first = await alice.query(api.projects.list, args);
+    expect(first.page.map((p) => p._id)).toEqual(
+      published
+        .slice(1)
+        .reverse()
+        .map((p) => p.id),
+    );
+    expect(first.page.every((p) => p.thumbnailUrl && p.partCount === 500)).toBe(
+      true,
+    );
+    expect(first.page.every((p) => !("scene" in p) && !("imports" in p))).toBe(
+      true,
+    );
+    expect(new TextEncoder().encode(JSON.stringify(first)).length).toBeLessThan(
+      12_000,
+    );
+    const rest = await alice.query(api.projects.list, {
+      ...args,
+      paginationOpts: { numItems: 12, cursor: first.continueCursor },
+    });
+    expect(rest.page.map((p) => p._id)).toEqual([published[0].id]);
+    expect(rest.isDone).toBe(true);
+    const oldest = await alice.query(api.projects.list, {
+      ...args,
+      sort: "oldest",
+    });
+    expect(oldest.page.map((p) => p._id)).toEqual(
+      published.slice(0, 12).map((p) => p.id),
+    );
+    await alice.mutation(api.projects.save, {
+      id: published[0].id,
+      revision: 0,
+      title: "Actualisée",
+      scene: largeScene,
+    });
+    const updated = await alice.query(api.projects.list, args);
+    expect(updated.page[0]).toMatchObject({
+      _id: published[0].id,
+      revision: 1,
+      thumbnailUrl: null,
+    });
+    await alice.mutation(api.projects.withdraw, {
+      id: published[0].publicationId,
+    });
+    expect(
+      (await alice.query(api.projects.list, args)).page.map((p) => p._id),
+    ).not.toContain(published[0].id);
+    expect((await bob.query(api.projects.list, args)).page).toEqual([]);
+  });
+
+  it("migre les anciens projets par lots sans perdre une publication ni un curseur", async () => {
+    vi.useFakeTimers();
+    try {
+      const { alice, t } = setup();
+      const ids = [];
+      for (let i = 0; i < 27; i++)
+        ids.push(
+          await alice.mutation(api.projects.create, {
+            title: `Ancien ${i}`,
+            scene,
+          }),
+        );
+      const thumbnail = await t.run((ctx) =>
+        ctx.storage.store(new Blob(["image"])),
+      );
+      await alice.mutation(internal.projects.registerThumbnail, {
+        projectId: ids[0],
+        storageId: thumbnail,
+      });
+      await alice.mutation(api.projects.publish, {
+        id: ids[0],
+        title: "Ancienne publication",
+        description: "",
+        thumbnail,
+        revision: 0,
+      });
+      await t.run(async (ctx) => {
+        for (const id of ids)
+          await ctx.db.patch(id, { isPublished: undefined });
+      });
+      expect(await alice.query(api.projects.collectionReady, {})).toBe(false);
+      await t.mutation(internal.projects.migrateCollection, {});
+      await t.finishAllScheduledFunctions(() => vi.runAllTimers());
+      expect(await alice.query(api.projects.collectionReady, {})).toBe(true);
+      const result = await alice.query(api.projects.list, {
+        publishedOnly: true,
+        paginationOpts: { numItems: 12, cursor: null },
+      });
+      expect(result.page.map((p) => p._id)).toEqual([ids[0]]);
+      await t.mutation(internal.projects.migrateCollection, {});
+      expect(
+        await t.run((ctx) => ctx.db.query("collectionMigration").unique()),
+      ).toMatchObject({ complete: true });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
 describe("Projets privés et versions publiques", () => {
   it("conserve les dates de pose dans les sauvegardes, versions publiques et reprises", async () => {
     const { alice, bob, t } = setup();
@@ -272,20 +415,29 @@ describe("Projets privés et versions publiques", () => {
       "introuvable",
     );
   });
-  it("renvoie la scène actuelle et sa révision pour les aperçus du propriétaire", async () => {
+  it("liste des métadonnées légères et charge la scène actuelle uniquement à la demande du propriétaire", async () => {
     const { alice, bob, t } = setup();
     const id = await alice.mutation(api.projects.create, {
       title: "Ma création",
       scene,
     });
     const paginationOpts = { numItems: 12, cursor: null };
-    const first = await alice.query(api.projects.list, { paginationOpts });
+    const first = await alice.query(api.projects.list, {
+      paginationOpts,
+      summaryOnly: true,
+    });
     expect(first.page[0]).toMatchObject({
       _id: id,
-      scene,
+      partCount: 1,
       revision: 0,
       description: "",
     });
+    expect(first.page[0]).not.toHaveProperty("scene");
+    expect(first.page[0]).not.toHaveProperty("imports");
+    expect(
+      (await alice.query(api.projects.list, { paginationOpts })).page[0].scene,
+    ).toBe(scene);
+    expect((await alice.query(api.projects.get, { id })).scene).toBe(scene);
     const changed = JSON.stringify(emptyScene());
     await alice.mutation(api.projects.save, {
       id,
@@ -293,10 +445,17 @@ describe("Projets privés et versions publiques", () => {
       scene: changed,
       revision: 0,
     });
-    const second = await alice.query(api.projects.list, { paginationOpts });
+    expect((await alice.query(api.projects.get, { id })).scene).toBe(changed);
+    await expect(bob.query(api.projects.get, { id })).rejects.toThrow(
+      "introuvable",
+    );
+    const second = await alice.query(api.projects.list, {
+      paginationOpts,
+      summaryOnly: true,
+    });
     expect(second.page[0]).toMatchObject({
       _id: id,
-      scene: changed,
+      partCount: 0,
       revision: 1,
     });
     expect(

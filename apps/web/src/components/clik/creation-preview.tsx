@@ -4,6 +4,13 @@ import { Box, ImageOff, Minus, Plus, RotateCcw } from "lucide-react";
 import { validateScene, type SceneDocument } from "@clik/scene";
 import type { attachPreviewControls } from "@/lib/clik/preview-controls";
 
+type SceneSource =
+  SceneDocument | string | (() => Promise<SceneDocument | string>);
+async function readScene(source: SceneSource) {
+  const value = typeof source === "function" ? await source() : source;
+  return validateScene(typeof value === "string" ? JSON.parse(value) : value);
+}
+
 export default function CreationPreview({
   scene,
   cacheKey,
@@ -18,7 +25,7 @@ export default function CreationPreview({
   controlsButtonClassName,
   className,
 }: {
-  scene: SceneDocument | string;
+  scene: SceneSource;
   cacheKey: string;
   title: string;
   interactive?: boolean;
@@ -62,10 +69,11 @@ export default function CreationPreview({
     import("@/lib/clik/thumbnail")
       .then(async ({ creationThumbnail }) => {
         if (!active) return;
-        const document = validateScene(
-          typeof scene === "string" ? JSON.parse(scene) : scene,
+        const url = await creationThumbnail(
+          () => readScene(scene),
+          cacheKey,
+          () => active,
         );
-        const url = await creationThumbnail(document, cacheKey, () => active);
         if (active) setPreview({ key: cacheKey, url });
       })
       .catch(() => {
@@ -85,12 +93,13 @@ export default function CreationPreview({
     if (!interactive || !visible || !current?.url) return;
     let active = true;
     import("@/lib/clik/preview-controls")
-      .then(({ attachPreviewControls }) => {
+      .then(async ({ attachPreviewControls }) => {
+        const document = await readScene(scene);
         if (!active || !surface.current || !canvas.current) return;
         controls.current = attachPreviewControls(
           surface.current,
           canvas.current,
-          validateScene(typeof scene === "string" ? JSON.parse(scene) : scene),
+          document,
           initialZoom,
         );
         setInteractiveReady(!!controls.current);

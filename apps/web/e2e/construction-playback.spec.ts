@@ -1,3 +1,4 @@
+import { waitForSceneUpdate } from "./wait-for-scene";
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { emptyScene, makePart } from "@clik/scene";
 import { creatorsFixture } from "./fixtures/creators";
@@ -460,10 +461,8 @@ test("atelier : déplacer une pièce visible quitte la lecture, tourner la camé
   await page.mouse.move(x + 100, y + 30, { steps: 12 });
   await expect(timeline).toHaveAttribute("data-active", "false");
   await expect(canvas).toHaveAttribute("data-dragging", "true");
-  const frames = Number(await canvas.getAttribute("data-frames"));
-  await expect
-    .poll(async () => Number(await canvas.getAttribute("data-frames")))
-    .toBeGreaterThan(frames + 2);
+
+  await waitForSceneUpdate(page);
   await page.mouse.up();
   expect(await position()).not.toEqual(before);
   await expect(canvas).toHaveAttribute("data-rendered", "1");
@@ -553,10 +552,8 @@ test("atelier : la lecture conserve la caméra, l’éclairage et la taille du c
         blue: blue / count,
       };
     });
-  const frame = Number(await canvas.getAttribute("data-frames"));
-  await expect
-    .poll(async () => Number(await canvas.getAttribute("data-frames")))
-    .toBeGreaterThan(frame + 5);
+
+  await waitForSceneUpdate(page);
   const before = await pixels();
   const bounds = await canvas.boundingBox();
   const timeline = page.getByRole("group", {

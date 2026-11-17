@@ -11,7 +11,7 @@ import {
   LogIn,
   Trash2,
 } from "lucide-react";
-import { useAction, useMutation, useConvexAuth } from "convex/react";
+import { useAction, useMutation, useConvexAuth, useConvex } from "convex/react";
 import { ConvexError } from "convex/values";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
@@ -39,26 +39,33 @@ import {
 import { Button } from "@/components/ui/button";
 import { removeLocalCreation } from "@/lib/clik/local";
 import CreationPreview from "./creation-preview";
+import RemoteProjectPreview from "./remote-project-preview";
 import PublishDialog from "./publish-dialog";
 import AssemblyBadge from "./assembly-badge";
 
 export type CreationItem = {
   id: string;
   title: string;
-  scene: string | SceneDocument;
   cacheKey: string;
   updatedAt?: number;
   challenge?: { day: string; closesAt: number } | null;
   origin?: { title: string; author: string };
   provenance?: ProjectProvenance;
+  isAssembly?: boolean;
 } & (
-  | { location: "local"; draftId?: string; stamp: string }
+  | {
+      location: "local";
+      draftId?: string;
+      stamp: string;
+      scene: string | SceneDocument;
+    }
   | {
       location: "online";
       projectId: Id<"projects">;
       publicationId: Id<"publications"> | null;
       revision: number;
       description?: string;
+      thumbnailUrl?: string | null;
     }
 );
 
@@ -70,6 +77,7 @@ export default function ProjectCard({
   onLocalChange: () => void;
 }) {
   const { isAuthenticated, isLoading } = useConvexAuth();
+  const convex = useConvex();
   const navigate = useNavigate();
   const create = useMutation(api.projects.create);
   const remove = useMutation(api.projects.remove);
@@ -99,10 +107,22 @@ export default function ProjectCard({
     try {
       const { creation: snapshot, title, description } = publication;
       const { publicationThumbnail } = await import("@/lib/clik/thumbnail");
+      const source =
+        snapshot.location === "online"
+          ? await convex.query(api.projects.get, { id: snapshot.projectId })
+          : snapshot;
+      if (
+        snapshot.location === "online" &&
+        "revision" in source &&
+        source.revision !== snapshot.revision
+      )
+        throw Error(
+          "La création a changé. Actualisez la page avant de publier.",
+        );
       const document = validateScene(
-        typeof snapshot.scene === "string"
-          ? JSON.parse(snapshot.scene)
-          : snapshot.scene,
+        typeof source.scene === "string"
+          ? JSON.parse(source.scene)
+          : source.scene,
       );
       const bytes = await publicationThumbnail(document, snapshot.cacheKey);
       const projectId =
@@ -208,20 +228,34 @@ export default function ProjectCard({
         aria-label={`Ouvrir ${creation.title}`}
       >
         <div className="thumbnail project-thumbnail group/thumbnail aspect-4/3 bg-[#eef2f8] relative group/project-thumbnail [background:radial-gradient(ellipse_at_50%_65%,#dfe9f7,#f1f5fb_70%)] group-nth-[3n+2]/creation-card:[background:radial-gradient(ellipse_at_50%_65%,#e4e6f1,#f6f4fa_70%)] group-nth-[3n+3]/creation-card:[background:radial-gradient(ellipse_at_50%_65%,#dcebe7,#f1f8f5_70%)]">
-          <CreationPreview
-            imageClassName="object-cover size-full"
-            scene={creation.scene}
-            cacheKey={creation.cacheKey}
-            title={creation.title}
-          />
-          {(creation.challenge || !!creation.provenance?.imports.length) && (
+          {creation.location === "online" ? (
+            <RemoteProjectPreview
+              imageClassName="object-cover size-full"
+              projectId={creation.projectId}
+              revision={creation.revision}
+              poster={creation.thumbnailUrl}
+              cacheKey={creation.cacheKey}
+              title={creation.title}
+            />
+          ) : (
+            <CreationPreview
+              imageClassName="object-cover size-full"
+              scene={creation.scene}
+              cacheKey={creation.cacheKey}
+              title={creation.title}
+            />
+          )}
+          {(creation.challenge ||
+            creation.isAssembly ||
+            !!creation.provenance?.imports.length) && (
             <div className="pointer-events-none absolute bottom-4 left-3.5 z-2 flex max-w-[calc(100%-76px)] flex-wrap gap-1.5">
               {creation.challenge && (
                 <span className="challenge-badge project-challenge-badge block w-fit rounded-[6px] bg-[#f5f0ffed] px-2.25 py-1.5 text-[10px] font-semibold text-[#765aa8]">
                   Défi du {creation.challenge.day}
                 </span>
               )}
-              {!!creation.provenance?.imports.length && <AssemblyBadge />}
+              {(creation.isAssembly ||
+                !!creation.provenance?.imports.length) && <AssemblyBadge />}
             </div>
           )}
           <span

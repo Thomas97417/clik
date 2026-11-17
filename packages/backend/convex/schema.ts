@@ -48,6 +48,11 @@ export default defineSchema({
     ),
     cursor: v.optional(v.string()),
   }).index("by_key", ["key"]),
+  collectionMigration: defineTable({
+    key: v.literal("v1"),
+    cursor: v.optional(v.string()),
+    complete: v.boolean(),
+  }).index("by_key", ["key"]),
   publicationSources: defineTable({
     sourceId: v.id("publications"),
     publicationId: v.id("publications"),
@@ -147,16 +152,19 @@ export default defineSchema({
     challengeId: v.optional(v.id("challenges")),
     revision: v.number(),
     updatedAt: v.number(),
+    isPublished: v.optional(v.boolean()),
     origin: v.optional(origin),
     originReceiptId: v.optional(v.id("importReceipts")),
     imports: v.optional(v.array(projectImport)),
   })
     .index("by_owner", ["owner", "updatedAt"])
+    .index("by_owner_published", ["owner", "isPublished", "updatedAt"])
     .index("by_local_source", ["owner", "localSourceId"])
     .index("by_owner_challenge", ["owner", "challengeId"]),
   publications: defineTable({
     owner: v.string(),
     projectId: v.id("projects"),
+    projectRevision: v.optional(v.number()),
     title: v.string(),
     description: v.string(),
     author: v.string(),

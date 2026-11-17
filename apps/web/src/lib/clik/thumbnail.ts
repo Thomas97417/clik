@@ -13,8 +13,7 @@ import {
 } from "three";
 import {
   CATALOG,
-  inherited,
-  worldMatrix,
+  sceneTransforms,
   type PartType,
   type SceneDocument,
 } from "@clik/scene";
@@ -77,6 +76,7 @@ export async function publicationThumbnail(
 
 /** Build an isolated preview; shared catalogue geometries remain owned by the cache. */
 export function createCreationModel(document: SceneDocument) {
+  const transforms = sceneTransforms(document);
   const scene = new Scene();
   const bounds = new Box3();
   const material = new MeshStandardMaterial({ roughness: 0.42 });
@@ -86,13 +86,13 @@ export function createCreationModel(document: SceneDocument) {
       (n) =>
         n.kind === "part" &&
         n.type === type &&
-        !inherited(document, n.id, "hidden"),
+        !transforms.inherited(n.id, "hidden"),
     );
     if (!parts.length) continue;
     const shape = geometry(type);
     const mesh = new InstancedMesh(shape, material, parts.length);
     parts.forEach((part, i) => {
-      const matrix = worldMatrix(document, part.id);
+      const matrix = transforms.worldMatrix(part.id);
       mesh.setMatrixAt(i, matrix);
       if (part.kind === "part") mesh.setColorAt(i, new Color(part.color));
       bounds.union(shape.boundingBox!.clone().applyMatrix4(matrix));
@@ -170,10 +170,19 @@ export function drawCreationModel(
 
 /** One shared renderer and one preview per frame, rather than a canvas per card. */
 export function creationThumbnail(
-  document: SceneDocument,
+  source: SceneDocument | (() => SceneDocument | Promise<SceneDocument>),
   key: string,
   active: () => boolean,
 ): Promise<string | null> {
+  // Fetch visible projects concurrently; only GPU rendering needs serialization.
+  const document =
+    active() && !sceneCache.has(key)
+      ? Promise.resolve().then(() =>
+          typeof source === "function" ? source() : source,
+        )
+      : null;
+  // A queued/cancelled job may not observe the load's rejection until later.
+  document?.catch(() => {});
   const job = previewQueue.then(async () => {
     if (!active()) return null;
     if (sceneCache.has(key)) return sceneCache.get(key)!;
@@ -181,9 +190,12 @@ export function creationThumbnail(
       requestAnimationFrame(() => resolve()),
     );
     if (!active()) return null;
+    const resolved = await document;
+    if (!active()) return null;
+    if (!resolved) return null;
     renderer ??= new WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(640, 480);
-    const model = createCreationModel(document);
+    const model = createCreationModel(resolved);
     if (!model) return null;
     try {
       renderer.render(model.scene, model.camera);

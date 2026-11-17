@@ -1,3 +1,4 @@
+import { waitForSceneUpdate } from "./wait-for-scene";
 import { selectCameraView } from "./camera-view";
 import { test, expect, type Page } from "@playwright/test";
 
@@ -52,10 +53,8 @@ test("grille lisible au zoom maximal, au-dessus et en dessous du plan", async ({
   await expect.poll(() => gridPixels(page)).toBeGreaterThan(200);
   await page.mouse.move(x, y);
   for (let i = 0; i < 30; i++) await page.mouse.wheel(0, -200);
-  const frames = Number(await canvas.getAttribute("data-frames"));
-  await expect
-    .poll(async () => Number(await canvas.getAttribute("data-frames")))
-    .toBeGreaterThan(frames + 2);
+
+  await waitForSceneUpdate(page);
   await expect.poll(() => gridPixels(page)).toBeGreaterThan(200);
   await page.screenshot({
     path: `/tmp/clik-grid-close-${info.project.name}.png`,
@@ -87,10 +86,8 @@ test("pièce impaire : ajout, déplacement et quart de tour occupent des cases e
   await page.mouse.move(x + 80, y + 35, { steps: 12 });
   await expect(canvas).toHaveAttribute("data-snap-kind", "grid");
   await page.mouse.wheel(0, -100);
-  const frames = Number(await canvas.getAttribute("data-frames"));
-  await expect
-    .poll(async () => Number(await canvas.getAttribute("data-frames")))
-    .toBeGreaterThan(frames + 2);
+
+  await waitForSceneUpdate(page);
   await page.screenshot({
     path: `/tmp/clik-grid-footprint-${info.project.name}.png`,
   });

@@ -1,3 +1,4 @@
+import { waitForSceneUpdate } from "./wait-for-scene";
 import { selectCameraView } from "./camera-view";
 import { dragLibrary } from "./drag-library";
 import { test, expect, type Page } from "@playwright/test";
@@ -34,10 +35,8 @@ test("dessous creux des briques, plaques et pentes", async ({ page }, info) => {
   await selectCameraView(page, "top");
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
   await expect(canvas).toHaveAttribute("data-rendered", "3");
-  const frames = Number(await canvas.getAttribute("data-frames"));
-  await expect
-    .poll(async () => Number(await canvas.getAttribute("data-frames")))
-    .toBeGreaterThan(frames + 2);
+
+  await waitForSceneUpdate(page);
   await page.screenshot({
     path: `/tmp/clik-undersides-${info.project.name}.png`,
   });
@@ -53,10 +52,8 @@ test("emboîtement brique, plaque et brique aux hauteurs de contact", async ({
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
   const canvas = page.locator("canvas").first();
   await expect(canvas).toHaveAttribute("data-rendered", "1");
-  const readyFrames = Number(await canvas.getAttribute("data-frames"));
-  await expect
-    .poll(async () => Number(await canvas.getAttribute("data-frames")))
-    .toBeGreaterThan(readyFrames + 2);
+
+  await waitForSceneUpdate(page);
   const box = (await canvas.boundingBox())!;
   const clientX = box.x + box.width / 2,
     clientY = box.y + box.height / 2;
@@ -74,10 +71,8 @@ test("emboîtement brique, plaque et brique aux hauteurs de contact", async ({
   await selectCameraView(page, "front");
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
   await expect(canvas).toHaveAttribute("data-rendered", "3");
-  const frames = Number(await canvas.getAttribute("data-frames"));
-  await expect
-    .poll(async () => Number(await canvas.getAttribute("data-frames")))
-    .toBeGreaterThan(frames + 2);
+
+  await waitForSceneUpdate(page);
   await page.screenshot({
     path: `/tmp/clik-fitted-stack-${info.project.name}.png`,
   });

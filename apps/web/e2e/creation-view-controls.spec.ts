@@ -1,3 +1,4 @@
+import { waitForSceneUpdate } from "./wait-for-scene";
 import { test, expect } from "@playwright/test";
 import { creatorsFixture } from "./fixtures/creators";
 
@@ -57,11 +58,9 @@ test("création publique : boutons de zoom et réinitialisation sur ordinateur e
         ),
       )
       .toBeLessThan(0.01);
-    const frames = Number(await canvas.getAttribute("data-frames"));
+
     await reset.tap();
-    await expect
-      .poll(async () => Number(await canvas.getAttribute("data-frames")))
-      .toBeGreaterThan(frames + 2);
+    await waitForSceneUpdate(page);
     await expect.poll(async () => (await pixels()).count).toBeGreaterThan(1000);
     const initial = await pixels();
     await zoomIn.tap();

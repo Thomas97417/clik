@@ -1,6 +1,6 @@
+import { waitForSceneUpdate } from "./wait-for-scene";
 import { selectCameraView } from "./camera-view";
 import { test, expect, type Page } from "@playwright/test";
-import { Box3, PerspectiveCamera, Vector3 } from "three";
 import { dragLibrary } from "./drag-library";
 
 async function prepare(page: Page, existing: boolean) {
@@ -43,35 +43,20 @@ async function prepare(page: Page, existing: boolean) {
   }, existing);
   await selectCameraView(page, "front");
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
-  const frame = Number(await canvas.getAttribute("data-frames"));
-  await expect
-    .poll(async () => Number(await canvas.getAttribute("data-frames")))
-    .toBeGreaterThan(frame + 3);
-  const rect = (await canvas.boundingBox())!;
-  const bounds = new Box3(
-    new Vector3(-1, 0, -1),
-    new Vector3(existing ? 4 : 1, 3.8, 1),
-  );
-  const center = bounds.getCenter(new Vector3());
-  const size = Math.max(
-    9,
-    bounds.getSize(new Vector3()).length() *
-      1.6 *
-      Math.max(1, rect.height / rect.width),
-  );
-  const camera = new PerspectiveCamera(40, rect.width / rect.height, 0.1, 1000);
-  camera.position
-    .copy(center)
-    .add(new Vector3(0, 0.12, 1).normalize().multiplyScalar(size));
-  camera.lookAt(center);
-  camera.updateMatrixWorld();
-  const screen = (x: number, y: number, z: number) => {
-    const p = new Vector3(x, y, z).project(camera);
-    return {
-      x: rect.x + ((p.x + 1) * rect.width) / 2,
-      y: rect.y + ((1 - p.y) * rect.height) / 2,
-    };
-  };
+
+  await waitForSceneUpdate(page);
+  const screen = async (x: number, y: number, z: number) =>
+    page.evaluate(
+      async (local) => {
+        const path = "/e2e/rendered-scene.ts";
+        const { projectPartPoints } = await import(/* @vite-ignore */ path);
+        return projectPartPoints([{ id: "lower", local }])[0] as {
+          x: number;
+          y: number;
+        };
+      },
+      [x, y, z] as [number, number, number],
+    );
   return { canvas, screen };
 }
 
@@ -81,14 +66,14 @@ for (const existing of [false, true]) {
   }, info) => {
     const { canvas, screen } = await prepare(page, existing);
     if (existing) {
-      const start = screen(3.5, 1.4, 0.5);
+      const start = await screen(3.5, 1.4, 0.5);
       await page.mouse.move(start.x, start.y);
       await page.mouse.down();
-      const end = screen(0.5, 2.6, 0.5);
+      const end = await screen(0.5, 2.6, 0.5);
       await page.mouse.move(end.x, end.y, { steps: 12 });
       await expect(canvas).toHaveAttribute("data-dragging", "true");
     } else {
-      const target = screen(0.5, 1.4, 0.5);
+      const target = await screen(0.5, 1.4, 0.5);
       await dragLibrary(page, "Brique 1 × 1", target.x, target.y);
     }
     await expect(canvas).toHaveAttribute("data-snap-kind", "attachment");

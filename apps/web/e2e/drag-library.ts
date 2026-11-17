@@ -1,3 +1,4 @@
+import { waitForSceneUpdate } from "./wait-for-scene";
 import { expect, type Page } from "@playwright/test";
 
 export async function dragLibrary(
@@ -12,9 +13,5 @@ export async function dragLibrary(
   await page.mouse.down();
   await page.mouse.move(x, y, { steps: 12 });
   await expect(card).toHaveClass(/(?:^|\s)active(?:\s|$)/);
-  const canvas = page.locator("canvas").first();
-  const frame = Number(await canvas.getAttribute("data-frames"));
-  await expect
-    .poll(async () => Number(await canvas.getAttribute("data-frames")))
-    .toBeGreaterThan(frame + 2);
+  await waitForSceneUpdate(page);
 }

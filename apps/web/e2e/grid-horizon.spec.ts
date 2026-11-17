@@ -1,3 +1,4 @@
+import { waitForSceneUpdate } from "./wait-for-scene";
 import { selectCameraView } from "./camera-view";
 import { test, expect } from "@playwright/test";
 
@@ -8,10 +9,8 @@ test("horizon sans moiré pendant l’inertie de la caméra", async ({
   const canvas = page.locator("canvas").first();
   await expect(canvas).toHaveAttribute("data-rendered", "0");
   await selectCameraView(page, "front");
-  const ready = Number(await canvas.getAttribute("data-frames"));
-  await expect
-    .poll(async () => Number(await canvas.getAttribute("data-frames")))
-    .toBeGreaterThan(ready + 3);
+
+  await waitForSceneUpdate(page);
   const box = (await canvas.boundingBox())!;
   await page.mouse.move(box.x + box.width / 2, box.y + box.height * 0.65);
   await page.mouse.down();

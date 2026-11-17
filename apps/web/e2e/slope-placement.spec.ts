@@ -1,3 +1,4 @@
+import { waitForSceneUpdate } from "./wait-for-scene";
 import { selectCameraView } from "./camera-view";
 import { dragLibrary } from "./drag-library";
 import { test, expect } from "@playwright/test";
@@ -35,10 +36,8 @@ for (const snap of [true, false]) {
     await page.mouse.down();
     await page.mouse.move(x + 15, y + 10, { steps: 8 });
     await expect(canvas).toHaveAttribute("data-dragging", "true");
-    const frame = Number(await canvas.getAttribute("data-frames"));
-    await expect
-      .poll(async () => Number(await canvas.getAttribute("data-frames")))
-      .toBeGreaterThan(frame + 2);
+
+    await waitForSceneUpdate(page);
     await page.mouse.up();
     const z = Number(
       await page.getByLabel("position Z", { exact: true }).inputValue(),

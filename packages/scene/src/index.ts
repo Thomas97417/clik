@@ -459,7 +459,12 @@ const nodeSchema = z.discriminatedUnion("kind", [
       type: z.enum(Object.keys(CATALOG) as [PartType, ...PartType[]]),
       color: colorSchema,
       // Optional so scenes made before construction playback remain readable.
-      createdAt: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(),
+      createdAt: z
+        .number()
+        .int()
+        .min(0)
+        .max(Number.MAX_SAFE_INTEGER)
+        .optional(),
     })
     .strict(),
   z.object({ ...base, kind: z.literal("group") }).strict(),
@@ -487,6 +492,7 @@ export function validateScene(value: unknown): SceneDocument {
     throw Error("Limite de 500 pièces atteinte.");
   const map = new Map(scene.nodes.map((n) => [n.id, n]));
   if (map.size !== scene.nodes.length) throw Error("Identifiants dupliqués.");
+  const validGroups = new Set<string>();
   for (const node of scene.nodes) {
     const seen = new Set([node.id]);
     let id = node.parentId;
@@ -494,9 +500,12 @@ export function validateScene(value: unknown): SceneDocument {
       const parent = map.get(id);
       if (!parent || parent.kind !== "group" || seen.has(id))
         throw Error("Hiérarchie invalide.");
+      if (validGroups.has(id)) break;
       seen.add(id);
       id = parent.parentId;
     }
+    for (const id of seen)
+      if (map.get(id)?.kind === "group") validGroups.add(id);
   }
   return scene;
 }
@@ -506,12 +515,93 @@ export const matrix = (n: Pick<SceneNode, "position" | "rotation">) =>
     new Quaternion().setFromEuler(new Euler(...n.rotation)),
     new Vector3(1, 1, 1),
   );
+const nodeIndices = new WeakMap<SceneNode[], Map<string, number>>();
+function findNode(scene: SceneDocument, id: string) {
+  const nodes = scene.nodes;
+  let indices = nodeIndices.get(nodes);
+  if (!indices) {
+    indices = new Map(nodes.map((node, index) => [node.id, index]));
+    nodeIndices.set(nodes, indices);
+  }
+  const index = indices.get(id);
+  if (index !== undefined && nodes[index]?.id === id) return nodes[index];
+  // Also support callers that append, replace or reorder nodes in place.
+  const found = nodes.findIndex((node) => node.id === id);
+  if (found < 0) return undefined;
+  indices.set(id, found);
+  return nodes[found];
+}
+
+type CachedWorld = {
+  parent: Matrix4 | null;
+  x: number;
+  y: number;
+  z: number;
+  rx: number;
+  ry: number;
+  rz: number;
+  value: Matrix4;
+};
+const worldMatrices = new WeakMap<SceneNode, CachedWorld>();
+function cachedWorldMatrix(scene: SceneDocument, id: string): Matrix4 {
+  const node = findNode(scene, id);
+  if (!node) return new Matrix4();
+  const parent = node.parentId ? cachedWorldMatrix(scene, node.parentId) : null;
+  return nodeWorldMatrix(node, parent);
+}
+function nodeWorldMatrix(node: SceneNode, parent: Matrix4 | null) {
+  const [x, y, z] = node.position,
+    [rx, ry, rz] = node.rotation;
+  const cached = worldMatrices.get(node);
+  if (
+    cached &&
+    cached.parent === parent &&
+    cached.x === x &&
+    cached.y === y &&
+    cached.z === z &&
+    cached.rx === rx &&
+    cached.ry === ry &&
+    cached.rz === rz
+  )
+    return cached.value;
+  const value = parent ? parent.clone().multiply(matrix(node)) : matrix(node);
+  worldMatrices.set(node, { parent, x, y, z, rx, ry, rz, value });
+  return value;
+}
+
 export function worldMatrix(scene: SceneDocument, id: string): Matrix4 {
-  const n = scene.nodes.find((n) => n.id === id);
-  if (!n) return new Matrix4();
-  return n.parentId
-    ? worldMatrix(scene, n.parentId).multiply(matrix(n))
-    : matrix(n);
+  // Callers invert/multiply the result. Never expose the cached matrix itself.
+  return cachedWorldMatrix(scene, id).clone();
+}
+
+/** Resolve each ancestor once within one rendering or collision pass. */
+export function sceneTransforms(scene: SceneDocument) {
+  const nodes = new Map(scene.nodes.map((node) => [node.id, node]));
+  const matrices = new Map<string, Matrix4>();
+  const flags = {
+    hidden: new Map<string, boolean>(),
+    locked: new Map<string, boolean>(),
+  };
+  const resolve = (id: string): Matrix4 => {
+    const cached = matrices.get(id);
+    if (cached) return cached;
+    const node = nodes.get(id);
+    const value = node
+      ? nodeWorldMatrix(node, node.parentId ? resolve(node.parentId) : null)
+      : new Matrix4();
+    matrices.set(id, value);
+    return value;
+  };
+  const flag = (id: string, key: "hidden" | "locked"): boolean => {
+    const cached = flags[key].get(id);
+    if (cached !== undefined) return cached;
+    const node = nodes.get(id);
+    const value =
+      !!node && (node[key] || (!!node.parentId && flag(node.parentId, key)));
+    flags[key].set(id, value);
+    return value;
+  };
+  return { worldMatrix: (id: string) => resolve(id).clone(), inherited: flag };
 }
 export function transform(m: Matrix4) {
   const p = new Vector3(),
@@ -526,8 +616,12 @@ export function inherited(
   id: string,
   key: "hidden" | "locked",
 ): boolean {
-  const n = scene.nodes.find((n) => n.id === id);
-  return !!n && (n[key] || (!!n.parentId && inherited(scene, n.parentId, key)));
+  let node = findNode(scene, id);
+  while (node) {
+    if (node[key]) return true;
+    node = node.parentId ? findNode(scene, node.parentId) : undefined;
+  }
+  return false;
 }
 export function roots(scene: SceneDocument, ids: string[]) {
   const selected = new Set(ids);
@@ -540,8 +634,13 @@ export function roots(scene: SceneDocument, ids: string[]) {
     .map((n) => n.id);
 }
 export function ancestors(scene: SceneDocument, id: string): string[] {
-  const n = scene.nodes.find((n) => n.id === id);
-  return n?.parentId ? [n.parentId, ...ancestors(scene, n.parentId)] : [];
+  const result: string[] = [];
+  let node = findNode(scene, id);
+  while (node?.parentId) {
+    result.push(node.parentId);
+    node = findNode(scene, node.parentId);
+  }
+  return result;
 }
 export function descendants(scene: SceneDocument, ids: string[]) {
   const selected = new Set(ids);
@@ -863,6 +962,7 @@ function anchors(n: Part, top: boolean) {
   return points;
 }
 function placementClearance(scene: SceneDocument, parts: Part[], grid = false) {
+  const transforms = sceneTransforms(scene);
   const ids = new Set(parts.map((p) => p.id));
   const obstacles = scene.nodes.filter(
     (n): n is Part => n.kind === "part" && !ids.has(n.id),
@@ -871,7 +971,7 @@ function placementClearance(scene: SceneDocument, parts: Part[], grid = false) {
   return collisionClearance(
     parts.map((p) => placementBody(CATALOG[p.type], matrix(p))),
     obstacles.map((p) =>
-      placementBody(CATALOG[p.type], worldMatrix(scene, p.id)),
+      placementBody(CATALOG[p.type], transforms.worldMatrix(p.id)),
     ),
     grid,
   );
@@ -893,9 +993,10 @@ function clearPartCollisions(
 
 /** Use actual rotated body shapes, rather than their enclosing boxes. */
 export function hasOverlappingParts(scene: SceneDocument) {
+  const transforms = sceneTransforms(scene);
   const parts = scene.nodes
     .filter((n): n is Part => n.kind === "part")
-    .map((p) => placementBody(CATALOG[p.type], worldMatrix(scene, p.id)));
+    .map((p) => placementBody(CATALOG[p.type], transforms.worldMatrix(p.id)));
   return parts.some((part, i) =>
     parts.slice(i + 1).some((other) => bodiesOverlap(part, other)),
   );
@@ -909,6 +1010,7 @@ export type SnapPoint = {
 
 /** Contacts of the final preview, including supports beyond the snap reference. */
 function attachmentPoints(scene: SceneDocument, parts: Part[]): SnapPoint[] {
+  const transforms = sceneTransforms(scene);
   const moving = new Set(parts.map((p) => p.id));
   const bottoms = parts.map((part) => {
     const m = matrix(part);
@@ -924,10 +1026,10 @@ function attachmentPoints(scene: SceneDocument, parts: Part[]): SnapPoint[] {
     if (
       target.kind !== "part" ||
       moving.has(target.id) ||
-      inherited(scene, target.id, "hidden")
+      transforms.inherited(target.id, "hidden")
     )
       continue;
-    const tm = worldMatrix(scene, target.id);
+    const tm = transforms.worldMatrix(target.id);
     const normal = new Vector3(0, 1, 0).transformDirection(tm);
     const compatible = bottoms.filter((b) => b.normal.dot(normal) > 1 - 1e-6);
     if (!compatible.length) continue;
@@ -970,6 +1072,7 @@ export function snapCandidate(
       points: [],
       rotation: [0, 0, 0],
     };
+  const transforms = sceneTransforms(scene);
   const m = matrix(part),
     bottom = anchors(part, false).map((p) => p.applyMatrix4(m));
   let best = 0.7,
@@ -979,10 +1082,10 @@ export function snapCandidate(
     if (
       target.kind !== "part" ||
       target.id === part.id ||
-      inherited(scene, target.id, "hidden")
+      transforms.inherited(target.id, "hidden")
     )
       continue;
-    const tm = worldMatrix(scene, target.id),
+    const tm = transforms.worldMatrix(target.id),
       tq = new Quaternion().setFromRotationMatrix(tm),
       pq = new Quaternion().setFromEuler(new Euler(...part.rotation));
     const normal = new Vector3(0, 1, 0).applyQuaternion(tq),

@@ -1,6 +1,36 @@
 import { selectCameraView } from "./camera-view";
 import { test, expect } from "@playwright/test";
 import { writeFile } from "node:fs/promises";
+import { waitForSceneUpdate } from "./wait-for-scene";
+
+test("500 pièces et 100 groupes imbriqués : aperçus à 30 images par seconde", async ({
+  page,
+}, info) => {
+  await page.goto("/editor?draft=hierarchy-performance");
+  await expect(
+    page.getByLabel("Projet et sauvegarde").getByRole("status"),
+  ).toContainText("Enregistré");
+  await page.evaluate(async () => {
+    const path = "/e2e/performance-scene.ts";
+    const { loadHierarchyBenchmark } = await import(/* @vite-ignore */ path);
+    loadHierarchyBenchmark();
+  });
+  const canvas = page.locator(".viewport canvas");
+  await expect(canvas).toHaveAttribute("data-rendered", "600");
+  await waitForSceneUpdate(page);
+  const result = await page.evaluate(async () => {
+    const path = "/e2e/performance-scene.ts";
+    const { measureHierarchyPreviews } = await import(/* @vite-ignore */ path);
+    return measureHierarchyPreviews();
+  });
+  await writeFile(
+    `/tmp/clik-hierarchy-performance-${info.project.name}.json`,
+    JSON.stringify(result, null, 2),
+  );
+  expect(result.fps).toBeGreaterThanOrEqual(30);
+  await expect(canvas).toHaveAttribute("data-rendered", "600");
+});
+
 test("500 pièces : déplacement avec aperçu à 30 images par seconde", async ({
   page,
 }, info) => {
@@ -65,23 +95,28 @@ test("500 pièces : déplacement avec aperçu à 30 images par seconde", async (
   await page.mouse.move(box.x + box.width / 2 + 10, box.y + box.height / 2);
   await expect(canvas).toHaveAttribute("data-dragging", "true");
   await expect(canvas).toHaveAttribute("data-snap-kind", /grid|attachment/);
-  const measurement = page.evaluate(async () => {
+  const start = await page.evaluate(() => {
     const canvas = document.querySelector("canvas")!;
-    const start = performance.now(),
-      frames = Number(canvas.dataset.frames);
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    return {
-      frames: Number(canvas.dataset.frames) - frames,
-      durationMs: performance.now() - start,
-    };
+    return { time: performance.now(), frames: Number(canvas.dataset.frames) };
   });
-
-  await page.mouse.move(
-    box.x + box.width / 2 + 160,
-    box.y + box.height / 2 + 60,
-    { steps: 90 },
-  );
-  const result = await measurement;
+  // Count only active movement; an idle demand-rendered canvas should stop.
+  let result = { frames: 0, durationMs: 0 };
+  for (let i = 0; result.durationMs < 3000; i++) {
+    await page.mouse.move(
+      box.x + box.width / 2 + (i % 2 ? 30 : 160),
+      box.y + box.height / 2 + (i % 2 ? 10 : 60),
+      { steps: 30 },
+    );
+    result = await page.evaluate(
+      (start) => ({
+        frames:
+          Number(document.querySelector("canvas")!.dataset.frames) -
+          start.frames,
+        durationMs: performance.now() - start.time,
+      }),
+      start,
+    );
+  }
   await expect(canvas).toHaveAttribute("data-dragging", "true");
   await page.mouse.up();
   const fps = result.frames / (result.durationMs / 1000);

@@ -230,6 +230,19 @@ bunx --bun convex env set --prod BETTER_AUTH_URL 'https://clik.build'
 bunx --bun convex env set --prod EMAIL_FROM 'Clik <bonjour@clik.build>'
 ```
 
+### Mise à jour des collections optimisées
+
+Déployer le schéma et les fonctions Convex avant le frontend : celui-ci utilise
+`projects.collectionReady` et les nouveaux arguments de `projects.list`.
+Les arguments restent facultatifs pour les clients déjà ouverts.
+
+Le cron `project collection migration` initialise `projects.isPublished` par
+lots de 12, puis marque `collectionMigration.complete` à `true`. Il démarre
+automatiquement après le déploiement et reprend au curseur enregistré. Le filtre
+historique reste disponible pendant cette migration ; les comptes déjà migrés
+utilisent immédiatement l’index `by_owner_published`. Aucune opération manuelle
+sur les scènes ou les publications n’est nécessaire.
+
 ### Récupérer les deux URL de production
 
 Dans les paramètres du déploiement Convex **Production**, récupérer :
