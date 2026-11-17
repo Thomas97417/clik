@@ -1,5 +1,5 @@
 import { useId, type CSSProperties } from "react";
-import { Pause, PencilLine, Play, SkipBack } from "lucide-react";
+import { Pause, Play, SkipBack } from "lucide-react";
 import type { ConstructionPlayback } from "@/lib/clik/use-construction-playback";
 import { playbackTime } from "@/lib/clik/construction-timeline";
 import { cn } from "@/lib/utils";
@@ -127,20 +127,6 @@ export default function ConstructionTimeline({
       >
         {speedLabel(playback.speed)}
       </button>
-      {editor && (
-        <button
-          type="button"
-          className={cn(controlClass, "enabled:text-[#356ae6]")}
-          aria-label="Revenir à l’édition"
-          title={
-            playback.active ? "Revenir à l’édition (Échap)" : "Mode édition"
-          }
-          disabled={!playback.active}
-          onClick={playback.stop}
-        >
-          <PencilLine size={14} aria-hidden="true" />
-        </button>
-      )}
       <span className="construction-progress sr-only">
         {count} / {timeline.total} pièces
       </span>
@@ -148,6 +134,7 @@ export default function ConstructionTimeline({
         Les pièces apparaissent dans leur ordre de pose, à leur position
         actuelle. Les longues pauses sont raccourcies.
         {timeline.baseline > 0 ? " · pièces antérieures déjà présentes" : ""}
+        {editor && " Appuyez sur Échap pour revenir à l’édition."}
       </p>
     </div>
   );

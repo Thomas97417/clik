@@ -6,13 +6,18 @@ test("défi : sélection des 17 pièces par cadre et sauvegarde d’une couleur 
   page,
 }) => {
   const { challengeFixture } = await import("./fixtures/challenges");
-  await challengeFixture(page, { generatorVersion: 1 });
+  const { stock } = await challengeFixture(page, { generatorVersion: 1 });
   await page.goto("/editor/project");
   const brick = page.locator('.piece-card[aria-label="Brique 1 × 1"]');
   for (let i = 0; i < 16; i++) await brick.click();
   await page.getByRole("button", { name: "Brique 1 × 2", exact: true }).click();
   const canvas = page.locator("canvas").first();
   await expect(canvas).toHaveAttribute("data-rendered", "17");
+  const counter = page.getByRole("meter", {
+    name: "Pièces dans la construction",
+  });
+  const limit = stock.reduce((total, item) => total + item.quantity, 0);
+  await expect(counter).toHaveText(`17 / ${limit} pièces`);
   await selectCameraView(page, "top");
   await page
     .getByRole("button", { name: "Tout sélectionner", exact: true })
