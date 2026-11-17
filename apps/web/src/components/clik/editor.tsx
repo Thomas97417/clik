@@ -1072,8 +1072,8 @@ export default function Editor({
             }
           >
             {(playback) => (
-              <section className="viewport overflow-hidden relative bg-[#edf1f7] min-w-0 flex flex-col">
-                <div className="relative min-h-0 flex-1">
+              <section className="viewport relative grid min-w-0 grid-rows-[minmax(0,1fr)_2.5rem] overflow-hidden bg-[#edf1f7]">
+                <div className="relative min-h-0">
                   <div className="scene-toolbar p-1.25 gap-0.75 border border-solid border-white absolute top-5 left-1/2 transform-[translateX(-50%)] z-3 flex items-center bg-[#ffffffed] [box-shadow:0_4px_15px_#53668114] rounded-[10px]">
                     <div className="tool-group flex border-r border-solid border-r-[#e7ecf2] pr-1 mr-0.5">
                       <button
@@ -1369,7 +1369,7 @@ export default function Editor({
                       publishing ||
                       tourActive
                     }
-                    className="border-t border-[#e0e7f1]"
+                    className="h-full border-t border-[#e0e7f1]"
                   />
                 )}
               </section>

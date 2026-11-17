@@ -59,6 +59,34 @@ async function setSpeed(timeline: Locator, speed: string) {
   await expect(button).toHaveText(speed);
 }
 
+test("la première pièce et son annulation gardent le canvas et ses commandes en place", async ({
+  page,
+}) => {
+  await page.goto("/editor?draft=timeline-layout");
+  const canvas = page.locator(".viewport canvas");
+  const controls = page.locator(".viewport-bottom");
+  const timeline = page.getByRole("group", {
+    name: "Lecture de la construction",
+  });
+  await expect(canvas).toHaveAttribute("data-rendered", "0");
+  await expect(timeline).toBeHidden();
+  const bounds = () =>
+    Promise.all([canvas.boundingBox(), controls.boundingBox()]);
+  const initial = await bounds();
+
+  await page.getByRole("button", { name: "Brique 1 × 1", exact: true }).click();
+  await expect(canvas).toHaveAttribute("data-rendered", "1");
+  await expect(timeline).toBeVisible();
+  expect(await bounds()).toEqual(initial);
+
+  await page
+    .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
+    .click();
+  await expect(canvas).toHaveAttribute("data-rendered", "0");
+  await expect(timeline).toBeHidden();
+  expect(await bounds()).toEqual(initial);
+});
+
 test("atelier : dates persistantes, lecture, pause, déplacement souris et retour à l’édition sans modification", async ({
   page,
 }, info) => {
