@@ -1,0 +1,403 @@
+{
+  "measuredAt": "2026-11-17T12:43:07.113Z",
+  "baselineCommit": "acd70d0",
+  "environment": {
+    "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M2 Pro, Unspecified Version)",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "frontend": "Vite development",
+    "browser": "Chromium headless",
+    "backend": "HTTP simulé / convex-test",
+    "productionMeasured": false
+  },
+  "collections": {
+    "pagination": {
+      "before": {
+        "privateProjects": 120,
+        "publishedProjects": 1,
+        "pagesQueried": 11,
+        "cursors": [
+          null,
+          "12",
+          "24",
+          "36",
+          "48",
+          "60",
+          "72",
+          "84",
+          "96",
+          "108",
+          "120"
+        ],
+        "elapsedMs": 829.8134580000001,
+        "cards": [
+          "Le phare bleu"
+        ]
+      },
+      "after": {
+        "privateProjects": 120,
+        "publishedProjects": 1,
+        "pagesQueried": 2,
+        "cursors": [
+          null,
+          null
+        ],
+        "elapsedMs": 586.3130000000001,
+        "cards": [
+          "Le phare bleu"
+        ]
+      },
+      "scope": "Inclut la page Toutes déjà affichée, puis une recherche de publication ; après correction, une seule page filtrée supplémentaire."
+    },
+    "payload": {
+      "projects": 12,
+      "partsPerProject": 500,
+      "beforeBytes": 1224421,
+      "afterBytes": 2413,
+      "reductionPercent": 99.80292726112995,
+      "scope": "JSON de la liste sans compression ; scènes et images chargées séparément pour les aperçus visibles.",
+      "comparison": "Mêmes données dans convex-test, réponse complète compatible avec les anciens clients comparée à summaryOnly=true."
+    }
+  },
+  "hierarchy": {
+    "method": "Même script avant/après : 90 appels preview à raison d’un par requestAnimationFrame, 500 briques 2×4, une pièce déplacée, mêmes positions et mêmes paramètres de rendu. Les niveaux 50 et 100 sont des cas de charge extrêmes acceptés par le format.",
+    "results": [
+      {
+        "parts": 500,
+        "groupDepth": 0,
+        "before": {
+          "parts": 500,
+          "depth": 0,
+          "frames": 90,
+          "durationMs": 2129.399999976158,
+          "fps": 42.265426881284725,
+          "previewMedianMs": 5.100000023841858,
+          "previewP95Ms": 10.600000023841858,
+          "previewMaxMs": 16.69999998807907,
+          "createPreviewMedianMs": 2.200000047683716
+        },
+        "after": {
+          "parts": 500,
+          "depth": 0,
+          "frames": 89,
+          "durationMs": 1825.5,
+          "fps": 48.753766091481786,
+          "previewMedianMs": 2.199999988079071,
+          "previewP95Ms": 3,
+          "previewMaxMs": 6.099999964237213,
+          "createPreviewMedianMs": 0.800000011920929
+        },
+        "previewSpeedup": 2.32,
+        "fpsSpeedup": 1.15
+      },
+      {
+        "parts": 500,
+        "groupDepth": 10,
+        "before": {
+          "parts": 500,
+          "depth": 10,
+          "frames": 90,
+          "durationMs": 2740.899999976158,
+          "fps": 32.835929804364575,
+          "previewMedianMs": 10.900000035762787,
+          "previewP95Ms": 12.699999988079071,
+          "previewMaxMs": 21.899999976158142,
+          "createPreviewMedianMs": 2.600000023841858
+        },
+        "after": {
+          "parts": 500,
+          "depth": 10,
+          "frames": 89,
+          "durationMs": 2255.599999964237,
+          "fps": 39.45735059470256,
+          "previewMedianMs": 2.399999976158142,
+          "previewP95Ms": 2.699999988079071,
+          "previewMaxMs": 3.700000047683716,
+          "createPreviewMedianMs": 0.7000000476837158
+        },
+        "previewSpeedup": 4.54,
+        "fpsSpeedup": 1.2
+      },
+      {
+        "parts": 500,
+        "groupDepth": 50,
+        "before": {
+          "parts": 500,
+          "depth": 50,
+          "frames": 90,
+          "durationMs": 7633.399999976158,
+          "fps": 11.790290041171838,
+          "previewMedianMs": 43.5,
+          "previewP95Ms": 63.200000047683716,
+          "previewMaxMs": 68.89999997615814,
+          "createPreviewMedianMs": 9.699999988079071
+        },
+        "after": {
+          "parts": 500,
+          "depth": 50,
+          "frames": 89,
+          "durationMs": 2139.800000011921,
+          "fps": 41.59267221212458,
+          "previewMedianMs": 2.5,
+          "previewP95Ms": 2.800000011920929,
+          "previewMaxMs": 5.800000011920929,
+          "createPreviewMedianMs": 0.699999988079071
+        },
+        "previewSpeedup": 17.4,
+        "fpsSpeedup": 3.53
+      },
+      {
+        "parts": 500,
+        "groupDepth": 100,
+        "before": {
+          "parts": 500,
+          "depth": 100,
+          "frames": 90,
+          "durationMs": 16034.399999976158,
+          "fps": 5.612932195787421,
+          "previewMedianMs": 106.89999997615814,
+          "previewP95Ms": 129.80000001192093,
+          "previewMaxMs": 132.19999998807907,
+          "createPreviewMedianMs": 23.5
+        },
+        "after": {
+          "parts": 500,
+          "depth": 100,
+          "frames": 89,
+          "durationMs": 2408.199999988079,
+          "fps": 36.957063367012935,
+          "previewMedianMs": 2.5,
+          "previewP95Ms": 2.900000035762787,
+          "previewMaxMs": 5.399999976158142,
+          "createPreviewMedianMs": 0.699999988079071
+        },
+        "previewSpeedup": 42.76,
+        "fpsSpeedup": 6.58
+      }
+    ]
+  },
+  "idle": {
+    "method": "Échantillon de trois secondes sans interaction dans le même éditeur vide. Le temps CPU est une mesure courte du thread principal, pas une mesure de batterie.",
+    "before": {
+      "frames": 181,
+      "durationMs": 3004.900000035763,
+      "taskCpuMs": 278.925,
+      "scriptCpuMs": 102.67999999999999,
+      "fps": 60.234949581631945
+    },
+    "after": {
+      "frames": 0,
+      "durationMs": 3002.199999988079,
+      "taskCpuMs": 2.943,
+      "scriptCpuMs": 0.015000000000000001,
+      "fps": 0
+    }
+  },
+  "renderer500Parts": {
+    "before": [
+      {
+        "type": "brick-2x4",
+        "parts": 500,
+        "sceneBytes": 86802,
+        "trianglesPerPiece": 1676,
+        "normal": {
+          "frames": 180,
+          "durationMs": 3000.600000023842,
+          "fps": 59.98800239904345,
+          "taskCpuMs": 320.34799999999984
+        },
+        "demand": {
+          "frames": 0,
+          "durationMs": 3002.300000011921,
+          "fps": 0,
+          "taskCpuMs": 1.6979999999999773
+        }
+      },
+      {
+        "type": "plate-8x8",
+        "parts": 500,
+        "sceneBytes": 87302,
+        "trianglesPerPiece": 12548,
+        "normal": {
+          "frames": 180,
+          "durationMs": 3000.699999988079,
+          "fps": 59.98600326614293,
+          "taskCpuMs": 400.3700000000001
+        },
+        "demand": {
+          "frames": 1,
+          "durationMs": 3001.5,
+          "fps": 0.33316674995835416,
+          "taskCpuMs": 288.0750000000001
+        }
+      }
+    ],
+    "after": [
+      {
+        "type": "brick-2x4",
+        "parts": 500,
+        "sceneBytes": 86802,
+        "trianglesPerPiece": 1676,
+        "normal": {
+          "frames": 1,
+          "durationMs": 3251.899999976158,
+          "fps": 0.30751253113789834,
+          "taskCpuMs": 297.80799999999994
+        },
+        "demand": {
+          "frames": 0,
+          "durationMs": 3001.300000011921,
+          "fps": 0,
+          "taskCpuMs": 2.325999999999828
+        }
+      },
+      {
+        "type": "plate-8x8",
+        "parts": 500,
+        "sceneBytes": 87302,
+        "trianglesPerPiece": 12548,
+        "normal": {
+          "frames": 0,
+          "durationMs": 3001.100000023842,
+          "fps": 0,
+          "taskCpuMs": 2.044000000000157
+        },
+        "demand": {
+          "frames": 1,
+          "durationMs": 3001.599999964237,
+          "fps": 0.33315565032379885,
+          "taskCpuMs": 293.51000000000016
+        }
+      }
+    ],
+    "note": "Des tâches de fond et le GC affectent les courts échantillons CPU ; retenir surtout le nombre d’images effectivement rendues au repos."
+  },
+  "validation": {
+    "unitTests": 1145,
+    "unitFiles": 41,
+    "browserTests": {
+      "uniqueScenarios": 285,
+      "byBrowser": {
+        "chromium": {
+          "passed": 95,
+          "total": 95
+        },
+        "firefox": {
+          "passed": 95,
+          "total": 95
+        },
+        "webkit": {
+          "passed": 95,
+          "total": 95
+        }
+      },
+      "unresolved": [],
+      "runs": [
+        {
+          "report": "regression-results.json",
+          "startTime": "2026-11-17T12:47:12.265Z",
+          "duration": 1199424.747,
+          "expected": 273,
+          "skipped": 0,
+          "unexpected": 12,
+          "flaky": 0
+        },
+        {
+          "report": "repair-results.json",
+          "startTime": "2026-11-17T13:00:47.003Z",
+          "duration": 160116.54799999998,
+          "expected": 17,
+          "skipped": 0,
+          "unexpected": 4,
+          "flaky": 0
+        },
+        {
+          "report": "final-results.json",
+          "startTime": "2026-11-17T13:08:39.287Z",
+          "duration": 156644.975,
+          "expected": 33,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        }
+      ],
+      "note": "Validation réunie depuis la suite principale et des relances ciblées après recalibrage des assertions de recette. Pas une suite exhaustive du dépôt.",
+      "passedUniqueScenarios": 285
+    },
+    "typescript": "passed",
+    "build": "passed",
+    "testAdjustments": [
+      "Attentes de scheduler compatibles avec un canvas immobile.",
+      "Nom actuel de la fenêtre des raccourcis.",
+      "Largeur utile du conteneur, hors scrollbar.",
+      "Points de prise et de dépôt projetés avec la caméra réelle.",
+      "Zone de pixels située dans la face opaque et compatible avec la teinte de sélection."
+    ]
+  },
+  "activePointerDrag": {
+    "chromium": {
+      "browser": "chromium",
+      "pieces": 500,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fps": 59.82853265853746,
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M2 Pro, Unspecified Version)",
+      "frames": 194,
+      "durationMs": 3242.600000023842
+    },
+    "firefox": {
+      "browser": "firefox",
+      "pieces": 500,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fps": 70.01795332136444,
+      "gpu": "Apple M1, or similar",
+      "frames": 234,
+      "durationMs": 3342
+    },
+    "webkit": {
+      "browser": "webkit",
+      "pieces": 500,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fps": 59.65257292690921,
+      "gpu": "Apple GPU",
+      "frames": 182,
+      "durationMs": 3051
+    }
+  },
+  "hierarchyRegression": {
+    "chromium": {
+      "frames": 89,
+      "durationMs": 1536.199999988079,
+      "fps": 57.93516469254696,
+      "previewMedianMs": 2.800000011920929
+    },
+    "firefox": {
+      "frames": 89,
+      "durationMs": 1759,
+      "fps": 50.59693007390563,
+      "previewMedianMs": 3
+    },
+    "webkit": {
+      "frames": 89,
+      "durationMs": 1697,
+      "fps": 52.44549204478491,
+      "previewMedianMs": 3
+    }
+  },
+  "activePointerDragMethod": "Au moins trois secondes de déplacement continu, hors repos. Les anciennes mesures à fenêtre fixe avec une partie immobile ne sont pas utilisées pour une comparaison de FPS de ce scénario.",
+  "deployment": {
+    "backendFirst": true,
+    "automaticCollectionMigration": true,
+    "deployed": false
+  }
+}

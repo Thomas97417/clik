@@ -95,6 +95,9 @@ test("masquer la grille conserve l’aimantation et l’historique des pièces",
   await page.goto("/editor");
   const canvas = page.locator("canvas").first();
   await expect(canvas).toHaveAttribute("data-rendered", "0");
+  await page
+    .getByRole("button", { name: "Fermer le message de bienvenue" })
+    .click();
   const grid = page.getByRole("button", { name: "Grille", exact: true });
   await expect(grid).toHaveAttribute("aria-pressed", "true");
   await expect.poll(async () => (await pixels(page)).grid).toBeGreaterThan(100);

@@ -1,3 +1,4 @@
+import { waitForSceneUpdate } from "./wait-for-scene";
 import { selectCameraView } from "./camera-view";
 import { dragLibrary } from "./drag-library";
 import { test, expect, type Page } from "@playwright/test";
@@ -6,11 +7,7 @@ import { worldMatrix } from "@clik/scene";
 import type { PartPoint } from "./rendered-scene";
 
 async function renderedFrame(page: Page) {
-  const canvas = page.locator("canvas").first();
-  const frames = Number(await canvas.getAttribute("data-frames"));
-  await expect
-    .poll(async () => Number(await canvas.getAttribute("data-frames")))
-    .toBeGreaterThan(frames + 2);
+  await waitForSceneUpdate(page);
 }
 
 async function partPoints(page: Page, points: PartPoint[]) {
@@ -111,10 +108,8 @@ test("annulation par Échap, pointercancel et perte de focus ; dépôt hors canv
   await page.mouse.move(box.x + box.width + 30, y, { steps: 15 });
   // Release after a rendered preview: WebKit can dispatch all synthetic moves
   // before the next animation frame, whereas the gesture deposits that preview.
-  const rendered = Number(await canvas.getAttribute("data-frames"));
-  await expect
-    .poll(async () => Number(await canvas.getAttribute("data-frames")))
-    .toBeGreaterThan(rendered + 2);
+
+  await waitForSceneUpdate(page);
   await page.mouse.up();
   expect(await position(page)).not.toEqual(before);
   await expect(canvas).not.toHaveAttribute("data-dragging", "true");
@@ -334,10 +329,8 @@ test("glisser un enfant conserve la sélection du groupe ; bibliothèque avec ap
   );
   // Release after a rendered preview: WebKit can dispatch all synthetic moves
   // before the next animation frame, whereas the gesture deposits that preview.
-  const rendered = Number(await canvas.getAttribute("data-frames"));
-  await expect
-    .poll(async () => Number(await canvas.getAttribute("data-frames")))
-    .toBeGreaterThan(rendered + 2);
+
+  await waitForSceneUpdate(page);
   await page.mouse.up();
   const moved = await position(page);
   expect(moved).not.toEqual(["0", "0", "0"]);
@@ -533,12 +526,8 @@ test("le repère d’orientation conserve la sélection et l’historique", asyn
 });
 
 async function wheelTurn(page: Page, deltaY: number) {
-  const canvas = page.locator("canvas").first();
-  const frames = Number(await canvas.getAttribute("data-frames"));
   await page.mouse.wheel(0, deltaY);
-  await expect
-    .poll(async () => Number(await canvas.getAttribute("data-frames")))
-    .toBeGreaterThan(frames + 1);
+  await waitForSceneUpdate(page);
 }
 
 test("molette pendant la prise : +90°, −90° et un seul historique", async ({

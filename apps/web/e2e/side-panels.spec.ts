@@ -1,3 +1,4 @@
+import { waitForSceneUpdate } from "./wait-for-scene";
 import { selectCameraView } from "./camera-view";
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { selectPieceFamily } from "./piece-family";
@@ -69,8 +70,12 @@ test("panneaux indépendants, scène agrandie et état conservé à la réouvert
   for (const width of [1600, 900, 1440]) {
     await page.setViewportSize({ width, height: 1000 });
     await expect
-      .poll(async () => Math.round((await canvas.boundingBox())!.width))
-      .toBe(width);
+      .poll(
+        async () =>
+          Math.round((await canvas.boundingBox())!.width) -
+          Math.round(await panelWidth(page.locator(".editor-body"))),
+      )
+      .toBe(0);
     await expect(openLibrary).toBeInViewport();
     await expect(openInspector).toBeInViewport();
   }
@@ -89,10 +94,8 @@ test("panneaux indépendants, scène agrandie et état conservé à la réouvert
     { steps: 12 },
   );
   await expect(canvas).toHaveAttribute("data-dragging", "true");
-  const frame = Number(await canvas.getAttribute("data-frames"));
-  await expect
-    .poll(async () => Number(await canvas.getAttribute("data-frames")))
-    .toBeGreaterThan(frame + 2);
+
+  await waitForSceneUpdate(page);
   await page.mouse.up();
   await openInspector.focus();
   await openInspector.press("Enter");
@@ -169,7 +172,13 @@ test("les bordures redimensionnent chaque panneau et conservent les largeurs apr
     })
     .click();
   await expect(right).toHaveCount(0);
-  await expect.poll(() => panelWidth(canvas)).toBe(1440);
+  await expect
+    .poll(
+      async () =>
+        (await panelWidth(canvas)) -
+        (await panelWidth(page.locator(".editor-body"))),
+    )
+    .toBe(0);
   await page
     .getByRole("button", { name: "Déplier la bibliothèque", exact: true })
     .click();
@@ -191,9 +200,12 @@ test("les bordures redimensionnent chaque panneau et conservent les largeurs apr
           await panelWidth(canvas),
           await panelWidth(inspector),
         ];
-        return Math.round(sizes.reduce((sum, size) => sum + size, 0));
+        return (
+          Math.round(sizes.reduce((sum, size) => sum + size, 0)) -
+          Math.round(await panelWidth(page.locator(".editor-body")))
+        );
       })
-      .toBe(width);
+      .toBe(0);
     expect(await panelWidth(library)).toBeGreaterThanOrEqual(
       Number(await left.getAttribute("aria-valuemin")),
     );

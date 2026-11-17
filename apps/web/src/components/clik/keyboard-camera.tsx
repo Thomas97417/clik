@@ -15,10 +15,11 @@ export function KeyboardCamera({
   controls: RefObject<ComponentRef<typeof OrbitControls> | null>;
   enabled: boolean;
 }) {
-  const { camera } = useThree();
+  const { camera, invalidate } = useThree();
   const pressed = useRef(
     new Map<string, NonNullable<ReturnType<typeof cameraNavigationKey>>>(),
   );
+  const lastMovement = useRef(0);
   const clear = () => pressed.current.clear();
   const blocked = () => {
     const state = useEditor.getState();
@@ -46,10 +47,13 @@ export function KeyboardCamera({
     orbit.target.add(delta);
     orbit.update();
   };
-  useFrame((_, seconds) => {
+  useFrame(() => {
     if (!pressed.current.size) return;
     if (blocked()) return clear();
-    move(seconds);
+    const now = performance.now();
+    move((now - lastMovement.current) / 1000);
+    lastMovement.current = now;
+    invalidate();
   });
   useEffect(() => {
     if (!enabled) return clear();
@@ -81,6 +85,8 @@ export function KeyboardCamera({
       const key = event.code || event.key.toLowerCase();
       if (event.repeat || pressed.current.has(key)) return;
       if (!pressed.current.size) {
+        // The R3F clock also includes idle time in demand mode.
+        lastMovement.current = performance.now();
         // Remove residual mouse damping before starting a straight translation.
         const orbit = controls.current!;
         const damping = orbit.enableDamping;
@@ -91,6 +97,7 @@ export function KeyboardCamera({
       pressed.current.set(key, input);
       // A quick tap must move the camera even if released before the next frame.
       move(1 / 60);
+      invalidate();
     };
     const up = (event: KeyboardEvent) =>
       pressed.current.delete(event.code || event.key.toLowerCase());
@@ -123,6 +130,6 @@ export function KeyboardCamera({
       window.removeEventListener("focusin", clear);
       document.removeEventListener("visibilitychange", clear);
     };
-  }, [camera, controls, enabled]);
+  }, [camera, controls, enabled, invalidate]);
   return null;
 }

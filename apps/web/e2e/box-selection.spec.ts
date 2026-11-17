@@ -1,3 +1,4 @@
+import { waitForSceneUpdate } from "./wait-for-scene";
 import { expect, test, type Page } from "@playwright/test";
 import { emptyScene, group, makePart } from "@clik/scene";
 import { selectCameraView } from "./camera-view";
@@ -225,13 +226,10 @@ test("le groupe est sélectionné dès que toutes ses pièces le sont, par clics
   await expect(row(right.id)).not.toHaveClass(selected);
   await expect(page.locator(".tree-row.selected")).toHaveCount(1);
 
-  const frames = Number(await canvas.getAttribute("data-frames"));
   await page
     .getByRole("button", { name: "Cadrer la sélection (F)", exact: true })
     .click();
-  await expect
-    .poll(async () => Number(await canvas.getAttribute("data-frames")))
-    .toBeGreaterThan(frames + 2);
+  await waitForSceneUpdate(page);
   await canvas.click({
     position: { x: box.width / 2, y: box.height / 2 },
     modifiers: ["Shift"],

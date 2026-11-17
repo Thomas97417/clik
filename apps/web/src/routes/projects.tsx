@@ -1,7 +1,7 @@
 import { seo } from "@/lib/seo/meta";
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useConvexAuth, usePaginatedQuery } from "convex/react";
+import { useConvexAuth, usePaginatedQuery, useQuery } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import {
   ArrowRight,
@@ -55,9 +55,19 @@ function Projects({ pending = false }: { pending?: boolean } = {}) {
   >("all");
   const [publishedTarget, setPublishedTarget] = useState({ sort, count: 12 });
   const { isAuthenticated, isLoading } = useConvexAuth();
+  const collectionReady = useQuery(
+    api.projects.collectionReady,
+    !pending && isAuthenticated ? {} : "skip",
+  );
   const { results, status, loadMore } = usePaginatedQuery(
     api.projects.list,
-    !pending && isAuthenticated ? { sort } : "skip",
+    !pending && isAuthenticated && filter !== "local"
+      ? {
+          sort,
+          summaryOnly: true,
+          publishedOnly: filter === "published" && collectionReady === true,
+        }
+      : "skip",
     { initialNumItems: 12 },
   );
   const navigate = useNavigate();
@@ -109,11 +119,6 @@ function Projects({ pending = false }: { pending?: boolean } = {}) {
           projectId: p._id,
           location: "online",
           cacheKey: `project:${p._id}:${p.revision}`,
-          provenance: {
-            origin: p.origin,
-            originReceiptId: p.originReceiptId,
-            imports: p.imports ?? [],
-          },
         }))
       : [];
   const creations = mergeCreations(
@@ -130,6 +135,7 @@ function Projects({ pending = false }: { pending?: boolean } = {}) {
     publishedTarget.sort === sort ? publishedTarget.count : 12;
   const loadingPublished =
     filter === "published" &&
+    collectionReady !== undefined &&
     isAuthenticated &&
     creations.length < targetCount &&
     (status === "CanLoadMore" || status === "LoadingMore");

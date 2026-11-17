@@ -1,3 +1,4 @@
+import { waitForSceneUpdate } from "./wait-for-scene";
 import { expect, test, type Page } from "@playwright/test";
 import { projectsFixture } from "./fixtures/projects";
 import { selectCameraView } from "./camera-view";
@@ -138,12 +139,10 @@ test("couleurs : presets, teinte personnalisée, sélection et sauvegarde locale
   await first.locator(".tree-name").click();
   await selectCameraView(page, "top");
   const canvas = page.locator("canvas").first();
-  const frame = Number(await canvas.getAttribute("data-frames"));
+
   await page.getByRole("button", { name: "Cadrer la sélection (F)" }).click();
   await expect(canvas).toHaveAttribute("data-rendered", "2");
-  await expect
-    .poll(async () => Number(await canvas.getAttribute("data-frames")))
-    .toBeGreaterThan(frame);
+  await waitForSceneUpdate(page);
   await second.locator(".tree-name").click();
   const canvasBox = (await canvas.boundingBox())!;
   await canvas.click({

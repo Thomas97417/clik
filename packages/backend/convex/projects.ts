@@ -152,13 +152,22 @@ export const list = query({
   args: {
     paginationOpts: paginationOptsValidator,
     sort: v.optional(v.union(v.literal("recent"), v.literal("oldest"))),
+    publishedOnly: v.optional(v.boolean()),
+    summaryOnly: v.optional(v.boolean()),
   },
   handler: async (ctx, a) => {
     const u = await user(ctx);
     // 12 × 512 KiB stays comfortably below the transaction read limit.
-    const result = await ctx.db
-      .query("projects")
-      .withIndex("by_owner", (q) => q.eq("owner", u._id))
+    const projects = a.publishedOnly
+      ? ctx.db
+          .query("projects")
+          .withIndex("by_owner_published", (q) =>
+            q.eq("owner", u._id).eq("isPublished", true),
+          )
+      : ctx.db
+          .query("projects")
+          .withIndex("by_owner", (q) => q.eq("owner", u._id));
+    const result = await projects
       .order(a.sort === "oldest" ? "asc" : "desc")
       .paginate({
         ...a.paginationOpts,
@@ -175,19 +184,81 @@ export const list = query({
           return {
             _id: p._id,
             title: p.title,
-            scene: p.scene,
             revision: p.revision,
             updatedAt: p.updatedAt,
-            origin: p.origin,
-            originReceiptId: p.originReceiptId,
-            imports: p.imports,
+            origin: p.origin
+              ? { title: p.origin.title, author: p.origin.author }
+              : undefined,
+            isAssembly: !!p.imports?.length,
+            partCount: JSON.parse(p.scene).nodes.filter(
+              (n: { kind: string }) => n.kind === "part",
+            ).length,
+            thumbnailUrl:
+              publication?.projectRevision === p.revision
+                ? await ctx.storage.getUrl(publication.thumbnail)
+                : null,
             challenge: p.challengeId ? await ctx.db.get(p.challengeId) : null,
             publicationId: publication?.active ? publication._id : null,
             description: publication?.description ?? "",
+            // Preserve the contract for clients open during a rolling deployment.
+            ...(a.summaryOnly
+              ? {}
+              : {
+                  scene: p.scene,
+                  origin: p.origin,
+                  originReceiptId: p.originReceiptId,
+                  imports: p.imports,
+                }),
           };
         }),
       ),
     };
+  },
+});
+
+/** Switch pagination indices only after this owner's legacy rows are backfilled. */
+export const collectionReady = query({
+  args: {},
+  handler: async (ctx) => {
+    const u = await user(ctx);
+    const legacy = await ctx.db
+      .query("projects")
+      .withIndex("by_owner_published", (q) =>
+        q.eq("owner", u._id).eq("isPublished", undefined),
+      )
+      .first();
+    return legacy === null;
+  },
+});
+
+/** Bounded, resumable migration; old clients can keep editing while it runs. */
+export const migrateCollection = internalMutation({
+  args: {},
+  handler: async (ctx): Promise<void> => {
+    const state = await ctx.db
+      .query("collectionMigration")
+      .withIndex("by_key", (q) => q.eq("key", "v1"))
+      .unique();
+    if (state?.complete) return;
+    const result = await ctx.db
+      .query("projects")
+      .paginate({ numItems: 12, cursor: state?.cursor ?? null });
+    for (const project of result.page) {
+      const publication = await ctx.db
+        .query("publications")
+        .withIndex("by_project", (q) => q.eq("projectId", project._id))
+        .unique();
+      await ctx.db.patch(project._id, { isPublished: !!publication?.active });
+    }
+    const next = {
+      key: "v1" as const,
+      cursor: result.continueCursor,
+      complete: result.isDone,
+    };
+    if (state) await ctx.db.patch(state._id, next);
+    else await ctx.db.insert("collectionMigration", next);
+    if (!result.isDone)
+      await ctx.scheduler.runAfter(0, internal.projects.migrateCollection, {});
   },
 });
 export const get = query({
@@ -267,6 +338,7 @@ export const create = mutation({
       localSourceId: a.localSourceId,
       title: projectTitle,
       scene: document,
+      isPublished: false,
       revision: 0,
       updatedAt: Date.now(),
       origin,
@@ -483,6 +555,7 @@ export const publish = mutation({
     const data = {
       owner: p.owner,
       projectId: p._id,
+      projectRevision: p.revision,
       title: title(a.title),
       description: a.description,
       author: u.name || "Créateur Clik",
@@ -517,6 +590,7 @@ export const publish = mutation({
       imports: p.imports ?? [],
     });
     await ctx.db.patch(id, { ...data, versionId });
+    await ctx.db.patch(p._id, { isPublished: true });
     await syncPublicationSources(ctx, (await ctx.db.get(id))!);
     if (p.challengeId) {
       await recordParticipation(ctx, p.owner, p.challengeId);
@@ -555,6 +629,8 @@ async function withdrawPublication(ctx: MutationCtx, p: Doc<"publications">) {
       ? { voteCount: 0, voteEpoch: (p.voteEpoch ?? 0) + 1 }
       : {}),
   });
+  if (await ctx.db.get(p.projectId))
+    await ctx.db.patch(p.projectId, { isPublished: false });
   await syncPublicationSources(ctx, (await ctx.db.get(p._id))!);
 }
 export const remove = mutation({
@@ -802,6 +878,7 @@ export const remix = mutation({
       owner: u._id,
       title: title(`${version.title.slice(0, 85)} · reprise`),
       scene: version.scene,
+      isPublished: false,
       revision: 0,
       updatedAt: Date.now(),
       origin,

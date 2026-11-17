@@ -1,3 +1,4 @@
+import { waitForSceneUpdate } from "./wait-for-scene";
 import { expect, test, type Page } from "@playwright/test";
 import { selectCameraView } from "./camera-view";
 
@@ -48,12 +49,8 @@ async function pixels(page: Page) {
     });
 }
 async function frames(page: Page, action: () => Promise<unknown>) {
-  const canvas = page.locator("canvas").first();
-  const before = Number(await canvas.getAttribute("data-frames"));
   await action();
-  await expect
-    .poll(async () => Number(await canvas.getAttribute("data-frames")))
-    .toBeGreaterThan(before + 2);
+  await waitForSceneUpdate(page);
 }
 async function reset(page: Page) {
   await frames(page, () =>
@@ -194,7 +191,7 @@ test("saisie, menus et aide conservent leurs touches ; une perte de focus arrêt
     })
     .click();
   const popup = page.getByRole("dialog", {
-    name: "Les raccourcis à portée de main",
+    name: "Les raccourcis",
     exact: true,
   });
   await expect(popup).toBeVisible();

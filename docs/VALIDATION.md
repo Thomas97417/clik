@@ -169,6 +169,55 @@ L’empilement vérifie les quatre plots d’accroche et les trois coordonnées 
 
 La suite complète de gestes passe sous Chromium, Firefox et WebKit : 57 contrôles sur 57 (19 par moteur). Les trois scénarios corrigés passent aussi sous Chromium dans une fenêtre réduite à 1 100 × 760 px. TypeScript passe également. La capture d’empilement a été inspectée : les quatre plots sont éclairés et les briques sont alignées.
 
+## Optimisation des collections, des hiérarchies et du repos — 17 novembre 2026
+
+Mesures sur Apple M2 Pro, Chromium headless, fenêtre 1 440 × 1 000, serveur Vite
+en développement et transport simulé. La comparaison des aperçus reprend le même
+script avant/après : 500 briques 2 × 4, une pièce déplacée, 90 mises à jour pilotées
+par `requestAnimationFrame`. Les niveaux 50 et 100 sont des cas extrêmes valides,
+pas une estimation de la structure habituelle des créations.
+
+| Scénario | Avant | Après |
+| --- | --- | --- |
+| Recherche d’une publication parmi 120 projets privés, page initiale incluse | 11 pages | 2 pages, dont une seule page filtrée |
+| Réponse de liste pour 12 projets de 500 pièces, JSON sans compression | 1 224 421 octets | 2 413 octets (−99,8 %) |
+| Aperçu, 50 niveaux : calcul médian / cadence | 43,5 ms / 11,8 images/s | 2,5 ms / 41,6 images/s |
+| Aperçu, 100 niveaux : calcul médian / cadence | 106,9 ms / 5,6 images/s | 2,5 ms / 37,0 images/s |
+| Éditeur vide immobile pendant trois secondes | 181 images | 0 image |
+
+La mesure de volume compare, sur les mêmes données dans `convex-test`, la réponse
+complète conservée pour les anciens clients et la réponse `summaryOnly`. Les
+scènes et images des aperçus visibles sont transférées séparément : la réduction
+de 99,8 % concerne la liste, pas l’ensemble du trafic d’une visite.
+
+Les 1 145 tests automatisés passent (1 078 frontend, 67 backend), ainsi que les
+vérifications TypeScript et le build client/serveur. Les contrôles backend
+vérifient aussi les permissions des aperçus, le tri des publications, le retrait,
+la révision des miniatures, la réponse compatible et la migration par lots.
+
+Les 285 scénarios navigateur ciblés sont validés sur Chromium, Firefox et WebKit
+(95 par moteur), en réunissant la suite principale et les relances ciblées. Ils
+couvrent les collections, imports, publications, gestes, groupes, couleurs,
+caméra, grille, panneaux, sauvegarde, annulation et lecture. Les attentes fondées
+sur un rendu continu ont été remplacées par des attentes de scheduler. Des
+assertions anciennes ont également été recalibrées sur le libellé actuel des
+raccourcis, la largeur utile hors scrollbar, la caméra réelle et les pixels de la
+face opaque tenant compte de la teinte de sélection. Les erreurs de navigation
+ou d’état pendant les rechargements du serveur de recette ont été revalidées
+sur un serveur propre. Les 33 derniers contrôles ciblés passent ensemble.
+
+Le test de déplacement mesure maintenant au moins trois secondes de mouvement
+continu : une scène au repos ne contribue plus artificiellement à son score.
+Le test de hiérarchie à 100 niveaux et les tests d’arrêt/reprise du rendu passent
+sur les trois moteurs. Ces mesures locales courtes ne remplacent pas des mesures
+terrain sur mobile ni un profil du backend de production.
+
+Résultats détaillés, méthodes et compteurs de validation :
+[`performance-audit.json`](../apps/web/reports/performance-audit.json).
+Aucun compte, email ou contenu distant n’a été créé et aucun déploiement n’a été
+effectué pendant cette validation. Le backend mis à jour doit être déployé avant
+le frontend ; la migration des collections est automatique.
+
 ## Limites et contrôles de recette restants
 
 - WebKit est le moteur utilisé par Safari ; ce test ne remplace pas une recette dans l’application Safari réelle et sur un appareil iOS.

@@ -12,6 +12,7 @@ export async function projectsFixture(
     privateCount?: number;
     updatedAt?: number;
     privateUpdatedAt?: number;
+    collectionReady?: boolean;
   } = {},
 ) {
   const user = {
@@ -37,6 +38,7 @@ export async function projectsFixture(
   };
   const calls = {
     lists: [] as any[],
+    gets: [] as any[],
     uploads: [] as any[],
     publications: [] as any[],
     withdrawals: [] as any[],
@@ -95,6 +97,8 @@ export async function projectsFixture(
   );
   const query = (path: string, args: any) => {
     if (path === "auth:getCurrentUser") return user;
+    if (path === "projects:collectionReady")
+      return options.collectionReady ?? true;
     if (path === "projects:creation") {
       const target = [project, ...imported.values()].find(
         (item) => item.publicationId === args.id,
@@ -129,7 +133,9 @@ export async function projectsFixture(
                 title: "Un ancien défi",
                 challenge: { day: "2020-01-01", closesAt: 1 },
               }
-            : [...imported.values()].find((p) => p._id === args.id);
+            : [...privateProjects, ...imported.values()].find(
+                (p) => p._id === args.id,
+              );
       return target
         ? { ...target, owner: user._id, serverNow: Date.now() }
         : null;
@@ -147,7 +153,10 @@ export async function projectsFixture(
           challenge: { day: "2020-01-01", closesAt: 1 },
         },
       ]
-        .filter((p) => !deleted.has(p._id))
+        .filter(
+          (p) =>
+            !deleted.has(p._id) && (!args.publishedOnly || !!p.publicationId),
+        )
         .sort((a, b) =>
           args.sort === "oldest"
             ? a.updatedAt - b.updatedAt
@@ -156,7 +165,14 @@ export async function projectsFixture(
       const start = Number(args.paginationOpts.cursor ?? 0);
       const end = start + Math.min(12, args.paginationOpts.numItems);
       return {
-        page: rows.slice(start, end),
+        page: rows.slice(start, end).map(({ scene, imports, ...p }) => ({
+          ...p,
+          isAssembly: !!imports.length,
+          partCount: JSON.parse(scene).nodes.filter(
+            (n: any) => n.kind === "part",
+          ).length,
+          thumbnailUrl: null,
+        })),
         isDone: end >= rows.length,
         continueCursor: end >= rows.length ? "" : String(end),
       };
@@ -199,6 +215,7 @@ export async function projectsFixture(
           if (mod.type === "Add") {
             queries.set(mod.queryId, mod);
             if (mod.udfPath === "projects:list") calls.lists.push(mod.args[0]);
+            if (mod.udfPath === "projects:get") calls.gets.push(mod.args[0]);
           } else queries.delete(mod.queryId);
         }
         transition({ ...version, querySet: message.newVersion });

@@ -1,3 +1,4 @@
+import { waitForSceneUpdate } from "./wait-for-scene";
 import { selectCameraView } from "./camera-view";
 import { test, expect, type Page } from "@playwright/test";
 
@@ -337,10 +338,8 @@ test("groupes verrouillés ou vides : repli indépendant du masquage", async ({
   await expect(row(page, "Brique 2 × 2")).toHaveAttribute("draggable", "false");
   await row(page, "Assemblage").getByTitle("Masquer", { exact: true }).click();
   const canvas = page.locator("canvas").first();
-  const frames = Number(await canvas.getAttribute("data-frames"));
-  await expect
-    .poll(async () => Number(await canvas.getAttribute("data-frames")))
-    .toBeGreaterThan(frames + 2);
+
+  await waitForSceneUpdate(page);
   const hiddenImage = await canvas.evaluate((c: HTMLCanvasElement) =>
     c.toDataURL(),
   );

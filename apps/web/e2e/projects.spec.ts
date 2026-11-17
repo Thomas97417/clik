@@ -412,12 +412,12 @@ test("voir plus conserve l’ordre fourni par le serveur lorsque plusieurs créa
   }
 });
 
-test("le filtre galerie retrouve les publications après les pages privées et suit leur retrait", async ({
+test("le filtre galerie charge directement les publications et suit leur retrait", async ({
   page,
 }, info) => {
   const fixture = await projectsFixture(page, {
     published: true,
-    privateCount: 25,
+    privateCount: 120,
   });
   await page.goto("/projects");
   const cards = page.locator(".project-card h2");
@@ -433,9 +433,11 @@ test("le filtre galerie retrouve les publications après les pages privées et s
   await expect(page.locator(".projects-count")).toHaveText(
     "1 création affichée",
   );
-  expect(
-    fixture.calls.lists.some((args) => args.paginationOpts.cursor !== null),
-  ).toBe(true);
+  expect(fixture.calls.lists).toHaveLength(2);
+  expect(fixture.calls.lists[1]).toMatchObject({
+    publishedOnly: true,
+    paginationOpts: { cursor: null },
+  });
   const sort = page.getByRole("combobox", { name: "Trier par" });
   await sort.click();
   await page.getByRole("option", { name: "Les plus anciennes" }).click();
@@ -473,7 +475,9 @@ test("le filtre galerie retrouve les publications après les pages privées et s
   await page
     .getByRole("button", { name: "Voir mes créations", exact: true })
     .click();
-  await expect(cards).toHaveCount(27);
+  await expect(cards).toHaveCount(12);
+  await page.locator(".projects-load-more").click();
+  await expect(cards).toHaveCount(24);
   await expect(
     page.getByRole("button", { name: "Toutes", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");

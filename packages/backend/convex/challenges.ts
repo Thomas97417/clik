@@ -147,6 +147,7 @@ export const start = mutation({
         owner: me._id,
         title: `Mon défi du ${args.day}`,
         scene: JSON.stringify(emptyScene()),
+        isPublished: false,
         revision: 0,
         updatedAt: Date.now(),
         challengeId,

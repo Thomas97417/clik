@@ -31,15 +31,22 @@ import { Button } from "@/components/ui/button";
 import { listLocalCreations, readDraft, type Draft } from "@/lib/clik/local";
 import { useEditor } from "@/lib/clik/store";
 import CreationPreview from "./creation-preview";
+import RemoteProjectPreview from "./remote-project-preview";
 
 type Choice = {
   id: string;
   title: string;
-  scene: string | SceneDocument;
   cacheKey: string;
-  location: "local" | "online";
   updatedAt?: number;
-};
+} & (
+  | { location: "local"; scene: string | SceneDocument }
+  | {
+      location: "online";
+      revision: number;
+      partCount: number;
+      thumbnailUrl: string | null;
+    }
+);
 const locationFilters = [
   { value: "all", label: "Toutes" },
   { value: "local", label: "Sur cet appareil" },
@@ -90,13 +97,16 @@ export default function ImportProjectDialog({
           throw Error("Reconnectez-vous pour afficher vos projets en ligne.");
         const result = await convex.query(api.projects.list, {
           sort: "recent",
+          summaryOnly: true,
           paginationOpts: { numItems: 12, cursor },
         });
         if (!mounted.current || request !== remoteRequest.current) return;
         const choices = result.page.map((p) => ({
           id: p._id,
           title: p.title,
-          scene: p.scene,
+          revision: p.revision,
+          partCount: p.partCount,
+          thumbnailUrl: p.thumbnailUrl,
           location: "online" as const,
           updatedAt: p.updatedAt,
           cacheKey: `project:${p._id}:${p.revision}`,
@@ -171,6 +181,8 @@ export default function ImportProjectDialog({
       ]
         .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))
         .map((choice) => {
+          if (choice.location === "online")
+            return { ...choice, invalid: false };
           try {
             const scene = validateScene(
               typeof choice.scene === "string"
@@ -386,14 +398,27 @@ export default function ImportProjectDialog({
                     }}
                   >
                     <div className="project-import-thumbnail overflow-hidden relative w-full h-37.5 shrink-0 bg-[#f0f3f8] max-sm-narrow:h-40">
-                      <CreationPreview
-                        placeholderClassName="min-h-0 text-[11px]"
-                        imageClassName="object-contain size-full"
-                        className="size-full"
-                        scene={choice.scene}
-                        cacheKey={choice.cacheKey}
-                        title={choice.title}
-                      />
+                      {choice.location === "online" ? (
+                        <RemoteProjectPreview
+                          placeholderClassName="min-h-0 text-[11px]"
+                          imageClassName="object-contain size-full"
+                          className="size-full"
+                          projectId={choice.id as Id<"projects">}
+                          revision={choice.revision}
+                          poster={choice.thumbnailUrl}
+                          cacheKey={choice.cacheKey}
+                          title={choice.title}
+                        />
+                      ) : (
+                        <CreationPreview
+                          placeholderClassName="min-h-0 text-[11px]"
+                          imageClassName="object-contain size-full"
+                          className="size-full"
+                          scene={choice.scene}
+                          cacheKey={choice.cacheKey}
+                          title={choice.title}
+                        />
+                      )}
                       <span
                         className="project-import-check group/project-import-check border border-solid border-[#cfd9e7] absolute top-2.5 right-2.5 grid place-items-center rounded-[6px] bg-[#ffffffe0] text-white size-5.75 group-aria-pressed/project-import-choice:border-[#356ae6] group-aria-pressed/project-import-choice:bg-[#356ae6]"
                         aria-hidden="true"
