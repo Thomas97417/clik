@@ -79,7 +79,9 @@ test("bibliothèque : largeur stable quand le défilement apparaît", async ({
   await selectPieceFamily(page, "Arches");
   await expect(page.locator(".piece-card")).toHaveCount(2);
   await expect(pieceFamily(page, "Arches")).toBeChecked();
-  await expect(page.locator(".library-count")).toHaveText("2");
+  await expect(page.locator(".library-header").getByRole("status")).toHaveText(
+    "2 modèles",
+  );
   const filtered = await layout(page);
   expect(filtered.overflow).toBe(false);
   expect(filtered.card).toEqual(all.card);
@@ -158,10 +160,8 @@ test("bibliothèque : catégories et couleurs restent accessibles pendant le dé
   await expect
     .poll(() => scroll.evaluate((element) => element.scrollTop))
     .toBe(0);
-  await expect(page.locator(".library-count")).toHaveText(
-    String(
-      Object.keys(CATALOG).filter((type) => type.startsWith("plate")).length,
-    ),
+  await expect(page.locator(".library-header").getByRole("status")).toHaveText(
+    `${Object.keys(CATALOG).filter((type) => type.startsWith("plate")).length} modèles`,
   );
   await page.screenshot({
     path: `/tmp/clik-library-palette-${info.project.name}.png`,

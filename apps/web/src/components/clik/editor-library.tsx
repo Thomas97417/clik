@@ -284,12 +284,6 @@ const EditorLibrary = memo(function EditorLibrary({
               Pièces
             </h2>
             <span
-              className="library-count inline-flex h-5 min-w-6 items-center justify-center rounded-[5px] bg-[#f1f4f9] px-1.5 text-[11px] leading-none text-[#748198] tabular-nums"
-              aria-hidden="true"
-            >
-              {visibleCount}
-            </span>
-            <span
               role="status"
               aria-live="polite"
               aria-atomic="true"

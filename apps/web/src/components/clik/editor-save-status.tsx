@@ -1,24 +1,67 @@
+import { Tooltip } from "@base-ui/react/tooltip";
 import {
   AlertCircle,
+  Cloud,
   CloudAlert,
   CloudCheck,
+  CloudUpload,
   HardDrive,
   LoaderCircle,
   WifiOff,
+  type LucideIcon,
 } from "lucide-react";
 import type {
   LocalSaveStatus,
   ProjectSyncStatus,
 } from "@/lib/clik/use-project";
-import { cn } from "@/lib/utils";
 
-const syncLabels: Record<ProjectSyncStatus, string> = {
-  local: "",
-  loading: "Connexion au projet…",
-  syncing: "Synchronisation en cours…",
-  synced: "Synchronisé en ligne",
-  offline: "Hors ligne · en attente",
-  error: "Synchronisation impossible",
+type Indicator = { label: string; icon: LucideIcon; className: string };
+const saving = "text-[#356ae6] motion-safe:animate-spin";
+const syncing = "text-[#356ae6] motion-safe:animate-pulse";
+const saved = "text-[#34906c]";
+const warning = "text-[#9b660c]";
+const error = "text-[#c33e42]";
+
+const localStates: Record<LocalSaveStatus, Indicator> = {
+  loading: {
+    label: "Chargement du projet…",
+    icon: LoaderCircle,
+    className: saving,
+  },
+  saving: {
+    label: "Enregistrement sur cet appareil…",
+    icon: LoaderCircle,
+    className: saving,
+  },
+  saved: {
+    label: "Enregistré sur cet appareil",
+    icon: HardDrive,
+    className: saved,
+  },
+  error: {
+    label: "Sauvegarde locale indisponible",
+    icon: AlertCircle,
+    className: error,
+  },
+};
+const syncStates: Record<Exclude<ProjectSyncStatus, "local">, Indicator> = {
+  loading: { label: "Connexion au projet…", icon: Cloud, className: syncing },
+  syncing: {
+    label: "Synchronisation en cours…",
+    icon: CloudUpload,
+    className: syncing,
+  },
+  synced: { label: "Synchronisé en ligne", icon: CloudCheck, className: saved },
+  offline: {
+    label: "Hors ligne · en attente",
+    icon: WifiOff,
+    className: warning,
+  },
+  error: {
+    label: "Synchronisation impossible",
+    icon: CloudAlert,
+    className: error,
+  },
 };
 
 export default function EditorSaveStatus({
@@ -30,86 +73,52 @@ export default function EditorSaveStatus({
   syncStatus: ProjectSyncStatus;
   conflict: boolean;
 }) {
-  const label = conflict
-    ? "Conflit à résoudre"
-    : localStatus === "error"
-      ? "Sauvegarde locale indisponible"
-      : localStatus === "loading"
-        ? "Chargement du projet…"
-        : localStatus === "saved"
-          ? "Enregistré sur cet appareil"
-          : "Enregistrement sur cet appareil…";
-  const LocalIcon =
-    conflict || localStatus === "error"
-      ? AlertCircle
-      : localStatus === "loading" || localStatus === "saving"
-        ? LoaderCircle
-        : HardDrive;
-  const SyncIcon = conflict
-    ? AlertCircle
-    : syncStatus === "offline"
-      ? WifiOff
-      : syncStatus === "error"
-        ? CloudAlert
-        : syncStatus === "synced"
-          ? CloudCheck
-          : LoaderCircle;
-  const syncLabel = conflict
-    ? "Synchronisation suspendue"
-    : syncLabels[syncStatus];
+  const local = conflict
+    ? { label: "Conflit à résoudre", icon: AlertCircle, className: warning }
+    : localStates[localStatus];
+  const sync =
+    syncStatus === "local"
+      ? null
+      : conflict
+        ? {
+            label: "Synchronisation suspendue",
+            icon: CloudAlert,
+            className: warning,
+          }
+        : syncStates[syncStatus];
 
   return (
-    <div
-      className="save-status flex h-8 w-52 shrink-0 flex-col justify-center gap-0.5 text-[11px] leading-4 text-[#68788e]"
-      data-state={conflict ? "conflict" : localStatus}
-      data-sync-state={syncStatus}
-      role="status"
-      aria-live="polite"
-      aria-atomic="true"
-    >
-      <div
-        className={cn(
-          "flex min-w-0 items-center gap-1.5",
-          conflict && "text-[#9b660c]",
-          !conflict && localStatus === "error" && "text-[#c33e42]",
-        )}
-        title={label}
+    <Tooltip.Root>
+      <Tooltip.Trigger
+        render={<div />}
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        tabIndex={0}
+        className="save-status inline-flex h-8 min-w-8 shrink-0 items-center justify-center gap-1.5 rounded-md px-1.5 hover:bg-[#f3f6fb] focus-visible:outline-2 focus-visible:outline-[#356ae6]"
+        data-state={conflict ? "conflict" : localStatus}
+        data-sync-state={syncStatus}
       >
-        <LocalIcon
-          size={14}
-          aria-hidden="true"
-          className={cn(
-            "shrink-0",
-            !conflict && localStatus === "saved" && "text-[#34906c]",
-            !conflict &&
-              (localStatus === "saving" || localStatus === "loading") &&
-              "animate-spin text-[#356ae6] motion-reduce:animate-none",
-          )}
-        />
-        <span className="truncate">{label}</span>
-      </div>
-      {syncStatus !== "local" && (
-        <div
-          className={cn(
-            "flex min-w-0 items-center gap-1.5 text-[10px] leading-3 text-[#8a97ab]",
-            (conflict || syncStatus === "offline") && "text-[#9b660c]",
-            !conflict && syncStatus === "error" && "text-[#c33e42]",
-          )}
-          title={syncLabel}
-        >
-          <SyncIcon
-            size={14}
-            aria-hidden="true"
-            className={cn(
-              "shrink-0",
-              !conflict &&
-                (syncStatus === "syncing" || syncStatus === "loading") &&
-                "animate-spin motion-reduce:animate-none",
-            )}
-          />
-          <span className="truncate">{syncLabel}</span>
-        </div>
-      )}
-    </div>
+        <local.icon size={16} aria-hidden="true" className={local.className} />
+        {sync && (
+          <sync.icon size={16} aria-hidden="true" className={sync.className} />
+        )}
+        <span className="sr-only">
+          {local.label}
+          {sync && `. ${sync.label}`}
+        </span>
+      </Tooltip.Trigger>
+      <Tooltip.Portal>
+        <Tooltip.Positioner side="bottom" sideOffset={6} className="z-50">
+          <Tooltip.Popup
+            role="tooltip"
+            className="rounded-md bg-[#253249] px-2.5 py-1.5 text-[11px] leading-4 text-white shadow-md"
+          >
+            {local.label}
+            {sync && <div>{sync.label}</div>}
+          </Tooltip.Popup>
+        </Tooltip.Positioner>
+      </Tooltip.Portal>
+    </Tooltip.Root>
   );
 }
