@@ -1,6 +1,6 @@
 import { CATALOG } from "@clik/scene";
 import { test, expect, type Page } from "@playwright/test";
-import { selectPieceFamily } from "./piece-family";
+import { pieceFamily, selectPieceFamily } from "./piece-family";
 
 test("la bibliothèque permet de poser et de sauvegarder la 1 000e pièce", async ({
   page,
@@ -78,9 +78,7 @@ test("bibliothèque : largeur stable quand le défilement apparaît", async ({
   const all = await layout(page);
   await selectPieceFamily(page, "Arches");
   await expect(page.locator(".piece-card")).toHaveCount(2);
-  await expect(
-    page.getByRole("combobox", { name: "Famille de pièces", exact: true }),
-  ).toHaveText("Arches");
+  await expect(pieceFamily(page, "Arches")).toBeChecked();
   await expect(page.locator(".library-count")).toHaveText("2");
   const filtered = await layout(page);
   expect(filtered.overflow).toBe(false);
@@ -179,6 +177,18 @@ test("bibliothèque : recherche par nom et dimensions, filtres et saisie sans ac
   await page.getByRole("button", { name: "Brique 1 × 1", exact: true }).click();
   const input = page.getByRole("searchbox", { name: "Rechercher une pièce" });
   const cards = page.locator(".piece-card");
+  const allFamilies = pieceFamily(page, "Toutes les familles");
+  await allFamilies.focus();
+  await allFamilies.press("ArrowRight");
+  const bricks = pieceFamily(page, "Briques");
+  await expect(bricks).toBeChecked();
+  await expect(cards.first()).toHaveAccessibleName("Brique 1 × 1");
+  await expect(cards.nth(5)).toHaveAccessibleName("Brique 1 × 8");
+  await bricks.press("Tab");
+  await expect(
+    page.getByRole("region", { name: "Modèles de pièces" }),
+  ).toBeFocused();
+  await allFamilies.check();
   await input.fill("2 x 2");
   await expect(cards).toHaveCount(
     Object.values(CATALOG).filter(({ name }) => name.includes("2 × 2")).length,
@@ -244,9 +254,7 @@ test("bibliothèque : recherche par nom et dimensions, filtres et saisie sans ac
     page.getByRole("dialog", { name: "Les pièces et leurs couleurs" }),
   ).toBeVisible();
   await expect(cards).toHaveCount(Object.keys(CATALOG).length);
-  await expect(
-    page.getByRole("combobox", { name: "Famille de pièces", exact: true }),
-  ).toHaveText("Toutes les familles");
+  await expect(pieceFamily(page, "Toutes les familles")).toBeChecked();
   await page
     .getByRole("button", { name: "Quitter la visite", exact: true })
     .click();

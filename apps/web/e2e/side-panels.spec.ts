@@ -1,7 +1,7 @@
 import { waitForSceneUpdate } from "./wait-for-scene";
 import { selectCameraView } from "./camera-view";
 import { test, expect, type Locator, type Page } from "@playwright/test";
-import { selectPieceFamily } from "./piece-family";
+import { pieceFamily, selectPieceFamily } from "./piece-family";
 
 const panelWidth = async (panel: Locator) => (await panel.boundingBox())!.width;
 
@@ -107,9 +107,7 @@ test("panneaux indépendants, scène agrandie et état conservé à la réouvert
   await expect(openLibrary).toHaveAttribute("aria-expanded", "false");
   await openLibrary.focus();
   await openLibrary.press("Space");
-  await expect(
-    page.getByRole("combobox", { name: "Famille de pièces", exact: true }),
-  ).toHaveText("Pentes");
+  await expect(pieceFamily(page, "Pentes")).toBeChecked();
   await expect
     .poll(async () => (await canvas.boundingBox())!.width)
     .toBe(originalWidth);
