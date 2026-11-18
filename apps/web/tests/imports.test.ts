@@ -132,13 +132,17 @@ describe("Import de projets dans la construction", () => {
     );
     const full = {
       ...emptyScene(),
-      nodes: Array.from({ length: 500 }, (_, i) =>
+      nodes: Array.from({ length: 1000 }, (_, i) =>
         makePart("brick-2x2", "#4079e8", [i * 3, 0, 0]),
       ),
     };
-    editor.load(full, "Plein");
-    expect(() => editor.importProject(source(), item)).toThrow("500 pièces");
-    expect(useEditor.getState().scene).toEqual(full);
+    const assembly = importAssembly(emptyScene(), full, "Mille pièces");
+    expect(assembly.scene.nodes).toHaveLength(1001);
+    editor.load(assembly.scene, "Plein");
+    expect(() => editor.importProject(source(), item)).toThrow(
+      /1\s?000 pièces/,
+    );
+    expect(useEditor.getState().scene).toEqual(assembly.scene);
     expect(useEditor.getState().past).toHaveLength(0);
     expect(useEditor.getState().provenance.imports).toHaveLength(0);
     const groups = {
@@ -154,7 +158,9 @@ describe("Import de projets dans la construction", () => {
         locked: false,
       })),
     };
-    expect(() => importAssembly(groups, source(), "Projet")).toThrow();
+    expect(() => importAssembly(groups, source(), "Projet")).toThrow(
+      /1\s?000 groupes/,
+    );
     editor.load(emptyScene(), "Défi", {
       stock: [],
       closesAt: Date.now() + 10000,

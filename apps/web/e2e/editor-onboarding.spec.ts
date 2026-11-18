@@ -98,7 +98,7 @@ for (const mac of [true, false]) {
     await tour(page)
       .getByRole("button", { name: "Terminer", exact: true })
       .click();
-    await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+    await expect(page.locator(".viewport-bottom")).toContainText("0 / 1 000");
   });
 }
 
@@ -185,7 +185,7 @@ test("accueil discret une seule fois, bibliothèque utilisable et visite chargé
   expect(loaded).toEqual([]);
   await page.screenshot({ path: `/tmp/clik-welcome-${info.project.name}.png` });
   await page.getByRole("button", { name: "Brique 1 × 1", exact: true }).click();
-  await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("1 / 1 000");
   await expect(welcome(page)).toHaveCount(0);
   expect(loaded).toEqual([]);
   await page.reload();
@@ -194,7 +194,7 @@ test("accueil discret une seule fois, bibliothèque utilisable et visite chargé
   await page
     .getByRole("button", { name: "Nouvelle création", exact: true })
     .click();
-  await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("0 / 1 000");
   await expect(welcome(page)).toHaveCount(0);
   expect(loaded).toEqual([]);
   await help(page).click();
@@ -332,7 +332,7 @@ test("les six étapes présentent les couleurs et les actions sans débordement 
   expect(errors).toEqual([]);
   // The editor's keyboard controls work again after the visit.
   await page.keyboard.press("Control+d");
-  await expect(page.locator(".viewport-bottom")).toContainText("2 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("2 / 1 000");
 });
 
 test("visite sans pièces : panneaux ouverts temporairement et nettoyage sur navigation", async ({
@@ -392,7 +392,7 @@ test("visite sans pièces : panneaux ouverts temporairement et nettoyage sur nav
     "aria-expanded",
     "false",
   );
-  await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("0 / 1 000");
   await help(page).click();
   await expect(tour(page)).toBeVisible();
   await page.goBack();
@@ -402,7 +402,7 @@ test("visite sans pièces : panneaux ouverts temporairement et nettoyage sur nav
   await expect(page.locator("body")).not.toHaveClass(/driver-active/);
   await expect(welcome(page)).toHaveCount(0);
   await page.getByRole("button", { name: "Brique 1 × 1", exact: true }).click();
-  await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("1 / 1 000");
 });
 
 test("le mobile garde l’accueil pour la première ouverture de l’atelier sur ordinateur", async ({
@@ -479,5 +479,5 @@ test("les actions restent lisibles au clavier dans une fenêtre basse, avec les 
   });
   await page.keyboard.press("Escape");
   await expect(help(page)).toBeFocused();
-  await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("0 / 1 000");
 });

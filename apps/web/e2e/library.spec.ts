@@ -1,6 +1,41 @@
 import { CATALOG } from "@clik/scene";
 import { test, expect, type Page } from "@playwright/test";
-import { selectPieceFamily } from "./piece-family";
+import { pieceFamily, selectPieceFamily } from "./piece-family";
+
+test("la bibliothèque permet de poser et de sauvegarder la 1 000e pièce", async ({
+  page,
+}) => {
+  await page.goto("/editor?draft=mille-pieces");
+  const canvas = page.locator(".viewport canvas");
+  await expect(canvas).toHaveAttribute("data-rendered", "0");
+  await page.evaluate(async () => {
+    const path = "/e2e/performance-scene.ts";
+    const { loadHierarchyBenchmark } = await import(/* @vite-ignore */ path);
+    loadHierarchyBenchmark(1, 999);
+  });
+  const counter = page.getByRole("meter", {
+    name: "Pièces dans la construction",
+  });
+  const brick = page
+    .getByRole("complementary", { name: "Bibliothèque de pièces" })
+    .getByRole("button", { name: "Brique 1 × 1", exact: true });
+  await expect(counter).toHaveAttribute("aria-valuenow", "999");
+  await brick.click();
+  await expect(counter).toHaveText("1 000 / 1 000 pièces");
+  await expect(brick).toBeDisabled();
+  await page
+    .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
+    .click();
+  await expect(brick).toBeEnabled();
+  await page.getByRole("button", { name: "Rétablir", exact: true }).click();
+  await expect(brick).toBeDisabled();
+  await expect(
+    page.getByLabel("Projet et sauvegarde").getByRole("status"),
+  ).toContainText("Enregistré");
+  await page.reload();
+  await expect(counter).toHaveText("1 000 / 1 000 pièces");
+  await expect(canvas).toHaveAttribute("data-rendered", "1001"); // Includes the group.
+});
 
 async function layout(page: Page) {
   return page.evaluate(() => {
@@ -43,10 +78,10 @@ test("bibliothèque : largeur stable quand le défilement apparaît", async ({
   const all = await layout(page);
   await selectPieceFamily(page, "Arches");
   await expect(page.locator(".piece-card")).toHaveCount(2);
-  await expect(
-    page.getByRole("combobox", { name: "Famille de pièces", exact: true }),
-  ).toHaveText("Arches");
-  await expect(page.locator(".library-count")).toHaveText("2");
+  await expect(pieceFamily(page, "Arches")).toBeChecked();
+  await expect(page.locator(".library-header").getByRole("status")).toHaveText(
+    "2 modèles",
+  );
   const filtered = await layout(page);
   expect(filtered.overflow).toBe(false);
   expect(filtered.card).toEqual(all.card);
@@ -113,7 +148,7 @@ test("bibliothèque : catégories et couleurs restent accessibles pendant le dé
     "Rouge",
   );
   await page.locator('.piece-card[aria-label="Pente 2 × 2"]').click();
-  await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("1 / 1 000");
   await expect(page.locator(".tree-row.selected .part-dot")).toHaveCSS(
     "background-color",
     "rgb(239, 68, 68)",
@@ -125,10 +160,8 @@ test("bibliothèque : catégories et couleurs restent accessibles pendant le dé
   await expect
     .poll(() => scroll.evaluate((element) => element.scrollTop))
     .toBe(0);
-  await expect(page.locator(".library-count")).toHaveText(
-    String(
-      Object.keys(CATALOG).filter((type) => type.startsWith("plate")).length,
-    ),
+  await expect(page.locator(".library-header").getByRole("status")).toHaveText(
+    `${Object.keys(CATALOG).filter((type) => type.startsWith("plate")).length} modèles`,
   );
   await page.screenshot({
     path: `/tmp/clik-library-palette-${info.project.name}.png`,
@@ -144,6 +177,18 @@ test("bibliothèque : recherche par nom et dimensions, filtres et saisie sans ac
   await page.getByRole("button", { name: "Brique 1 × 1", exact: true }).click();
   const input = page.getByRole("searchbox", { name: "Rechercher une pièce" });
   const cards = page.locator(".piece-card");
+  const allFamilies = pieceFamily(page, "Toutes les familles");
+  await allFamilies.focus();
+  await allFamilies.press("ArrowRight");
+  const bricks = pieceFamily(page, "Briques");
+  await expect(bricks).toBeChecked();
+  await expect(cards.first()).toHaveAccessibleName("Brique 1 × 1");
+  await expect(cards.nth(5)).toHaveAccessibleName("Brique 1 × 8");
+  await bricks.press("Tab");
+  await expect(
+    page.getByRole("region", { name: "Modèles de pièces" }),
+  ).toBeFocused();
+  await allFamilies.check();
   await input.fill("2 x 2");
   await expect(cards).toHaveCount(
     Object.values(CATALOG).filter(({ name }) => name.includes("2 × 2")).length,
@@ -209,9 +254,7 @@ test("bibliothèque : recherche par nom et dimensions, filtres et saisie sans ac
     page.getByRole("dialog", { name: "Les pièces et leurs couleurs" }),
   ).toBeVisible();
   await expect(cards).toHaveCount(Object.keys(CATALOG).length);
-  await expect(
-    page.getByRole("combobox", { name: "Famille de pièces", exact: true }),
-  ).toHaveText("Toutes les familles");
+  await expect(pieceFamily(page, "Toutes les familles")).toBeChecked();
   await page
     .getByRole("button", { name: "Quitter la visite", exact: true })
     .click();

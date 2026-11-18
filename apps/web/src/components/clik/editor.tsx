@@ -23,6 +23,7 @@ import { ConvexError } from "convex/values";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import {
+  MAX_SCENE_PARTS,
   inherited,
   ancestors,
   descendants,
@@ -60,6 +61,7 @@ import {
   SquareDashedMousePointer,
   Scan,
   Sun,
+  ToyBrick,
   Trash2,
   Undo2,
   Ungroup,
@@ -198,7 +200,7 @@ export default function Editor({
   publishOnLoad?: boolean;
 }) {
   // The canvas subscribes to live transforms. Keep the tree and inspector stable
-  // during a gesture so a 500-part document does not rebuild its UI each frame.
+  // during a gesture so large documents do not rebuild their UI each frame.
   const s = useEditor(
       useShallow(({ color: _color, ...state }) => ({
         ...state,
@@ -470,6 +472,8 @@ export default function Editor({
     ...parentGroups.map((node) => ({ value: node.id, label: node.name })),
   ];
   const count = s.scene.nodes.filter((n) => n.kind === "part").length;
+  const partLimit =
+    stock?.reduce((sum, item) => sum + item.quantity, 0) ?? MAX_SCENE_PARTS;
   const layoutKey = useMemo(() => sceneLayoutKey(s.scene), [s.scene]);
   const overlap = useMemo(() => hasOverlappingParts(s.scene), [layoutKey]);
   const sources = projectSources(s.provenance);
@@ -1072,8 +1076,8 @@ export default function Editor({
             }
           >
             {(playback) => (
-              <section className="viewport overflow-hidden relative bg-[#edf1f7] min-w-0 flex flex-col">
-                <div className="relative min-h-0 flex-1">
+              <section className="viewport relative min-w-0 overflow-hidden bg-[#edf1f7]">
+                <div className="relative h-full">
                   <div className="scene-toolbar p-1.25 gap-0.75 border border-solid border-white absolute top-5 left-1/2 transform-[translateX(-50%)] z-3 flex items-center bg-[#ffffffed] [box-shadow:0_4px_15px_#53668114] rounded-[10px]">
                     <div className="tool-group flex border-r border-solid border-r-[#e7ecf2] pr-1 mr-0.5">
                       <button
@@ -1235,13 +1239,28 @@ export default function Editor({
                       </p>
                     </div>
                   )}
-                  <div className="viewport-bottom gap-2 absolute left-4.5 bottom-3.75 right-4.5 z-3 flex items-center flex-wrap pointer-events-none text-xs leading-[inherit] text-[#8591a3]">
-                    <span className="first:px-2.25 first:py-1.5 first:border first:border-solid first:border-[#dce3ed] first:rounded-[6px] first:bg-[#ffffff91] first:text-[#6e7f96]">
-                      {count} /{" "}
-                      {stock
-                        ? stock.reduce((sum, item) => sum + item.quantity, 0)
-                        : 500}{" "}
-                      pièces
+                  <div className="viewport-bottom gap-2 absolute left-4.5 bottom-13.75 right-4.5 z-3 flex items-center flex-wrap pointer-events-none text-xs leading-[inherit] text-[#8591a3]">
+                    <span
+                      role="meter"
+                      aria-label="Pièces dans la construction"
+                      aria-valuemin={0}
+                      aria-valuenow={count}
+                      aria-valuemax={partLimit}
+                      aria-valuetext={`${count.toLocaleString("fr-FR")} sur ${partLimit.toLocaleString("fr-FR")}`}
+                      className="inline-flex h-9.5 shrink-0 items-center gap-2 rounded-lg border border-[#dce5f0] bg-white/95 px-2.5 text-[11px] font-medium whitespace-nowrap text-[#64758d] shadow-[0_2px_8px_#53668108] tabular-nums"
+                    >
+                      <ToyBrick
+                        size={17}
+                        className="text-[#356ae6]"
+                        aria-hidden="true"
+                      />
+                      <span>
+                        <strong className="text-sm font-bold text-[#32445f]">
+                          {count.toLocaleString("fr-FR")}
+                        </strong>
+                        <span className="text-[#8998ad]"> / </span>
+                        {partLimit.toLocaleString("fr-FR")} pièces
+                      </span>
                     </span>
                     {overlap && (
                       <span className="overlap group/overlap first:px-2.25 first:py-1.5 first:border first:border-solid first:border-[#dce3ed] first:rounded-[6px] first:bg-[#ffffff91] first:text-[#6e7f96] text-[10px] text-[#956f21]">
@@ -1369,7 +1388,7 @@ export default function Editor({
                       publishing ||
                       tourActive
                     }
-                    className="border-t border-[#e0e7f1]"
+                    className="absolute inset-x-0 bottom-0 z-3 border-t border-[#e0e7f1] bg-[#fbfcfd]"
                   />
                 )}
               </section>

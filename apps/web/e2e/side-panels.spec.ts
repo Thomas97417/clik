@@ -1,7 +1,7 @@
 import { waitForSceneUpdate } from "./wait-for-scene";
 import { selectCameraView } from "./camera-view";
 import { test, expect, type Locator, type Page } from "@playwright/test";
-import { selectPieceFamily } from "./piece-family";
+import { pieceFamily, selectPieceFamily } from "./piece-family";
 
 const panelWidth = async (panel: Locator) => (await panel.boundingBox())!.width;
 
@@ -107,9 +107,7 @@ test("panneaux indépendants, scène agrandie et état conservé à la réouvert
   await expect(openLibrary).toHaveAttribute("aria-expanded", "false");
   await openLibrary.focus();
   await openLibrary.press("Space");
-  await expect(
-    page.getByRole("combobox", { name: "Famille de pièces", exact: true }),
-  ).toHaveText("Pentes");
+  await expect(pieceFamily(page, "Pentes")).toBeChecked();
   await expect
     .poll(async () => (await canvas.boundingBox())!.width)
     .toBe(originalWidth);
@@ -124,7 +122,7 @@ test("panneaux indépendants, scène agrandie et état conservé à la réouvert
   await page
     .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
     .click();
-  await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("0 / 1 000");
 });
 
 test("les bordures redimensionnent chaque panneau et conservent les largeurs après repli et rechargement", async ({
@@ -229,11 +227,11 @@ test("les bordures redimensionnent chaque panneau et conservent les largeurs apr
   await page
     .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
     .click();
-  await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("0 / 1 000");
   await page.reload();
   await expect.poll(() => panelWidth(library)).toBe(saved.library);
   await expect.poll(() => panelWidth(inspector)).toBe(saved.inspector);
-  await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("0 / 1 000");
 });
 
 test("les bordures respectent les limites, se règlent au clavier et annulent un glissement avec Échap", async ({
@@ -265,7 +263,7 @@ test("les bordures respectent les limites, se règlent au clavier et annulent un
   await right.press("ArrowLeft");
   await expect.poll(() => panelWidth(inspector)).toBe(minimum.inspector + 10);
   for (const key of ["r", "d", "Delete", "Control+z"]) await right.press(key);
-  await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("1 / 1 000");
   for (const [axis, value] of [
     ["X", "0"],
     ["Y", "0"],
@@ -300,5 +298,5 @@ test("les bordures respectent les limites, se règlent au clavier et annulent un
   await page
     .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
     .click();
-  await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("0 / 1 000");
 });

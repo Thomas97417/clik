@@ -26,6 +26,8 @@ for (const width of [1440, 900]) {
     const status = page.locator(".save-status");
     await expect(status).toHaveAttribute("data-state", "saved");
     await expect(status).toHaveAttribute("data-sync-state", "synced");
+    await expect(status.locator("svg")).toHaveCount(2);
+    expect((await status.boundingBox())!.width).toBeLessThanOrEqual(56);
     const before = await headerPositions(page);
     const stable = async () => {
       const current = await headerPositions(page);
@@ -97,6 +99,19 @@ test("sauvegarde : la création locale garde un indicateur stable et fonctionne 
   await page.goto("/editor?draft=save-status");
   const status = page.locator(".save-status");
   await expect(status).toHaveText("Enregistré sur cet appareil");
+  await expect(status.locator("svg")).toHaveCount(1);
+  expect((await status.boundingBox())!.width).toBeLessThanOrEqual(32);
+  const tooltip = page.getByRole("tooltip");
+  await expect(tooltip).toBeHidden();
+  await status.hover();
+  await expect(tooltip).toHaveText("Enregistré sur cet appareil");
+  await page.mouse.move(0, 0);
+  await expect(tooltip).toBeHidden();
+  await page.keyboard.press("Tab");
+  await status.focus();
+  await expect(tooltip).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(tooltip).toBeHidden();
   const before = await headerPositions(page);
   await page.getByRole("button", { name: "Brique 1 × 1", exact: true }).click();
   await expect(status).toHaveText("Enregistré sur cet appareil");
@@ -108,5 +123,5 @@ test("sauvegarde : la création locale garde un indicateur stable et fonctionne 
   expect(fixture.calls.saves).toHaveLength(0);
   await context.setOffline(false);
   await page.reload();
-  await expect(page.locator(".viewport-bottom")).toContainText("2 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("2 / 1 000");
 });

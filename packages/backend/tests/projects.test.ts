@@ -174,6 +174,36 @@ describe("Collections paginées", () => {
 });
 
 describe("Projets privés et versions publiques", () => {
+  it("sauvegarde mille pièces et conserve la révision si la suivante dépasse le plafond", async () => {
+    const { alice } = setup();
+    const title = "Mille pièces";
+    const id = await alice.mutation(api.projects.create, { title, scene });
+    const nodes = Array.from({ length: 1000 }, (_, i) =>
+      makePart("brick-1x1", "#4079e8", [i * 2, 0, 0]),
+    );
+    const full = { ...emptyScene(), nodes };
+    await alice.mutation(api.projects.save, {
+      id,
+      title,
+      revision: 0,
+      scene: JSON.stringify(full),
+    });
+    await expect(
+      alice.mutation(api.projects.save, {
+        id,
+        title,
+        revision: 1,
+        scene: JSON.stringify({
+          ...full,
+          nodes: [...nodes, makePart("brick-1x1", "#4079e8")],
+        }),
+      }),
+    ).rejects.toThrow(/1\s?000 pièces/);
+    const saved = await alice.query(api.projects.get, { id });
+    expect(saved?.revision).toBe(1);
+    expect(JSON.parse(saved!.scene)).toEqual(full);
+  });
+
   it("conserve les dates de pose dans les sauvegardes, versions publiques et reprises", async () => {
     const { alice, bob, t } = setup();
     const first = { ...makePart("brick-2x2", "#4079e8"), createdAt: 1000 };

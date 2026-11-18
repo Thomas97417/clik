@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { selectCameraView } from "./camera-view";
 
 const count = (page: Page, parts: number) =>
-  expect(page.locator(".viewport-bottom")).toContainText(`${parts} / 500`);
+  expect(page.locator(".viewport-bottom")).toContainText(`${parts} / 1 000`);
 async function scene(page: Page) {
   return page.evaluate(async () => {
     const path = "/src/lib/clik/store.ts";

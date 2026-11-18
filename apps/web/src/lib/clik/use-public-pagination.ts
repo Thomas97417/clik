@@ -52,7 +52,7 @@ export function usePublicPagination<Q extends PaginatedQueryReference>(
     return (value === undefined && i === 0 ? seed : value) as
       PaginationResult<PaginatedQueryItem<Q>> | undefined;
   });
-  const last = pages.at(-1);
+  const last = pages.includes(undefined) ? undefined : pages.at(-1);
   const status = !pages[0]
     ? "LoadingFirstPage"
     : !last
@@ -72,7 +72,7 @@ export function usePublicPagination<Q extends PaginatedQueryReference>(
             : { key, cursors: [...previous.cursors, last.continueCursor] },
         );
     },
-  };
+  } as const;
 }
 export function continuationHref(
   path: string,

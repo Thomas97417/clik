@@ -59,6 +59,59 @@ async function setSpeed(timeline: Locator, speed: string) {
   await expect(button).toHaveText(speed);
 }
 
+test("la première pièce et son annulation gardent le canvas et ses commandes en place", async ({
+  page,
+}) => {
+  await page.goto("/editor?draft=timeline-layout");
+  const canvas = page.locator(".viewport canvas");
+  const controls = page.locator(".viewport-bottom");
+  const counter = controls.getByRole("meter", {
+    name: "Pièces dans la construction",
+  });
+  const timeline = page.getByRole("group", {
+    name: "Lecture de la construction",
+  });
+  await expect(canvas).toHaveAttribute("data-rendered", "0");
+  await expect(counter).toHaveAttribute("aria-valuenow", "0");
+  await expect(counter).toHaveAttribute("aria-valuemax", "1000");
+  await expect(timeline).toBeHidden();
+  const viewport = (await page.locator(".viewport").boundingBox())!;
+  const strip = {
+    x: Math.ceil(viewport.x + viewport.width / 4),
+    y: Math.floor(viewport.y + viewport.height) - 24,
+    width: Math.floor(viewport.width / 2),
+    height: 20,
+  };
+  const grid = page.getByRole("button", { name: "Grille", exact: true });
+  await expect(grid).toHaveAttribute("aria-pressed", "true");
+  await grid.press("Space");
+  await waitForSceneUpdate(page);
+  const withoutGrid = await page.screenshot({ clip: strip });
+  await grid.press("Space");
+  await expect
+    .poll(async () =>
+      (await page.screenshot({ clip: strip })).equals(withoutGrid),
+    )
+    .toBe(false);
+  const bounds = () =>
+    Promise.all([canvas.boundingBox(), controls.boundingBox()]);
+  const initial = await bounds();
+
+  await page.getByRole("button", { name: "Brique 1 × 1", exact: true }).click();
+  await expect(canvas).toHaveAttribute("data-rendered", "1");
+  await expect(counter).toHaveText("1 / 1 000 pièces");
+  await expect(timeline).toBeVisible();
+  expect(await bounds()).toEqual(initial);
+
+  await page
+    .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
+    .click();
+  await expect(canvas).toHaveAttribute("data-rendered", "0");
+  await expect(counter).toHaveAttribute("aria-valuenow", "0");
+  await expect(timeline).toBeHidden();
+  expect(await bounds()).toEqual(initial);
+});
+
 test("atelier : dates persistantes, lecture, pause, déplacement souris et retour à l’édition sans modification", async ({
   page,
 }, info) => {
@@ -161,15 +214,15 @@ test("atelier : dates persistantes, lecture, pause, déplacement souris et retou
     timeline.getByRole("button", { name: "Lire la construction", exact: true }),
   ).toBeVisible();
   await expect(canvas).toHaveAttribute("data-rendered", "3");
-  await timeline.getByRole("button", { name: "Revenir à l’édition" }).click();
+  await expect(
+    timeline.getByRole("button", { name: "Revenir à l’édition" }),
+  ).toHaveCount(0);
   await timeline
     .getByRole("button", { name: "Revenir au début de la construction" })
     .click();
   await page.keyboard.press("Escape");
   await expect(canvas).toHaveAttribute("data-rendered", "3");
-  await expect(
-    timeline.getByRole("button", { name: "Revenir à l’édition" }),
-  ).toBeDisabled();
+  await expect(timeline).toHaveAttribute("data-active", "false");
   await expect(
     page
       .getByRole("complementary", { name: "Bibliothèque de pièces" })
@@ -564,9 +617,7 @@ test("atelier : la lecture conserve la caméra, l’éclairage et la taille du c
   await slider.focus();
   await slider.press("Home");
   await slider.press("End");
-  await expect(
-    timeline.getByRole("button", { name: "Revenir à l’édition" }),
-  ).toBeEnabled();
+  await expect(timeline).toHaveAttribute("data-active", "true");
   const expectSameView = async () => {
     await expect
       .poll(async () => {
@@ -588,7 +639,8 @@ test("atelier : la lecture conserve la caméra, l’éclairage et la taille du c
     await expectSingleLine(timeline);
   };
   await expectSameView();
-  await timeline.getByRole("button", { name: "Revenir à l’édition" }).click();
+  await slider.press("Escape");
+  await expect(timeline).toHaveAttribute("data-active", "false");
   await expectSameView();
   await expect(
     page.getByRole("button", { name: "Tout éclairer", exact: true }),

@@ -23,6 +23,10 @@ import {
 } from "@/components/ui/select";
 import { listLocalCreations } from "@/lib/clik/local";
 import { mergeCreations } from "@/lib/clik/merge-creations";
+import {
+  useCollectionReturn,
+  useCollectionVisit,
+} from "@/lib/clik/use-collection-return";
 import ProjectCard, { type CreationItem } from "@/components/clik/project-card";
 import CreationGridSkeleton from "@/components/clik/creation-grid-skeleton";
 
@@ -50,9 +54,8 @@ export const Route = createFileRoute("/projects")({
 });
 function Projects({ pending = false }: { pending?: boolean } = {}) {
   const { sort = "recent" } = Route.useSearch();
-  const [filter, setFilter] = useState<
-    "all" | "online" | "local" | "published"
-  >("all");
+  const visit = useCollectionVisit("/projects");
+  const { filter, setFilter } = visit;
   const [publishedTarget, setPublishedTarget] = useState({ sort, count: 12 });
   const { isAuthenticated, isLoading } = useConvexAuth();
   const collectionReady = useQuery(
@@ -151,6 +154,16 @@ function Projects({ pending = false }: { pending?: boolean } = {}) {
     (loadingPublished && creations.length === 0);
   const accountRequired =
     (filter === "online" || filter === "published") && !isAuthenticated;
+  useCollectionReturn(visit, {
+    count: filter === "published" ? creations.length : results.length,
+    ready:
+      !loading &&
+      (filter !== "published" ||
+        !isAuthenticated ||
+        collectionReady !== undefined),
+    status: filter === "local" || !isAuthenticated ? "Exhausted" : status,
+    loadMore,
+  });
   const newCreation = () =>
     void navigate({ to: "/editor", search: { draft: crypto.randomUUID() } });
   return (

@@ -22,6 +22,7 @@ export async function creatorsFixture(
   authenticated = false,
   options: {
     now?: number;
+    publicationCount?: number;
     ownPublication?: boolean;
     scene?: SceneDocument;
   } = {},
@@ -77,7 +78,8 @@ export async function creatorsFixture(
   ]);
   const authorFor = (owner: string, fallback: string) =>
     profiles.get(owner)?.name ?? fallback;
-  const publications = Array.from({ length: 17 }, (_, i) => ({
+  const length = options.publicationCount ?? 17;
+  const publications = Array.from({ length }, (_, i) => ({
     _id: `creation-${i}`,
     owner:
       options.ownPublication && i === 0 ? user._id : i < 15 ? "alice" : "bob",

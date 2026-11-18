@@ -33,7 +33,7 @@ test("l’atelier reprend la dernière création locale après la galerie et un 
   await page
     .getByRole("button", { name: "Nouvelle création", exact: true })
     .click();
-  await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("0 / 1 000");
   await page.getByRole("button", { name: "Brique 1 × 1", exact: true }).click();
   await page.getByRole("button", { name: "Brique 2 × 2", exact: true }).click();
   await renameAndSave(page, "Dernière construction");
@@ -47,7 +47,7 @@ test("l’atelier reprend la dernière création locale après la galerie et un 
   await expect(page.getByLabel("Nom du projet")).toHaveValue(
     "Dernière construction",
   );
-  await expect(page.locator(".viewport-bottom")).toContainText("2 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("2 / 1 000");
   await expect(page).toHaveURL(lastUrl);
 
   await navigation(page, "La galerie").click();
@@ -72,7 +72,7 @@ test("l’atelier reprend la dernière création locale après la galerie et un 
     .getByRole("link", { name: "Ouvrir Premier essai", exact: true })
     .click();
   await expect(page.getByLabel("Nom du projet")).toHaveValue("Premier essai");
-  await expect(page.locator(".viewport-bottom")).toContainText("1 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("1 / 1 000");
   await navigation(page, "La galerie").click();
   await navigation(page, "L’atelier").click();
   await expect(page.getByLabel("Nom du projet")).toHaveValue("Premier essai");
@@ -110,7 +110,7 @@ for (const draft of ["", "to-remove"]) {
     await expect(page.getByLabel("Nom du projet")).toHaveValue(
       "Nouvelle création",
     );
-    await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+    await expect(page.locator(".viewport-bottom")).toContainText("0 / 1 000");
     expect(new URL(page.url()).searchParams.get("draft")).toBe("");
     await navigation(page, "Mes créations").click();
     await expect(page.locator(".project-card")).toHaveCount(0);

@@ -338,7 +338,7 @@ test("glisser un enfant conserve la sélection du groupe ; bibliothèque avec ap
   await dragLibrary(page, "Brique 2 × 2", x, y);
   await expect(canvas).toHaveAttribute("data-snap-kind", "attachment");
   await page.mouse.up();
-  await expect(page.locator(".viewport-bottom")).toContainText("3 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("3 / 1 000");
   await expect(page.getByLabel("position Y", { exact: true })).toHaveValue(
     "2.4",
   );
@@ -516,13 +516,13 @@ test("le repère d’orientation conserve la sélection et l’historique", asyn
   page,
 }) => {
   const { box } = await setup(page);
-  await page.mouse.click(box.x + box.width - 65, box.y + box.height - 25);
+  await page.mouse.click(box.x + box.width - 65, box.y + box.height - 175);
   await expect(page.locator(".tree-row.selected")).toHaveCount(1);
   expect(await position(page)).toEqual(["0", "0", "0"]);
   await page
     .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
     .click();
-  await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("0 / 1 000");
 });
 
 async function wheelTurn(page: Page, deltaY: number) {

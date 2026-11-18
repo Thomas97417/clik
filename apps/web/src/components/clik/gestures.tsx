@@ -32,8 +32,8 @@ import {
 } from "@/lib/clik/box-selection";
 import { toast } from "sonner";
 
-// Keep the orientation widget above the bottom display controls.
-export const CAMERA_GIZMO_MARGIN: [number, number] = [65, 135];
+// Leave room for the editor's display controls and its 40px playback bar.
+export const EDITOR_GIZMO_MARGIN: [number, number] = [65, 175];
 
 type Controls = RefObject<ComponentRef<typeof OrbitControls> | null>;
 type Rotation = RefObject<ComponentRef<typeof TransformControls> | null>;
@@ -180,8 +180,8 @@ export function Gestures({
     const overCameraWidget = (e: { clientX: number; clientY: number }) => {
       const rect = canvas.getBoundingClientRect();
       return (
-        Math.abs(e.clientX - (rect.right - CAMERA_GIZMO_MARGIN[0])) <= 52 &&
-        Math.abs(e.clientY - (rect.bottom - CAMERA_GIZMO_MARGIN[1])) <= 52
+        Math.abs(e.clientX - (rect.right - EDITOR_GIZMO_MARGIN[0])) <= 52 &&
+        Math.abs(e.clientY - (rect.bottom - EDITOR_GIZMO_MARGIN[1])) <= 52
       );
     };
     const ground = () =>

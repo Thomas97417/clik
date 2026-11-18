@@ -121,11 +121,27 @@ test("cartes illustrées, filtres, ouverture et présentation mobile", async ({
     path: `/tmp/clik-projects-mobile-${info.project.name}.png`,
     fullPage: true,
   });
-  await page.setViewportSize({ width: 1440, height: 1000 });
-  await page
-    .getByRole("link", { name: "Ouvrir Le pont des couleurs", exact: true })
-    .click();
+  const link = page.getByRole("link", {
+    name: "Ouvrir Le pont des couleurs",
+    exact: true,
+  });
+  await link.scrollIntoViewIfNeeded();
+  const scrollTop = () =>
+    page.locator(".page-scroll").evaluate((element) => element.scrollTop);
+  const position = await scrollTop();
+  expect(position).toBeGreaterThan(0);
+  await link.click();
   await expect(page).toHaveURL(/draft=model-1/);
+  await page.goBack();
+  await expect(page.locator(".project-card")).toHaveCount(3);
+  await expect(
+    page.getByRole("button", { name: "Sur cet appareil", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect
+    .poll(async () => Math.abs((await scrollTop()) - position))
+    .toBeLessThan(2);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await link.click();
   await expect(page.getByLabel("Nom du projet")).toHaveValue(
     "Le pont des couleurs",
   );
@@ -143,7 +159,7 @@ test("une nouvelle création préserve les précédentes et obtient son propre a
     .getByRole("button", { name: "Nouvelle création", exact: true })
     .click();
   await expect(page).toHaveURL(/draft=/);
-  await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("0 / 1 000");
   await page.locator('.piece-card[aria-label="Brique 2 × 2"]').click();
   await page.getByLabel("Nom du projet").fill("Nouvelle sculpture");
   await page.getByLabel("Nom du projet").press("Enter");

@@ -30,7 +30,7 @@ test("créer un groupe vide puis y ranger une pièce, avec annuler et rétablir"
   await expect(
     page.getByRole("button", { name: "Grouper", exact: true }),
   ).toBeEnabled();
-  await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("0 / 1 000");
   await page
     .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
     .click();
@@ -247,11 +247,11 @@ test("tout sélectionner inclut les groupes repliés sans doubler leurs pièces"
     path: `/tmp/clik-select-all-${info.project.name}.png`,
   });
   await page.keyboard.press("Control+d");
-  await expect(page.locator(".viewport-bottom")).toContainText("6 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("6 / 1 000");
   await page
     .getByRole("button", { name: "Annuler (⌘/Ctrl Z)", exact: true })
     .click();
-  await expect(page.locator(".viewport-bottom")).toContainText("3 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("3 / 1 000");
   await page
     .getByRole("button", { name: "Tout sélectionner", exact: true })
     .click();
@@ -261,7 +261,7 @@ test("tout sélectionner inclut les groupes repliés sans doubler leurs pièces"
     "Pente 2 × 2",
   ]);
   await page.getByRole("button", { name: "Supprimer", exact: true }).click();
-  await expect(page.locator(".viewport-bottom")).toContainText("0 / 500");
+  await expect(page.locator(".viewport-bottom")).toContainText("0 / 1 000");
   await expect(
     page.getByRole("button", { name: "Tout sélectionner", exact: true }),
   ).toBeDisabled();
